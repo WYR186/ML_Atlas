@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Block 1 · Foundations · ECE 449 / CS 446</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>
+  window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="block1.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航 · TOC</h4>
+    <ul>
+      <li><a href="#probability">🎲 1. Probability</a></li>
+      <li><a href="#linalg">📐 2. Linear Algebra</a></li>
+      <li><a href="#opt">🧭 3. Optimization</a></li>
+      <li><a href="#summary">✅ 速记 Checklist</a></li>
+    </ul>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="1" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+    <a class="btn" href="block2.html" style="margin-top:8px;">下一章 → Block 2</a>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / Block 1</div>
+      <h1>📐 Block 1 · Foundations</h1>
+      <div class="subtitle">概率论 · 线性代数 · 优化 — 整门课的“数学武器”</div>
+      <div class="refs">
+        <a class="ref-chip lecture" href="../slides/Lecture_1.pdf" target="_blank">📄 Lecture 1</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_2.pdf" target="_blank">📄 Lecture 2</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 HW 1</a>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">✅ HW 1 sol</a>
+        <a class="ref-chip lecture" href="../slides/mt_course_review.pdf" target="_blank">📑 MT review</a>
+        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📑 Final review</a>
+      </div>
+    </div>
+
+    <!-- Probability -->
+    <section class="topic" id="probability">
+      <h2><span class="icon">🎲</span> Probability · 概率论</h2>
+      <div class="callout">
+        <div class="head">🧠 Core intuition</div>
+        <div class="bi-text">
+          <span class="cn">概率论提供“从已知到未知”的推理规则：条件化、独立性、贝叶斯更新。</span>
+          <span class="en">Probability is the language for reasoning under uncertainty (conditioning, independence, Bayes updates).</span>
+        </div>
+      </div>
+
+      <h3>🔵 概念理解</h3>
+      <ul>
+        <li><b>条件概率 / Conditional probability</b>：在 $B$ 已发生时，$A$ 发生的概率。</li>
+        <li><b>独立 / Independence</b>：知道 $B$ 不会改变 $A$ 的概率。</li>
+        <li><b>条件独立 / Conditional independence</b>：Naive Bayes 的核心假设。</li>
+      </ul>
+
+      <h3>🟣 核心公式（默写）</h3>
+      <div class="cols2">
+        <div class="callout formula">
+          <div class="head">Conditional Probability</div>
+          <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)} $$</div>
+        </div>
+        <div class="callout formula">
+          <div class="head">Bayes' Rule</div>
+          <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)P(A)}{P(B)} $$</div>
+          <div style="font-size:13px;">ML slogan: <b>Posterior ∝ Likelihood × Prior</b></div>
+        </div>
+        <div class="callout formula">
+          <div class="head">Independence</div>
+          <div class="eq">$$ P(A,B)=P(A)P(B) $$</div>
+        </div>
+        <div class="callout formula">
+          <div class="head">Conditional Independence (Naive Bayes)</div>
+          <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
+        </div>
+        <div class="callout formula" style="grid-column:1/3;">
+          <div class="head">Expectation & Variance</div>
+          <div class="eq">$$ \mathbb{E}[X]=\sum_x xP(x)\quad\text{or}\quad\int x\,p(x)\,dx,\qquad \mathrm{Var}(X)=\mathbb{E}[X^2]-(\mathbb{E}[X])^2 $$</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="head">⚠️ Common pitfalls</div>
+        <ul>
+          <li>条件概率分母是 $P(B)$，不是 $P(A)$。</li>
+          <li>独立 ≠ 条件独立：可能在总体不独立，但在给定 $C$ 时独立（或反之）。</li>
+        </ul>
+      </div>
+
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>能在图模型 / 朴素贝叶斯中识别并写出条件独立因子分解。</li>
+          <li>能把 “Posterior ∝ Likelihood × Prior” 映射到具体变量。</li>
+        </ul>
+      </div>
+
+      <div class="callout example">
+        <div class="head">🧩 Example · Bayes 计算</div>
+        <p>已知 $P(A)=0.3,\ P(B\mid A)=0.8,\ P(B\mid \neg A)=0.2$，求 $P(A\mid B)$。</p>
+        <div class="eq">$$ P(B)=0.8\cdot 0.3+0.2\cdot 0.7=0.38 $$</div>
+        <div class="eq">$$ P(A\mid B)=\frac{0.8\cdot 0.3}{0.38}\approx 0.6316 $$</div>
+      </div>
+    </section>
+
+    <!-- Linear Algebra -->
+    <section class="topic" id="linalg">
+      <h2><span class="icon">📐</span> Linear Algebra · 线性代数</h2>
+      <div class="callout">
+        <div class="head">🧠 Core intuition</div>
+        <div class="bi-text">
+          <span class="cn">线代告诉你“对象是什么形状、如何组合”。</span>
+          <span class="en">Linear algebra is the grammar of shapes; it prevents gradient-shape mistakes.</span>
+        </div>
+      </div>
+
+      <h3>🔵 概念理解</h3>
+      <ul>
+        <li><b>点积 / Dot product</b>：相似度 / 投影；线性模型与核方法的基础。</li>
+        <li><b>范数 / Norm</b>：长度 / 大小；正则化的“惩罚”。</li>
+        <li><b>特征值 / 向量</b>：矩阵沿某方向缩放；PCA 关键。</li>
+      </ul>
+
+      <h3>🟣 核心公式（默写）</h3>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Dot Product</div>
+          <div class="eq">$$ x^\top y=\sum_i x_i y_i $$</div></div>
+        <div class="callout formula"><div class="head">$L_2$ / $L_1$ Norms</div>
+          <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\qquad \|x\|_1=\sum_i |x_i| $$</div></div>
+        <div class="callout formula"><div class="head">Matrix Multiply Shape</div>
+          <div class="eq">$$ (m\times n)\cdot(n\times p)\rightarrow(m\times p) $$</div>
+          <div style="font-size:13px;">肌肉记忆：中间维度必须相同。</div></div>
+        <div class="callout formula"><div class="head">Eigenvalue / Eigenvector</div>
+          <div class="eq">$$ Au=\lambda u $$</div>
+          <div style="font-size:13px;">PCA：取协方差矩阵最大 $\lambda$ 对应的 $u$。</div></div>
+        <div class="callout formula" style="grid-column:1/3;">
+          <div class="head">Three Derivative Shapes</div>
+          <div class="eq">$$ \nabla f\in\mathbb{R}^{d\times 1},\quad \nabla^2 f\in\mathbb{R}^{d\times d},\quad J\in\mathbb{R}^{m\times n} $$</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="head">⚠️ Common pitfalls</div>
+        <ul>
+          <li>把梯度写成行向量 → 链式法则维度对不上。</li>
+          <li>混淆 $x^\top y$ 与 elementwise product（向量 vs 标量）。</li>
+        </ul>
+      </div>
+
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>能快速判断任意表达式的维度（尤其反向传播）。</li>
+          <li>PCA：最大方差方向 = 最大特征值对应特征向量。</li>
+        </ul>
+      </div>
+
+      <div class="callout example">
+        <div class="head">🧩 Example · Shape 判断</div>
+        <p>设 $A\in\mathbb{R}^{m\times n}$，$x\in\mathbb{R}^{n\times 1}$。</p>
+        <ul>
+          <li>$Ax\in\mathbb{R}^{m\times 1}$。</li>
+          <li>$x^\top\in\mathbb{R}^{1\times n}$，所以 $x^\top A$ 合法，结果在 $\mathbb{R}^{1\times m}$。</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Optimization -->
+    <section class="topic" id="opt">
+      <h2><span class="icon">🧭</span> Optimization · 优化</h2>
+      <div class="callout">
+        <div class="head">🧠 Core intuition</div>
+        <div class="bi-text">
+          <span class="cn">优化告诉你“怎么走到最好”。凸性保证你不会走错盆地。</span>
+          <span class="en">Optimization tells you how to reach the best; convexity guarantees no bad local minima.</span>
+        </div>
+      </div>
+
+      <h3>🔵 概念理解</h3>
+      <ul>
+        <li><b>凸函数 / Convex</b>：像“碗”；局部最小 = 全局最小。</li>
+        <li><b>PSD / PD（半正定 / 正定）</b>：通过 Hessian 判断曲率。</li>
+      </ul>
+
+      <h3>🟣 核心公式（默写）</h3>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Second-order Convexity Test</div>
+          <div class="eq">$$ \nabla^2 f(w)\succeq 0\quad(\text{PSD}) \Rightarrow f\ \text{convex} $$</div></div>
+        <div class="callout formula"><div class="head">Gradient Descent</div>
+          <div class="eq">$$ w_{t+1}=w_t-\eta\nabla f(w_t) $$</div></div>
+        <div class="callout formula"><div class="head">Lagrangian</div>
+          <div class="eq">$$ L(w,\lambda)=f_0(w)+\sum_i \lambda_i f_i(w),\ \lambda_i\ge 0 $$</div>
+          <div style="font-size:13px;">用于 $\min f_0(w)$ s.t. $f_i(w)\le 0$。</div></div>
+        <div class="callout formula"><div class="head">Primal vs Dual</div>
+          <div class="eq">$$ \text{Primal: }\min_w\max_\lambda L \quad|\quad \text{Dual: }\max_\lambda\min_w L $$</div>
+          <div style="font-size:13px;">SVM 对偶只依赖内积 $x_i^\top x_j$ → 核技巧。</div></div>
+      </div>
+
+      <div class="callout warn">
+        <div class="head">⚠️ Common pitfalls</div>
+        <ul>
+          <li>PSD 只保证凸（可能非严格）；PD 才保证严格凸（唯一最优）。</li>
+          <li>学习率 $\eta$ 太大：发散；太小：收敛慢。</li>
+        </ul>
+      </div>
+
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>会用 Hessian 的 PSD/PD 判断凸性与唯一性。</li>
+          <li>会写带约束问题的 Lagrangian 并解释对偶形式。</li>
+        </ul>
+      </div>
+
+      <div class="callout example">
+        <div class="head">🧩 Example · Logistic Hessian PD 含义</div>
+        <ul>
+          <li>形状：$\nabla^2 f(w)\in\mathbb{R}^{d\times d}$（对称）。</li>
+          <li>PD ⇒ 严格凸 ⇒ 唯一全局最小值；GD 在合适学习率下收敛可控。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic checklist" id="summary">
+      <h3>✅ Block 1 速记 Checklist</h3>
+      <ul>
+        <li>Bayes：$P(A\mid B)=P(B\mid A)P(A)/P(B)$ — Posterior ∝ Likelihood × Prior</li>
+        <li>条件独立：Naive Bayes 给定 $Y$ 时各特征独立 ⇒ 联合分解</li>
+        <li>Shape 三件套：$\nabla f$ ∈ ℝ<sup>d×1</sup>，Hessian ∈ ℝ<sup>d×d</sup>，Jacobian ∈ ℝ<sup>m×n</sup></li>
+        <li>PCA：协方差矩阵 → 最大特征值的特征向量</li>
+        <li>凸性：Hessian PSD ⇒ 凸；PD ⇒ 严格凸 ⇒ 唯一最优</li>
+        <li>SVM 对偶仅依赖 $x_i^\top x_j$ → 核技巧</li>
+      </ul>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;">
+      <a class="btn" href="../index.html" data-i18n="btn.back">← 返回路线图</a>
+      <a class="btn btn-primary" href="block2.html">下一章 · Block 2 →</a>
+    </div>
+  </main>
+</div>
+
+<footer><span data-i18n="footer.builtFrom14">由 Block 1-4.rtf 整理 ·</span> <a href="../resources.html" data-i18n="footer.resourceMap">资源映射</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/data.js"></script>
+<script src="../assets/main.js"></script>
+</body>
+</html>

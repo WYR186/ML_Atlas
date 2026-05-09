@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚡ 1 小时速记 · ECE 449 / CS 446</title>
+<link rel="stylesheet" href="assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="blocks/block1.html" data-i18n="nav.notes">📘 速查</a>
+      <a href="cheatsheet.html" class="active" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索公式…" data-i18n="search.formula" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="block-header" style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:24px;">
+    <div class="crumbs"><a href="index.html" data-i18n="crumbs.roadmap">路线图</a> / 速记</div>
+    <h1 style="margin:0;font-size:28px;">⚡ 一页式速记 · 1 Hour Cheatsheet</h1>
+    <div class="subtitle" style="color:var(--text-soft);margin-top:6px;">每个算法只留 <b>1 句定义 + 1 个公式 + 1 个高频考点</b>。配合 <a href="index.html" data-i18n="crumbs.roadmap">路线图</a> + 各 Block 速查页使用。</div>
+  </div>
+
+  <!-- Block 1 -->
+  <section class="topic" style="background:#fff;">
+    <h2>📐 Block 1 · Foundations</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead><tr style="text-align:left;color:var(--text-muted);font-size:12px;text-transform:uppercase;">
+        <th style="padding:8px;width:18%;">算法</th><th style="padding:8px;width:34%;">公式 · Formula</th><th style="padding:8px;">高频考点</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Bayes</td><td style="padding:10px 8px;">$P(A\mid B)=\frac{P(B\mid A)P(A)}{P(B)}$</td><td style="padding:10px 8px;">Posterior ∝ Likelihood × Prior</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">条件独立</td><td style="padding:10px 8px;">$P(A,B\mid C)=P(A\mid C)P(B\mid C)$</td><td style="padding:10px 8px;">Naive Bayes 因子分解</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PCA 直觉</td><td style="padding:10px 8px;">$Au=\lambda u$</td><td style="padding:10px 8px;">先中心化 → 最大特征值方向</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">凸性</td><td style="padding:10px 8px;">$\nabla^2 f\succeq 0$</td><td style="padding:10px 8px;">PSD ⇒ 凸；PD ⇒ 严格凸唯一最优</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">GD</td><td style="padding:10px 8px;">$w_{t+1}=w_t-\eta\nabla f(w_t)$</td><td style="padding:10px 8px;">$\eta$ 太大发散 / 太小慢</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">SVM 对偶</td><td style="padding:10px 8px;">$L=f_0+\sum\lambda_i f_i$</td><td style="padding:10px 8px;">对偶仅依赖 $x_i^\top x_j$ → 核技巧</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 2 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🧮 Block 2 · KNN · Naive Bayes</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">KNN 分类</td><td style="padding:10px 8px;width:34%;">$\hat y(x)=\mathrm{mode}\{y_i:x_i\in\mathcal{N}_k(x)\}$</td><td style="padding:10px 8px;">特征缩放；高维 distance concentration</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">NB 分解</td><td style="padding:10px 8px;">$P(X\mid Y)=\prod_j P(X_j\mid Y)$</td><td style="padding:10px 8px;">log-space MAP；GNB 共享方差 ⇒ 线性边界</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 3 -->
+  <section class="topic" style="background:#fff;">
+    <h2>📈 Block 3 · Linear · Logistic · SVM · Kernel</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">Linear Reg</td><td style="padding:10px 8px;width:34%;">$w^*=(X^\top X)^{-1}X^\top y$</td><td style="padding:10px 8px;">闭式解需要 $X^\top X$ 可逆</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Logistic</td><td style="padding:10px 8px;">$\min_w\sum\log(1+e^{-y_i w^\top x_i})$</td><td style="padding:10px 8px;">边界仍线性（$\sigma(a)=0.5\Leftrightarrow a=0$）</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">SVM hard</td><td style="padding:10px 8px;">$\min\tfrac12\|w\|^2,\ y_i(w^\top x_i+b)\ge 1$</td><td style="padding:10px 8px;">最大间隔；只支持向量决定解</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Hinge</td><td style="padding:10px 8px;">$\ell=\max(0,1-yf(x))$</td><td style="padding:10px 8px;">先 $t=yf(x)$ 再代入</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">RBF</td><td style="padding:10px 8px;">$k(x,x')=\exp(-\gamma\|x-x'\|^2)$</td><td style="padding:10px 8px;">$\gamma\uparrow$ ⇒ 边界更弯曲 / 易过拟合</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 4 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🌳 Block 4 · Trees · Ensemble · PCA · K-means</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">Entropy / IG</td><td style="padding:10px 8px;width:34%;">$IG=I(D)-\sum\frac{|D_j|}{|D|}I(D_j)$</td><td style="padding:10px 8px;">贪心选最大 IG；纯叶 → 过拟合</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Bagging</td><td style="padding:10px 8px;">bootstrap + 平均</td><td style="padding:10px 8px;">降方差，偏差几乎不变</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Boosting</td><td style="padding:10px 8px;">串行 + 关注难样本</td><td style="padding:10px 8px;">常降偏差；对噪声敏感</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PCA</td><td style="padding:10px 8px;">$\Sigma=\tfrac1n\sum x_c x_c^\top$</td><td style="padding:10px 8px;">先居中；PC1 = max-eig 方向</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">K-means</td><td style="padding:10px 8px;">$J=\sum r_{ik}\|x-\mu_k\|^2$</td><td style="padding:10px 8px;">E 分配 / M 更新；局部最优</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 5 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🧠 Block 5 · MLP · Backprop · CNN · RNN</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">MLP forward</td><td style="padding:10px 8px;width:34%;">$z^{(2)}=W^{(2)}\sigma(W^{(1)}x+b^{(1)})+b^{(2)}$</td><td style="padding:10px 8px;">XOR 需隐藏层 + 非线性</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Backprop</td><td style="padding:10px 8px;">downstream = local × upstream</td><td style="padding:10px 8px;">$\partial L/\partial W$ shape = $W$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">CNN</td><td style="padding:10px 8px;">$\lfloor (N+2P-F)/S\rfloor+1$</td><td style="padding:10px 8px;">注意 floor + $2P$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">RNN</td><td style="padding:10px 8px;">BPTT + 共享参数</td><td style="padding:10px 8px;">vanishing / exploding</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">LSTM / GRU</td><td style="padding:10px 8px;">门控（F/I/O 或 U/R）</td><td style="padding:10px 8px;">缓解长程依赖</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 6 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🎭 Block 6 · AE · VAE · Contrastive</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">AE</td><td style="padding:10px 8px;width:34%;">$\min\|x-g(f(x))\|^2$</td><td style="padding:10px 8px;">线性 AE ≈ PCA；需正则防恒等</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">VAE ELBO</td><td style="padding:10px 8px;">$\mathbb{E}_q[\log p_\theta(x\mid z)]-D_{KL}(q\|p)$</td><td style="padding:10px 8px;">重建 + KL；最大化 ≈ 最大化 $\log p(x)$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Reparam</td><td style="padding:10px 8px;">$z=\mu+\sigma\odot\epsilon$</td><td style="padding:10px 8px;">把随机性转移到 $\epsilon$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Gaussian KL</td><td style="padding:10px 8px;">$\tfrac12\sum(\mu_j^2+\sigma_j^2-\ln\sigma_j^2-1)$</td><td style="padding:10px 8px;">必背 / 必推</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">InfoNCE</td><td style="padding:10px 8px;">$-\log \frac{e^{s(x,x^+)/\tau}}{\sum e^{s/\tau}}$</td><td style="padding:10px 8px;">$\tau\downarrow$ 更尖锐；负样本防坍塌</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 7 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🔮 Block 7 · Attention · Transformer · LLM</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">Attention</td><td style="padding:10px 8px;width:34%;">$\mathrm{softmax}(QK^\top/\sqrt{d_k})V$</td><td style="padding:10px 8px;">除 $\sqrt{d_k}$ 防 softmax 饱和</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Mask</td><td style="padding:10px 8px;">future logits → $-\infty$</td><td style="padding:10px 8px;">加在 softmax <b>之前</b>；防偷看未来</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PE</td><td style="padding:10px 8px;">$\sin(pos/10000^{2i/d}),\cos(\cdot)$</td><td style="padding:10px 8px;">$PE(pos+k)$ 是 $PE(pos)$ 的线性变换</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Transformer block</td><td style="padding:10px 8px;">LN + MHA + Add + LN + FFN + Add</td><td style="padding:10px 8px;">Pre-LN vs Post-LN</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">LLM</td><td style="padding:10px 8px;">$P(X)=\prod P(x_t\mid x_{<t})$</td><td style="padding:10px 8px;">$PP=\exp(L)$；SFT vs RLHF vs ICL</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 8 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🌊 Block 8 · Diffusion</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">Forward</td><td style="padding:10px 8px;width:34%;">$x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon$</td><td style="padding:10px 8px;">$\bar\alpha_T\to 0 \Rightarrow x_T\approx\mathcal{N}(0,I)$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Reverse</td><td style="padding:10px 8px;">$p_\theta(x_{t-1}\mid x_t)=\mathcal{N}(\mu_\theta,\Sigma_\theta)$</td><td style="padding:10px 8px;">前向固定 / 逆向学习；常预测 $\epsilon$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">ELBO</td><td style="padding:10px 8px;">重建 + 先验 KL + 每步一致性</td><td style="padding:10px 8px;">每步对齐已知 $x_0$ 真后验</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 9 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🎓 Block 9 · Learning Theory</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">Bayes 决策</td><td style="padding:10px 8px;width:34%;">$\eta(x)\ge 0.5 \Rightarrow 1$</td><td style="padding:10px 8px;">回归：$f^*(x)=\mathbb{E}[Y\mid X]$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Decomp</td><td style="padding:10px 8px;">Estimation + Approx + Bayes</td><td style="padding:10px 8px;">加数据 → Estimation；换模型 → Approx</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PAC 样本</td><td style="padding:10px 8px;">$n\ge \tfrac{1}{\epsilon}(\ln|\mathcal{F}|+\ln\tfrac{1}{\delta})$</td><td style="padding:10px 8px;">直接代入计算</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">VC bound</td><td style="padding:10px 8px;">$\hat\epsilon+\mathcal{O}(\sqrt{(d+\ln(1/\delta))/n})$</td><td style="padding:10px 8px;">$d$ 翻倍 ⇒ 界变 $\sqrt 2$ 倍</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Block 10 -->
+  <section class="topic" style="background:#fff;">
+    <h2>🎮 Block 10 · RL</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tbody>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">MDP</td><td style="padding:10px 8px;width:34%;">$(\mathcal S,\mathcal A,P,R,\gamma)$</td><td style="padding:10px 8px;">Markov 性 + 折扣</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Bellman*</td><td style="padding:10px 8px;">$Q^*=R+\gamma\mathbb{E}[\max_{a'}Q^*]$</td><td style="padding:10px 8px;">$V^*(s)=\max_a Q^*(s,a)$</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Q-learning</td><td style="padding:10px 8px;">$Q\leftarrow Q+\alpha(r+\gamma\max_{a'}Q'-Q)$</td><td style="padding:10px 8px;">model-free + off-policy</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PG</td><td style="padding:10px 8px;">$\nabla J\approx \tfrac1n\sum R(\tau)\sum\nabla\log\pi$</td><td style="padding:10px 8px;">on-policy；高回报动作概率↑</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="callout exam" style="margin:24px 0;">
+    <div class="head">🎯 闭卷自测 · 10 分钟</div>
+    <ol>
+      <li>写出 ELBO 两项含义 + Gaussian KL 闭式解。</li>
+      <li>$N=32,F=3,P=1,S=2$，求 CNN 输出尺寸。</li>
+      <li>$Q(s,a)=2,\alpha=0.5,r=1,\gamma=0.9,\max Q'=4$，更新一次后 $Q$？</li>
+      <li>VC 维 $d$ 翻倍，$n$ 不变，泛化项变化几倍？</li>
+      <li>解释为什么 attention 要除 $\sqrt{d_k}$。</li>
+      <li>SVM 为什么只依赖支持向量？</li>
+    </ol>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-top:20px;">
+    <a class="btn" href="index.html" data-i18n="btn.back">← 返回路线图</a>
+    <a class="btn btn-primary" href="resources.html">📂 查看资源映射</a>
+  </div>
+</div>
+<footer>由 <code>Block 1-4.rtf</code>、<code>Block 5-10.rtf</code>、课件、HW 综合整理</footer>
+<script src="assets/i18n.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/main.js"></script>
+</body>
+</html>

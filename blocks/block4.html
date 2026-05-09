@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Block 4 · Trees · Ensemble · PCA · K-means</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="block4.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <ul>
+      <li><a href="#dt">🌳 1. Decision Trees</a></li>
+      <li><a href="#bagging">🎒 2. Bagging</a></li>
+      <li><a href="#boosting">🚀 3. Boosting</a></li>
+      <li><a href="#pca">📉 4. PCA</a></li>
+      <li><a href="#kmeans">🎯 5. K-means</a></li>
+      <li><a href="#summary">✅ 速记 Checklist</a></li>
+    </ul>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="4" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+    <a class="btn" href="block5.html" style="margin-top:8px;">下一章 → Block 5</a>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / Block 4</div>
+      <h1>🌳 Block 4 · Decision Trees · Ensemble · PCA · K-means</h1>
+      <div class="subtitle">非参数划分 · 集成思想 · 经典无监督</div>
+      <div class="refs">
+        <a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_11.pdf" target="_blank">📄 Lecture 11</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_12.pdf" target="_blank">📄 Lecture 12</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_13.pdf" target="_blank">📄 Lecture 13</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 HW 3</a>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">✅ HW 3 sol</a>
+        <a class="ref-chip lecture" href="../slides/mt_course_review.pdf" target="_blank">📑 MT review</a>
+      </div>
+    </div>
+
+    <section class="topic" id="dt">
+      <h2><span class="icon">🌳</span> 1. Decision Trees</h2>
+      <p>通过坐标轴对齐的划分把输入空间切成不重叠的区域。内部节点用 $g(x)=\operatorname{sign}(x_i-\tau)$ 选择 $(x_i,\tau)$ 进行分裂。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Entropy 不纯度</div>
+          <div class="eq">$$ I(D)=-\sum_{c=1}^{C} p(c\mid D)\log_2 p(c\mid D) $$</div>
+          <div style="font-size:13px;">纯节点 ⇒ 0；类别越均匀 ⇒ 越大。</div></div>
+        <div class="callout formula"><div class="head">Information Gain</div>
+          <div class="eq">$$ IG(D,f)=I(D)-\sum_{j=1}^{N}\frac{|D_j|}{|D|}\,I(D_j) $$</div></div>
+        <div class="callout formula" style="grid-column:1/3;"><div class="head">Gini Impurity (alternative)</div>
+          <div class="eq">$$ \text{Gini}=1-\sum_{c}p_c^2 $$</div></div>
+      </div>
+      <div class="callout">
+        <div class="head">🧠 Concept check</div>
+        <ul>
+          <li>IG = 父节点不纯度 − 子节点加权不纯度。</li>
+          <li>找最小规模决策树是 NP-complete → 实用算法（ID3 / CART）逐层贪心。</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <div class="head">⚠️ Pitfall · Overfitting</div>
+        <p>长到叶子全纯：训练误差 → 0，但方差 ↑，测试误差常变差。</p>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>会手算小数据集的 entropy / IG / Gini。</li>
+          <li>能解释深树的偏差–方差权衡。</li>
+        </ul>
+      </div>
+      <div class="callout example">
+        <div class="head">🧩 Example · IG</div>
+        <p>$D$ 含 6 点，3 蓝 3 绿 ⇒ $I(D)=1$。按 $x_1$ 在 $\tau=5$ 分裂为 $D_1,D_2$：</p>
+        <div class="eq">$$ IG(D,f)=I(D)-\sum_{j=1}^{2}\frac{|D_j|}{|D|}\,I(D_j) $$</div>
+      </div>
+    </section>
+
+    <section class="topic" id="bagging">
+      <h2><span class="icon">🎒</span> 2. Bagging · 装袋法</h2>
+      <ul>
+        <li>Bootstrap（有放回抽样）独立训练多个模型 → 平均。</li>
+        <li>主要 <b>降低方差</b>；典型考点：bagging <b>通常不降低偏差</b>（期望预测器基本不变）。</li>
+        <li>典型应用：Random Forest（bagging + 特征随机）。</li>
+      </ul>
+      <div class="callout exam">
+        <div class="head">✅ 比较题模板</div>
+        <p>“bagging vs boosting” 答：训练方式（并行 vs 串行）+ 偏差/方差影响 + 噪声敏感性。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="boosting">
+      <h2><span class="icon">🚀</span> 3. Boosting · AdaBoost 思想</h2>
+      <ul>
+        <li>顺序训练，后续学习器更关注被前面错分的样本（提高其权重）。</li>
+        <li>常常 <b>降低偏差</b>；对噪声 / 离群点更敏感。</li>
+        <li>每个 weak learner 的影响来自其样本权重和投票权重。</li>
+      </ul>
+      <div class="callout warn">
+        <div class="head">⚠️ Exam warning</div>
+        <p>区分清楚 “bagging 降方差，boosting 降偏差” —— 但 boosting 也可能过拟合，特别是噪声样本。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="pca">
+      <h2><span class="icon">📉</span> 4. PCA · 主成分分析</h2>
+      <p>在尽量保留方差的前提下降维。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Step 0 · Centering（关键第一步）</div>
+          <div class="eq">$$ X_c = X - \mu $$</div>
+          <div style="font-size:13px;">不居中：PC1 可能反映“离原点的距离”。</div></div>
+        <div class="callout formula"><div class="head">Empirical Covariance</div>
+          <div class="eq">$$ \Sigma = \frac{1}{n}\sum_{i=1}^{n} x_c^{(i)}\big(x_c^{(i)}\big)^\top $$</div></div>
+        <div class="callout formula" style="grid-column:1/3;"><div class="head">PC1 · 最大方差方向</div>
+          <div class="eq">$$ w_1=\arg\max_{\|w\|=1}\operatorname{Var}(X_c w) $$</div>
+          <div style="font-size:13px;">解：$\Sigma$ 最大特征值对应的特征向量。</div></div>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <p>常考 2D：先居中 → 写出协方差矩阵 → 求最大特征值方向。注意必须先居中。</p>
+      </div>
+      <div class="callout example">
+        <div class="head">🧩 Example</div>
+        <p>$(1,3),(4,7)$，$\mu=(2.5,5)$，居中后 $(-1.5,-2),(1.5,2)$，第一主方向 $\propto[0.6,0.8]^\top$。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="kmeans">
+      <h2><span class="icon">🎯</span> 5. K-means · 聚类</h2>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Objective (WCSS)</div>
+          <div class="eq">$$ J=\sum_i\sum_k r_{ik}\|x^{(i)}-\mu_k\|^2,\ r_{ik}\in\{0,1\} $$</div></div>
+        <div class="callout formula"><div class="head">Two-Step Iteration</div>
+          <div class="eq">$$ k^*(i)=\arg\min_k\|x^{(i)}-\mu_k\|^2 $$</div>
+          <div class="eq">$$ \mu_k=\tfrac{1}{N_k}\sum_{i:k^*(i)=k}x^{(i)} $$</div></div>
+      </div>
+      <div class="callout warn">
+        <div class="head">⚠️ Pitfall · Local Minima</div>
+        <p>K-means 不保证全局最优；对初始化敏感（k-means++ 是常见缓解）。</p>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>会手跑 1–2 次迭代。</li>
+          <li>能区分 E-step（分配）vs M-step（更新中心）。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic checklist" id="summary">
+      <h3>✅ Block 4 速记 Checklist</h3>
+      <ul>
+        <li>🌳 Tree split：最大化 IG / 最小化不纯度</li>
+        <li>🎒 Bagging：降方差，偏差几乎不变</li>
+        <li>🚀 Boosting：常降偏差，对噪声敏感</li>
+        <li>📉 PCA：先居中，PC1 = 最大特征值方向</li>
+        <li>🎯 K-means：分配 / 更新交替；初始化影响大 → 局部最优</li>
+      </ul>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;">
+      <a class="btn" href="block3.html">← Block 3</a>
+      <a class="btn btn-primary" href="block5.html">Block 5 →</a>
+    </div>
+  </main>
+</div>
+<footer><span data-i18n="footer.builtFrom14">由 Block 1-4.rtf 整理 ·</span> <a href="../resources.html" data-i18n="footer.resourceMap">资源映射</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/data.js"></script>
+<script src="../assets/main.js"></script>
+</body>
+</html>

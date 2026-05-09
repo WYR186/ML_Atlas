@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Block 3 · Linear · Logistic · SVM · Kernel</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="block3.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <ul>
+      <li><a href="#linreg">📈 1. Linear Regression</a></li>
+      <li><a href="#logreg">🎯 2. Logistic Regression</a></li>
+      <li><a href="#svm">⚔️ 3. SVM</a></li>
+      <li><a href="#kernel">🪄 4. Kernel Methods</a></li>
+      <li><a href="#summary">✅ 速记 Checklist</a></li>
+    </ul>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="3" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+    <a class="btn" href="block4.html" style="margin-top:8px;">下一章 → Block 4</a>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / Block 3</div>
+      <h1>📈 Block 3 · Linear / Logistic / SVM / Kernel</h1>
+      <div class="subtitle">线性模型（回归 / 分类）→ SVM 最大间隔 → Kernel 走向非线性</div>
+      <div class="refs">
+        <a class="ref-chip lecture" href="../slides/Lecture_6.pdf" target="_blank">📄 Lecture 6</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_7.pdf" target="_blank">📄 Lecture 7</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_8.pdf" target="_blank">📄 Lecture 8</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 HW 2</a>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">✅ HW 2 sol</a>
+      </div>
+    </div>
+
+    <section class="topic" id="linreg">
+      <h2><span class="icon">📈</span> 1. Linear Regression · 线性回归</h2>
+      <p>预测连续值 $y\in\mathbb{R}$。模型 $\hat y = w^\top x + b$，目标平方损失。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">MSE Objective</div>
+          <div class="eq">$$ \min_{w,b}\ \tfrac{1}{2}\sum_{i=1}^{n}\big(y_i-(w^\top x_i+b)\big)^2 $$</div></div>
+        <div class="callout formula"><div class="head">Closed-form (Normal Eqn.)</div>
+          <div class="eq">$$ w^*=(X^\top X)^{-1}X^\top y $$</div>
+          <div style="font-size:13px;">需要 $X^\top X$ 可逆。</div></div>
+      </div>
+      <div class="callout warn">
+        <div class="head">⚠️ Pitfalls</div>
+        <ul>
+          <li>对离群点敏感（平方损失放大异常）。</li>
+          <li>用于二分类（$y\in\{-1,1\}$ + 阈值）虽可，但不是为分类设计。</li>
+          <li>多重共线性 → $X^\top X$ 病态 / 不可逆。</li>
+        </ul>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <p>会写模型 + MSE 目标；闭式解的存在条件 + 共线性问题。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="logreg">
+      <h2><span class="icon">🎯</span> 2. Logistic Regression · 逻辑回归</h2>
+      <p>把线性打分映射到 $(0,1)$ 概率。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Probability output</div>
+          <div class="eq">$$ p(y=1\mid x)=\sigma(w^\top x+b),\ \sigma(a)=\tfrac{1}{1+e^{-a}} $$</div></div>
+        <div class="callout formula"><div class="head">Decision boundary (still linear)</div>
+          <div class="eq">$$ w^\top x + b = 0 $$</div></div>
+        <div class="callout formula" style="grid-column:1/3;"><div class="head">NLL / Cross-entropy ($y_i\in\{-1,+1\}$ form)</div>
+          <div class="eq">$$ \min_w\ \sum_{i=1}^{n}\log\!\big(1+\exp(-y_i\,w^\top x_i)\big) $$</div></div>
+      </div>
+      <div class="callout">
+        <div class="head">🧠 Why logistic over linear for classification?</div>
+        <p>概率建模更适合分类；对“分得很对”的点不会过度惩罚（不像 MSE 把对的点拽回来）。</p>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>看到“概率输出 / log-odds / MLE” → Logistic。</li>
+          <li>“为什么边界线性？”因为 $\sigma(a)=0.5\Leftrightarrow a=0\Leftrightarrow w^\top x+b=0$。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="svm">
+      <h2><span class="icon">⚔️</span> 3. SVM · 支持向量机</h2>
+      <p>找分离超平面 + 让最小间隔最大。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Hard-margin (linearly separable)</div>
+          <div class="eq">$$ \min_{w,b}\ \tfrac{1}{2}\|w\|_2^2 \quad\text{s.t.}\ y_i(w^\top x_i+b)\ge 1 $$</div></div>
+        <div class="callout formula"><div class="head">Soft-margin + slack</div>
+          <div class="eq">$$ \min_{w,b,\xi}\ \tfrac{1}{2}\|w\|_2^2 + C\sum_i\xi_i,\ \ y_i(w^\top x_i+b)\ge 1-\xi_i,\ \xi_i\ge 0 $$</div></div>
+        <div class="callout formula" style="grid-column:1/3;"><div class="head">Hinge Loss</div>
+          <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\quad t=y_i(w^\top x_i+b) $$</div></div>
+      </div>
+      <div class="callout">
+        <div class="head">📍 Support Vectors</div>
+        <p>只有落在间隔边界上 / 间隔内（含误分）的点决定最终解。其余点的对偶系数为 0（complementary slackness）。</p>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>“为什么只依赖支持向量？” → 对偶里非支持向量系数 = 0。</li>
+          <li>会算 hinge loss：先 $t=yf(x)$，再 $\max(0,1-t)$。</li>
+        </ul>
+      </div>
+      <div class="callout example">
+        <div class="head">🧩 Example · Hinge 计算</div>
+        <p>$y=+1,\ f(x)=0.3$ ⇒ $t=0.3$ ⇒ $\ell_{\text{hinge}}=\max(0,1-0.3)=0.7$。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="kernel">
+      <h2><span class="icon">🪄</span> 4. Kernel Methods · 核方法</h2>
+      <p>用 kernel 计算高维特征映射的内积，避免显式构造 $\phi(x)$。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Kernel Trick</div>
+          <div class="eq">$$ k(x,x')=\phi(x)^\top \phi(x') $$</div></div>
+        <div class="callout formula"><div class="head">XOR feature map</div>
+          <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div></div>
+        <div class="callout formula"><div class="head">Polynomial Kernel</div>
+          <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div></div>
+        <div class="callout formula"><div class="head">RBF / Gaussian Kernel</div>
+          <div class="eq">$$ k(x,x')=\exp\!\big(-\gamma\|x-x'\|^2\big) $$</div>
+          <div style="font-size:13px;">$\gamma\uparrow$ ⇒ 核更窄 ⇒ 边界更弯曲 ⇒ 更易过拟合。</div></div>
+      </div>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>写出 RBF 公式并解释 $\gamma$ 含义（题目频繁出现）。</li>
+          <li>解释 SVM 对偶为什么能直接套 kernel（只看内积）。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic checklist" id="summary">
+      <h3>✅ Block 3 速记 Checklist</h3>
+      <ul>
+        <li><b>Linear</b>：MSE + 正规方程 $w^*=(X^\top X)^{-1}X^\top y$</li>
+        <li><b>Logistic</b>：Sigmoid + NLL，边界 $w^\top x+b=0$（线性）</li>
+        <li><b>SVM</b>：max-margin · hard/soft · hinge $\max(0,1-yf(x))$ · 支持向量</li>
+        <li><b>Kernel</b>：$k(x,x')=\phi(x)^\top\phi(x')$；Polynomial / RBF（$\gamma$ 直觉）</li>
+      </ul>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;">
+      <a class="btn" href="block2.html">← Block 2</a>
+      <a class="btn btn-primary" href="block4.html">Block 4 →</a>
+    </div>
+  </main>
+</div>
+<footer><span data-i18n="footer.builtFrom14">由 Block 1-4.rtf 整理 ·</span> <a href="../resources.html" data-i18n="footer.resourceMap">资源映射</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/data.js"></script>
+<script src="../assets/main.js"></script>
+</body>
+</html>

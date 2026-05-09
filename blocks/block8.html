@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Block 8 · Diffusion Models</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="block8.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <ul>
+      <li><a href="#notation">📒 0. Notation</a></li>
+      <li><a href="#fwd">🔵 1. Forward / Noising</a></li>
+      <li><a href="#rev">🟢 2. Reverse / Denoising</a></li>
+      <li><a href="#elbo">🟣 3. Diffusion ELBO</a></li>
+      <li><a href="#sample">🎨 4. Sampling</a></li>
+      <li><a href="#summary">✅ 速记 Checklist</a></li>
+    </ul>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="8" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+    <a class="btn" href="block9.html" style="margin-top:8px;">下一章 → Block 9</a>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / Block 8</div>
+      <h1>🌊 Block 8 · Diffusion Models</h1>
+      <div class="subtitle">前向加噪 → 逆向去噪 → 从噪声生成数据</div>
+      <div class="refs">
+        <a class="ref-chip lecture" href="../slides/Lecture_25.pdf" target="_blank">📄 Lecture 25</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 HW 5</a>
+        <a class="ref-chip book" href="../book/BB -Deep Learning Foundations and Concepts.pdf" target="_blank">📚 Bishop DL · Diffusion ch.</a>
+      </div>
+    </div>
+
+    <section class="topic" id="notation">
+      <h2><span class="icon">📒</span> 0. Notation Cheat Sheet</h2>
+      <ul>
+        <li>$x_0$：原始数据 / clean data</li>
+        <li>$x_t$：第 $t$ 步的带噪样本</li>
+        <li>$T$：扩散步数</li>
+        <li>$\alpha_t\in(0,1)$：每步保留信号系数</li>
+        <li>$\bar{\alpha}_t=\prod_{i=1}^{t}\alpha_i$：累计保留系数</li>
+        <li>$\epsilon_t\sim\mathcal{N}(0,I)$：高斯噪声</li>
+      </ul>
+      <div class="callout">
+        <div class="head">🟦 Concept</div>
+        <p>把“生成”转化成“逐步去噪”。只要学会每一步如何把 $x_t$ 变回 $x_{t-1}$，就能从纯噪声生成 $x_0$。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="fwd">
+      <h2><span class="icon">🔵</span> 1. Forward / Noising Process</h2>
+      <p>固定的马尔可夫链，往数据里加少量高斯噪声。</p>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Single-step Transition</div>
+          <div class="eq">$$ q_\phi(x_t \mid x_{t-1}) = \mathcal{N}\!\left(x_t \mid \sqrt{\alpha_t}\,x_{t-1},\,(1-\alpha_t)I\right) $$</div></div>
+        <div class="callout formula"><div class="head">Reparameterization Form</div>
+          <div class="eq">$$ x_t = \sqrt{\alpha_t}\,x_{t-1} + \sqrt{1-\alpha_t}\,\epsilon_t $$</div></div>
+        <div class="callout formula" style="grid-column:1/3;"><div class="head">Direct Sampling from $x_0$</div>
+          <div class="eq">$$ q_\phi(x_t \mid x_0)=\mathcal{N}\!\left(x_t \mid \sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div></div>
+      </div>
+      <div class="callout">
+        <div class="head">🟠 Intuition</div>
+        <p>$t$ 增大，信号 $\sqrt{\bar{\alpha}_t}\,x_0$ 持续衰减，噪声占比增加；当 $T$ 足够大、$\bar{\alpha}_T\to 0$ 时，$x_T\approx \mathcal{N}(0,I)$。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="rev">
+      <h2><span class="icon">🟢</span> 2. Reverse / Denoising Process</h2>
+      <p>真实 $q(x_{t-1}\mid x_t)$ 难以直接求；用神经网络学一个参数化的高斯逆过程。</p>
+      <div class="callout formula">
+        <div class="head">Learned Reverse Transition</div>
+        <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\big(x_{t-1}\mid \mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\big) $$</div>
+      </div>
+      <div class="callout formula">
+        <div class="head">Full Generative Factorization</div>
+        <div class="eq">$$ p_\theta(x_{0:T})=p(x_T)\prod_{t=1}^{T} p_\theta(x_{t-1}\mid x_t),\quad p(x_T)=\mathcal{N}(0,I) $$</div>
+      </div>
+      <div class="callout warn">
+        <div class="head">⚠️ Pitfalls</div>
+        <ul>
+          <li>前向 $q$ 是<b>固定</b>的（由 $\alpha_t$ 决定）；训练的是<b>逆向</b> $p_\theta$。</li>
+          <li>实现中常预测<b>噪声 $\epsilon$</b>，而非直接预测 $\mu_\theta$（更稳定，与 score matching 紧密相关）。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="elbo">
+      <h2><span class="icon">🟣</span> 3. Diffusion ELBO</h2>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <p>会考：ELBO 的<b>三项分解结构</b>、每项含义、以及“为什么常预测噪声”。</p>
+      </div>
+      <div class="callout formula">
+        <div class="head">三项分解</div>
+        <p>(1) 重建项 / Reconstruction</p>
+        <div class="eq">$$ \mathbb{E}_{q_\phi(x_1\mid x_0)}\!\big[\ln p_\theta(x_0\mid x_1)\big] $$</div>
+        <p>(2) 先验匹配 / Prior matching</p>
+        <div class="eq">$$ D_{KL}\!\big(q_\phi(x_T\mid x_0)\,\|\,p(x_T)\big) $$</div>
+        <p>(3) 一致性 / Consistency across steps</p>
+        <div class="eq">$$ \sum_{t=2}^{T}\mathbb{E}_{q_\phi(x_t\mid x_0)}\!\Big[ D_{KL}\!\big(q_\phi(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t)\big) \Big] $$</div>
+      </div>
+      <div class="callout">
+        <div class="head">🟠 本质</div>
+        <p>ELBO 强迫模型在每一步的逆向预测都与“已知 $x_0$ 时的真实后验”对齐 → 整条去噪链稳定可用。</p>
+      </div>
+    </section>
+
+    <section class="topic" id="sample">
+      <h2><span class="icon">🎨</span> 4. Sampling / Inference</h2>
+      <ol>
+        <li>采样初始噪声：$x_T\sim\mathcal{N}(0,I)$。</li>
+        <li>对 $t=T,\ldots,1$，用网络从 $x_t$ 采样得到 $x_{t-1}$。</li>
+        <li>输出 $x_0$ 作为生成样本。</li>
+      </ol>
+      <div class="callout">
+        <div class="head">🧩 Guidance</div>
+        <p>条件（文本 / 类别）输入即可做 conditional diffusion（如 text-to-image）；常见技巧 classifier-free guidance。</p>
+      </div>
+
+      <div class="callout example">
+        <div class="head">🧩 Example · 推导 $q(x_t\mid x_0)$</div>
+        <p>把 $x_t$ 递推展开成 $x_0$ + 累计噪声：均值乘 $\sqrt{\alpha_i}$ 累乘 ⇒ $\sqrt{\bar{\alpha}_t}$；噪声是独立高斯线性组合，仍为高斯，方差按系数平方相加 ⇒ $(1-\bar{\alpha}_t)$。</p>
+      </div>
+    </section>
+
+    <section class="topic checklist" id="summary">
+      <h3>✅ Block 8 速记 Checklist</h3>
+      <ul>
+        <li>Forward：$x_0\to x_T\approx\mathcal{N}(0,I)$（固定）</li>
+        <li>Reverse：学习 $p_\theta(x_{t-1}\mid x_t)$</li>
+        <li>ELBO：重建 + 先验匹配 + 每步一致性</li>
+        <li>常见实现：预测噪声 $\epsilon$（与 score matching 相关）</li>
+      </ul>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;">
+      <a class="btn" href="block7.html">← Block 7</a>
+      <a class="btn btn-primary" href="block9.html">Block 9 →</a>
+    </div>
+  </main>
+</div>
+<footer><span data-i18n="footer.builtFrom510">由 Block 5-10.rtf 整理 ·</span> <a href="../resources.html" data-i18n="footer.resourceMap">资源映射</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/data.js"></script>
+<script src="../assets/main.js"></script>
+</body>
+</html>
