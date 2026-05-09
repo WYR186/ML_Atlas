@@ -19,3 +19,8 @@ dist/
 # Local notes / scratch
 _*.txt
 *.bak
+
+# Symlinks to course material (don't commit copyrighted PDFs)
+HW
+slides
+book
