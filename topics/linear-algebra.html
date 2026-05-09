@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="cn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Linear Algebra · ML Atlas</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="linear-algebra.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <div id="topicToc"></div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="linear-algebra" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Linear Algebra</div>
+      <h1>📐 Linear Algebra<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 线性代数</span></h1>
+      <div class="subtitle">点积 · 范数 · 特征值 / 向量</div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_2.pdf" target="_blank">📄 Lecture 2</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a></div>
+    </div>
+
+<section class="topic" id="linalg">
+      <h2><span class="icon">📐</span> Linear Algebra · 线性代数</h2>
+      <div class="callout">
+        <div class="head">🧠 Core intuition</div>
+        <div class="bi-text">
+          <span class="cn">线代告诉你“对象是什么形状、如何组合”。</span>
+          <span class="en">Linear algebra is the grammar of shapes; it prevents gradient-shape mistakes.</span>
+        </div>
+      </div>
+
+      <h3>🔵 概念理解</h3>
+      <ul>
+        <li><b>点积 / Dot product</b>：相似度 / 投影；线性模型与核方法的基础。</li>
+        <li><b>范数 / Norm</b>：长度 / 大小；正则化的“惩罚”。</li>
+        <li><b>特征值 / 向量</b>：矩阵沿某方向缩放；PCA 关键。</li>
+      </ul>
+
+      <h3>🟣 核心公式（默写）</h3>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">Dot Product</div>
+          <div class="eq">$$ x^\top y=\sum_i x_i y_i $$</div></div>
+        <div class="callout formula"><div class="head">$L_2$ / $L_1$ Norms</div>
+          <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\qquad \|x\|_1=\sum_i |x_i| $$</div></div>
+        <div class="callout formula"><div class="head">Matrix Multiply Shape</div>
+          <div class="eq">$$ (m\times n)\cdot(n\times p)\rightarrow(m\times p) $$</div>
+          <div style="font-size:13px;">肌肉记忆：中间维度必须相同。</div></div>
+        <div class="callout formula"><div class="head">Eigenvalue / Eigenvector</div>
+          <div class="eq">$$ Au=\lambda u $$</div>
+          <div style="font-size:13px;">PCA：取协方差矩阵最大 $\lambda$ 对应的 $u$。</div></div>
+        <div class="callout formula" style="grid-column:1/3;">
+          <div class="head">Three Derivative Shapes</div>
+          <div class="eq">$$ \nabla f\in\mathbb{R}^{d\times 1},\quad \nabla^2 f\in\mathbb{R}^{d\times d},\quad J\in\mathbb{R}^{m\times n} $$</div>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="head">⚠️ Common pitfalls</div>
+        <ul>
+          <li>把梯度写成行向量 → 链式法则维度对不上。</li>
+          <li>混淆 $x^\top y$ 与 elementwise product（向量 vs 标量）。</li>
+        </ul>
+      </div>
+
+      <div class="callout exam">
+        <div class="head">✅ Exam focus</div>
+        <ul>
+          <li>能快速判断任意表达式的维度（尤其反向传播）。</li>
+          <li>PCA：最大方差方向 = 最大特征值对应特征向量。</li>
+        </ul>
+      </div>
+
+      <div class="callout example">
+        <div class="head">🧩 Example · Shape 判断</div>
+        <p>设 $A\in\mathbb{R}^{m\times n}$，$x\in\mathbb{R}^{n\times 1}$。</p>
+        <ul>
+          <li>$Ax\in\mathbb{R}^{m\times 1}$。</li>
+          <li>$x^\top\in\mathbb{R}^{1\times n}$，所以 $x^\top A$ 合法，结果在 $\mathbb{R}^{1\times m}$。</li>
+        </ul>
+      </div>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+      <a class="btn" href="probability.html">← Probability</a>
+      <a class="btn btn-primary" href="optimization.html">Optimization →</a>
+    </div>
+  </main>
+</div>
+<footer><a href="../index.html" data-i18n="btn.back">← 返回路线图</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/topics-data.js"></script>
+<script src="../assets/main.js"></script>
+<script>
+  // Auto-build TOC from h2/h3 in this topic body.
+  (function () {
+    const main = document.querySelector('.block-main');
+    const toc = document.getElementById('topicToc');
+    if (!main || !toc) return;
+    const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+    if (!items.length) return;
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+    ul.style.display = 'grid';
+    ul.style.gap = '4px';
+    items.forEach((el) => {
+      // find nearest section ancestor for the id
+      const sect = el.closest('section.topic');
+      if (!sect || !sect.id) return;
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + sect.id;
+      a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
+      a.style.color = 'var(--text-soft)';
+      a.style.fontSize = '13px';
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    toc.appendChild(ul);
+  })();
+</script>
+</body>
+</html>

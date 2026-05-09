@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="cn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bagging · ML Atlas</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="bagging.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <div id="topicToc"></div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="bagging" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / Bagging</div>
+      <h1>🌳 Bagging<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 装袋法</span></h1>
+      <div class="subtitle">Bootstrap + 平均 → 降方差</div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_11.pdf" target="_blank">📄 Lecture 11</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
+    </div>
+
+<section class="topic" id="bagging">
+      <h2><span class="icon">🎒</span> 2. Bagging · 装袋法</h2>
+      <ul>
+        <li>Bootstrap（有放回抽样）独立训练多个模型 → 平均。</li>
+        <li>主要 <b>降低方差</b>；典型考点：bagging <b>通常不降低偏差</b>（期望预测器基本不变）。</li>
+        <li>典型应用：Random Forest（bagging + 特征随机）。</li>
+      </ul>
+      <div class="callout exam">
+        <div class="head">✅ 比较题模板</div>
+        <p>“bagging vs boosting” 答：训练方式（并行 vs 串行）+ 偏差/方差影响 + 噪声敏感性。</p>
+      </div>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+      <a class="btn" href="decision-trees.html">← Decision Trees</a>
+      <a class="btn btn-primary" href="boosting.html">AdaBoost →</a>
+    </div>
+  </main>
+</div>
+<footer><a href="../index.html" data-i18n="btn.back">← 返回路线图</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/topics-data.js"></script>
+<script src="../assets/main.js"></script>
+<script>
+  // Auto-build TOC from h2/h3 in this topic body.
+  (function () {
+    const main = document.querySelector('.block-main');
+    const toc = document.getElementById('topicToc');
+    if (!main || !toc) return;
+    const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+    if (!items.length) return;
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+    ul.style.display = 'grid';
+    ul.style.gap = '4px';
+    items.forEach((el) => {
+      // find nearest section ancestor for the id
+      const sect = el.closest('section.topic');
+      if (!sect || !sect.id) return;
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + sect.id;
+      a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
+      a.style.color = 'var(--text-soft)';
+      a.style.fontSize = '13px';
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    toc.appendChild(ul);
+  })();
+</script>
+</body>
+</html>

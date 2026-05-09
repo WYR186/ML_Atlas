@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-lang="cn">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ECE 449 / CS 446 · ML Review Roadmap</title>
+<title>ECE 449 / CS 446 · ML Atlas</title>
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -16,7 +16,7 @@
     </a>
     <nav class="nav-links">
       <a href="index.html" class="active" data-i18n="nav.roadmap">🗺️ 路线图</a>
-      <a href="blocks/block1.html" data-i18n="nav.notes">📘 速查</a>
+      <a href="topics/probability.html" data-i18n="nav.notes">📘 速查</a>
       <a href="cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
       <a href="resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
@@ -42,176 +42,182 @@
           </svg>
           <div class="ring-text">
             <span class="num" id="progressNum">0</span>
-            <span class="total">/10</span>
+            <span class="total">/<span id="progressTotal">37</span></span>
           </div>
         </div>
         <div class="legend">
-          <div><span class="dot green"></span><span data-i18n="home.legend.found">Foundations / 基础</span></div>
-          <div><span class="dot yellow"></span><span data-i18n="home.legend.dl">Modern DL / 现代深度</span></div>
-          <div><span class="dot red"></span><span data-i18n="home.legend.theory">Theory / RL</span></div>
+          <div><span class="dot green"></span><span data-i18n="home.legend.found">基础 / 简单</span></div>
+          <div><span class="dot yellow"></span><span data-i18n="home.legend.dl">中等</span></div>
+          <div><span class="dot red"></span><span data-i18n="home.legend.theory">困难</span></div>
         </div>
       </div>
       <div class="side-actions">
         <a class="btn btn-primary" href="cheatsheet.html" data-i18n="home.btn.cheatsheet">⚡ 1 小时速记</a>
-        <a class="btn" href="blocks/block1.html" data-i18n="home.btn.start">📖 从头开始</a>
+        <a class="btn" href="topics/probability.html" data-i18n="home.btn.start">📖 从头开始</a>
         <a class="btn" href="resources.html" data-i18n="home.btn.resources">📂 课件 & 作业</a>
         <button class="btn" id="resetProgress" data-i18n="home.btn.reset">🔄 重置进度</button>
       </div>
     </aside>
 
     <div class="roadmap" id="roadmap">
-      <svg class="roadmap-svg lines" id="lines" preserveAspectRatio="none"></svg>
-
-      <!-- Root -->
-      <a class="section-node" id="n-root" href="#" style="left: 50%; transform: translateX(-50%); top: 16px; width: 260px;">
+      <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:16px; width:280px;">
         <span data-i18n="brand.short">ECE 449 / CS 446</span>
         <span class="sub" data-i18n="home.subtitle.subtitle">机器学习 · 期末复习</span>
       </a>
-
-      <!-- Foundations (Block 1) -->
-      <a class="section-node" id="n-b1" href="blocks/block1.html"
-         style="left: 50%; transform: translateX(-50%); top: 130px; width: 240px;">
-        <span data-i18n="node.b1">📐 Block 1 · Foundations</span>
-        <span class="sub" data-i18n="node.b1.sub">概率 · 线代 · 优化</span>
-      </a>
-
-      <!-- Left branch: Classical ML -->
-      <div class="group" id="g-classical" style="left: 30px; top: 280px; width: 480px;">
-        <span class="group-label" data-i18n="group.classical">🧮 Classical Machine Learning · 经典机器学习</span>
-        <div class="group-cards" style="grid-template-columns: 1fr 1fr;">
-          <a class="node" data-block="2" href="blocks/block2.html">
-            <span class="difficulty" style="background: var(--accent);"></span>
-            Block 2 · KNN / NB
-            <span class="progress-bar"><span class="fill"></span></span>
-          </a>
-          <a class="node" data-block="3" href="blocks/block3.html">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Block 3 · Linear / SVM
-            <span class="progress-bar"><span class="fill"></span></span>
-          </a>
-          <a class="node" data-block="4" href="blocks/block4.html" style="grid-column: 1 / 3;">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Block 4 · Trees · Ensemble · PCA · K-means
-            <span class="progress-bar"><span class="fill"></span></span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Right branch: Deep Learning Core (Block 5) -->
-      <div class="group" id="g-dlcore" style="right: 30px; top: 280px; width: 480px;">
-        <span class="group-label" data-i18n="group.dlcore">🧠 Deep Learning Core · 深度学习核心</span>
-        <div class="group-cards">
-          <a class="node" data-block="5" href="blocks/block5.html">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Block 5 · MLP · Backprop · CNN · RNN / LSTM
-            <span class="progress-bar"><span class="fill"></span></span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Generative & Self-supervised (Block 6) -->
-      <div class="group" id="g-repr" style="right: 30px; top: 480px; width: 480px;">
-        <span class="group-label" data-i18n="group.repr">🎭 Representation & Generative · 表示与生成</span>
-        <div class="group-cards" style="grid-template-columns: 1fr 1fr 1fr;">
-          <a class="node" data-block="6a" href="blocks/block6.html#ae">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            AE
-          </a>
-          <a class="node" data-block="6b" href="blocks/block6.html#vae">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            VAE
-          </a>
-          <a class="node" data-block="6c" href="blocks/block6.html#contrastive">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Contrastive
-          </a>
-        </div>
-      </div>
-
-      <!-- Modern Models (Block 7) -->
-      <div class="group" id="g-modern" style="right: 30px; top: 640px; width: 480px;">
-        <span class="group-label" data-i18n="group.modern">🔮 Modern Models · 现代序列模型</span>
-        <div class="group-cards" style="grid-template-columns: 1fr 1fr;">
-          <a class="node" data-block="7a" href="blocks/block7.html#attention">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Attention / PE
-          </a>
-          <a class="node" data-block="7b" href="blocks/block7.html#transformer">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Transformer / LLM
-          </a>
-        </div>
-      </div>
-
-      <!-- Diffusion (Block 8) -->
-      <div class="group" id="g-diff" style="right: 30px; top: 800px; width: 480px;">
-        <span class="group-label" data-i18n="group.diff">🌊 Diffusion · 扩散模型</span>
-        <div class="group-cards">
-          <a class="node" data-block="8" href="blocks/block8.html">
-            <span class="difficulty" style="background: var(--danger);"></span>
-            Block 8 · Forward / Reverse / ELBO
-            <span class="progress-bar"><span class="fill"></span></span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Bottom Branch: Theory & RL -->
-      <div class="group" id="g-theory" style="left: 30px; top: 600px; width: 480px;">
-        <span class="group-label" data-i18n="group.theory">🎓 Learning Theory · 学习理论</span>
-        <div class="group-cards" style="grid-template-columns: 1fr 1fr;">
-          <a class="node" data-block="9a" href="blocks/block9.html#bayes">
-            <span class="difficulty" style="background: var(--danger);"></span>
-            Bayes / Decomp
-          </a>
-          <a class="node" data-block="9b" href="blocks/block9.html#pac">
-            <span class="difficulty" style="background: var(--danger);"></span>
-            PAC · ERM · VC
-          </a>
-        </div>
-      </div>
-
-      <!-- RL (Block 10) -->
-      <div class="group" id="g-rl" style="left: 30px; top: 760px; width: 480px;">
-        <span class="group-label" data-i18n="group.rl">🎮 Reinforcement Learning · 强化学习</span>
-        <div class="group-cards" style="grid-template-columns: 1fr 1fr;">
-          <a class="node" data-block="10a" href="blocks/block10.html#mdp">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            MDP · Bellman
-          </a>
-          <a class="node" data-block="10b" href="blocks/block10.html#qlearn">
-            <span class="difficulty" style="background: var(--danger);"></span>
-            Q-learning · PG
-          </a>
-          <a class="node" data-block="10c" href="blocks/block10.html#dp" style="grid-column: 1 / 3;">
-            <span class="difficulty" style="background: var(--warn);"></span>
-            Value / Policy Iteration
-          </a>
-        </div>
-      </div>
-
-      <!-- Practice anchor -->
-      <a class="section-node" href="cheatsheet.html"
-         style="left: 50%; transform: translateX(-50%); top: 1020px; width: 260px;">
-        <span data-i18n="node.practice">⚡ 速记 + 练习</span>
-        <span class="sub" data-i18n="node.practice.sub">10 min · 闭卷自测</span>
-      </a>
+      <div id="groupGrid" style="margin-top: 110px;"></div>
     </div>
   </section>
 
   <section style="margin-top: 28px;">
-    <h2 style="margin: 0 0 6px; font-size: 20px;" data-i18n="home.indexTitle">📚 完整核心算法表 · Course Algorithm Index</h2>
-    <p style="margin: 0 0 14px; color: var(--text-soft); font-size: 14px;" data-i18n="home.indexSub">按模块整理；每行可点击跳转到对应章节。</p>
+    <h2 style="margin: 0 0 6px; font-size: 20px;" data-i18n="home.indexTitle">📚 完整核心算法表</h2>
+    <p style="margin: 0 0 14px; color: var(--text-soft); font-size: 14px;" data-i18n="home.indexSub">每个算法独立成页 · 点击行进入详情。</p>
     <div id="indexTable"></div>
   </section>
 </div>
 
 <footer>
-  <span data-i18n="footer.home">本网站由 ECE 449 / CS 446 期末笔记 (Block 1-4.rtf, Block 5-10.rtf) 与课件 / 作业生成 ·</span>
-  <a href="resources.html" data-i18n="footer.viewMap">查看资源映射</a>
+  <span data-i18n="footer.home">ML Atlas · ECE 449 / CS 446 期末复习 ·</span>
+  <a href="resources.html" data-i18n="footer.viewMap">资源映射</a>
 </footer>
 
 <script src="assets/i18n.js"></script>
-<script src="assets/data.js"></script>
+<script src="assets/topics-data.js"></script>
 <script src="assets/main.js"></script>
+<script>
+  // === Render group grid (one card per algorithm) ===
+  (function () {
+    const grid = document.getElementById("groupGrid");
+    if (!grid || !window.GROUPS || !window.TOPICS) return;
+    const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+    const total = document.getElementById("progressTotal");
+    if (total) total.textContent = window.TOPICS.length;
+
+    grid.style.display = "grid";
+    grid.style.gap = "20px";
+    grid.style.gridTemplateColumns = "repeat(2, 1fr)";
+
+    const order = [
+      ["foundations"],
+      ["supervised"],
+      ["trees", "unsupervised"],
+      ["neural"],
+      ["sequential", "representation"],
+      ["modern"],
+      ["generative", "theory"],
+      ["rl"],
+    ];
+
+    function nameFor(g, lang) {
+      return lang === "en" ? g.name_en : g.name_cn;
+    }
+    function topicLabel(t, lang) {
+      return lang === "en" ? t.name_en : t.name_cn;
+    }
+    const diffColor = { green: "var(--accent)", yellow: "var(--warn)", red: "var(--danger)" };
+
+    function renderGroup(gid) {
+      const g = window.GROUPS.find(x => x.id === gid);
+      if (!g) return "";
+      const items = window.TOPICS.filter(t => t.group === gid);
+      const cards = items.map(t => `
+        <a class="node" href="topics/${t.slug}.html" data-slug="${t.slug}">
+          <span class="difficulty" style="background:${diffColor[t.diff]||'var(--border)'};"></span>
+          <span class="topic-label" data-cn="${t.name_cn}" data-en="${t.name_en}">${t.name_cn}</span>
+          <span class="progress-bar"><span class="fill"></span></span>
+        </a>
+      `).join("");
+      const cols = items.length >= 4 ? "repeat(2, 1fr)" : (items.length >= 2 ? `repeat(${Math.min(items.length, 3)}, 1fr)` : "1fr");
+      return `
+        <div class="group" style="position:relative; padding:18px 16px 14px; border:1px solid var(--border-strong); border-radius:12px; background:rgba(255,255,255,0.7);">
+          <span class="group-label" data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
+          <div class="group-cards" style="grid-template-columns: ${cols}; margin-top:6px;">
+            ${cards}
+          </div>
+        </div>
+      `;
+    }
+
+    grid.innerHTML = order.map(row => {
+      if (row.length === 1) {
+        return `<div style="grid-column: 1 / 3;">${renderGroup(row[0])}</div>`;
+      }
+      return row.map(g => `<div>${renderGroup(g)}</div>`).join("");
+    }).join("");
+
+    // Apply CN/EN to topic labels and group labels
+    function applyTopicLang() {
+      const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+      grid.querySelectorAll("[data-cn][data-en]").forEach(el => {
+        el.textContent = lang === "en" ? el.dataset.en : el.dataset.cn;
+      });
+    }
+    applyTopicLang();
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      btn.addEventListener("click", () => setTimeout(applyTopicLang, 0));
+    });
+
+    // Mark progress dots
+    function markProgress() {
+      const p = JSON.parse(localStorage.getItem("ml_review_progress_v1") || "{}");
+      let done = 0;
+      grid.querySelectorAll(".node[data-slug]").forEach(el => {
+        if (p[el.dataset.slug]) {
+          el.classList.add("done");
+          done += 1;
+        }
+      });
+      const num = document.getElementById("progressNum");
+      const circle = document.getElementById("progressCircle");
+      if (num) num.textContent = done;
+      if (circle) {
+        const C = 2 * Math.PI * 33;
+        circle.setAttribute("stroke-dasharray", C.toFixed(2));
+        circle.setAttribute("stroke-dashoffset", (C * (1 - done / window.TOPICS.length)).toFixed(2));
+      }
+    }
+    markProgress();
+  })();
+
+  // === Render index table per group ===
+  (function () {
+    const root = document.getElementById("indexTable");
+    if (!root || !window.GROUPS || !window.TOPICS) return;
+
+    const html = window.GROUPS.map(g => {
+      const items = window.TOPICS.filter(t => t.group === g.id);
+      if (!items.length) return "";
+      return `
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;">
+          <h3 style="margin:0 0 8px; font-size:16px;">
+            <span data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
+            <span style="color:var(--text-muted); font-size:13px; font-weight:500; margin-left:8px;">${g.sub}</span>
+          </h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:6px;">
+            ${items.map(t => `
+              <a href="topics/${t.slug}.html" style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:6px; color:var(--text); text-decoration:none; font-size:13.5px;">
+                <span style="width:6px; height:6px; border-radius:50%; background:${({green:'var(--accent)',yellow:'var(--warn)',red:'var(--danger)'})[t.diff]};"></span>
+                <span data-cn="${t.name_cn}" data-en="${t.name_en}">${t.name_cn}</span>
+                <span style="color:var(--text-muted); font-size:12px; margin-left:auto;">${t.sub}</span>
+              </a>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }).join("");
+    root.innerHTML = html;
+
+    // Apply lang
+    function applyLang() {
+      const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+      root.querySelectorAll("[data-cn][data-en]").forEach(el => {
+        el.textContent = lang === "en" ? el.dataset.en : el.dataset.cn;
+      });
+    }
+    applyLang();
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      btn.addEventListener("click", () => setTimeout(applyLang, 0));
+    });
+  })();
+</script>
 </body>
 </html>

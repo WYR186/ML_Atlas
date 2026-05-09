@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="cn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Error Decomposition · ML Atlas</title>
+<link rel="stylesheet" href="../assets/style.css" />
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="error-decomposition.html" class="active" data-i18n="nav.notes">📘 速查</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box"><input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" /></div>
+  </div>
+</header>
+
+<div class="page block-page">
+  <aside class="toc">
+    <h4 data-i18n="page.toc">本章导航</h4>
+    <div id="topicToc"></div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+    <button id="markRead" class="btn" data-block="error-decomposition" data-i18n="btn.markRead.todo">📌 标记为已掌握</button>
+  </aside>
+
+  <main class="block-main">
+    <div class="block-header">
+      <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / Error Decomposition</div>
+      <h1>🎓 Error Decomposition<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 误差分解</span></h1>
+      <div class="subtitle">Estimation + Approx + Bayes</div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
+        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a></div>
+    </div>
+
+<section class="topic" id="decomp">
+      <h2><span class="icon">🧩</span> 3. Error Decomposition</h2>
+      <div class="callout formula">
+        <div class="head">三部分分解</div>
+        <div class="eq">$$ \epsilon_\mu(f) = \underbrace{\big(\epsilon_\mu(f)-\inf_{f'\in\mathcal{F}}\epsilon_\mu(f')\big)}_{\text{Estimation}} + \underbrace{\big(\inf_{f'\in\mathcal{F}}\epsilon_\mu(f')-\epsilon_\mu^*\big)}_{\text{Approximation}} + \underbrace{\epsilon_\mu^*}_{\text{Bayes}} $$</div>
+      </div>
+      <ul>
+        <li><b>Bayes Error</b>：数据本身噪声（不可消除）。</li>
+        <li><b>Approximation Error</b>：$\mathcal{F}$ 太弱，表达不了最优函数。</li>
+        <li><b>Estimation Error</b>：样本有限导致学得不准。</li>
+      </ul>
+      <div class="callout exam">
+        <div class="head">✅ Exam focus（高频选择题）</div>
+        <ul>
+          <li>“加数据是否有用？” → 只影响 Estimation。</li>
+          <li>“换更强模型是否有用？” → 主要影响 Approximation（但 Estimation 风险可能上升）。</li>
+          <li><b>过拟合本质</b>：估计误差 / 泛化间隙变大（模型复杂度过高但数据不足）。</li>
+        </ul>
+      </div>
+    </section>
+
+    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+      <a class="btn" href="bayes-classifier.html">← Bayes Classifier</a>
+      <a class="btn btn-primary" href="pac.html">PAC Learnability →</a>
+    </div>
+  </main>
+</div>
+<footer><a href="../index.html" data-i18n="btn.back">← 返回路线图</a></footer>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/topics-data.js"></script>
+<script src="../assets/main.js"></script>
+<script>
+  // Auto-build TOC from h2/h3 in this topic body.
+  (function () {
+    const main = document.querySelector('.block-main');
+    const toc = document.getElementById('topicToc');
+    if (!main || !toc) return;
+    const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+    if (!items.length) return;
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+    ul.style.display = 'grid';
+    ul.style.gap = '4px';
+    items.forEach((el) => {
+      // find nearest section ancestor for the id
+      const sect = el.closest('section.topic');
+      if (!sect || !sect.id) return;
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + sect.id;
+      a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
+      a.style.color = 'var(--text-soft)';
+      a.style.fontSize = '13px';
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    toc.appendChild(ul);
+  })();
+</script>
+</body>
+</html>
