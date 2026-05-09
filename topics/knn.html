@@ -34,13 +34,51 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / KNN</div>
-      <h1>🧮 KNN<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· K-近邻</span></h1>
+      <h1>🧮 <span class="en-only">KNN</span><span class="cn-only">K-近邻</span></h1>
       <div class="subtitle">记忆型分类器 · 距离表</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="knn-en">
+  <h2>🟧 KNN — K-Nearest Neighbors</h2>
+  <div class="callout">
+    <div class="head">🧠 Intuition</div>
+    <p>"Nearby points carry similar labels." Supervised, non-parametric, can produce highly nonlinear decision boundaries.</p>
+  </div>
+
+  <h3>Prediction rules</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Classification (majority vote)</div>
+      <div class="eq">$$ \hat{y}(x)=\mathrm{mode}\{y_i:\ x_i \in \mathcal{N}_k(x)\} $$</div></div>
+    <div class="callout formula"><div class="head">Regression (mean)</div>
+      <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Euclidean distance</div>
+      <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_j (x_j-x_{ij})^2} $$</div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfall 1 · Feature scaling</div>
+    <p>KNN is distance-based, so a feature with a large numerical range dominates. Standardize (zero mean, unit variance) or normalize to [0, 1] before training.</p>
+  </div>
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfall 2 · Curse of dimensionality</div>
+    <p>In high dimensions the volume grows exponentially with d, so a fixed number of "neighbors" must come from a much larger radius. Distance concentration: the nearest and farthest points get arbitrarily close in relative distance.</p>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Numerical KNN: list distances, sort, take top-k, vote — handle ties per the problem's rule.</li>
+      <li>Concept: explain why KNN degrades in high dimensions.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="knn">
       <h2><span class="icon">🟧</span> KNN · K-Nearest Neighbors</h2>
       <div class="callout">
@@ -77,7 +115,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="optimization.html">← Optimization</a>
       <a class="btn btn-primary" href="naive-bayes.html">Naive Bayes →</a>
     </div>

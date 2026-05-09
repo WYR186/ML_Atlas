@@ -34,12 +34,29 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔄 序列模型</span><span class="en-only">🔄 Sequential Models</span> / LSTM</div>
-      <h1>🔄 LSTM<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 长短期记忆</span></h1>
+      <h1>🔄 <span class="en-only">LSTM</span><span class="cn-only">长短期记忆</span></h1>
       <div class="subtitle">门控（含 GRU 变体）</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_19.pdf" target="_blank">📄 Lecture 19</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="lstm-en">
+  <h2>🚪 LSTM &amp; GRU — Gated Recurrent Cells</h2>
+  <ul>
+    <li>Goal: control how much information flows along the cell state, mitigating long-range dependency issues.</li>
+    <li>LSTM gates: <b>Forget</b>, <b>Input</b>, <b>Output</b>.</li>
+    <li>GRU gates: <b>Update</b>, <b>Reset</b> — fewer parameters than LSTM.</li>
+  </ul>
+
+  <div class="callout">
+    <div class="head">🧠 Intuition</div>
+    <p>Each gate is a sigmoid that decides "how much to write / keep / read". The cell state is a near-identity highway, so gradients no longer get repeatedly multiplied by a small factor.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="lstm">
       <h2><span class="icon">🚪</span> 5. LSTM & GRU · 门控机制</h2>
       <ul>
@@ -58,7 +75,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="rnn.html">← RNN</a>
       <a class="btn btn-primary" href="autoencoder.html">Auto-encoder →</a>
     </div>

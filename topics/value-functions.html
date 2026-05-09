@@ -34,11 +34,37 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Value & Q functions</div>
-      <h1>🎮 Value & Q functions<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 价值函数</span></h1>
+      <h1>🎮 <span class="en-only">Value & Q functions</span><span class="cn-only">价值函数</span></h1>
       <div class="subtitle">V(s) vs Q(s,a)</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="vq-en">
+  <h2>💎 Value &amp; Q-Functions</h2>
+  <ul>
+    <li>Deterministic policy: $\pi:\mathcal{S}\to\mathcal{A}$.</li>
+    <li>Stochastic policy: $\pi:\mathcal{S}\to\Delta(\mathcal{A})$.</li>
+  </ul>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">State value</div>
+      <div class="eq">$$ V^\pi(s)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,\pi\right] $$</div></div>
+    <div class="callout formula"><div class="head">Action value</div>
+      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a,\pi\right] $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Relation (deterministic)</div>
+      <div class="eq">$$ V^\pi(s)=Q^\pi(s,\pi(s)) $$</div></div>
+  </div>
+  <div class="callout exam">
+    <div class="head">✅ Concept check</div>
+    <ul>
+      <li>$V(s)$: how good is this state?</li>
+      <li>$Q(s, a)$: how good is taking action $a$ in state $s$?</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vq">
       <h2><span class="icon">💎</span> 2. Policy & Value</h2>
       <p><b>策略 $\pi$</b>：</p>
@@ -63,7 +89,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="mdp.html">← MDP</a>
       <a class="btn btn-primary" href="bellman.html">Bellman Optimality →</a>
     </div>

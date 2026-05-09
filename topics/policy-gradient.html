@@ -34,11 +34,34 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Policy Gradient</div>
-      <h1>🎮 Policy Gradient<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 策略梯度</span></h1>
+      <h1>🎮 <span class="en-only">Policy Gradient</span><span class="cn-only">策略梯度</span></h1>
       <div class="subtitle">log-deriv · on-policy</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="pg-en">
+  <h2>🟪 Policy Gradient · On-policy</h2>
+  <div class="callout formula">
+    <div class="head">Objective</div>
+    <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim \pi_\theta}[R(\tau)] $$</div>
+  </div>
+  <div class="callout formula">
+    <div class="head">Log-derivative trick (Monte Carlo estimator)</div>
+    <div class="eq">$$ \nabla_\theta J(\theta)\approx \tfrac{1}{n}\sum_i R(\tau_i)\sum_t \nabla_\theta\log \pi_\theta(a_t\mid s_t) $$</div>
+  </div>
+  <ul>
+    <li><b>On-policy</b>: gradient uses fresh trajectories from the current $\pi_\theta$.</li>
+    <li>Works for continuous actions and complex policies (e.g. robotics).</li>
+  </ul>
+  <div class="callout">
+    <div class="head">🧠 Why log-prob?</div>
+    <p>Increasing $\log \pi_\theta(a\mid s)$ for high-return $(s, a)$ shifts probability mass toward those actions.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pg">
       <h2><span class="icon">🟪</span> 6. Policy Gradient · On-policy</h2>
       <div class="callout formula">
@@ -66,7 +89,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="q-learning.html">← Q-learning</a>
       <a class="btn btn-primary" href="../cheatsheet.html">⚡ Cheatsheet →</a>
     </div>

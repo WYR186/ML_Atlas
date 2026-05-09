@@ -34,12 +34,67 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Optimization</div>
-      <h1>📐 Optimization<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 优化</span></h1>
+      <h1>📐 <span class="en-only">Optimization</span><span class="cn-only">优化</span></h1>
       <div class="subtitle">凸性 · GD · Lagrangian</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="opt-en">
+  <h2>🧭 Optimization</h2>
+  <div class="callout">
+    <div class="head">🧠 Core intuition</div>
+    <p>Optimization tells you how to reach the best parameters. Convexity is the safety net: a PSD Hessian everywhere ⇒ no bad local minima.</p>
+  </div>
+
+  <h3>Concepts</h3>
+  <ul>
+    <li><b>Convex function</b>: bowl-shaped. Local min = global min.</li>
+    <li><b>PSD / PD Hessian</b>: convex / strictly convex (unique optimum).</li>
+  </ul>
+
+  <h3>Core formulas</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Second-order convexity test</div>
+      <div class="eq">$$ \nabla^2 f(w)\succeq 0 \;\Rightarrow\; f \text{ is convex} $$</div></div>
+    <div class="callout formula"><div class="head">Gradient descent</div>
+      <div class="eq">$$ w_{t+1}=w_t-\eta\,\nabla f(w_t) $$</div></div>
+    <div class="callout formula"><div class="head">Lagrangian</div>
+      <div class="eq">$$ L(w,\lambda)=f_0(w)+\sum_i \lambda_i f_i(w),\ \lambda_i\ge 0 $$</div>
+      <div style="font-size:13px;">For $\min f_0$ subject to $f_i \le 0$.</div></div>
+    <div class="callout formula"><div class="head">Primal vs Dual</div>
+      <div class="eq">$$ \min_w\max_\lambda L \;|\; \max_\lambda\min_w L $$</div>
+      <div style="font-size:13px;">SVM dual depends only on $x_i^\top x_j$ → kernel trick.</div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Common pitfalls</div>
+    <ul>
+      <li>PSD ⇒ convex (possibly non-strict). PD ⇒ strictly convex with a unique optimum.</li>
+      <li>Step size $\eta$ too large diverges; too small converges painfully slowly.</li>
+    </ul>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Use PSD / PD of the Hessian to argue convexity / uniqueness.</li>
+      <li>Write the Lagrangian for a constrained problem and explain its dual.</li>
+    </ul>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Logistic Hessian PD meaning</div>
+    <ul>
+      <li>Hessian shape: $\nabla^2 f(w)\in\mathbb{R}^{d\times d}$, symmetric.</li>
+      <li>PD ⇒ strictly convex ⇒ unique global minimizer; gradient descent with a sensible step size converges cleanly.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="opt">
       <h2><span class="icon">🧭</span> Optimization · 优化</h2>
       <div class="callout">
@@ -95,7 +150,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="linear-algebra.html">← Linear Algebra</a>
       <a class="btn btn-primary" href="knn.html">KNN →</a>
     </div>

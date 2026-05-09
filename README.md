@@ -1,45 +1,63 @@
 # ML Atlas
 
-ECE 449 / CS 446 期末复习路线图。从 Foundations → 经典 ML → 深度学习 → 现代序列模型 → 学习理论 / RL，整门课的核心算法、关键公式、考点与例题，配上 labuladong 风格的树形导航。
+Final-exam roadmap for **ECE 449 / CS 446 — Introduction to Machine Learning**. From foundations through classical ML, deep learning, modern sequence models, learning theory and reinforcement learning, every core algorithm gets its own page with key formulas, exam pitfalls and a worked example.
 
-支持中英文切换（右上角 中 / EN 按钮）。
+The whole site is bilingual. Use the **EN / EN+中 / 中** switch in the top right to flip between English-only, dual-language and Chinese-only modes. **English is the default.**
 
 ## Layout
 
 ```
 .
-├── index.html          路线图首页
-├── cheatsheet.html     一页式速记
-├── resources.html      课件 / 作业 / 教材索引
-├── blocks/
-│   ├── block1.html  Foundations · Probability / 线代 / Optimization
-│   ├── block2.html  KNN · Naive Bayes
-│   ├── block3.html  Linear · Logistic · SVM · Kernel
-│   ├── block4.html  Trees · Ensemble · PCA · K-means
-│   ├── block5.html  MLP · Backprop · CNN · RNN
-│   ├── block6.html  AE · VAE · Contrastive
-│   ├── block7.html  Attention · Transformer · LLM
-│   ├── block8.html  Diffusion
-│   ├── block9.html  Learning Theory
-│   └── block10.html Reinforcement Learning
+├── index.html          Roadmap homepage (one card per algorithm)
+├── cheatsheet.html     One-page cram sheet
+├── resources.html      Slides / homework / textbooks index
+├── topics/             37 algorithm pages, one per topic
+│   ├── probability.html · linear-algebra.html · optimization.html
+│   ├── knn.html · naive-bayes.html
+│   ├── linear-regression.html · logistic-regression.html · svm.html · kernel-methods.html
+│   ├── decision-trees.html · bagging.html · boosting.html
+│   ├── pca.html · kmeans.html
+│   ├── mlp.html · backpropagation.html · cnn.html
+│   ├── rnn.html · lstm.html
+│   ├── autoencoder.html · vae.html · contrastive.html
+│   ├── attention.html · positional-encoding.html · transformer.html · llm.html
+│   ├── diffusion.html
+│   ├── bayes-classifier.html · error-decomposition.html · pac.html · vc-dimension.html
+│   ├── mdp.html · value-functions.html · bellman.html · dynamic-programming.html
+│   └── q-learning.html · policy-gradient.html
 └── assets/
-    ├── style.css       样式（树形图 + i18n 可见性）
-    ├── i18n.js         中 / EN 切换 + 翻译字典
-    ├── data.js         算法索引数据
-    └── main.js         进度条 / 搜索 / SVG 连接线
+    ├── style.css       Visual style + i18n visibility rules
+    ├── i18n.js         EN / Mixed / CN switching + translation dictionary
+    ├── topics-data.js  Topic metadata for the homepage cards
+    ├── popup-data.js   Tutorial blurbs, Python templates, HW problem entries
+    ├── popup.js        Click-anchored popup component
+    └── main.js         Progress tracking + search + connector lines
 ```
+
+Click any card on the homepage and a popup pops out from the click position, with three sections:
+
+- **Tutorial** — a short blurb plus a link to the full notes page.
+- **Python template** — a concise reference implementation. Code is a side-show in this course; these snippets are study aids, not the focus.
+- **HW problems** — paraphrased one-line summaries of each homework problem, my own conceptual answer sketch, and direct links to the original problem and solution PDFs (the originals stay in their own folders, not in this repo).
+
+Per-problem and per-tutorial completion is stored in the browser's `localStorage`, and the popup header shows your progress as `done / total`.
 
 ## Local preview
 
-直接用浏览器打开 `index.html` 即可，或者：
+Drop the `ML Review/` folder next to your `slides/`, `HW/`, `book/` folders, then start a local server from inside `ML Review/`:
 
 ```bash
+cd "ML Review"
 python3 -m http.server 8000
-# 打开 http://localhost:8000
+# open http://localhost:8000
 ```
+
+The repo includes symlinks `HW`, `slides`, `book` pointing at the parent directory so all PDF chips on the site resolve cleanly when served from inside `ML Review/`. The symlinks themselves are git-ignored, and no PDFs are committed — the course material stays in your local filesystem.
+
+LaTeX is rendered with MathJax 3 from the jsDelivr CDN, so an internet connection is needed for math to look right.
 
 ## Notes
 
-- 站内 `../slides/`、`../HW/`、`../book/` 链接指向同级目录的课件 / 作业 / 教材 PDF（未上传到仓库）。
-- 进度记录通过 `localStorage` 保存在浏览器本地。
-- 公式渲染使用 MathJax 3。
+- Source material: `Block 1-4.rtf` and `Block 5-10.rtf` (my consolidated bilingual study notes). Topic page bodies, homework summaries and the answer sketches are written from scratch in my own words.
+- The site has no build step. Everything is plain HTML / CSS / vanilla JS.
+- License: personal study notes — the algorithms, formulas and Python templates are public knowledge; my notes around them are released under MIT (see `LICENSE`).

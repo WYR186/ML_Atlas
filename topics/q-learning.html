@@ -34,11 +34,40 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Q-learning</div>
-      <h1>🎮 Q-learning<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· Q-learning</span></h1>
+      <h1>🎮 <span class="en-only">Q-learning</span><span class="cn-only">Q-learning</span></h1>
       <div class="subtitle">model-free · off-policy</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="qlearn-en">
+  <h2>🟩 Q-learning · Model-free, Off-policy</h2>
+  <div class="callout formula">
+    <div class="head">Update rule</div>
+    <div class="eq">$$ Q(s,a)\leftarrow (1-\alpha)Q(s,a)+\alpha\!\big(r+\gamma\max_{a'}Q(s',a')\big) $$</div>
+  </div>
+  <ul>
+    <li><b>Off-policy</b>: target uses $\max_{a'}$, so the data can come from any behavior policy.</li>
+    <li><b>Convergence</b>: every $(s, a)$ visited infinitely often + a Robbins-Monro learning rate schedule.</li>
+  </ul>
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfalls</div>
+    <ul>
+      <li>Calling Q-learning on-policy. It is off-policy.</li>
+      <li>Forgetting that $\max_{a'}$ takes the best <b>next-step</b> action.</li>
+      <li>Insufficient exploration → wrong $Q$.</li>
+    </ul>
+  </div>
+  <div class="callout example">
+    <div class="head">🧩 One update</div>
+    <p>$Q(s,a)=2,\,\alpha=0.5,\,r=1,\,\gamma=0.9,\,\max Q'=4$.</p>
+    <div class="eq">$$ \text{TD target}=1+0.9\times 4 = 4.6 $$</div>
+    <div class="eq">$$ Q\leftarrow 0.5\cdot 2 + 0.5\cdot 4.6 = 3.3 $$</div>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="qlearn">
       <h2><span class="icon">🟩</span> 5. Q-learning · Model-free, Off-policy</h2>
       <div class="callout formula">
@@ -65,7 +94,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="dynamic-programming.html">← Value & Policy Iteration</a>
       <a class="btn btn-primary" href="policy-gradient.html">Policy Gradient →</a>
     </div>

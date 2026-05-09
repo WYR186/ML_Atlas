@@ -34,13 +34,72 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Linear Algebra</div>
-      <h1>📐 Linear Algebra<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 线性代数</span></h1>
+      <h1>📐 <span class="en-only">Linear Algebra</span><span class="cn-only">线性代数</span></h1>
       <div class="subtitle">点积 · 范数 · 特征值 / 向量</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_2.pdf" target="_blank">📄 Lecture 2</a>
         <a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="linalg-en">
+  <h2>📐 Linear Algebra</h2>
+  <div class="callout">
+    <div class="head">🧠 Core intuition</div>
+    <p>Linear algebra is the grammar of shapes — it tells you what objects look like and how to combine them, and it prevents gradient-shape mistakes in backprop.</p>
+  </div>
+
+  <h3>Concepts</h3>
+  <ul>
+    <li><b>Dot product</b>: similarity / projection. The basis of linear models and kernels.</li>
+    <li><b>Norm</b>: magnitude. Drives regularization penalties.</li>
+    <li><b>Eigenvalue / eigenvector</b>: directions along which a matrix only scales. PCA picks the largest one.</li>
+  </ul>
+
+  <h3>Core formulas</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Dot Product</div>
+      <div class="eq">$$ x^\top y=\sum_i x_i y_i $$</div></div>
+    <div class="callout formula"><div class="head">L2 / L1 norms</div>
+      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\qquad \|x\|_1=\sum_i |x_i| $$</div></div>
+    <div class="callout formula"><div class="head">Matrix multiply shapes</div>
+      <div class="eq">$$ (m\times n)(n\times p)\rightarrow (m\times p) $$</div>
+      <div style="font-size:13px;">Inner dimensions must match.</div></div>
+    <div class="callout formula"><div class="head">Eigenvalue / Eigenvector</div>
+      <div class="eq">$$ Au=\lambda u $$</div>
+      <div style="font-size:13px;">PCA: top eigenvector of the covariance matrix.</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">The three derivative shapes</div>
+      <div class="eq">$$ \nabla f\in\mathbb{R}^{d\times 1},\quad \nabla^2 f\in\mathbb{R}^{d\times d},\quad J\in\mathbb{R}^{m\times n} $$</div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Common pitfalls</div>
+    <ul>
+      <li>Writing the gradient as a row vector breaks chain-rule shapes.</li>
+      <li>Confusing $x^\top y$ (scalar) with $x \odot y$ (elementwise vector).</li>
+    </ul>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Quickly infer dimensions of any expression — especially in backprop.</li>
+      <li>PCA: max-variance direction = top eigenvector of the covariance matrix.</li>
+    </ul>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Shape practice</div>
+    <p>Let $A\in\mathbb{R}^{m\times n}$ and $x\in\mathbb{R}^{n\times 1}$.</p>
+    <ul>
+      <li>$Ax\in\mathbb{R}^{m\times 1}$.</li>
+      <li>$x^\top \in \mathbb{R}^{1\times n}$, so $x^\top A\in\mathbb{R}^{1\times m}$ — a row vector.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="linalg">
       <h2><span class="icon">📐</span> Linear Algebra · 线性代数</h2>
       <div class="callout">
@@ -102,7 +161,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="probability.html">← Probability</a>
       <a class="btn btn-primary" href="optimization.html">Optimization →</a>
     </div>

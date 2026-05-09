@@ -34,12 +34,29 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / AdaBoost</div>
-      <h1>🌳 AdaBoost<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· AdaBoost</span></h1>
+      <h1>🌳 <span class="en-only">AdaBoost</span><span class="cn-only">AdaBoost</span></h1>
       <div class="subtitle">串行关注难样本 → 降偏差</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_11.pdf" target="_blank">📄 Lecture 11</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="boosting-en">
+  <h2>🚀 Boosting · AdaBoost</h2>
+  <ul>
+    <li>Train weak classifiers <b>sequentially</b>; each one focuses on examples the ensemble previously misclassified (via reweighting).</li>
+    <li>Effect: <b>reduces bias</b>; can overfit, especially with noisy labels.</li>
+    <li>The weight of each weak classifier in the final vote depends on its error rate.</li>
+  </ul>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Exam warning</div>
+    <p>Memorize the dichotomy: bagging cuts variance, boosting cuts bias — but boosting is also more sensitive to noise.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="boosting">
       <h2><span class="icon">🚀</span> 3. Boosting · AdaBoost 思想</h2>
       <ul>
@@ -53,7 +70,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="bagging.html">← Bagging</a>
       <a class="btn btn-primary" href="pca.html">PCA →</a>
     </div>

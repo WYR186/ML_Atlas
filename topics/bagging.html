@@ -34,12 +34,29 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / Bagging</div>
-      <h1>🌳 Bagging<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 装袋法</span></h1>
+      <h1>🌳 <span class="en-only">Bagging</span><span class="cn-only">装袋法</span></h1>
       <div class="subtitle">Bootstrap + 平均 → 降方差</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_11.pdf" target="_blank">📄 Lecture 11</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="bagging-en">
+  <h2>🎒 Bagging (Bootstrap Aggregating)</h2>
+  <ul>
+    <li>Train many models in <b>parallel</b> on bootstrap-resampled data, then average.</li>
+    <li>Effect: <b>reduces variance</b>; bias stays roughly the same.</li>
+    <li>Random Forest = bagging + per-split feature subsampling.</li>
+  </ul>
+
+  <div class="callout exam">
+    <div class="head">✅ Comparison cheat sheet</div>
+    <p>"Bagging vs Boosting" — answer with three things: training style (parallel vs sequential), bias / variance impact, sensitivity to noise.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="bagging">
       <h2><span class="icon">🎒</span> 2. Bagging · 装袋法</h2>
       <ul>
@@ -53,7 +70,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="decision-trees.html">← Decision Trees</a>
       <a class="btn btn-primary" href="boosting.html">AdaBoost →</a>
     </div>

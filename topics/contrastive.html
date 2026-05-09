@@ -34,12 +34,36 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎭 表示学习</span><span class="en-only">🎭 Representation Learning</span> / Contrastive Learning</div>
-      <h1>🎭 Contrastive Learning<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 对比学习</span></h1>
+      <h1>🎭 <span class="en-only">Contrastive Learning</span><span class="cn-only">对比学习</span></h1>
       <div class="subtitle">InfoNCE · 拉正推负</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="contrastive-en">
+  <h2>🔥 Contrastive Learning</h2>
+  <p>Pull representations of positive pairs together; push negatives apart.</p>
+
+  <ul>
+    <li><b>Positive</b>: two augmented views of the same input $x$.</li>
+    <li><b>Negative</b>: other samples in the batch.</li>
+  </ul>
+
+  <div class="callout formula">
+    <div class="head">InfoNCE</div>
+    <div class="eq">$$ \mathcal{L}_{NCE}=-\mathbb{E}\!\left[\log \frac{e^{s(f(x),f(x^+))/\tau}}{e^{s(f(x),f(x^+))/\tau}+\sum_{i} e^{s(f(x),f(x_i^-))/\tau}}\right] $$</div>
+    <p style="font-size:13px;">$s$ is typically cosine similarity. Temperature $\tau\downarrow$ sharpens the softmax and emphasizes hard negatives.</p>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Why negatives?</div>
+    <p>Without negative pairs, representations can <b>collapse</b> to a single constant vector. Negatives keep the embedding space spread out.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="contrastive">
       <h2><span class="icon">🔥</span> 3. Contrastive Learning · 对比学习</h2>
       <p>核心：拉近正样本对（同一样本的不同增强）；推开负样本对（不同样本）。</p>
@@ -65,7 +89,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="vae.html">← VAE</a>
       <a class="btn btn-primary" href="attention.html">Attention →</a>
     </div>

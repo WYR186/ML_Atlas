@@ -34,13 +34,41 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎭 表示学习</span><span class="en-only">🎭 Representation Learning</span> / Auto-encoder</div>
-      <h1>🎭 Auto-encoder<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 自编码器</span></h1>
+      <h1>🎭 <span class="en-only">Auto-encoder</span><span class="cn-only">自编码器</span></h1>
       <div class="subtitle">encoder–decoder 重建表示</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_20.pdf" target="_blank">📄 Lecture 20</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="ae-en">
+  <h2>🧩 Auto-encoder</h2>
+  <p>Encoder $z = f(x)$ compresses; decoder $\hat x = g(z)$ reconstructs.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Reconstruction loss</div>
+      <div class="eq">$$ \min_{\theta,\phi}\;\mathcal{L}_{rec}(x,\hat x) $$</div>
+      <div class="eq">$$ \mathcal{L}_{rec}=\|x-\hat x\|_2^2\;(\text{MSE}) $$</div></div>
+    <div class="callout"><div class="head">Linear AE ≈ PCA</div>
+      <p>A single-hidden-layer AE with linear activations is essentially PCA. Adding nonlinearity allows it to learn nonlinear manifolds.</p></div>
+  </div>
+
+  <h3>Regularized variants</h3>
+  <ul>
+    <li><b>Undercomplete</b>: $\dim(z) &lt; \dim(x)$ (bottleneck).</li>
+    <li><b>Denoising AE</b>: corrupt input, predict clean $x$.</li>
+    <li><b>Contractive AE</b>: penalize the encoder Jacobian for robustness.</li>
+  </ul>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfall</div>
+    <p>An over-capacity AE without constraints can collapse to the identity map (just memorizes inputs).</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="ae">
       <h2><span class="icon">🧩</span> 1. Auto-encoder · AE</h2>
       <p>Encoder-decoder 学习低维表示。Encoder：$z=f(x)$；Decoder：$\hat x = g(z)$。</p>
@@ -64,7 +92,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="lstm.html">← LSTM</a>
       <a class="btn btn-primary" href="vae.html">VAE →</a>
     </div>

@@ -34,12 +34,64 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌊 生成模型</span><span class="en-only">🌊 Generative</span> / Diffusion Models</div>
-      <h1>🌊 Diffusion Models<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 扩散模型</span></h1>
+      <h1>🌊 <span class="en-only">Diffusion Models</span><span class="cn-only">扩散模型</span></h1>
       <div class="subtitle">Forward · Reverse · ELBO</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_25.pdf" target="_blank">📄 Lecture 25</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="diffusion-en">
+  <h2>🌊 Diffusion Models</h2>
+
+  <h3>Notation</h3>
+  <ul>
+    <li>$x_0$ — clean data; $x_t$ — noised sample at step $t$; $T$ — total diffusion steps.</li>
+    <li>$\alpha_t \in (0, 1)$ — per-step signal retention; $\bar{\alpha}_t = \prod_i \alpha_i$.</li>
+    <li>$\epsilon_t \sim \mathcal{N}(0, I)$ — Gaussian noise.</li>
+  </ul>
+
+  <h3>Forward (noising)</h3>
+  <div class="callout formula">
+    <div class="head">Single-step transition</div>
+    <div class="eq">$$ q_\phi(x_t\mid x_{t-1}) = \mathcal{N}(\sqrt{\alpha_t}\,x_{t-1},\,(1-\alpha_t)I) $$</div>
+  </div>
+  <div class="callout formula">
+    <div class="head">Direct sample from $x_0$</div>
+    <div class="eq">$$ q_\phi(x_t\mid x_0) = \mathcal{N}(\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I) $$</div>
+    <div style="font-size:13px;">As $\bar{\alpha}_T \to 0$, $x_T \approx \mathcal{N}(0, I)$.</div>
+  </div>
+
+  <h3>Reverse (denoising)</h3>
+  <div class="callout formula">
+    <div class="head">Learned reverse transition</div>
+    <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}(\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)) $$</div>
+  </div>
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfalls</div>
+    <ul>
+      <li>The forward $q$ is fixed (set by the noise schedule); training optimizes the reverse $p_\theta$.</li>
+      <li>In practice it's more stable to predict the noise $\epsilon$ rather than the mean.</li>
+    </ul>
+  </div>
+
+  <h3>ELBO (three-term decomposition)</h3>
+  <div class="callout formula">
+    <div class="eq">$$ \text{Reconstruction:}\;\mathbb{E}_{q(x_1|x_0)}[\ln p_\theta(x_0\mid x_1)] $$</div>
+    <div class="eq">$$ \text{Prior matching:}\;D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T)) $$</div>
+    <div class="eq">$$ \text{Step consistency:}\;\sum_{t=2}^{T} \mathbb{E}_{q(x_t|x_0)}\!\big[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\big] $$</div>
+  </div>
+
+  <h3>Sampling</h3>
+  <ol>
+    <li>Sample $x_T \sim \mathcal{N}(0, I)$.</li>
+    <li>For $t = T, \ldots, 1$, draw $x_{t-1}$ from the learned reverse model.</li>
+    <li>Output $x_0$ as the generated sample.</li>
+  </ol>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="notation">
       <h2><span class="icon">📒</span> 0. Notation Cheat Sheet</h2>
       <ul>
@@ -128,7 +180,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="llm.html">← LLM</a>
       <a class="btn btn-primary" href="bayes-classifier.html">Bayes Classifier →</a>
     </div>

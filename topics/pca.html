@@ -34,13 +34,42 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎯 无监督</span><span class="en-only">🎯 Unsupervised</span> / PCA</div>
-      <h1>🎯 PCA<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 主成分分析</span></h1>
+      <h1>🎯 <span class="en-only">PCA</span><span class="cn-only">主成分分析</span></h1>
       <div class="subtitle">中心化 · 最大方差方向</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_12.pdf" target="_blank">📄 Lecture 12</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
         <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="pca-en">
+  <h2>📉 Principal Component Analysis</h2>
+  <p>Reduce dimension while keeping as much variance as possible.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Step 0 · Centering (mandatory)</div>
+      <div class="eq">$$ X_c = X - \mu $$</div>
+      <div style="font-size:13px;">Without centering, PC1 may pick up "distance from origin" instead of true variance directions.</div></div>
+    <div class="callout formula"><div class="head">Empirical covariance</div>
+      <div class="eq">$$ \Sigma = \frac{1}{n}\sum_i x_c^{(i)}\big(x_c^{(i)}\big)^\top $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">First principal component</div>
+      <div class="eq">$$ w_1=\arg\max_{\|w\|=1}\operatorname{Var}(X_c w) $$</div>
+      <div style="font-size:13px;">Solution: top eigenvector of $\Sigma$.</div></div>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <p>Often a 2-D problem: center, write $\Sigma$, find the top eigenvector. Don't forget to center first.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Quick example</div>
+    <p>Points (1, 3) and (4, 7), $\mu=(2.5, 5)$. Centered: (−1.5, −2), (1.5, 2). PC1 is along [0.6, 0.8].</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pca">
       <h2><span class="icon">📉</span> 4. PCA · 主成分分析</h2>
       <p>在尽量保留方差的前提下降维。</p>
@@ -64,7 +93,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="boosting.html">← AdaBoost</a>
       <a class="btn btn-primary" href="kmeans.html">K-means →</a>
     </div>

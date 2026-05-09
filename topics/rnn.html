@@ -34,12 +34,29 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔄 序列模型</span><span class="en-only">🔄 Sequential Models</span> / RNN</div>
-      <h1>🔄 RNN<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 循环神经网络</span></h1>
+      <h1>🔄 <span class="en-only">RNN</span><span class="cn-only">循环神经网络</span></h1>
       <div class="subtitle">BPTT · 共享参数</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_18.pdf" target="_blank">📄 Lecture 18</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="rnn-en">
+  <h2>🔄 Recurrent Neural Networks</h2>
+  <ul>
+    <li>Same parameters processed at every time step.</li>
+    <li>Hidden state $h^{(t)}$ summarizes information up to time $t$.</li>
+    <li>BPTT: unroll over time, then run standard backprop on the resulting deep graph.</li>
+  </ul>
+
+  <div class="callout warn">
+    <div class="head">💥 Core challenge</div>
+    <p>Long sequences repeatedly multiply by the same recurrent weight, so gradients either vanish or explode.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="rnn">
       <h2><span class="icon">🔄</span> 4. RNN · 循环神经网络</h2>
       <ul>
@@ -53,7 +70,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="cnn.html">← CNN</a>
       <a class="btn btn-primary" href="lstm.html">LSTM →</a>
     </div>

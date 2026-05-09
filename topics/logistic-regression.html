@@ -34,13 +34,43 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Logistic Regression</div>
-      <h1>🧮 Logistic Regression<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 逻辑回归</span></h1>
+      <h1>🧮 <span class="en-only">Logistic Regression</span><span class="cn-only">逻辑回归</span></h1>
       <div class="subtitle">Sigmoid + NLL</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_7.pdf" target="_blank">📄 Lecture 7</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
         <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="logreg-en">
+  <h2>🎯 Logistic Regression</h2>
+  <p>Map a linear score into a probability with the sigmoid.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Probability output</div>
+      <div class="eq">$$ p(y=1\mid x)=\sigma(w^\top x+b),\;\sigma(a)=\tfrac{1}{1+e^{-a}} $$</div></div>
+    <div class="callout formula"><div class="head">Linear decision boundary</div>
+      <div class="eq">$$ w^\top x + b = 0 $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">NLL / cross-entropy ($y_i\in\{-1,+1\}$)</div>
+      <div class="eq">$$ \min_w \sum_i \log\!\big(1+\exp(-y_i\,w^\top x_i)\big) $$</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="head">🧠 Why logistic over linear for classification?</div>
+    <p>Probabilistic loss does not over-penalize examples that are already classified correctly with high confidence, unlike MSE.</p>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Recognize when a problem screams logistic regression: probability output, log-odds, MLE.</li>
+      <li>"Why is the boundary linear?" — because $\sigma(a)=0.5\Leftrightarrow a=0\Leftrightarrow w^\top x+b=0$.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="logreg">
       <h2><span class="icon">🎯</span> 2. Logistic Regression · 逻辑回归</h2>
       <p>把线性打分映射到 $(0,1)$ 概率。</p>
@@ -65,7 +95,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="linear-regression.html">← Linear Regression</a>
       <a class="btn btn-primary" href="svm.html">SVM →</a>
     </div>

@@ -34,12 +34,56 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎭 表示学习</span><span class="en-only">🎭 Representation Learning</span> / VAE</div>
-      <h1>🎭 VAE<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 变分自编码器</span></h1>
+      <h1>🎭 <span class="en-only">VAE</span><span class="cn-only">变分自编码器</span></h1>
       <div class="subtitle">ELBO · 重参数化 · KL</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_20.pdf" target="_blank">📄 Lecture 20</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="vae-en">
+  <h2>🎲 Variational Auto-encoder</h2>
+  <p>Unlike an AE, a VAE outputs a distribution $q_\phi(z\mid x)$ over latents instead of a single point.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Prior</div>
+      <div class="eq">$$ p(z)=\mathcal{N}(0,I) $$</div></div>
+    <div class="callout formula"><div class="head">Approximate posterior</div>
+      <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}(\mu(x),\sigma^2(x)\,I) $$</div></div>
+  </div>
+
+  <div class="callout formula">
+    <div class="head">🌟 ELBO (memorize)</div>
+    <div class="eq">$$ \mathrm{ELBO}(x)=\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x\mid z)]\;-\;D_{KL}(q_\phi(z\mid x)\,\|\,p(z)) $$</div>
+    <ul style="margin:8px 0 0;font-size:13.5px;">
+      <li>First term: reconstruction quality.</li>
+      <li>Second term: KL regularization, pulls posterior toward the prior so the latent space is samplable.</li>
+    </ul>
+  </div>
+
+  <div class="callout formula">
+    <div class="head">🪄 Reparameterization trick</div>
+    <p>Sampling $z$ directly from $q_\phi$ is non-differentiable. Push the randomness into $\epsilon$:</p>
+    <div class="eq">$$ z=\mu+\sigma\odot\epsilon,\;\epsilon\sim\mathcal{N}(0,I) $$</div>
+  </div>
+
+  <div class="callout formula">
+    <div class="head">✅ Closed-form Gaussian KL (must-know)</div>
+    <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j (\mu_j^2+\sigma_j^2-\ln\sigma_j^2-1) $$</div>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ol>
+      <li>Write the ELBO and explain both terms.</li>
+      <li>Write the reparameterization trick.</li>
+      <li>Derive / recall the Gaussian KL closed form.</li>
+    </ol>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vae">
       <h2><span class="icon">🎲</span> 2. VAE · Variational Auto-encoder</h2>
       <p>AE 输出一个点 $z$；<b>VAE 输出后验分布 $q_\phi(z|x)$</b>。</p>
@@ -81,7 +125,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="autoencoder.html">← Auto-encoder</a>
       <a class="btn btn-primary" href="contrastive.html">Contrastive Learning →</a>
     </div>

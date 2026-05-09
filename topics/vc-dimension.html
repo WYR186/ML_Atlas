@@ -34,12 +34,36 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / VC Dimension</div>
-      <h1>🎓 VC Dimension<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· VC 维</span></h1>
+      <h1>🎓 <span class="en-only">VC Dimension</span><span class="cn-only">VC 维</span></h1>
       <div class="subtitle">Hoeffding · VC bound</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
         <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="vc-en">
+  <h2>🔢 Hoeffding &amp; VC Dimension</h2>
+  <div class="callout formula">
+    <div class="head">Hoeffding (concentration)</div>
+    <div class="eq">$$ \mathbb{P}\!\left(|\bar Z_n-\mathbb{E}[Z]|\le (b-a)\sqrt{\tfrac{\log(2/\delta)}{2n}}\right)\ge 1-\delta $$</div>
+  </div>
+  <p><b>VC dimension</b> — the maximum set size that the hypothesis class can <b>shatter</b>. Larger VC ⇒ richer class ⇒ harder to bound.</p>
+  <div class="callout formula">
+    <div class="head">Typical generalization bound</div>
+    <div class="eq">$$ \epsilon_\mu(f)\le \hat{\epsilon}_D(f)+\mathcal{O}\!\left(\sqrt{\tfrac{d+\ln(1/\delta)}{n}}\right) $$</div>
+  </div>
+  <div class="callout">
+    <div class="head">📜 Fundamental Theorem (binary)</div>
+    <p>$\mathcal{F}$ is PAC-learnable iff its VC dimension is finite.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">🧩 Doubling VC</div>
+    <p>If $d \to 2d$ at fixed $n$, the bound term scales by $\sqrt{2}$ — looser, more samples needed.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vc">
       <h2><span class="icon">🔢</span> 5. Hoeffding · VC Dimension</h2>
       <div class="callout formula">
@@ -61,7 +85,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="pac.html">← PAC Learnability</a>
       <a class="btn btn-primary" href="mdp.html">MDP →</a>
     </div>

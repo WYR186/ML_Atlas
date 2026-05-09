@@ -34,7 +34,7 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧠 神经网络</span><span class="en-only">🧠 Neural Networks</span> / MLP</div>
-      <h1>🧠 MLP<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 多层感知机</span></h1>
+      <h1>🧠 <span class="en-only">MLP</span><span class="cn-only">多层感知机</span></h1>
       <div class="subtitle">线性 → 非线性 → 学习复杂函数</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_14.pdf" target="_blank">📄 Lecture 14</a>
         <a class="ref-chip lecture" href="../slides/Lecture_15.pdf" target="_blank">📄 Lecture 15</a>
@@ -43,6 +43,37 @@
         <a class="ref-chip hw" href="../HW/hw4_sol.pdf" target="_blank">📝 hw4_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="mlp-en">
+  <h2>🧠 Multi-Layer Perceptron</h2>
+  <ul>
+    <li>Linear → nonlinearity → linear. A single linear layer cannot solve XOR; one hidden layer with a nonlinearity can.</li>
+    <li>Universal approximation: a wide enough hidden layer with a nonlinearity approximates any continuous function on a compact set.</li>
+    <li>Depth gives hierarchical abstractions; width gives capacity.</li>
+  </ul>
+
+  <h3>Two-layer forward pass</h3>
+  <div class="callout formula">
+    <div class="eq">$$ z^{(1)} = W^{(1)}x + b^{(1)},\quad a^{(1)} = \sigma(z^{(1)}) $$</div>
+    <div class="eq">$$ z^{(2)} = W^{(2)}a^{(1)} + b^{(2)} $$</div>
+    <div class="eq">Multi-class: $\hat y = \mathrm{softmax}(z^{(2)})$. Binary: $\hat y = \sigma(z^{(2)})$.</div>
+  </div>
+
+  <h3>Activations</h3>
+  <ul>
+    <li>Sigmoid / tanh: saturate easily → vanishing gradients.</li>
+    <li>ReLU: $\max(0, z)$. Fast, but the negative half has zero gradient.</li>
+    <li>Leaky ReLU / ELU: small slope for $z &lt; 0$ to keep gradients alive.</li>
+  </ul>
+
+  <div class="callout example">
+    <div class="head">🧩 XOR needs a hidden layer</div>
+    <p>A single-layer perceptron is just a hyperplane classifier. XOR requires composing two linear cuts, which is exactly what a hidden layer + nonlinearity provides.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="mlp">
       <h2><span class="icon">🧠</span> 1. Neural Networks · MLP</h2>
       <ul>
@@ -83,7 +114,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="kmeans.html">← K-means</a>
       <a class="btn btn-primary" href="backpropagation.html">Backpropagation →</a>
     </div>

@@ -34,11 +34,32 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Value & Policy Iteration</div>
-      <h1>🎮 Value & Policy Iteration<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 值 / 策略迭代</span></h1>
+      <h1>🎮 <span class="en-only">Value & Policy Iteration</span><span class="cn-only">值 / 策略迭代</span></h1>
       <div class="subtitle">model-known DP</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="dp-en">
+  <h2>🔁 Value &amp; Policy Iteration</h2>
+  <h3>Value iteration</h3>
+  <p>Repeatedly apply the Bellman optimality operator:</p>
+  <div class="callout formula">
+    <div class="eq">$$ Q^{(t)}(s,a)=R(s,a)+\gamma\,\mathbb{E}_{s'}\!\left[\max_{a'}Q^{(t-1)}(s',a')\right] $$</div>
+  </div>
+  <h3>Policy iteration (alternating)</h3>
+  <ol>
+    <li>Policy evaluation: solve for $V^\pi$ (linear system or iterative).</li>
+    <li>Policy improvement: make $\pi$ greedy with respect to $V^\pi$.</li>
+  </ol>
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <p>DP requires knowing $P$ and $R$. Common follow-up: "Why hard in practice?" → unknown dynamics or huge state space.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="dp">
       <h2><span class="icon">🔁</span> 4. DP · Value / Policy Iteration（model-known）</h2>
       <h3>Value Iteration</h3>
@@ -57,7 +78,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="bellman.html">← Bellman Optimality</a>
       <a class="btn btn-primary" href="q-learning.html">Q-learning →</a>
     </div>

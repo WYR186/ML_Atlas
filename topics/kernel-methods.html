@@ -34,13 +34,41 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Kernel Methods</div>
-      <h1>🧮 Kernel Methods<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 核方法</span></h1>
+      <h1>🧮 <span class="en-only">Kernel Methods</span><span class="cn-only">核方法</span></h1>
       <div class="subtitle">Polynomial · RBF</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
         <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="kernel-en">
+  <h2>🪄 Kernel Methods</h2>
+  <p>Compute inner products in a high-dimensional feature space without ever materializing the feature map $\varphi$.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Kernel trick</div>
+      <div class="eq">$$ k(x,x')=\varphi(x)^\top\varphi(x') $$</div></div>
+    <div class="callout formula"><div class="head">XOR feature map</div>
+      <div class="eq">$$ \varphi(x_1,x_2)=(x_1,\,x_2,\,x_1 x_2) $$</div></div>
+    <div class="callout formula"><div class="head">Polynomial kernel</div>
+      <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div></div>
+    <div class="callout formula"><div class="head">RBF / Gaussian kernel</div>
+      <div class="eq">$$ k(x,x')=\exp(-\gamma\|x-x'\|^2) $$</div>
+      <div style="font-size:13px;">$\gamma\uparrow$ → narrower kernel → curvier boundary → easier overfit.</div></div>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Write the RBF formula and explain the role of $\gamma$.</li>
+      <li>Explain why the SVM dual works directly with kernels — it only sees inner products.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="kernel">
       <h2><span class="icon">🪄</span> 4. Kernel Methods · 核方法</h2>
       <p>用 kernel 计算高维特征映射的内积，避免显式构造 $\phi(x)$。</p>
@@ -64,7 +92,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="svm.html">← SVM</a>
       <a class="btn btn-primary" href="decision-trees.html">Decision Trees →</a>
     </div>

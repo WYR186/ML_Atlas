@@ -1,9 +1,21 @@
-/* ===== i18n visibility ===== */
-html[data-lang="cn"] .en-only { display: none !important; }
-html[data-lang="en"] .cn-only { display: none !important; }
-html[data-lang="cn"] .bi-text .en { display: none; }
-html[data-lang="en"] .bi-text .cn { display: none; }
-html[data-lang="en"] .bi-text { gap: 0; }
+/* ===== i18n visibility (3 modes: en / mixed / cn) =====
+   - en      → hide .cn-only and .bi-text .cn
+   - cn      → hide .en-only and .bi-text .en
+   - mixed   → show both (no hiding)                                          */
+html[data-lang="cn"] .en-only       { display: none !important; }
+html[data-lang="en"] .cn-only       { display: none !important; }
+html[data-lang="cn"] .bi-text .en   { display: none; }
+html[data-lang="en"] .bi-text .cn   { display: none; }
+html[data-lang="en"] .bi-text       { gap: 0; }
+/* Visual cue around mixed-mode content blocks so they don't blend into walls */
+html[data-lang="mixed"] .cn-only,
+html[data-lang="mixed"] .en-only {
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+  margin: 6px 0;
+}
+html[data-lang="mixed"] .en-only { border-left-color: #c7d8fa; }
+html[data-lang="mixed"] .cn-only { border-left-color: #e5e7eb; }
 
 /* Lang switch button */
 .lang-switch {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>📂 资源 · ECE 449 / CS 446</title>
+<title>📂 Resources · ECE 449 / CS 446</title>
 <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
@@ -23,17 +23,17 @@
 
 <div class="page">
   <div class="block-header" style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:24px;">
-    <div class="crumbs"><a href="index.html" data-i18n="crumbs.roadmap">路线图</a> / 资料</div>
-    <h1 style="margin:0;font-size:28px;">📂 课件 · 作业 · 教材</h1>
-    <div class="subtitle" style="color:var(--text-soft);margin-top:6px;">引用自 <code>../slides/</code>、<code>../HW/</code>、<code>../book/</code>。点击任一项可在浏览器打开 PDF。</div>
+    <div class="crumbs"><a href="index.html" data-i18n="crumbs.roadmap">Roadmap</a> / <span class="en-only">Resources</span><span class="cn-only">资料</span></div>
+    <h1 style="margin:0;font-size:28px;"><span class="en-only">📂 Slides · Homework · Textbooks</span><span class="cn-only">📂 课件 · 作业 · 教材</span></h1>
+    <div class="subtitle" style="color:var(--text-soft);margin-top:6px;"><span class="en-only">Resolved from <code>../slides/</code>, <code>../HW/</code>, <code>../book/</code>. Click any item to open the PDF.</span><span class="cn-only">引用自 <code>../slides/</code>、<code>../HW/</code>、<code>../book/</code>。点击任一项可在浏览器打开 PDF。</span></div>
   </div>
 
   <section class="topic" style="background:#fff;">
-    <h2>📄 Lectures · 课件</h2>
-    <p>课件按主题映射到 10 个 Block：</p>
+    <h2><span class="en-only">📄 Lectures</span><span class="cn-only">📄 Lectures · 课件</span></h2>
+    <p><span class="en-only">Lectures grouped into ten blocks by topic.</span><span class="cn-only">课件按主题映射到 10 个 Block：</span></p>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       <thead><tr style="text-align:left;color:var(--text-muted);font-size:12px;text-transform:uppercase;">
-        <th style="padding:8px;">Block</th><th style="padding:8px;">主题</th><th style="padding:8px;">课件</th>
+        <th style="padding:8px;">Block</th><th style="padding:8px;"><span class="en-only">Topic</span><span class="cn-only">主题</span></th><th style="padding:8px;"><span class="en-only">Lectures</span><span class="cn-only">课件</span></th>
       </tr></thead>
       <tbody>
         <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;"><a href="topics/probability.html">Block 1</a></td><td style="padding:10px 8px;">Foundations</td>
@@ -97,7 +97,7 @@
       </tbody>
     </table>
 
-    <h3 style="margin-top:24px;">📑 综合 Review</h3>
+    <h3 style="margin-top:24px;"><span class="en-only">📑 Course-wide Review</span><span class="cn-only">📑 综合 Review</span></h3>
     <p>
       <a class="ref-chip lecture" href="slides/mt_course_review.pdf" target="_blank">📑 Midterm Review</a>
       <a class="ref-chip lecture" href="slides/final_review.pdf" target="_blank">📑 Final Review</a>
@@ -108,7 +108,7 @@
     <h2>📝 Homework</h2>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       <thead><tr style="text-align:left;color:var(--text-muted);font-size:12px;text-transform:uppercase;">
-        <th style="padding:8px;">编号</th><th style="padding:8px;">题目</th><th style="padding:8px;">解答</th><th style="padding:8px;">主要覆盖 Block</th>
+        <th style="padding:8px;"><span class="en-only">#</span><span class="cn-only">编号</span></th><th style="padding:8px;"><span class="en-only">Problems</span><span class="cn-only">题目</span></th><th style="padding:8px;"><span class="en-only">Solutions</span><span class="cn-only">解答</span></th><th style="padding:8px;"><span class="en-only">Main blocks</span><span class="cn-only">主要覆盖 Block</span></th>
       </tr></thead>
       <tbody>
         <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">HW 1</td>
@@ -139,7 +139,7 @@
   </section>
 
   <section class="topic" style="background:#fff;">
-    <h2>📚 教材 · Reference Books</h2>
+    <h2><span class="en-only">📚 Reference Books</span><span class="cn-only">📚 教材 · Reference Books</span></h2>
     <ul style="font-size:14px;">
       <li><a href="book/HTF-The Elements of Statistical Learning.pdf" target="_blank">📚 ESL · Hastie, Tibshirani, Friedman</a> — KNN / Trees / Ensemble / Kernel / PCA</li>
       <li><a href="book/GBC-deeplearningbook.pdf" target="_blank">📚 Goodfellow Deep Learning</a> — MLP / Backprop / CNN / RNN / AE</li>
@@ -151,14 +151,14 @@
   </section>
 
   <section class="topic checklist">
-    <h3>📂 文件夹结构</h3>
+    <h3><span class="en-only">📂 Folder layout</span><span class="cn-only">📂 文件夹结构</span></h3>
     <pre style="background:#fff;padding:14px;border-radius:8px;font-size:13px;line-height:1.5;overflow:auto;">
 ECE 449/
-├── ML Review/                 ← 本网站
-│   ├── index.html             路线图首页
-│   ├── cheatsheet.html        一页式速记
-│   ├── resources.html         本页 · 资料映射
-│   ├── topics/                每个算法独立成页 (37 个)
+├── ML Review/                 ← this site
+│   ├── index.html             roadmap homepage
+│   ├── cheatsheet.html        one-page cheatsheet
+│   ├── resources.html         this page · resource map
+│   ├── topics/                one HTML page per algorithm (37 total)
 │   │   ├── probability.html
 │   │   ├── linear-algebra.html
 │   │   ├── optimization.html
@@ -180,10 +180,10 @@ ECE 449/
 │   │   └── q-learning.html · policy-gradient.html
 │   └── assets/
 │       ├── style.css
-│       ├── i18n.js            中 / EN 切换
-│       ├── topics-data.js     算法元数据
-│       └── main.js            进度条 / 搜索
-├── slides/                    ← 课件 PDF (Lecture_1 ~ 27)
+│       ├── i18n.js            EN / Mixed / CN switching
+│       ├── topics-data.js     topic metadata
+│       └── main.js            progress + search
+├── slides/                    ← lecture PDFs (Lecture_1 ~ 27)
 ├── HW/                        ← 作业与解答
 ├── book/                      ← 6 本教材
 ├── Block 1-4.rtf              ← 笔记原文
@@ -193,10 +193,10 @@ ECE 449/
 
   <div style="display:flex;justify-content:space-between;margin-top:20px;">
     <a class="btn" href="index.html" data-i18n="btn.back">← 返回路线图</a>
-    <a class="btn btn-primary" href="cheatsheet.html">⚡ 速记 →</a>
+    <a class="btn btn-primary" href="cheatsheet.html"><span class="en-only">⚡ Cheatsheet →</span><span class="cn-only">⚡ 速记 →</span></a>
   </div>
 </div>
-<footer>由 <code>Block 1-4.rtf</code> 与 <code>Block 5-10.rtf</code> 整理 · 引用自当前文件夹</footer>
+<footer><span class="en-only">Compiled from Block 1-4.rtf and Block 5-10.rtf · linked to local files</span><span class="cn-only">由 Block 1-4.rtf 与 Block 5-10.rtf 整理 · 引用自当前文件夹</span></footer>
 <script src="assets/i18n.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/main.js"></script>

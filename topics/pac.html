@@ -34,13 +34,34 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / PAC Learnability</div>
-      <h1>🎓 PAC Learnability<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· PAC 可学习</span></h1>
+      <h1>🎓 <span class="en-only">PAC Learnability</span><span class="cn-only">PAC 可学习</span></h1>
       <div class="subtitle">n ≥ (1/ε)(ln|F|+ln(1/δ))</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
         <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
         <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="pac-en">
+  <h2>📐 PAC Learnability &amp; ERM</h2>
+  <p>A class is <b>PAC-learnable</b> if for any target $\epsilon, \delta$ there is a learning algorithm whose output achieves true error $\le \epsilon$ with probability $\ge 1-\delta$, using polynomially many samples.</p>
+  <p><b>ERM</b> picks $f \in \mathcal{F}$ minimizing the empirical risk on the training set.</p>
+
+  <div class="callout formula">
+    <div class="head">Finite hypothesis class · sample complexity</div>
+    <div class="eq">$$ n \ge \tfrac{1}{\epsilon}\!\Big(\ln|\mathcal{F}|+\ln\tfrac{1}{\delta}\Big) $$</div>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Plug-in example</div>
+    <p>$|\mathcal{F}|=1000,\,\epsilon=0.05,\,\delta=0.01$:</p>
+    <div class="eq">$$ n\ge \tfrac{1}{0.05}(\ln 1000+\ln 100)\approx 230.26 $$</div>
+    <p>Round up to $n \ge 231$.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pac">
       <h2><span class="icon">📐</span> 4. PAC / ERM / 样本复杂度</h2>
       <p><b>PAC 可学习</b>：对任意 $\epsilon,\delta$，存在算法在概率 $\ge 1-\delta$ 下输出测试误差 $\le\epsilon$ 的假设，且样本量随参数多项式增长。</p>
@@ -57,7 +78,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="error-decomposition.html">← Error Decomposition</a>
       <a class="btn btn-primary" href="vc-dimension.html">VC Dimension →</a>
     </div>

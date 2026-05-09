@@ -13,7 +13,7 @@
   function probKey(slug, pid) { return `prob:${slug}:${pid}`; }
   function tutKey(slug)        { return `tut:${slug}`; }
 
-  function getLang() { return localStorage.getItem("ml_review_lang_v1") || "cn"; }
+  function getLang() { return localStorage.getItem("ml_review_lang_v1") || "en"; }
   function pickLang(obj) {
     if (!obj) return "";
     const lang = getLang();

@@ -34,12 +34,45 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / Attention</div>
-      <h1>🔮 Attention<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 注意力机制</span></h1>
+      <h1>🔮 <span class="en-only">Attention</span><span class="cn-only">注意力机制</span></h1>
       <div class="subtitle">softmax(QKᵀ/√d) V</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="attention-en">
+  <h2>👀 Attention</h2>
+  <div class="callout">
+    <div class="head">🧠 Intuition · retrieve on demand</div>
+    <p>Query asks, Key indexes, Value supplies content. Attention lets each token dynamically read from other tokens — bypassing the RNN information bottleneck.</p>
+  </div>
+
+  <div class="callout formula">
+    <div class="head">Scaled dot-product attention (memorize)</div>
+    <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
+  </div>
+
+  <div class="callout">
+    <div class="head">⚖️ Why divide by $\sqrt{d_k}$?</div>
+    <p>Without scaling, dot products grow with $d_k$, the softmax saturates, and gradients vanish. Scaling keeps the variance roughly constant and stabilizes training.</p>
+  </div>
+
+  <h3>Self-attention</h3>
+  <p>$Q, K, V$ all come from the same sequence: $Q=XW_Q$, $K=XW_K$, $V=XW_V$. Parallelizable; captures long-range dependencies.</p>
+
+  <div class="callout warn">
+    <div class="head">🕶️ Masked attention (causal mask)</div>
+    <ul>
+      <li>Set future logits to $-\infty$ so their softmax weights become 0.</li>
+      <li>The mask is added <b>before</b> softmax, not after.</li>
+      <li>Without it, the decoder leaks future information at training time.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="attention">
       <h2><span class="icon">👀</span> 1. Attention · 注意力机制</h2>
       <div class="callout">
@@ -74,7 +107,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="contrastive.html">← Contrastive Learning</a>
       <a class="btn btn-primary" href="positional-encoding.html">Positional Encoding →</a>
     </div>

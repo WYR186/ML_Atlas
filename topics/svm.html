@@ -34,13 +34,48 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / SVM</div>
-      <h1>🧮 SVM<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 支持向量机</span></h1>
+      <h1>🧮 <span class="en-only">SVM</span><span class="cn-only">支持向量机</span></h1>
       <div class="subtitle">最大间隔 · Hinge</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_8.pdf" target="_blank">📄 Lecture 8</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
         <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="svm-en">
+  <h2>⚔️ Support Vector Machine</h2>
+  <p>Find the separating hyperplane that maximizes the margin.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Hard-margin (linearly separable)</div>
+      <div class="eq">$$ \min_{w,b}\tfrac{1}{2}\|w\|_2^2,\;y_i(w^\top x_i+b)\ge 1 $$</div></div>
+    <div class="callout formula"><div class="head">Soft-margin + slack</div>
+      <div class="eq">$$ \min_{w,b,\xi}\tfrac{1}{2}\|w\|^2+C\sum_i\xi_i,\ y_i(w^\top x_i+b)\ge 1-\xi_i,\ \xi_i\ge 0 $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Hinge loss</div>
+      <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\quad t=y_i(w^\top x_i+b) $$</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="head">📍 Support vectors</div>
+    <p>Only points on or inside the margin (including misclassified ones) determine the solution. Other points have zero dual coefficients (complementary slackness).</p>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>"Why does the solution depend only on support vectors?" — non-SV dual coefficients are 0.</li>
+      <li>Compute hinge loss: first $t=y\,f(x)$, then $\max(0,1-t)$.</li>
+    </ul>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Hinge calculation</div>
+    <p>$y=+1,\ f(x)=0.3$ ⇒ $t=0.3$ ⇒ $\ell_{\text{hinge}}=\max(0,1-0.3)=0.7$.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="svm">
       <h2><span class="icon">⚔️</span> 3. SVM · 支持向量机</h2>
       <p>找分离超平面 + 让最小间隔最大。</p>
@@ -69,7 +104,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="logistic-regression.html">← Logistic Regression</a>
       <a class="btn btn-primary" href="kernel-methods.html">Kernel Methods →</a>
     </div>

@@ -34,13 +34,46 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / LLM</div>
-      <h1>🔮 LLM<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 大语言模型</span></h1>
+      <h1>🔮 <span class="en-only">LLM</span><span class="cn-only">大语言模型</span></h1>
       <div class="subtitle">Autoregressive NLL · PPL</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
         <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="llm-en">
+  <h2>🤖 Large Language Models</h2>
+  <p>Modern LLMs are decoder-only transformers trained on next-token prediction.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Autoregressive factorization</div>
+      <div class="eq">$$ P_\theta(X)=\prod_{t=1}^{T} P_\theta(x_t\mid x_{<t}) $$</div></div>
+    <div class="callout formula"><div class="head">NLL / cross-entropy</div>
+      <div class="eq">$$ L(X;\theta)=-\tfrac{1}{T}\sum_t \log P_\theta(x_t\mid x_{<t}) $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Perplexity</div>
+      <div class="eq">$$ PP(X)=\exp(L(X;\theta)) $$</div>
+      <div style="font-size:13px;">If $L=2$ then $PP=e^2\approx 7.39$.</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="head">🧱 BPE tokenization</div>
+    <p>Iteratively merges frequent symbol pairs to balance vocabulary size against sequence length.</p>
+  </div>
+
+  <div class="callout">
+    <div class="head">🛠️ Post-training stages</div>
+    <ul>
+      <li><b>Pre-training</b>: huge unlabeled text corpus, next-token loss.</li>
+      <li><b>SFT</b>: supervised fine-tuning on instruction–response pairs.</li>
+      <li><b>RLHF</b>: reinforcement learning from human preferences.</li>
+      <li><b>ICL</b>: in-context learning — no parameter updates, just prompt examples.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="llm">
       <h2><span class="icon">🤖</span> 4. Large Language Models · LLM</h2>
       <p>主流是 decoder-only Transformer，做 next-token prediction。</p>
@@ -72,7 +105,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="transformer.html">← Transformer</a>
       <a class="btn btn-primary" href="diffusion.html">Diffusion Models →</a>
     </div>

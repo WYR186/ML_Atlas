@@ -34,13 +34,52 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / Decision Trees</div>
-      <h1>🌳 Decision Trees<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 决策树</span></h1>
+      <h1>🌳 <span class="en-only">Decision Trees</span><span class="cn-only">决策树</span></h1>
       <div class="subtitle">Entropy · IG · Gini</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
         <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="dt-en">
+  <h2>🌳 Decision Trees</h2>
+  <p>Recursively partition the input space along axis-aligned splits. Internal nodes use $g(x)=\operatorname{sign}(x_i-\tau)$.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Entropy</div>
+      <div class="eq">$$ I(D)=-\sum_{c=1}^{C} p(c\mid D)\log_2 p(c\mid D) $$</div>
+      <div style="font-size:13px;">Pure node ⇒ 0; balanced classes ⇒ maximum.</div></div>
+    <div class="callout formula"><div class="head">Information gain</div>
+      <div class="eq">$$ IG(D,f)=I(D)-\sum_j \tfrac{|D_j|}{|D|}\,I(D_j) $$</div></div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Gini impurity</div>
+      <div class="eq">$$ \text{Gini}=1-\sum_c p_c^2 $$</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="head">🧠 Concept check</div>
+    <ul>
+      <li>IG = parent impurity − weighted child impurity.</li>
+      <li>Finding the smallest tree is NP-complete; ID3 / CART are greedy.</li>
+    </ul>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Overfitting</div>
+    <p>Growing until every leaf is pure drives training error to 0 but increases variance, often hurting test error.</p>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>Hand-compute entropy / IG / Gini on a small dataset.</li>
+      <li>Explain the bias-variance trade-off for deep trees.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="dt">
       <h2><span class="icon">🌳</span> 1. Decision Trees</h2>
       <p>通过坐标轴对齐的划分把输入空间切成不重叠的区域。内部节点用 $g(x)=\operatorname{sign}(x_i-\tau)$ 选择 $(x_i,\tau)$ 进行分裂。</p>
@@ -78,7 +117,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="kernel-methods.html">← Kernel Methods</a>
       <a class="btn btn-primary" href="bagging.html">Bagging →</a>
     </div>

@@ -49,9 +49,9 @@ function renderIndexTable() {
       <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
         <thead>
           <tr style="text-align: left; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;">
-            <th style="padding: 6px 8px; width: 28%;" data-i18n="home.col.topic">算法 / Topic</th>
-            <th style="padding: 6px 8px; width: 36%;" data-i18n="home.col.goal">核心目标</th>
-            <th style="padding: 6px 8px;" data-i18n="home.col.exam">考点 / Exam focus</th>
+            <th style="padding: 6px 8px; width: 28%;" data-i18n="home.col.topic">Algorithm / Topic</th>
+            <th style="padding: 6px 8px; width: 36%;" data-i18n="home.col.goal">Core Goal</th>
+            <th style="padding: 6px 8px;" data-i18n="home.col.exam">Exam Focus</th>
           </tr>
         </thead>
         <tbody>
@@ -70,7 +70,7 @@ function renderIndexTable() {
   `).join("");
   root.innerHTML = rows;
   // Re-apply current language to newly inserted nodes.
-  if (typeof applyLang === "function") applyLang(getLang ? getLang() : (localStorage.getItem("ml_review_lang_v1") || "cn"));
+  if (typeof applyLang === "function") applyLang(getLang ? getLang() : (localStorage.getItem("ml_review_lang_v1") || "en"));
 }
 
 // === Search across topics ===
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const reset = document.getElementById("resetProgress");
   if (reset) {
     reset.addEventListener("click", () => {
-      const lang = localStorage.getItem("ml_review_lang_v1") || "cn";
+      const lang = localStorage.getItem("ml_review_lang_v1") || "en";
       const msg = lang === "en" ? "Reset all learning progress?" : "重置全部学习进度？";
       if (confirm(msg)) {
         localStorage.removeItem(STORAGE_KEY);
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const key = p[block] ? "btn.markRead.done" : "btn.markRead.todo";
       markBtn.setAttribute("data-i18n", key);
       markBtn.classList.toggle("btn-primary", !!p[block]);
-      if (typeof applyLang === "function") applyLang(localStorage.getItem("ml_review_lang_v1") || "cn");
+      if (typeof applyLang === "function") applyLang(localStorage.getItem("ml_review_lang_v1") || "en");
     };
     refresh();
     markBtn.addEventListener("click", () => {

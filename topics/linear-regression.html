@@ -34,12 +34,42 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Linear Regression</div>
-      <h1>🧮 Linear Regression<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 线性回归</span></h1>
+      <h1>🧮 <span class="en-only">Linear Regression</span><span class="cn-only">线性回归</span></h1>
       <div class="subtitle">MSE 闭式解</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_6.pdf" target="_blank">📄 Lecture 6</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="linreg-en">
+  <h2>📈 Linear Regression</h2>
+  <p>Predict a continuous target $y\in\mathbb{R}$. Model $\hat y = w^\top x + b$, minimize squared loss.</p>
+
+  <div class="cols2">
+    <div class="callout formula"><div class="head">MSE objective</div>
+      <div class="eq">$$ \min_{w,b}\ \tfrac{1}{2}\sum_i (y_i-(w^\top x_i+b))^2 $$</div></div>
+    <div class="callout formula"><div class="head">Closed form (normal equation)</div>
+      <div class="eq">$$ w^*=(X^\top X)^{-1}X^\top y $$</div>
+      <div style="font-size:13px;">Requires $X^\top X$ to be invertible.</div></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfalls</div>
+    <ul>
+      <li>Sensitive to outliers (squared loss amplifies large errors).</li>
+      <li>Using it for binary classification with $y\in\{-1,1\}$ + threshold works mechanically but isn't optimal.</li>
+      <li>Multicollinearity ⇒ $X^\top X$ is ill-conditioned or singular.</li>
+    </ul>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <p>Translate model + MSE into the optimization objective; state when the closed form exists; handle collinearity.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="linreg">
       <h2><span class="icon">📈</span> 1. Linear Regression · 线性回归</h2>
       <p>预测连续值 $y\in\mathbb{R}$。模型 $\hat y = w^\top x + b$，目标平方损失。</p>
@@ -64,7 +94,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="naive-bayes.html">← Naive Bayes</a>
       <a class="btn btn-primary" href="logistic-regression.html">Logistic Regression →</a>
     </div>

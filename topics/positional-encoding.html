@@ -34,12 +34,30 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / Positional Encoding</div>
-      <h1>🔮 Positional Encoding<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 位置编码</span></h1>
+      <h1>🔮 <span class="en-only">Positional Encoding</span><span class="cn-only">位置编码</span></h1>
       <div class="subtitle">sin / cos 注入位置</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="pe-en">
+  <h2>🌊 Positional Encoding</h2>
+  <p>Self-attention is permutation-invariant, so token positions must be injected explicitly.</p>
+
+  <div class="callout formula">
+    <div class="head">Sinusoidal PE</div>
+    <div class="eq">$$ PE_{(pos,2i)}=\sin\!\Big(\tfrac{pos}{10000^{2i/d}}\Big),\;PE_{(pos,2i+1)}=\cos\!\Big(\tfrac{pos}{10000^{2i/d}}\Big) $$</div>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <p>$PE(pos+k)$ is a <b>linear function</b> of $PE(pos)$ (a 2-D rotation depending only on $k$). This lets the model learn relative positions easily.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pe">
       <h2><span class="icon">🌊</span> 2. Positional Encoding · 位置编码</h2>
       <p>Self-attention 对输入顺序不敏感（permutation invariant），需要显式注入位置信息。</p>
@@ -53,7 +71,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="attention.html">← Attention</a>
       <a class="btn btn-primary" href="transformer.html">Transformer →</a>
     </div>

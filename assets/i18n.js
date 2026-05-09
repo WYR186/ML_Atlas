@@ -1,8 +1,11 @@
-// === i18n: 中 / EN switch ===
+// === i18n: EN / Mixed / CN switch ===
+// Three language modes:
+//   "en"     — English only (default for first-time visitors)
+//   "mixed"  — both languages stacked (great for studying)
+//   "cn"     — Chinese only
 // HTML elements use data-i18n="key" (textContent) or
 // data-i18n-attr="placeholder" data-i18n="key" (attribute).
-// Bilingual block content uses .cn-only / .en-only classes,
-// or paired <span class="cn">…</span><span class="en">…</span> inside .bi-text.
+// Block content uses .cn-only / .en-only wrappers; mixed mode shows both.
 
 const I18N_KEY = "ml_review_lang_v1";
 
@@ -78,7 +81,9 @@ const I18N = {
 };
 
 function getLang() {
-  return localStorage.getItem(I18N_KEY) || "cn";
+  const v = localStorage.getItem(I18N_KEY);
+  if (v === "en" || v === "cn" || v === "mixed") return v;
+  return "en";  // default for first-time visitors
 }
 function setLang(lang) {
   localStorage.setItem(I18N_KEY, lang);
@@ -86,12 +91,20 @@ function setLang(lang) {
 }
 function applyLang(lang) {
   document.documentElement.setAttribute("data-lang", lang);
-  // Replace text / attributes for any element with data-i18n
+  // Resolve text per element: in "mixed" mode prefer English (UI labels)
+  // and let .cn-only / .en-only blocks naturally show both bodies.
+  const pick = (dict) => {
+    if (!dict) return null;
+    if (lang === "cn") return dict.cn || dict.en;
+    if (lang === "en") return dict.en || dict.cn;
+    // mixed: show "EN · 中文" when both exist and they differ.
+    if (dict.en && dict.cn && dict.en !== dict.cn) return `${dict.en} · ${dict.cn}`;
+    return dict.en || dict.cn;
+  };
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    const dict = I18N[key];
-    if (!dict) return;
-    const value = dict[lang] || dict.cn;
+    const value = pick(I18N[key]);
+    if (value == null) return;
     const attr = el.getAttribute("data-i18n-attr");
     if (attr) el.setAttribute(attr, value);
     else el.textContent = value;
@@ -103,16 +116,16 @@ function applyLang(lang) {
 }
 
 function injectLangSwitch() {
-  // Adds the 中 / EN toggle next to the search box on every page.
+  // Adds the EN / Mixed / 中 toggle next to the search box on every page.
   const topbarInner = document.querySelector(".topbar-inner");
   if (!topbarInner || document.querySelector(".lang-switch")) return;
   const wrap = document.createElement("div");
   wrap.className = "lang-switch";
   wrap.innerHTML = `
-    <button data-lang="cn" type="button">中</button>
-    <button data-lang="en" type="button">EN</button>
+    <button data-lang="en"    type="button" title="English only">EN</button>
+    <button data-lang="mixed" type="button" title="Both languages">EN+中</button>
+    <button data-lang="cn"    type="button" title="Chinese only">中</button>
   `;
-  // Insert before search box if present, else append.
   const search = topbarInner.querySelector(".search-box");
   if (search) topbarInner.insertBefore(wrap, search);
   else topbarInner.appendChild(wrap);

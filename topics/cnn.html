@@ -34,13 +34,45 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧠 神经网络</span><span class="en-only">🧠 Neural Networks</span> / CNN</div>
-      <h1>🧠 CNN<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 卷积神经网络</span></h1>
+      <h1>🧠 <span class="en-only">CNN</span><span class="cn-only">卷积神经网络</span></h1>
       <div class="subtitle">局部连接 + 权重共享</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
         <a class="ref-chip hw" href="../HW/hw4_sol.pdf" target="_blank">📝 hw4_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="cnn-en">
+  <h2>🖼️ Convolutional Neural Networks</h2>
+  <ul>
+    <li>Local connectivity: each filter sees a small spatial patch (edges, textures).</li>
+    <li>Weight sharing: same filter slides across the input → translation invariance with far fewer parameters.</li>
+    <li>Typical block: Conv → Pool → Conv → Pool → ... → FC.</li>
+  </ul>
+
+  <div class="callout formula">
+    <div class="head">Output size (must-know)</div>
+    <div class="eq">$$ \text{Output}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
+    <div style="font-size:13px;">$N$ input, $P$ padding, $F$ kernel, $S$ stride. For 2D, apply per axis.</div>
+  </div>
+
+  <div class="callout warn">
+    <div class="head">⚠️ Pitfalls</div>
+    <ul>
+      <li>Forgetting the floor.</li>
+      <li>Writing $P$ instead of $2P$.</li>
+      <li>Mixing up $F$ (kernel) with $S$ (stride).</li>
+    </ul>
+  </div>
+
+  <div class="callout example">
+    <div class="head">🧩 Plug in numbers</div>
+    <p>$N=32,\,F=5,\,P=2,\,S=1$ → $\lfloor (32+4-5)/1\rfloor+1 = 32$. Padding 2 cancels the kernel-5 shrink.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="cnn">
       <h2><span class="icon">🖼️</span> 3. CNN</h2>
       <ul>
@@ -69,7 +101,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="backpropagation.html">← Backpropagation</a>
       <a class="btn btn-primary" href="rnn.html">RNN →</a>
     </div>

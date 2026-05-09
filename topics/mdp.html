@@ -34,11 +34,33 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / MDP</div>
-      <h1>🎮 MDP<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 马尔可夫决策过程</span></h1>
+      <h1>🎮 <span class="en-only">MDP</span><span class="cn-only">马尔可夫决策过程</span></h1>
       <div class="subtitle">(S, A, P, R, γ) · Markov 性</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="mdp-en">
+  <h2>🟦 Markov Decision Process</h2>
+  <div class="callout formula">
+    <div class="head">5-tuple</div>
+    <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
+  </div>
+  <ul>
+    <li><b>States</b> $s \in \mathcal{S}$ — abstraction of the world.</li>
+    <li><b>Actions</b> $a \in \mathcal{A}$ — what the agent can choose.</li>
+    <li><b>Transitions</b> $P(s'\mid s,a)$ — environment dynamics.</li>
+    <li><b>Reward</b> $R(s,a)$ — immediate scalar feedback.</li>
+    <li><b>Discount</b> $\gamma \in [0,1)$ — preference for sooner rewards.</li>
+  </ul>
+  <div class="callout">
+    <div class="head">🧠 Markov property</div>
+    <p>Given the current $(s, a)$, the future is independent of the past.</p>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="mdp">
       <h2><span class="icon">🟦</span> 1. MDP · Markov Decision Process</h2>
       <div class="callout formula">
@@ -59,7 +81,10 @@
       <p>轨迹：$\tau=(s_0,a_0,r_0,s_1,a_1,r_1,\ldots,s_H)$。</p>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="vc-dimension.html">← VC Dimension</a>
       <a class="btn btn-primary" href="value-functions.html">Value & Q functions →</a>
     </div>

@@ -34,13 +34,40 @@
   <main class="block-main">
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧠 神经网络</span><span class="en-only">🧠 Neural Networks</span> / Backpropagation</div>
-      <h1>🧠 Backpropagation<span class="cn-only" style="font-size:18px;font-weight:500;color:var(--text-soft);margin-left:10px;">· 反向传播</span></h1>
+      <h1>🧠 <span class="en-only">Backpropagation</span><span class="cn-only">反向传播</span></h1>
       <div class="subtitle">chain rule · shape check</div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_15.pdf" target="_blank">📄 Lecture 15</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
         <a class="ref-chip hw" href="../HW/hw4_sol.pdf" target="_blank">📝 hw4_sol</a></div>
     </div>
 
+<div class="en-only">
+<section class="topic" id="backprop-en">
+  <h2>🔁 Backpropagation</h2>
+  <p>The chain rule realized efficiently on the computational graph.</p>
+
+  <div class="callout formula">
+    <div class="head">Mantra</div>
+    <p style="margin:0;font-family:ui-monospace,Menlo;background:#fff;padding:8px 12px;border-radius:6px;">downstream gradient = local gradient × upstream gradient</p>
+  </div>
+
+  <div class="callout formula">
+    <div class="head">Shape check (must-pass exam tool)</div>
+    <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
+    <p style="font-size:13px;">If you can't derive a gradient cleanly, write down all tensor shapes and back-solve from the matmul rules.</p>
+  </div>
+
+  <div class="callout exam">
+    <div class="head">✅ Exam focus</div>
+    <ul>
+      <li>For a two-layer net, compute gradients with respect to each $W^{(l)}, b^{(l)}$ and check shapes.</li>
+      <li>Forward caches $z^{(l)}, a^{(l)}$; backward propagates from the loss back through the graph.</li>
+    </ul>
+  </div>
+</section>
+</div><!--/en-only-->
+
+<!--cn-only-start--><div class="cn-only">
 <section class="topic" id="backprop">
       <h2><span class="icon">🔁</span> 2. Backpropagation · 反向传播</h2>
       <p>本质：链式法则在计算图上的高效实现。</p>
@@ -62,7 +89,10 @@
       </div>
     </section>
 
-    <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
+    
+</div><!--/cn-only-->
+
+<div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="mlp.html">← MLP</a>
       <a class="btn btn-primary" href="cnn.html">CNN →</a>
     </div>
