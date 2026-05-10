@@ -68,21 +68,50 @@
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">Spatial output size</div>
+    <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
+    <p><b>Symbols.</b></p>
+    <ul>
+      <li>$H,W_{\text{in}}$ are the input height and width.</li>
+      <li>$F_h,F_w$ are the filter height and width.</li>
+      <li>$P_h,P_w$ are padding added on each side of height and width. The $2P$ appears because padding is added to both ends.</li>
+      <li>$S_h,S_w$ are strides: how far the filter moves each step.</li>
+      <li>The floor means incomplete windows at the end are not counted.</li>
+    </ul>
+    <p><b>How to read it.</b> padded input size minus filter size tells you how much room the filter has to move; dividing by stride counts the moves; the final $+1$ counts the starting position.</p>
+
+      <p><b>How to use.</b> compute height and width separately, then attach the number of output channels: output shape is $C_{\text{out}}\times H_{\text{out}}\times W_{\text{out}}$ in channel-first notation.</p>
+  </div>
   <div class="cols2">
     <div class="callout formula">
-      <div class="head">Output size per axis</div>
-      <div class="eq">$$ N_{\text{out}}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
-      <p>$N$ is input size, $F$ filter size, $P$ padding on each side, and $S$ stride.</p>
+      <div class="head">Convolution parameter count</div>
+      <div class="eq">$$ \#\text{params}=F_hF_wC_{\text{in}}C_{\text{out}}+C_{\text{out}}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
+      <p><b>Symbols.</b> $F_hF_w$ is the filter's spatial area; $C_{\text{in}}$ is input channels; $C_{\text{out}}$ is output channels / number of filters; $+C_{\text{out}}$ is one bias per output channel.</p>
+      <p><b>How to read it.</b> each output channel has one filter, and each filter spans all input channels, so one filter has $F_hF_wC_{\text{in}}$ weights.</p>
+      <p><b>How to use.</b> multiply kernel height, kernel width, input channels, and filters. Then add biases only if the problem says the layer has bias.</p>
     </div>
     <div class="callout formula">
-      <div class="head">Convolution parameters</div>
-      <div class="eq">$$ \#\text{params}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
-      <p>The $+1$ is one bias per output channel. Omit it if the layer has no bias.</p>
-    </div>
-    <div class="callout formula wide">
       <div class="head">One output activation</div>
-      <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=1}^{F_h}\sum_{j=1}^{F_w}W_{i,j,c,k}\,x_{u+i,v+j,c} $$</div>
-      <p>Most deep-learning libraries implement cross-correlation, but the course intuition is the same: slide a shared kernel and take weighted local sums.</p>
+      <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=0}^{F_h-1}\sum_{j=0}^{F_w-1}W_{i,j,c,k}\,x_{uS_h+i-P_h,\;vS_w+j-P_w,\;c} $$</div>
+      <p><b>Symbols.</b> $u,v$ choose the output location; $k$ chooses the output channel; $c$ loops over input channels; $i,j$ move inside the filter window; $W_{i,j,c,k}$ is a kernel weight; $b_k$ is the bias for channel $k$.</p>
+      <p><b>How to read it.</b> one output number is a weighted sum of a local patch, plus a bias. The same kernel weights are reused at every spatial location.</p>
+
+      <p><b>How to use.</b> pick one $(u,v,k)$, find the input patch indexed by $uS_h+i-P_h$ and $vS_w+j-P_w$, multiply matching $W$ and $x$ entries, sum across $i,j,c$, then add $b_k$.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Pooling output</div>
+      <div class="eq">$$ y_{u,v,c}^{\max}=\max_{(i,j)\in\text{window}(u,v)}x_{i,j,c},\qquad y_{u,v,c}^{\text{avg}}=\frac{1}{F_hF_w}\sum_{(i,j)\in\text{window}(u,v)}x_{i,j,c} $$</div>
+      <p><b>Symbols.</b> $\text{window}(u,v)$ is the input patch covered by the pooling window; $y^{\max}$ takes the largest value; $y^{\text{avg}}$ averages all values in the window.</p>
+      <p><b>How to read it.</b> pooling uses a local window like convolution, but usually has no learned weights and no bias.</p>
+      <p><b>How to use.</b> use the same output-size formula, but set $C_{\text{out}}=C_{\text{in}}$ unless the problem states otherwise.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Cross-correlation note</div>
+      <div class="eq">$$ \text{deep-learning convolution usually means cross-correlation} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> This is a convention note rather than a numeric formula. The key symbol is the operation name: classical convolution flips the kernel; deep-learning "convolution" usually slides the kernel as written.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Most CNN layers use cross-correlation. Learning still works because the kernel entries are learned; flipping convention mainly changes how we name the operation.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For CNN shape, parameter-count, and forward-pass questions, use the deep-learning convention and do not flip the kernel unless the problem explicitly asks for classical convolution.</p>
     </div>
   </div>
 
@@ -163,22 +192,51 @@
         <p>如果 $500\times500$ 图片接到 1024 维 fully connected layer，weight matrix 会有数亿项。一个 $3\times3$ convolution 加 16 个 filters，只有几百个参数，因为小 kernel 被全图复用。</p>
       </div>
 
-      <h3 class="section-purple">4. Key Equations</h3>
+      <h3 class="section-purple">4. 关键公式</h3>
+      <div class="callout formula">
+        <div class="head">Spatial output size：输出高宽怎么算</div>
+        <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
+        <p><b>符号.</b></p>
+        <ul>
+          <li>$H,W_{\text{in}}$ 是 input 的 height 和 width。</li>
+          <li>$F_h,F_w$ 是 filter 的 height 和 width。</li>
+          <li>$P_h,P_w$ 是每一边加的 padding；公式里是 $2P$，因为上下或左右两边都加。</li>
+          <li>$S_h,S_w$ 是 stride，也就是 filter 每次移动多少格。</li>
+          <li>floor 表示最后放不下完整 window 的部分不算。</li>
+        </ul>
+        <p><b>怎么理解.</b>padded input size 减 filter size，表示 filter 可移动的范围；除以 stride 是数能移动几步；最后 $+1$ 是把初始位置算进去。</p>
+
+      <p><b>怎么用.</b>height 和 width 分开代入。最后再加上 output channels：channel-first 写法下输出 shape 是 $C_{\text{out}}\times H_{\text{out}}\times W_{\text{out}}$。</p>
+      </div>
       <div class="cols2">
         <div class="callout formula">
-          <div class="head">单轴 output size</div>
-          <div class="eq">$$ N_{\text{out}}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
-          <p>$N$ 是输入长度，$F$ 是 filter size，$P$ 是每边 padding，$S$ 是 stride。</p>
+          <div class="head">Convolution parameter count</div>
+          <div class="eq">$$ \#\text{params}=F_hF_wC_{\text{in}}C_{\text{out}}+C_{\text{out}}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
+          <p><b>符号.</b>$F_hF_w$ 是 filter 的 spatial area；$C_{\text{in}}$ 是 input channels；$C_{\text{out}}$ 是 output channels / filters 数量；$+C_{\text{out}}$ 是每个 output channel 一个 bias。</p>
+          <p><b>怎么理解.</b>每个 output channel 对应一个 filter。一个 filter 会跨过所有 $C_{\text{in}}$ 个 input channels，所以一个 filter 有 $F_hF_wC_{\text{in}}$ 个 weights。</p>
+      <p><b>怎么用.</b>先乘 kernel height、kernel width、input channels、filters 数量；如果题目说 no bias，就不要加最后的 $C_{\text{out}}$。</p>
         </div>
         <div class="callout formula">
-          <div class="head">卷积层参数量</div>
-          <div class="eq">$$ \#\text{params}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
-          <p>$+1$ 表示每个 output channel 一个 bias；如果 no bias 就不加。</p>
+          <div class="head">一个输出位置怎么来的</div>
+          <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=0}^{F_h-1}\sum_{j=0}^{F_w-1}W_{i,j,c,k}\,x_{uS_h+i-P_h,\;vS_w+j-P_w,\;c} $$</div>
+          <p><b>符号.</b>$u,v$ 指 output 的空间位置；$k$ 指 output channel；$c$ 遍历 input channels；$i,j$ 在 filter window 内移动；$W_{i,j,c,k}$ 是 kernel weight；$b_k$ 是第 $k$ 个 channel 的 bias。</p>
+          <p><b>怎么理解.</b>一个 output number = 局部 patch 的 weighted sum + bias。同一组 kernel weights 会在所有空间位置重复使用。</p>
+
+      <p><b>怎么用.</b>选定一个 $(u,v,k)$，用 $uS_h+i-P_h$ 和 $vS_w+j-P_w$ 找 input patch，对应的 $W$ 和 $x$ 相乘，对 $i,j,c$ 全部求和，再加 $b_k$。</p>
         </div>
-        <div class="callout formula wide">
-          <div class="head">一个输出位置</div>
-          <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=1}^{F_h}\sum_{j=1}^{F_w}W_{i,j,c,k}\,x_{u+i,v+j,c} $$</div>
-          <p>深度学习库里常实现的是 cross-correlation，但课堂直觉一样：共享 kernel 滑动，对局部区域做 weighted sum。</p>
+        <div class="callout formula">
+          <div class="head">Pooling output</div>
+          <div class="eq">$$ y_{u,v,c}^{\max}=\max_{(i,j)\in\text{window}(u,v)}x_{i,j,c},\qquad y_{u,v,c}^{\text{avg}}=\frac{1}{F_hF_w}\sum_{(i,j)\in\text{window}(u,v)}x_{i,j,c} $$</div>
+          <p><b>符号.</b>$\text{window}(u,v)$ 是 pooling window 盖住的 input patch；$y^{\max}$ 取最大值；$y^{\text{avg}}$ 对 window 内所有值取平均。</p>
+          <p><b>怎么理解.</b>Pooling 也看一个 local window，但通常没有 learned weights，也没有 bias。</p>
+      <p><b>怎么用.</b>output size 仍然用同一套公式；如果题目没特别说明，一般 $C_{\text{out}}=C_{\text{in}}$。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Cross-correlation 小提醒</div>
+          <div class="eq">$$ \text{deep-learning convolution usually means cross-correlation} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 这是 convention note，不是数值计算公式。核心区别在 operation name：classical convolution 会 flip kernel；deep-learning 里的“convolution”通常直接滑动 kernel，不先翻转。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 大多数 CNN layer 实际做的是 cross-correlation。因为 kernel 是学出来的，是否翻转主要影响命名，不影响学习机制。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 做 CNN output shape、parameter count、forward pass 题时，按 deep-learning convention，不 flip kernel；除非题目明确要求 classical convolution。</p>
         </div>
       </div>
 
@@ -234,7 +292,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

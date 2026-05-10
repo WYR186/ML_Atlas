@@ -72,25 +72,39 @@
     <div class="callout formula">
       <div class="head">Latent-variable likelihood</div>
       <div class="eq">$$ p_\theta(x)=\int p_\theta(x\mid z)p(z)\,dz $$</div>
-      <p>This integral is usually intractable for neural decoders.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: Observed data point.； $z$: Hidden latent variable or generative code.； $p(z)$: Prior distribution over latent codes, often $\mathcal{N}(0,I)$.； $p_\theta(x\mid z)$: Decoder likelihood, parameterized by $\theta$.； $\int dz$: Integrate over all continuous latent possibilities.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A visible sample can be produced by many possible hidden codes, so the model sums over every possible hidden explanation.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this as the generative story: sample $z\sim p(z)$, then sample or decode $x$ from $p_\theta(x\mid z)$. The integral explains why exact likelihood is hard.</p>
     </div>
     <div class="callout formula">
       <div class="head">Approximate posterior</div>
       <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}\!\big(\mu_\phi(x),\operatorname{diag}(\sigma_\phi^2(x))\big) $$</div>
-      <p>The encoder predicts mean and variance, not a single vector.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $q_\phi(z\mid x)$: Encoder distribution approximating the true posterior $p_\theta(z\mid x)$.； $\phi$: Encoder parameters.； $\mu_\phi(x)$: Mean vector predicted from input $x$.； $\sigma_\phi^2(x)$: Variance vector predicted from input $x$.； $\operatorname{diag}$: Builds a diagonal covariance matrix from the variance vector.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The encoder does not say one exact code caused the input; it gives a cloud of plausible latent codes.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> The encoder usually outputs $\mu$ and log variance. Convert log variance to variance or standard deviation before sampling and KL computation.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">ELBO to maximize</div>
       <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
-      <p>First term: reconstruction. Second term: regularize the posterior toward the prior.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{L}(x)$: ELBO, a lower bound on $\log p_\theta(x)$.； $\mathbb{E}_{z\sim q}$: Average over latent samples from the encoder distribution.； $\log p_\theta(x\mid z)$: Reconstruction log-likelihood.； $D_{KL}(q\|p)$: KL penalty that keeps the approximate posterior near the prior.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> One term asks the decoder to reconstruct well; the other keeps the latent space organized enough to sample from.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Maximize the ELBO, or minimize negative ELBO. In code this is usually reconstruction loss plus KL loss, with signs chosen for minimization.</p>
     </div>
     <div class="callout formula">
       <div class="head">Reparameterization</div>
       <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon$: Standard normal noise independent of network parameters.； $\sigma_\phi(x)$: Standard deviation vector, not variance.； $\odot$: Elementwise multiplication.； $z$: Latent sample passed into the decoder.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Move the randomness into a separate noise variable, so the network output remains a differentiable transformation.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Sample $\epsilon$, compute $z$, and backpropagate through $\mu_\phi(x)$ and $\sigma_\phi(x)$. This keeps stochastic sampling compatible with gradients.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gaussian KL</div>
       <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j\left(\mu_j^2+\sigma_j^2-\log\sigma_j^2-1\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $j$: Latent dimension index.； $\mu_j$: Mean of dimension $j$ under $q$.； $\sigma_j^2$: Variance of dimension $j$ under $q$.； $p$: Standard normal prior $\mathcal{N}(0,I)$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The term is zero when a dimension exactly matches the prior: $\mu_j=0$ and $\sigma_j^2=1$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this closed form when $q$ is diagonal Gaussian and $p=\mathcal{N}(0,I)$. If code stores logvar, substitute $\sigma_j^2=\exp(\text{logvar}_j)$.</p>
     </div>
   </div>
 
@@ -177,25 +191,39 @@
         <div class="callout formula">
           <div class="head">Latent-variable likelihood</div>
           <div class="eq">$$ p_\theta(x)=\int p_\theta(x\mid z)p(z)\,dz $$</div>
-          <p>神经网络 decoder 下，这个积分通常 intractable。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 观测到的数据点。；$z$: 隐藏的 latent variable / generative code。；$p(z)$: Latent prior，通常是 $\mathcal{N}(0,I)$。；$p_\theta(x\mid z)$: Decoder likelihood，参数是 $\theta$。；$\int dz$: 对连续 latent space 中所有可能 $z$ 做积分。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 同一个可见样本可能由很多 hidden code 生成，所以模型要把所有可能解释都加总起来。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把它当成生成故事：先 sample $z\sim p(z)$，再从 $p_\theta(x\mid z)$ 生成或 decode 出 $x$。这个积分也说明 exact likelihood 为什么难算。</p>
         </div>
         <div class="callout formula">
           <div class="head">Approximate posterior</div>
           <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}\!\big(\mu_\phi(x),\operatorname{diag}(\sigma_\phi^2(x))\big) $$</div>
-          <p>Encoder 输出的是 mean 和 variance，不是单个点。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $q_\phi(z\mid x)$: Encoder distribution，用来近似 true posterior $p_\theta(z\mid x)$。；$\phi$: Encoder 参数。；$\mu_\phi(x)$: 由输入 $x$ 预测出的 mean vector。；$\sigma_\phi^2(x)$: 由输入 $x$ 预测出的 variance vector。；$\operatorname{diag}$: 把 variance vector 放到 covariance matrix 的对角线上。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Encoder 不是说输入只对应一个精确 code，而是给出一团可能的 latent codes。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Encoder 通常输出 $\mu$ 和 log variance。采样和计算 KL 前，需要把 log variance 转成 variance 或 standard deviation。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">ELBO（最大化）</div>
           <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
-          <p>第一项是 reconstruction，第二项把 posterior 拉向 prior。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{L}(x)$: ELBO，是 $\log p_\theta(x)$ 的 lower bound。；$\mathbb{E}_{z\sim q}$: 对 encoder distribution 采样出的 $z$ 求平均。；$\log p_\theta(x\mid z)$: Reconstruction log-likelihood。；$D_{KL}(q\|p)$: KL penalty，用来让 approximate posterior 靠近 prior。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一项要求 decoder 重建得好，另一项让 latent space 足够规整，方便从 prior 采样。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 理论上 maximize ELBO；代码里常写成 minimize negative ELBO，也就是 reconstruction loss 加 KL loss。</p>
         </div>
         <div class="callout formula">
           <div class="head">Reparameterization trick</div>
           <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\epsilon$: Standard normal noise，不依赖网络参数。；$\sigma_\phi(x)$: Standard deviation vector，不是 variance。；$\odot$: Elementwise multiplication。；$z$: 送入 decoder 的 latent sample。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把随机性挪到独立噪声里，让网络输出部分仍然是可微 transformation。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先 sample $\epsilon$，再算 $z$，然后梯度可以传回 $\mu_\phi(x)$ 和 $\sigma_\phi(x)$。这样 stochastic sampling 仍然能配合 backpropagation。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gaussian KL</div>
           <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j\left(\mu_j^2+\sigma_j^2-\log\sigma_j^2-1\right) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $j$: Latent dimension index。；$\mu_j$: $q$ 中第 $j$ 维的 mean。；$\sigma_j^2$: $q$ 中第 $j$ 维的 variance。；$p$: Standard normal prior $\mathcal{N}(0,I)$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 当某一维完全匹配 prior，即 $\mu_j=0$ 且 $\sigma_j^2=1$ 时，这一维 KL contribution 为 0。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当 $q$ 是 diagonal Gaussian 且 $p=\mathcal{N}(0,I)$ 时直接用这个 closed form。如果代码存的是 logvar，代入 $\sigma_j^2=\exp(\text{logvar}_j)$。</p>
         </div>
       </div>
 
@@ -252,7 +280,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

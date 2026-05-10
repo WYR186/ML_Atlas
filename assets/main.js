@@ -230,6 +230,150 @@ function setupEquationSourceAnchors() {
   }
 }
 
+function topicEquationSheetUrl() {
+  const mainScript = document.querySelector('script[src$="assets/main.js"], script[src$="/main.js"]');
+  if (mainScript && mainScript.src) return new URL("equation-sheet.js", mainScript.src).href;
+  return new URL(location.pathname.includes("/topics/") ? "../assets/equation-sheet.js" : "assets/equation-sheet.js", location.href).href;
+}
+
+function loadTopicEquationSheet() {
+  if (window.EQUATION_SHEET) return Promise.resolve(window.EQUATION_SHEET);
+  if (window.__topicEquationSheetPromise) return window.__topicEquationSheetPromise;
+
+  const existing = Array.from(document.scripts).find(s => /equation-sheet\.js(?:\?|$)/.test(s.src || ""));
+  if (existing) {
+    window.__topicEquationSheetPromise = new Promise((resolve, reject) => {
+      existing.addEventListener("load", () => resolve(window.EQUATION_SHEET), { once: true });
+      existing.addEventListener("error", reject, { once: true });
+      setTimeout(() => window.EQUATION_SHEET ? resolve(window.EQUATION_SHEET) : reject(new Error("Equation sheet did not load")), 4000);
+    });
+    return window.__topicEquationSheetPromise;
+  }
+
+  window.__topicEquationSheetPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = topicEquationSheetUrl();
+    script.defer = true;
+    script.dataset.topicEquationSheet = "1";
+    script.addEventListener("load", () => resolve(window.EQUATION_SHEET), { once: true });
+    script.addEventListener("error", reject, { once: true });
+    document.head.appendChild(script);
+  });
+  return window.__topicEquationSheetPromise;
+}
+
+function topicEquationSourceId(item, slug) {
+  const source = item && item.source || "";
+  const hashIndex = source.indexOf("#");
+  if (hashIndex >= 0) return source.slice(hashIndex + 1);
+  return item && item.title ? `eq-${slug}-${equationSourceSlug(item.title)}` : "";
+}
+
+function topicExplanationAlreadyPresent(node) {
+  if (!node) return false;
+  if (node.querySelector && node.querySelector(":scope > .equation-explain, :scope > .equation-explain-wrap")) return true;
+  const next = node.nextElementSibling;
+  return !!(next && next.matches(".equation-explain, .equation-explain-wrap"));
+}
+
+function topicFormulaTargetsIn(wrapper, target) {
+  if (!wrapper || !target) return [];
+  if (target.matches("h3, h4")) return Array.from(wrapper.querySelectorAll("section.topic h3, section.topic h4"));
+  return Array.from(wrapper.querySelectorAll(".callout.formula, .cols2 > div, .study-box"))
+    .filter(el => el.querySelector(".eq"));
+}
+
+function topicLanguagePeerWrapper(wrapper) {
+  const selector = wrapper.classList.contains("en-only") ? ".cn-only" : ".en-only";
+  return Array.from(document.querySelectorAll(selector)).find(el => el.querySelector("section.topic")) || null;
+}
+
+function topicMirroredTarget(target) {
+  const wrapper = target && target.closest(".en-only, .cn-only");
+  if (!wrapper) return null;
+  const peer = topicLanguagePeerWrapper(wrapper);
+  if (!peer) return null;
+
+  const sourceTargets = topicFormulaTargetsIn(wrapper, target);
+  const index = sourceTargets.indexOf(target);
+  if (index < 0) return null;
+  return topicFormulaTargetsIn(peer, target)[index] || null;
+}
+
+function topicEquationInsertionPoint(target) {
+  if (!target) return null;
+  if (target.matches(".callout.formula, .callout") && target.querySelector(".eq")) {
+    return { mode: "inside", node: target };
+  }
+  if (target.querySelector && target.querySelector(":scope > .eq")) {
+    return { mode: "inside", node: target };
+  }
+  if (target.matches("h3, h4")) {
+    let cursor = target.nextElementSibling;
+    let anchor = null;
+    while (cursor && !cursor.matches("h2, h3, h4")) {
+      anchor = cursor;
+      cursor = cursor.nextElementSibling;
+    }
+    return { mode: "after", node: anchor || target };
+  }
+  return { mode: "after", node: target };
+}
+
+function typesetTopicEquationExplanations(nodes) {
+  if (!nodes.length || !window.MathJax || !MathJax.typesetPromise) return;
+  const run = () => MathJax.typesetPromise(nodes).catch(() => {});
+  if (MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(run);
+  else run();
+}
+
+function applyTopicEquationExplanations(slug) {
+  const sheet = window.EQUATION_SHEET;
+  const items = slug && sheet && sheet.data && sheet.data[slug];
+  if (!items || !items.length || typeof sheet.explain !== "function") return;
+
+  const inserted = [];
+  items.forEach(item => {
+    const id = topicEquationSourceId(item, slug);
+    const target = id && document.getElementById(id);
+    const targets = [target, topicMirroredTarget(target)].filter(Boolean);
+    targets.forEach(eachTarget => {
+      const point = topicEquationInsertionPoint(eachTarget);
+      if (!point || !point.node || topicExplanationAlreadyPresent(point.node)) return;
+
+      const html = sheet.explain(item).replace(
+        '<details class="equation-explain-wrap">',
+        '<details class="equation-explain-wrap" open>'
+      );
+      if (!html) return;
+      if (point.mode === "inside") point.node.insertAdjacentHTML("beforeend", html);
+      else point.node.insertAdjacentHTML("afterend", html);
+      const added = point.mode === "inside" ? point.node.lastElementChild : point.node.nextElementSibling;
+      if (added) {
+        if (added.matches(".equation-explain-wrap")) added.open = true;
+        added.dataset.topicEquationExplain = "1";
+        inserted.push(added);
+      }
+    });
+  });
+
+  typesetTopicEquationExplanations(inserted);
+}
+
+function setupTopicEquationExplanations() {
+  const markBtn = document.getElementById("markRead");
+  const slug = markBtn && markBtn.dataset.block;
+  if (!slug || !document.querySelector("section.topic .eq")) return;
+
+  if (window.EQUATION_SHEET) {
+    applyTopicEquationExplanations(slug);
+    return;
+  }
+  loadTopicEquationSheet()
+    .then(() => applyTopicEquationExplanations(slug))
+    .catch(() => {});
+}
+
 // === Collapsible topic-page table of contents ===
 const TOPIC_TOC_KEY = "ml_review_topic_toc_collapsed_v1";
 function reviewLang() {
@@ -624,6 +768,7 @@ function drawLines() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupEquationSourceAnchors();
+  setupTopicEquationExplanations();
   paintProgressOnHome();
   renderIndexTable();
   setupSearch();

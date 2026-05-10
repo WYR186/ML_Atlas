@@ -66,19 +66,27 @@
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
     <div class="head">Generic recurrence</div>
-    <div class="eq">$$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \qquad y^{(t)} = g(h^{(t)}) $$</div>
-    <p>$x^{(t)}$ is the input at step $t$; $h^{(t)}$ is the memory state; $y^{(t)}$ is an optional output at that step.</p>
+    <div class="eq">$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \qquad y^{(t)} = g(h^{(t)}) $</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $t$ is the time index. $x^{(t)}$ is the input at step $t$. $h^{(t)}$ is the hidden state after reading through step $t$. $h^{(0)}$ is the initial memory. $f$ is the recurrent update and $g$ maps hidden state to output.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The model reads the sequence one step at a time. Current input plus previous memory becomes new memory; the output is computed from that new memory.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Start from $h^{(0)}$, then compute $h^{(1)},h^{(2)},\ldots$ in order. The superscript $(t)$ means time step, not exponent.</p>
   </div>
   <div class="callout formula">
     <div class="head">Elman RNN form from Lecture 14</div>
-    <div class="eq">$$ h^{(t)}=\sigma_h(W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h) $$</div>
-    <div class="eq">$$ y^{(t)}=\sigma_y(W_{yh}h^{(t)}+b_y) $$</div>
-    <p>$W_{hx}$ reads the current input, $W_{hh}$ carries previous state information, and $W_{yh}$ maps state to prediction.</p>
+    <div class="eq">$ a^{(t)}=W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h,\qquad h^{(t)}=\sigma_h(a^{(t)}) $</div>
+    <div class="eq">$ z^{(t)}=W_{yh}h^{(t)}+b_y,\qquad y^{(t)}=\sigma_y(z^{(t)}) $</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $W_{hx}$ maps input to hidden state; $W_{hh}$ carries previous hidden state forward; $b_h$ is hidden bias; $a^{(t)}$ is hidden pre-activation; $\sigma_h$ is usually $\tanh$; $W_{yh},b_y$ map hidden state to output logits $z^{(t)}$; $\sigma_y$ may be softmax.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each time step first mixes current input and old hidden state, applies an activation, then optionally produces an output distribution.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute $a^{(t)}\to h^{(t)}\to z^{(t)}\to y^{(t)}$ step by step. Reuse the same $W_{hx},W_{hh},W_{yh}$ at every time step.</p>
   </div>
   <div class="callout formula">
     <div class="head">Why gradients vanish or explode</div>
-    <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=\prod_{t=2}^{T}\frac{\partial h^{(t)}}{\partial h^{(t-1)}} $$</div>
-    <p>If the factors tend to have norm below 1, the product shrinks; if above 1, it grows. This is the mechanism behind the long-term dependency problem.</p>
+    <div class="eq">$ J_t=\frac{\partial h^{(t)}}{\partial h^{(t-1)}}=\operatorname{diag}\!\big(\sigma_h'(a^{(t)})\big)W_{hh} $</div>
+    <div class="eq">$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=J_TJ_{T-1}\cdots J_2 $</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $J_t$ is the local Jacobian from hidden state $t-1$ to $t$. $\operatorname{diag}(\sigma_h'(a^{(t)}))$ stores activation derivatives on the diagonal. $W_{hh}$ is the recurrent weight matrix. The long derivative is a product of local Jacobians.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Backpropagation through time multiplies many local sensitivity matrices. Products with norms below 1 shrink; products with norms above 1 can explode.</p>
+    <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For explanation questions, point to the repeated product. For hand derivatives, unroll the graph and multiply local derivatives along each path back to the shared parameter.</p>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
@@ -145,20 +153,28 @@
 
       <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
-        <div class="head">通用 recurrence</div>
+        <div class="head">Generic recurrence</div>
         <div class="eq">$$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \qquad y^{(t)} = g(h^{(t)}) $$</div>
-        <p>$x^{(t)}$ 是第 $t$ 步输入；$h^{(t)}$ 是 memory state；$y^{(t)}$ 是这一步的预测。</p>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $t$ 是 time index；$x^{(t)}$ 是第 $t$ 步输入；$h^{(t)}$ 是读到第 $t$ 步后的 hidden state；$h^{(0)}$ 是初始 memory；$f$ 是 recurrent update；$g$ 把 hidden state 映射成 output。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 模型按顺序读 sequence：当前输入加旧记忆，变成新记忆；输出再由新记忆算出来。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 从 $h^{(0)}$ 开始，依次算 $h^{(1)},h^{(2)},\ldots$。上标 $(t)$ 表示时间步，不是幂次。</p>
       </div>
       <div class="callout formula">
         <div class="head">Lecture 14 的 Elman RNN</div>
-        <div class="eq">$$ h^{(t)}=\sigma_h(W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h) $$</div>
-        <div class="eq">$$ y^{(t)}=\sigma_y(W_{yh}h^{(t)}+b_y) $$</div>
-        <p>$W_{hx}$ 读当前输入，$W_{hh}$ 传递上一时刻状态，$W_{yh}$ 把状态映射成输出。</p>
+        <div class="eq">$$ a^{(t)}=W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h,\qquad h^{(t)}=\sigma_h(a^{(t)}) $$</div>
+        <div class="eq">$$ z^{(t)}=W_{yh}h^{(t)}+b_y,\qquad y^{(t)}=\sigma_y(z^{(t)}) $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $W_{hx}$ 把 input 映射到 hidden；$W_{hh}$ 把上一 hidden state 带到下一步；$b_h$ 是 hidden bias；$a^{(t)}$ 是 hidden pre-activation；$\sigma_h$ 常见为 $\tanh$；$W_{yh},b_y$ 把 hidden state 变成 output logits $z^{(t)}$；$\sigma_y$ 可为 softmax。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每一步先混合 current input 和 old hidden state，过 activation 得到新 hidden，再按需要输出预测。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 按 $a^{(t)}\to h^{(t)}\to z^{(t)}\to y^{(t)}$ 顺序算。所有时间步复用同一套 $W_{hx},W_{hh},W_{yh}$，不要每步换参数。</p>
       </div>
       <div class="callout formula">
-        <div class="head">梯度为什么会消失 / 爆炸</div>
-        <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=\prod_{t=2}^{T}\frac{\partial h^{(t)}}{\partial h^{(t-1)}} $$</div>
-        <p>这些因子如果多数小于 1，乘积会缩到接近 0；如果多数大于 1，乘积会变很大。</p>
+        <div class="head">Vanishing / exploding gradients</div>
+        <div class="eq">$$ J_t=\frac{\partial h^{(t)}}{\partial h^{(t-1)}}=\operatorname{diag}\!\big(\sigma_h'(a^{(t)})\big)W_{hh} $$</div>
+        <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=J_TJ_{T-1}\cdots J_2 $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $J_t$ 是从 hidden state $t-1$ 到 $t$ 的 local Jacobian；$\operatorname{diag}(\sigma_h'(a^{(t)}))$ 把 activation derivatives 放在对角线上；$W_{hh}$ 是 recurrent weight；长距离导数是很多 $J_t$ 的乘积。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> BPTT 会连续乘很多 local sensitivity matrices。Norm 小于 1 时越乘越小，gradient vanish；norm 大于 1 时可能 explode。</p>
+        <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 解释题抓住 repeated product；手算导数题先 unroll graph，再沿路径乘 local derivatives，并对 shared parameter 的所有路径求和。</p>
       </div>
 
       <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
@@ -201,7 +217,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -229,17 +245,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

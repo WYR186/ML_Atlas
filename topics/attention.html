@@ -72,13 +72,25 @@
   <h2>4. Key Equations</h2>
   <h3>Single-query attention</h3>
   <div class="eq">$$ s_i = k_i^\top q,\qquad \alpha_i=\frac{\exp(s_i)}{\sum_j \exp(s_j)},\qquad y=\sum_i \alpha_i v_i $$</div>
-  <p>$q$ is the query, $k_i$ is the key for candidate $i$, $v_i$ is its value, and $y$ is the returned mixture.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> $q\in\mathbb{R}^{d_k}$ is the query vector for the current token; $k_i\in\mathbb{R}^{d_k}$ is candidate $i$'s key; $v_i\in\mathbb{R}^{d_v}$ is candidate $i$'s content; $s_i$ is the raw logit; $\alpha_i$ is the attention weight.</p>
+    <p><b>How to read it.</b> First compute a match score $s_i$ between the current query and each candidate key. Then softmax turns those scores into weights $\alpha_i$ that sum to 1. Finally, output $y$ is a weighted average of the value vectors.</p>
+    <p><b>How to use.</b> In hand problems, list all dot products $k_i^\top q$, apply softmax, then multiply each $v_i$ by its weight. If one score is much larger, the answer is close to that value vector.</p>
+  </div>
   <h3>Scaled dot-product attention</h3>
   <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
-  <p>The division by $\sqrt{d_k}$ keeps dot products from becoming too large in high dimension, which prevents softmax saturation.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> If there are $T$ tokens, $Q,K\in\mathbb{R}^{T\times d_k}$ and $V\in\mathbb{R}^{T\times d_v}$. Entry $(i,j)$ of $QK^\top$ is how much token $i$ attends to token $j$. The $\sqrt{d_k}$ factor prevents high-dimensional dot products from making softmax too peaky.</p>
+    <p><b>How to read it.</b> This is the same idea in matrix form for many tokens at once. $QK^\top$ produces all query-key scores; row-wise softmax makes each row an attention distribution; multiplying by $V$ averages the value vectors for every token.</p>
+    <p><b>How to use.</b> Check matrix shapes first: $(T\times d_k)(d_k\times T)=T\times T$, then $(T\times T)(T\times d_v)=T\times d_v$. For a small example, compute one row at a time.</p>
+  </div>
   <h3>Causal mask</h3>
   <div class="eq">$$ \mathrm{softmax}\!\left(\frac{QK^\top + M}{\sqrt{d_k}}\right),\qquad M_{ij}=\begin{cases}0,&j\le i\\-\infty,&j>i\end{cases} $$</div>
-  <p>The mask is added before softmax; future-token weights become exactly 0.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> $M_{ij}$ is the mask entry for query position $i$ attending to key position $j$. $j\le i$ means the token is current or past, so the logit is kept. $j>i$ means future token, so adding $-\infty$ makes its softmax probability 0.</p>
+    <p><b>How to read it.</b> For token position $i$, positions $j>i$ are future tokens. Adding $-\infty$ to those logits makes their softmax probability 0.</p>
+    <p><b>How to use.</b> Always apply the mask to logits before softmax. In a decoder-only LLM, this is what prevents the model from looking at the answer token during training.</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="attention-examples-en">
@@ -167,13 +179,25 @@
   <h2>4. 核心公式 / Key Equations</h2>
   <h3>单个 query 的 attention</h3>
   <div class="eq">$$ s_i = k_i^\top q,\qquad \alpha_i=\frac{\exp(s_i)}{\sum_j \exp(s_j)},\qquad y=\sum_i \alpha_i v_i $$</div>
-  <p>$q$ 是 query，$k_i$ 是第 $i$ 个 key，$v_i$ 是对应 value，$y$ 是最后读出来的混合向量。</p>
+  <div class="study-box">
+    <p><b>符号.</b> $q\in\mathbb{R}^{d_k}$ 是当前 token 的 query；$k_i\in\mathbb{R}^{d_k}$ 是第 $i$ 个候选 token 的 key；$v_i\in\mathbb{R}^{d_v}$ 是它的内容；$s_i$ 是 raw logit；$\alpha_i$ 是 attention weight。</p>
+    <p><b>怎么理解.</b> 先用 $k_i^\top q$ 算 query 和每个 key 的匹配分数 $s_i$；再用 softmax 把分数变成总和为 1 的权重 $\alpha_i$；最后输出 $y$ 是所有 value 的加权平均。</p>
+    <p><b>怎么用.</b> 手算题先列所有 dot products，再 softmax，再按权重加权 value。某个 $s_i$ 远大于其他分数时，输出就接近对应的 $v_i$。</p>
+  </div>
   <h3>Scaled dot-product attention</h3>
   <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
-  <p>除以 $\sqrt{d_k}$ 是为了避免维度一大，点积太大导致 softmax 饱和、梯度变小。</p>
+  <div class="study-box">
+    <p><b>符号.</b> 若序列长度是 $T$，则 $Q,K\in\mathbb{R}^{T\times d_k}$，$V\in\mathbb{R}^{T\times d_v}$。$QK^\top$ 的第 $(i,j)$ 项表示 token $i$ 对 token $j$ 的注意力 logit。$\sqrt{d_k}$ 用来防止高维 dot product 过大，让 softmax 不至于过度饱和。</p>
+    <p><b>怎么理解.</b> 这是把单个 query 公式批量化。$QK^\top$ 一次性算出所有 token 之间的匹配分数；row-wise softmax 把每一行变成 attention distribution；再乘 $V$ 得到每个 token 读回来的内容。</p>
+    <p><b>怎么用.</b> 先检查 shape：$(T\times d_k)(d_k\times T)=T\times T$，再乘 $(T\times d_v)$ 得到 $T\times d_v$。小题可以逐行算 softmax。</p>
+  </div>
   <h3>Causal mask</h3>
   <div class="eq">$$ \mathrm{softmax}\!\left(\frac{QK^\top + M}{\sqrt{d_k}}\right),\qquad M_{ij}=\begin{cases}0,&j\le i\\-\infty,&j>i\end{cases} $$</div>
-  <p>mask 要加在 softmax 前的 logits 上；未来 token 的权重会变成 0。</p>
+  <div class="study-box">
+    <p><b>符号.</b> $M_{ij}$ 是 query 位置 $i$ 看 key 位置 $j$ 时加上的 mask entry。$j\le i$ 表示当前或过去 token，logit 保留；$j>i$ 表示未来 token，加 $-\infty$ 后 softmax probability 变成 0。</p>
+    <p><b>怎么理解.</b> 对位置 $i$ 来说，$j>i$ 是未来 token。把这些位置的 logit 加上 $-\infty$，softmax 后概率就会变成 0。</p>
+    <p><b>怎么用.</b> mask 一定加在 softmax 前。decoder-only LLM 靠这个避免训练时偷看未来 token。</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="attention-examples-cn">

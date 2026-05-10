@@ -66,18 +66,50 @@
 <section class="topic lesson-section equations" id="diffusion-equations-en">
   <h2>4. Key Equations</h2>
   <h3>Notation</h3>
-  <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$.</p>
+  <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final almost-pure-noise step, $I$ is the identity covariance matrix, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> $x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final noise step, $q$ is the fixed forward process, $p_\theta$ is the learned reverse process, and $\alpha_t,\beta_t,\bar\alpha_t$ control one-step and cumulative noise.</p>
+    <p><b>How to read it.</b> $q(\cdot)$ is the fixed forward noising process; $p_\theta(\cdot)$ is the learned reverse denoising process. $\alpha_t,\beta_t$ describe one step, while $\bar{\alpha}_t$ describes the cumulative effect from $0$ to $t$.</p>
+    <p><b>How to use.</b> first decide whether the question is moving forward ($q$) or backward ($p_\theta$). Then decide whether it asks for one step ($\alpha_t,\beta_t$) or a direct jump from clean data ($\bar{\alpha}_t$).</p>
+  </div>
   <h3>Forward noising process</h3>
   <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
   <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
+  <p>This says: given the previous noisy state $x_{t-1}$, the next state $x_t$ is Gaussian. Its mean is the old state slightly shrunk by $\sqrt{\alpha_t}$, and its covariance is $\beta_t I$, meaning isotropic Gaussian noise of variance $\beta_t$ is added.</p>
+  <ul class="mini-list">
+    <li>$\epsilon_t$ is fresh standard Gaussian noise. To sample one step, draw $\epsilon_t$ and plug it into the reparameterized equation.</li>
+    <li>Use the distribution form for ELBO / probability derivations; use the reparameterized form for sampling or deriving $q(x_t\mid x_0)$.</li>
+  </ul>
   <h3>Direct sample from $x_0$</h3>
   <div class="eq">$$ q(x_t\mid x_0)=\mathcal{N}\!\left(x_t;\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div>
+  <p>This is the shortcut formula. Instead of simulating every intermediate step, you can jump from clean data $x_0$ directly to any noise level $t$:</p>
+  <div class="eq">$$ x_t=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon,\qquad \epsilon\sim\mathcal{N}(0,I). $$</div>
+  <p>When $t$ is small, $\bar{\alpha}_t$ is close to $1$, so $x_t$ is mostly clean signal. When $t$ is large, $\bar{\alpha}_t$ is close to $0$, so $x_t$ is mostly noise.</p>
+  <ul class="mini-list">
+    <li>$\sqrt{\bar{\alpha}_t}$ is the remaining signal scale. It shrinks the original clean sample.</li>
+    <li>$\sqrt{1-\bar{\alpha}_t}$ is the noise scale. It grows as more noise steps accumulate.</li>
+    <li>In training-code style questions, sample $t$, sample $\epsilon$, build $x_t$, then ask the network to recover the noise or clean signal.</li>
+  </ul>
   <h3>Learned reverse transition</h3>
   <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <p>This is the model we learn. At generation time, start from $x_T\sim\mathcal{N}(0,I)$, then repeatedly use $p_\theta(x_{t-1}\mid x_t)$ to move from $T$ down to $0$.</p>
+  <ul class="mini-list">
+    <li>$\theta$ are neural-network parameters.</li>
+    <li>$\mu_\theta(x_t,t)$ is the predicted mean of the slightly cleaner previous state.</li>
+    <li>$\Sigma_\theta(x_t,t)$ is the reverse-step covariance; in many simplified derivations it is fixed or parameterized simply.</li>
+  </ul>
   <h3>Posterior mean used in HW4 §3.4</h3>
   <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
 \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}x_t+
 \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1-\bar{\alpha}_t}x_0 $$</div>
+  <p>This is the mean of the true posterior $q(x_{t-1}\mid x_t,x_0)$. It is a weighted average of the noisy observation $x_t$ and the clean anchor $x_0$. In derivations, get it from Bayes' rule:</p>
+  <div class="eq">$$ q(x_{t-1}\mid x_t,x_0)\propto q(x_t\mid x_{t-1})q(x_{t-1}\mid x_0). $$</div>
+  <p>Both factors are Gaussian in the variable $x_{t-1}$, so multiplying them gives another Gaussian. Completing the square gives the mean above.</p>
+  <ul class="mini-list">
+    <li>The coefficient on $x_t$ tells how much the current noisy observation pulls the previous step.</li>
+    <li>The coefficient on $x_0$ tells how much the clean reference anchors the posterior.</li>
+    <li>To use the formula, compute $\alpha_t$, $\bar{\alpha}_{t-1}$, $\bar{\alpha}_t$, and $\beta_t$ first; then plug in the two vectors $x_t$ and $x_0$.</li>
+  </ul>
 </section>
 
 <section class="topic lesson-section examples" id="diffusion-examples-en">
@@ -166,20 +198,51 @@
 </section>
 
 <section class="topic lesson-section equations" id="diffusion-equations-cn">
-  <h2>4. Key Equations</h2>
-  <h3>Notation</h3>
-  <p>$x_0$ 是 clean data，$x_t$ 是第 $t$ 步 noisy state，$\beta_t$ 是噪声方差，$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$。</p>
-  <h3>Forward noising process</h3>
+  <h2>4. 核心公式 / Key Equations</h2>
+  <h3>符号表 / Notation</h3>
+  <p>$x_0$ 是 clean data，$x_t$ 是第 $t$ 步 noisy state，$T$ 是最后几乎纯噪声的步数，$I$ 是 identity covariance matrix，$\beta_t$ 是噪声方差，$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$。</p>
+  <div class="study-box">
+    <p><strong>如何读 diffusion 公式：</strong>$q(\cdot)$ 是 fixed forward noising process；$p_\theta(\cdot)$ 是 learned reverse denoising process。$\alpha_t,\beta_t$ 描述单步变化；$\bar{\alpha}_t$ 描述从 $0$ 到 $t$ 的累计效果。</p>
+    <p><strong>怎么用这套符号：</strong>先判断题目是在 forward 加噪（$q$）还是 reverse 去噪（$p_\theta$）；再判断它问的是单步变化（$\alpha_t,\beta_t$）还是从 clean data 直接跳到第 $t$ 步（$\bar{\alpha}_t$）。</p>
+  </div>
+  <h3>正向加噪 / Forward noising process</h3>
   <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
   <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
-  <h3>Direct sample from $x_0$</h3>
+  <p>这表示：给定 previous noisy state $x_{t-1}$，下一步 $x_t$ 是 Gaussian。它的 mean 是把旧状态乘 $\sqrt{\alpha_t}$ 稍微缩小；covariance 是 $\beta_t I$，表示加入 variance 为 $\beta_t$ 的 isotropic Gaussian noise。</p>
+  <ul class="mini-list">
+    <li>$\epsilon_t$ 是 fresh standard Gaussian noise。sample 一步时，先 draw $\epsilon_t$，再代入 reparameterized equation。</li>
+    <li>做 ELBO / probability derivation 时用 distribution form；做 sampling 或推 $q(x_t\mid x_0)$ 时用 reparameterized form。</li>
+  </ul>
+  <h3>从 clean data 直接采样 / Direct sample from $x_0$</h3>
   <div class="eq">$$ q(x_t\mid x_0)=\mathcal{N}\!\left(x_t;\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div>
-  <h3>Learned reverse transition</h3>
+  <p>这是 shortcut formula。不需要真的模拟每个 intermediate step，可以从 clean data $x_0$ 直接跳到任意 noise level $t$：</p>
+  <div class="eq">$$ x_t=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon,\qquad \epsilon\sim\mathcal{N}(0,I). $$</div>
+  <p>$t$ 小时，$\bar{\alpha}_t$ 接近 $1$，所以 $x_t$ mostly clean signal；$t$ 大时，$\bar{\alpha}_t$ 接近 $0$，所以 $x_t$ mostly noise。</p>
+  <ul class="mini-list">
+    <li>$\sqrt{\bar{\alpha}_t}$ 是剩下的 signal scale，会缩小原始 clean sample。</li>
+    <li>$\sqrt{1-\bar{\alpha}_t}$ 是 noise scale，累计加噪越多，它越大。</li>
+    <li>训练代码题里通常是：sample $t$，sample $\epsilon$，构造 $x_t$，再让 network 预测 noise 或 clean signal。</li>
+  </ul>
+  <h3>学到的反向去噪 / Learned reverse transition</h3>
   <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <p>这是模型要学的部分。generation 时，从 $x_T\sim\mathcal{N}(0,I)$ 开始，然后不断使用 $p_\theta(x_{t-1}\mid x_t)$ 从 $T$ reverse 到 $0$。</p>
+  <ul class="mini-list">
+    <li>$\theta$ 是 neural-network parameters。</li>
+    <li>$\mu_\theta(x_t,t)$ 是模型预测的 slightly cleaner previous state 的 mean。</li>
+    <li>$\Sigma_\theta(x_t,t)$ 是 reverse-step covariance；很多简化推导里它会固定或用简单形式 parameterize。</li>
+  </ul>
   <h3>HW4 §3.4 的 posterior mean</h3>
   <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
 \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}x_t+
 \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1-\bar{\alpha}_t}x_0 $$</div>
+  <p>这是 true posterior $q(x_{t-1}\mid x_t,x_0)$ 的 mean。它是 noisy observation $x_t$ 和 clean anchor $x_0$ 的 weighted average。推导时从 Bayes' rule 开始：</p>
+  <div class="eq">$$ q(x_{t-1}\mid x_t,x_0)\propto q(x_t\mid x_{t-1})q(x_{t-1}\mid x_0). $$</div>
+  <p>两个 factors 关于 variable $x_{t-1}$ 都是 Gaussian，所以乘积仍然是 Gaussian。对 exponent complete the square，就得到上面的 mean。</p>
+  <ul class="mini-list">
+    <li>$x_t$ 前面的系数表示当前 noisy observation 对上一时刻的拉动有多强。</li>
+    <li>$x_0$ 前面的系数表示 clean reference 对 posterior 的 anchor 有多强。</li>
+    <li>套公式时先算 $\alpha_t$、$\bar{\alpha}_{t-1}$、$\bar{\alpha}_t$、$\beta_t$，再把 $x_t$ 和 $x_0$ 代进去。</li>
+  </ul>
 </section>
 
 <section class="topic lesson-section examples" id="diffusion-examples-cn">

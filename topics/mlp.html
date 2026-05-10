@@ -61,31 +61,43 @@
   <p>Depth lets the model reuse features hierarchically. Width gives more hidden units to carve the input space. Universal approximation says a sufficiently wide nonlinear network can approximate continuous functions on compact domains.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">Forward pass, layer by layer</div>
+    <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: one input example； $a^{(0)}$: layer-0 activation, equal to the raw input $x$； $\ell$: layer index； $W^{(\ell)}$: weight matrix of layer $\ell$; shape $n_\ell\times n_{\ell-1}$； $b^{(\ell)}$: bias vector of layer $\ell$; shape $n_\ell$； $z^{(\ell)}$: pre-activation raw score before the nonlinearity； $a^{(\ell)}$: post-activation output passed to the next layer； $\sigma$: activation function, applied elementwise</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> An MLP alternates linear mixing and nonlinear bending. The linear part combines previous features; the activation prevents stacked layers from collapsing into one big linear map.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Start with $a^{(0)}=x$. For each layer, multiply by $W^{(\ell)}$, add $b^{(\ell)}$, then apply $\sigma$. In homework calculations, write the vector dimensions first so matrix multiplication errors show up immediately.</p>
+  </div>
   <div class="cols2">
-    <div class="callout formula">
-      <div class="head">Two-layer forward pass</div>
-      <div class="eq">$$ z^{(1)}=W^{(1)}x+b^{(1)},\qquad a^{(1)}=\sigma(z^{(1)}) $$</div>
-      <div class="eq">$$ z^{(2)}=W^{(2)}a^{(1)}+b^{(2)} $$</div>
-    </div>
     <div class="callout formula">
       <div class="head">ReLU activation</div>
       <div class="eq">$$ \operatorname{ReLU}(z)=\max(0,z) $$</div>
-      <p>Fast and simple, but gradient is zero on the negative side.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $z$: pre-activation value; can be a scalar, vector, or matrix； $\max(0,z)$: elementwise choice between zero and the input value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> ReLU is a simple gate. A hidden unit either fires with its positive score or stays silent at zero.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Apply ReLU to every entry: negative values become $0$, positive values remain unchanged. In backprop, the derivative is $0$ on inactive negative entries and $1$ on active positive entries.</p>
     </div>
     <div class="callout formula">
       <div class="head">Softmax output</div>
-      <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_j e^{z_j}} $$</div>
-      <p>Turns logits into a probability vector.</p>
+      <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $K$: number of classes； $z_i$: logit score for class $i$； $\hat y_i$: predicted probability of class $i$； $\sum_{j=1}^{K}$: normalization across all classes</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Softmax turns arbitrary class scores into a probability distribution. Larger logits get exponentially more probability mass.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Exponentiate every logit, divide each exponential by the total sum, and pick the class with largest $\hat y_i$ for prediction. For numerical stability in code, subtract $\max_j z_j$ before exponentiating.</p>
     </div>
     <div class="callout formula">
-      <div class="head">Cross-entropy</div>
-      <div class="eq">$$ \ell(y,\hat y)=-\sum_i y_i\log \hat y_i $$</div>
-      <p>For one-hot labels, only the true class term remains.</p>
+      <div class="head">Cross-entropy loss</div>
+      <div class="eq">$$ \ell(y,\hat y)=-\sum_{i=1}^{K} y_i\log \hat y_i $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_i$: true label indicator for class $i$, often one-hot； $\hat y_i$: predicted probability for class $i$； $\ell$: loss for one example</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The loss is small only when the model assigns high probability to the correct class. Confidently wrong predictions get punished strongly.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a one-hot label with true class $c$, all terms vanish except $i=c$, so $\ell=-\log\hat y_c$. Use it with softmax for multiclass classification.</p>
     </div>
-    <div class="callout formula wide">
+    <div class="callout formula">
       <div class="head">Mini-batch gradient descent</div>
-      <div class="eq">$$ w\leftarrow w-\alpha\frac1{|B|}\sum_{i\in B}\nabla_w\ell_i(w) $$</div>
-      <p>Use a batch $B$ to approximate the full-data gradient.</p>
+      <div class="eq">$$ \theta\leftarrow \theta-\alpha\frac{1}{\lvert B\rvert}\sum_{i\in B}\nabla_{\theta}\ell_i(\theta) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\theta$: all trainable parameters, including every $W$ and $b$； $\alpha$: learning rate / step size； $B$: mini-batch of training examples； $\lvert B\rvert$: batch size； $\nabla_{\theta}\ell_i(\theta)$: gradient of example $i$'s loss with respect to the parameters</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The batch gradient estimates the full-data direction without scanning the entire dataset every step.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute gradients for each example in the batch, average them, scale by $\alpha$, and subtract from the parameters. This is the standard training update after backprop.</p>
     </div>
   </div>
 
@@ -159,32 +171,44 @@
       <p>Lecture 10 用 perceptron 解决不了 XOR 来引出 MLP。XOR 在原 input space 里不是 linearly separable，但 hidden layer 可以创造让它可分的 features。</p>
       <p>Depth 让模型复用 hierarchical features；width 提供更多 hidden units 来切分输入空间。Universal approximation 说足够宽的 nonlinear network 能在 compact domain 上逼近 continuous functions。</p>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <h3 class="section-purple">4. 关键公式</h3>
+      <div class="callout formula">
+        <div class="head">Forward pass：一层一层往前算</div>
+        <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 一个 input example；$a^{(0)}$: 第 0 层 activation，也就是原始输入 $x$；$\ell$: layer index，第几层；$W^{(\ell)}$: 第 $\ell$ 层 weight matrix；shape 是 $n_\ell\times n_{\ell-1}$；$b^{(\ell)}$: 第 $\ell$ 层 bias vector；shape 是 $n_\ell$；$z^{(\ell)}$: pre-activation，过 nonlinearity 前的 raw score；$a^{(\ell)}$: post-activation，传给下一层的 representation；$\sigma$: activation function，elementwise 套到每个坐标</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> MLP 就是在 linear mixing 和 nonlinear bending 之间交替。Linear part 负责组合上一层 features；activation 负责把空间折弯，避免多层网络退化成一个大 linear map。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 从 $a^{(0)}=x$ 开始。每层先乘 $W^{(\ell)}$，再加 $b^{(\ell)}$，最后套 activation $\sigma$。手算题先写每个 vector / matrix 的 dimension，shape 错误会立刻暴露。</p>
+      </div>
       <div class="cols2">
-        <div class="callout formula">
-          <div class="head">Two-layer forward pass</div>
-          <div class="eq">$$ z^{(1)}=W^{(1)}x+b^{(1)},\qquad a^{(1)}=\sigma(z^{(1)}) $$</div>
-          <div class="eq">$$ z^{(2)}=W^{(2)}a^{(1)}+b^{(2)} $$</div>
-        </div>
         <div class="callout formula">
           <div class="head">ReLU activation</div>
           <div class="eq">$$ \operatorname{ReLU}(z)=\max(0,z) $$</div>
-          <p>简单高效，但负半轴 gradient 为 0。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $z$: pre-activation value；可以是 scalar、vector 或 matrix；$\max(0,z)$: elementwise 地在 $0$ 和原值之间取较大者</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> ReLU 像一个简单开关：hidden unit 的 score 为正就激活，为负就静默成 $0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 entry 单独套 ReLU：负数变 $0$，正数原样保留。做 backprop 时，负数位置 derivative 是 $0$，正数位置 derivative 是 $1$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Softmax output</div>
-          <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_j e^{z_j}} $$</div>
-          <p>把 logits 变成 probability vector。</p>
+          <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $K$: classes 的数量；$z_i$: 第 $i$ 类的 logit score；$\hat y_i$: 模型预测属于第 $i$ 类的 probability；$\sum_{j=1}^{K}$: 对所有 classes 做 normalization</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Softmax 把任意 class scores 变成 probability distribution。logit 越大，拿到的 probability mass 会指数级更大。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先对每个 logit 取指数，再除以所有指数之和；prediction 通常取最大的 $\hat y_i$。代码里为了 numerical stability，常先减去 $\max_j z_j$ 再 exp。</p>
         </div>
         <div class="callout formula">
-          <div class="head">Cross-entropy</div>
-          <div class="eq">$$ \ell(y,\hat y)=-\sum_i y_i\log \hat y_i $$</div>
-          <p>One-hot label 时只有 true class 那一项留下。</p>
+          <div class="head">Cross-entropy loss</div>
+          <div class="eq">$$ \ell(y,\hat y)=-\sum_{i=1}^{K} y_i\log \hat y_i $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_i$: 第 $i$ 类的 true label indicator，通常是 one-hot；$\hat y_i$: 第 $i$ 类的 predicted probability；$\ell$: 单个 example 的 loss</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 只有模型给正确类别很高 probability 时，loss 才小。自信但错误的 prediction 会被重罚。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 label 是 one-hot，真实类别为 $c$，只有 $i=c$ 那一项留下，所以 $\ell=-\log\hat y_c$。Multiclass classification 通常 softmax + cross-entropy 一起用。</p>
         </div>
-        <div class="callout formula wide">
+        <div class="callout formula">
           <div class="head">Mini-batch gradient descent</div>
-          <div class="eq">$$ w\leftarrow w-\alpha\frac1{|B|}\sum_{i\in B}\nabla_w\ell_i(w) $$</div>
-          <p>用 batch $B$ 近似 full-data gradient。</p>
+          <div class="eq">$$ \theta\leftarrow \theta-\alpha\frac{1}{\lvert B\rvert}\sum_{i\in B}\nabla_{\theta}\ell_i(\theta) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\theta$: 所有 trainable parameters，包括每层的 $W$ 和 $b$；$\alpha$: learning rate / step size；$B$: 一个 mini-batch 的 training examples；$\lvert B\rvert$: batch size；$\nabla_{\theta}\ell_i(\theta)$: 第 $i$ 个 example 的 loss 对参数的 gradient</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Mini-batch gradient 用一小批样本近似 full-data gradient，避免每一步都扫完整 dataset。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 batch 内每个样本的 gradient，取平均，乘 learning rate $\alpha$，再从参数中减掉。这就是 backprop 后最常见的 training update。</p>
         </div>
       </div>
 
@@ -240,7 +264,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

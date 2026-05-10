@@ -88,41 +88,77 @@
 
   <h3>4. Key Equations</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">Dot Product & Cosine</div>
       <div class="eq">$$ x^\top y=\sum_{i=1}^{d} x_i y_i = \|x\|\|y\|\cos\theta $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x, y\in\mathbb{R}^d$ are column vectors; $x^\top$ is the row form. $\|x\|=\sqrt{x^\top x}$ is the Euclidean length. $\theta$ is the angle between them.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The dot product is "overlap" — large positive when the vectors point the same way, zero when perpendicular, negative when opposite. Linear models, kernels, and attention all rank inputs by this overlap.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> To compute, multiply componentwise and sum. To turn a dot product into an angle, divide by $\|x\|\|y\|$. Linear classifier score: $w^\top x$.</p>
     </div>
+
     <div class="callout formula"><div class="head">$\ell_p$ Norms</div>
       <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\|x\|_2$ is the Euclidean / L2 norm; $\|x\|_1$ is the L1 (Manhattan / taxicab) norm; $\|x\|_\infty$ is the largest absolute coordinate. All are non-negative; zero iff $x=0$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> A norm is "length." L2 = round ball; L1 = diamond ball (corners on the axes — that's why L1 sets weights exactly to zero); $\ell_\infty$ = box.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> As regularizers ($\lambda\|w\|_2^2$ or $\lambda\|w\|_1$ added to the loss), as distances ($\|x-y\|$), or as size measures of gradients / weights. L2 is differentiable; L1 is not at zero.</p>
     </div>
+
     <div class="callout formula"><div class="head">Matrix-Multiply Shapes</div>
       <div class="eq">$$ (m\times n)\cdot(n\times p)\to(m\times p) $$</div>
-      <p style="font-size:13px;">$(AB)^\top=B^\top A^\top$. Inner dim must match.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{m\times n}$ has $m$ rows, $n$ cols. The "inner" dimension ($n$) must match between the two factors and disappears; the "outer" dimensions ($m, p$) survive.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Matrix multiplication is function composition: applying $B$ then $A$ to a vector is $(AB)x$. Inner dimensions match because the output of $B$ must be a valid input to $A$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Annotate every matrix in your derivation with its shape, then trace through to verify. Useful identities: $(AB)^\top=B^\top A^\top$; $(AB)C=A(BC)$ (associative); matrix multiplication is <i>not</i> commutative.</p>
     </div>
+
     <div class="callout formula"><div class="head">Rank-Nullity</div>
       <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathrm{Col}(A)$ = column space (subspace of $\mathbb{R}^m$ that $A$ can hit). $\mathrm{Ker}(A)$ = null space = $\{v:Av=0\}$ (subspace of $\mathbb{R}^n$ that $A$ kills). $\dim$ counts the basis size of each. $n$ is the input dimension.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Every input dimension is either preserved (becomes part of the output, contributing to $\mathrm{Col}$) or destroyed (squashed to zero, falling into $\mathrm{Ker}$). Total = $n$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> If $A$ has full column rank ($\dim\mathrm{Col}=n$), the null space is just $\{0\}$ and $Av=0\Rightarrow v=0$ — solutions are unique. If $\dim\mathrm{Ker}>0$, any solution to $Aw=y$ has a whole affine family of siblings $w+v$, $v\in\mathrm{Ker}(A)$.</p>
     </div>
+
     <div class="callout formula"><div class="head">Eigen Equation</div>
       <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
-      <p style="font-size:13px;">PCA: top eigenvector of covariance = max-variance direction.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{n\times n}$ (must be square). $u$ is an <b>eigenvector</b> — a non-zero direction that $A$ leaves pointing the same way. $\lambda$ is the matching <b>eigenvalue</b> — how much $u$ gets stretched. For symmetric $A$, all $\lambda$ are real and $u$'s can be chosen orthonormal.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Eigenvectors are the "natural axes" of $A$ — along them, $A$ acts like simple scalar multiplication. In the eigenbasis the matrix is diagonal, and matrix powers / inverses become elementwise.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Solve $\det(A-\lambda I)=0$ for $\lambda$, then $(A-\lambda I)u=0$ for each eigenvector. PCA: top eigenvector of the covariance matrix = direction of maximum variance.</p>
     </div>
+
     <div class="callout formula"><div class="head">Reduced SVD</div>
       <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
-      <p style="font-size:13px;">$r=\mathrm{rank}(X)$. Pseudo-inverse $X^+=V\Sigma^{-1}U^\top$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X\in\mathbb{R}^{n\times d}$ is any matrix; $r=\mathrm{rank}(X)$. $U, V$ have orthonormal columns ($U^\top U=I$, $V^\top V=I$). $\Sigma$ is diagonal with strictly positive <b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Every matrix is "rotate ($V^\top$) → stretch along orthonormal axes ($\Sigma$) → rotate ($U$)." Singular values measure how much $X$ stretches each axis.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Pseudo-inverse: $X^+=V\Sigma^{-1}U^\top$ (works even when $X$ isn't square or invertible). Low-rank approximation: keep top-$k$ singular values to compress / denoise. PCA: $V$'s columns are principal directions, singular values squared / $n$ = variances.</p>
     </div>
+
     <div class="callout formula"><div class="head">Quadratic Form & PSD</div>
       <div class="eq">$$ x^\top A x=\sum_{i,j}A_{ij}x_ix_j,\quad \text{PSD}: x^\top A x\ge 0\ \forall x $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{n\times n}$ symmetric ($A=A^\top$). The quadratic form is a scalar. <b>PSD</b> ($A\succeq 0$): $x^\top Ax\ge 0$ for all $x$. <b>PD</b> ($A\succ 0$): $x^\top Ax>0$ for all $x\ne 0$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> $x^\top Ax$ is the "energy" of $x$ measured through $A$. PSD means the energy is never negative — geometrically, the surface $f(x)=x^\top Ax$ is a bowl (PD: strict bowl with unique bottom).</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Equivalent tests: all eigenvalues $\ge 0$ (PSD) or $>0$ (PD); $A=B^\top B$ for some $B$ (PSD); leading principal minors $>0$ (PD). Used to certify a Hessian, hence to certify a loss is convex.</p>
     </div>
+
     <div class="callout formula"><div class="head">Sandwich Identity</div>
       <div class="eq">$$ A=B^\top B \;\Rightarrow\; A\succeq 0;\quad X^\top D X \succeq 0\ \text{when}\ D\succeq 0 $$</div>
-      <p style="font-size:13px;">Used for logistic Hessian $H=X^\top B X$ (HW1 §4.1).</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $B$ is any matrix; $X$ is any matrix; $D$ is symmetric PSD (often diagonal with non-negative entries). The right form is $X^\top D X$ — $D$ "sandwiched" between $X^\top$ and $X$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Multiplying a PSD matrix on both sides by the same factor never makes the energy negative — it just rescales the basis you measure energy in.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> To prove $H\succeq 0$, factor $H$ as $X^\top D X$ with $D\succeq 0$, then expand $v^\top H v=(Xv)^\top D(Xv)=\sum_i D_{ii}(Xv)_i^2\ge 0$. This is exactly the proof that the logistic-loss Hessian is PSD (HW1 §4.1).</p>
     </div>
+
     <div class="callout formula"><div class="head">Vector-Calc Shapes</div>
       <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Gradient $\nabla f$: column vector of partial derivatives, same length as the input. Hessian $\nabla^2 f$: matrix of second partials, symmetric for nice $f$. Jacobian $J$: rectangular for vector-valued $f:\mathbb{R}^n\to\mathbb{R}^m$, with $J_{ij}=\partial f_i/\partial x_j$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Conventions vary, but in this course gradients are <i>columns</i>. Track shapes obsessively: a missing transpose collapses your derivation silently. The chain rule for $f:\mathbb{R}^n\to\mathbb{R}^m\to\mathbb{R}^k$ is just $J_{\text{outer}}\,J_{\text{inner}}$ — matrix multiply.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Treat them as the standard "directional derivative machinery": gradient gives the steepest-ascent direction; Hessian gives curvature; Jacobian linearizes a vector-valued map (chain rule = matrix multiply).</p>
     </div>
+
     <div class="callout formula"><div class="head">Useful Derivatives</div>
       <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
-      <p style="font-size:13px;">Symmetric $A$ ⇒ gradient $2Aw$, Hessian $2A$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a\in\mathbb{R}^d$ is a constant vector; $A\in\mathbb{R}^{d\times d}$ is a constant matrix; $w$ is the variable. The gradient is taken with respect to $w$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The first formula is the multivariable analogue of $(ax)'=a$. The second is the analogue of $(ax^2)'=2ax$ — the $A+A^\top$ shows up because $w^\top Aw=w^\top A^\top w$ depends on the symmetric part of $A$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> If $A$ is symmetric, $\nabla(w^\top A w)=2Aw$ and $\nabla^2=2A$. Combine with the chain rule to differentiate any quadratic / linear loss: for OLS, $L=\tfrac12\|Xw-y\|^2$ has $\nabla L=X^\top(Xw-y)$ and $\nabla^2 L=X^\top X$.</p>
     </div>
+
   </div>
 
   <h3>5. Worked Examples</h3>
@@ -255,41 +291,77 @@
 
   <h3>4. 关键公式</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">点积与余弦</div>
       <div class="eq">$$ x^\top y=\sum_{i=1}^{d} x_i y_i = \|x\|\|y\|\cos\theta $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x, y\in\mathbb{R}^d$ 是列向量，$x^\top$ 是其行形式；$\|x\|=\sqrt{x^\top x}$ 是欧式长度；$\theta$ 是二者夹角。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 点积是"重叠度"——同向时大正、垂直时为 0、反向时为负。线性模型、kernel 方法、attention 都靠这一重叠值打分。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 计算就是逐分量相乘再求和；想得到夹角，把点积除以 $\|x\|\|y\|$。线性分类器的 score 就是 $w^\top x$。</p>
     </div>
+
     <div class="callout formula"><div class="head">$\ell_p$ 范数</div>
       <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\|x\|_2$ 欧式 / L2 范数；$\|x\|_1$ L1（曼哈顿 / 出租车）范数；$\|x\|_\infty$ 最大绝对分量。都非负，等于 0 当且仅当 $x=0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 范数就是"长度"。L2 = 圆球；L1 = 菱形球（角点落在坐标轴上，所以 L1 才会把权重精确推到 0）；$\ell_\infty$ = 方盒。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 用作正则项（损失上加 $\lambda\|w\|_2^2$ 或 $\lambda\|w\|_1$）、距离 $\|x-y\|$、或衡量梯度 / 权重的大小。L2 处处可微；L1 在 0 不可微。</p>
     </div>
+
     <div class="callout formula"><div class="head">矩阵乘法形状</div>
       <div class="eq">$$ (m\times n)\cdot(n\times p)\to(m\times p) $$</div>
-      <p style="font-size:13px;">$(AB)^\top=B^\top A^\top$；中间维必须相同。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{m\times n}$ 表示 $m$ 行 $n$ 列；"内"维 $n$ 必须匹配并消失，"外"维 $m, p$ 保留。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 矩阵乘法 = 函数复合：先用 $B$ 再用 $A$ 等于 $(AB)x$。中间维必须匹配，因为 $B$ 的输出要能当 $A$ 的合法输入。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 推导时给每个矩阵标 shape 再追踪。常用恒等式：$(AB)^\top=B^\top A^\top$；$(AB)C=A(BC)$（结合律）。注意：矩阵乘法<i>不</i>满足交换律。</p>
     </div>
+
     <div class="callout formula"><div class="head">秩 - 零度定理</div>
       <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathrm{Col}(A)$ = 列空间（$A$ 能映射到的 $\mathbb{R}^m$ 子空间）；$\mathrm{Ker}(A)$ = 零空间 = $\{v:Av=0\}$（被 $A$ 杀掉的 $\mathbb{R}^n$ 子空间）；$\dim$ 数它们的基个数；$n$ 是输入维度。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 每个输入维度要么被保留（贡献到 $\mathrm{Col}$），要么被压成 0（落进 $\mathrm{Ker}$），二者之和必为 $n$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 若 $A$ 满列秩（$\dim\mathrm{Col}=n$），则 $\mathrm{Ker}=\{0\}$，$Av=0\Rightarrow v=0$，解唯一。若 $\dim\mathrm{Ker}>0$，$Aw=y$ 的解构成一整个仿射族 $w+v$，$v\in\mathrm{Ker}(A)$。</p>
     </div>
+
     <div class="callout formula"><div class="head">特征方程</div>
       <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
-      <p style="font-size:13px;">PCA：协方差最大特征值方向 = 最大方差方向。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{n\times n}$（必须方阵）；$u$ 是 <b>eigenvector</b>，是 $A$ 不改变方向的非零向量；$\lambda$ 是匹配的 <b>eigenvalue</b>，是 $u$ 被拉伸的倍数。$A$ 对称时所有 $\lambda$ 实数，$u$ 可选成正交单位基。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> eigenvector 是 $A$ 的"自然轴"，沿它 $A$ 退化成简单的标量乘。换到 eigenbasis 后矩阵变对角，求幂、求逆都变成逐元素的。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 解 $\det(A-\lambda I)=0$ 求 $\lambda$，再解 $(A-\lambda I)u=0$ 求每个 $u$。PCA：协方差矩阵最大特征值对应的方向 = 最大方差方向。</p>
     </div>
+
     <div class="callout formula"><div class="head">紧凑 SVD</div>
       <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
-      <p style="font-size:13px;">$r=\mathrm{rank}(X)$；伪逆 $X^+=V\Sigma^{-1}U^\top$。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X\in\mathbb{R}^{n\times d}$ 任意矩阵；$r=\mathrm{rank}(X)$。$U, V$ 列正交（$U^\top U=I$，$V^\top V=I$）。$\Sigma$ 对角，<b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 任意矩阵 = "旋转 ($V^\top$) → 沿正交轴伸缩 ($\Sigma$) → 旋转 ($U$)"。singular value 衡量 $X$ 在每个轴上拉多大。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 伪逆 $X^+=V\Sigma^{-1}U^\top$（即便 $X$ 不方 / 不可逆也能算）；低秩近似——只保留前 $k$ 个奇异值压缩 / 去噪；PCA：$V$ 的列是主方向，singular value 平方除以 $n$ 是各方向方差。</p>
     </div>
+
     <div class="callout formula"><div class="head">二次型与 PSD</div>
       <div class="eq">$$ x^\top A x=\sum_{i,j}A_{ij}x_ix_j,\quad \text{PSD}: x^\top A x\ge 0\ \forall x $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{n\times n}$ 对称（$A=A^\top$）；二次型是标量。<b>PSD</b>（$A\succeq 0$）：对所有 $x$ 都有 $x^\top Ax\ge 0$；<b>PD</b>（$A\succ 0$）：对所有 $x\ne 0$ 都有 $x^\top Ax>0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> $x^\top Ax$ 是 $x$ 通过 $A$ 测得的"能量"。PSD = 能量永远非负；几何上曲面 $f(x)=x^\top Ax$ 是个碗（PD = 严格碗、唯一底）。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 等价判定：所有特征值 $\ge 0$（PSD）/ $>0$（PD）；存在 $A=B^\top B$（PSD）；前主子式 $>0$（PD）。用于认证 Hessian，进而认证损失为凸。</p>
     </div>
+
     <div class="callout formula"><div class="head">夹心恒等式</div>
       <div class="eq">$$ A=B^\top B \;\Rightarrow\; A\succeq 0;\quad X^\top D X \succeq 0\ \text{当}\ D\succeq 0 $$</div>
-      <p style="font-size:13px;">用于 logistic Hessian $H=X^\top BX$（HW1 §4.1）。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $B$ 任意矩阵；$X$ 任意矩阵；$D$ 对称 PSD（常见为对角且元素 $\ge 0$）。右形 $X^\top D X$——把 $D$ 夹在 $X^\top$ 与 $X$ 之间。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> PSD 矩阵两边乘同一因子永远不会让能量变负——只是把测能量的基重新缩放了。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 证 $H\succeq 0$，把 $H$ 凑成 $X^\top D X$（$D\succeq 0$），再展 $v^\top H v=(Xv)^\top D(Xv)=\sum_i D_{ii}(Xv)_i^2\ge 0$。logistic Hessian 是 PSD 的证明就是这一招（HW1 §4.1）。</p>
     </div>
+
     <div class="callout formula"><div class="head">向量微积分形状</div>
       <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Gradient $\nabla f$：偏导组成的列向量，长度等于输入维度。Hessian $\nabla^2 f$：二阶偏导组成的矩阵，光滑函数下对称。Jacobian $J$：向量值 $f:\mathbb{R}^n\to\mathbb{R}^m$ 的 $m\times n$ 矩阵，$J_{ij}=\partial f_i/\partial x_j$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 约定不同，本课中 gradient 是<i>列</i>。盯紧 shape：少一个转置整条推导静悄悄塌掉。$f:\mathbb{R}^n\to\mathbb{R}^m\to\mathbb{R}^k$ 的链式法则就是 $J_{\text{outer}}\,J_{\text{inner}}$ 矩阵乘法。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 当作"方向导数机器"：gradient 给最陡上升方向；Hessian 给曲率；Jacobian 把向量映射线性化（链式法则 = 矩阵乘法）。</p>
     </div>
+
     <div class="callout formula"><div class="head">常用导数</div>
       <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
-      <p style="font-size:13px;">$A$ 对称时为 $2Aw$，Hessian 为 $2A$。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a\in\mathbb{R}^d$ 常向量；$A\in\mathbb{R}^{d\times d}$ 常矩阵；$w$ 是变量；梯度对 $w$ 取。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 第一条是 $(ax)'=a$ 的多元版本；第二条是 $(ax^2)'=2ax$ 的多元版本——$A+A^\top$ 出现是因为 $w^\top Aw=w^\top A^\top w$ 只取决于 $A$ 的对称部分。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> $A$ 对称时 $\nabla(w^\top Aw)=2Aw$、$\nabla^2=2A$。配合链式法则可微分任意二次 / 线性损失：OLS $L=\tfrac12\|Xw-y\|^2$ 的 $\nabla L=X^\top(Xw-y)$，$\nabla^2 L=X^\top X$。</p>
     </div>
+
   </div>
 
   <h3>5. 例题精解</h3>

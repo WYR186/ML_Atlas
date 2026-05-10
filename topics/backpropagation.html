@@ -68,21 +68,44 @@
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">Gradient notation</div>
+    <div class="eq">$$ \bar{v}\equiv \frac{\partial L}{\partial v} $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $L$: scalar loss at the end of the computation graph； $v$: any intermediate value or parameter； $\bar v$: gradient of the loss with respect to $v$</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The bar notation measures blame: how strongly changing this value would change the final loss.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Run the forward pass first. In the backward pass, initialize $\bar L=1$ and propagate gradients to earlier nodes.</p>
+  </div>
   <div class="cols2">
     <div class="callout formula">
-      <div class="head">Chain rule at one node</div>
+      <div class="head">Chain rule on one edge</div>
       <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
-      <p>$\bar{y}$ is the upstream gradient; $\partial y/\partial x$ is the local gradient.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\bar y$: upstream gradient arriving from later nodes； $\partial y/\partial x$: local derivative of the current operation； $\bar x$: gradient to pass to the previous value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Backprop is just the chain rule organized so every reused partial derivative is computed once.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> At each node, multiply the upstream gradient by the local derivative. Repeat this node by node from the loss back to the inputs and parameters.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gradient accumulation</div>
-      <div class="eq">$$ \frac{\partial L}{\partial x}=\sum_{j:\,x\to y_j}\frac{\partial L}{\partial y_j}\frac{\partial y_j}{\partial x} $$</div>
-      <p>If a value feeds multiple later nodes, add the incoming gradient contributions.</p>
+      <div class="eq">$$ \bar{x}=\sum_{j:\,x\to y_j}\bar{y}_j\frac{\partial y_j}{\partial x} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x\to y_j$: $x$ feeds into several downstream values $y_j$； $\bar y_j$: gradient contribution arriving from path $j$； $\sum_j$: add contributions from all branches</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If one value affects the loss through multiple routes, total blame is the sum of blame from every route.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> When a variable branches, add all returned gradients into the same accumulator. In code this is why repeated use of a tensor accumulates into one .grad field.</p>
     </div>
-    <div class="callout formula wide">
-      <div class="head">Shape check</div>
-      <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
-      <p>For a layer $z=Wx+b$, typical single-example shapes are $x\in\mathbb{R}^{d}$, $W\in\mathbb{R}^{h\times d}$, $z,b\in\mathbb{R}^{h}$, and $\partial L/\partial W=(\partial L/\partial z)x^\top$.</p>
+    <div class="callout formula">
+      <div class="head">Affine layer backward pass</div>
+      <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
+      <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a$: input activation to the layer； $W,b$: weight matrix and bias vector； $z$: pre-activation output； $g_z$: upstream gradient at $z$； $g_z a^\top$: outer product that has the same shape as $W$</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A weight gradient is upstream error times the input that weight saw. The transpose sends the error signal back to the previous layer.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use these formulas for a single example after you know $g_z$. For a mini-batch, compute the same contributions per example and sum or average according to the loss convention.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">ReLU backward pass</div>
+      <div class="eq">$$ a=\operatorname{ReLU}(z),\qquad \frac{\partial L}{\partial z}=\frac{\partial L}{\partial a}\odot \mathbf{1}[z>0] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\odot$: elementwise multiplication； $\mathbf{1}[z&gt;0]$: mask that is $1$ where the forward pre-activation was positive and $0$ otherwise； $\partial L/\partial a$: upstream gradient after the ReLU</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Inactive ReLU units were clipped to zero, so small changes behind them do not affect the output locally.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Keep the upstream gradient only where ReLU was active in the forward pass. Zero it out where the pre-activation was negative.</p>
     </div>
   </div>
 
@@ -163,22 +186,45 @@
         <p>神经网络通常是一个 scalar loss、非常多 parameters。Reverse mode 可以用一次 backward sweep 算出这个 loss 对所有参数的梯度。</p>
       </div>
 
-      <h3 class="section-purple">4. Key Equations</h3>
+      <h3 class="section-purple">4. 关键公式</h3>
+      <div class="callout formula">
+        <div class="head">Gradient notation：bar 符号怎么读</div>
+        <div class="eq">$$ \bar{v}\equiv \frac{\partial L}{\partial v} $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $L$: computation graph 最后的 scalar loss；$v$: 任意 intermediate value 或 parameter；$\bar v$: loss 对 $v$ 的 gradient</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> bar notation 可以理解成 blame：这个值稍微改变，会让最终 loss 改变多少。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先做 forward pass。Backward 时从 $\bar L=1$ 开始，把 gradient 一层层往前传。</p>
+      </div>
       <div class="cols2">
         <div class="callout formula">
-          <div class="head">单个节点的 chain rule</div>
+          <div class="head">单条边上的 chain rule</div>
           <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
-          <p>$\bar{y}$ 是 upstream gradient；$\partial y/\partial x$ 是 local gradient。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\bar y$: 从后面节点传回来的 upstream gradient；$\partial y/\partial x$: 当前这个 operation 的 local derivative；$\bar x$: 继续往前传给 $x$ 的 gradient</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Backprop 本质就是 chain rule，只是把重复的 partial derivative 组织起来复用。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每到一个节点，就做 upstream gradient × local derivative。沿着 graph 从 loss 往 input / parameters 一步步倒推。</p>
         </div>
         <div class="callout formula">
-          <div class="head">梯度累加</div>
-          <div class="eq">$$ \frac{\partial L}{\partial x}=\sum_{j:\,x\to y_j}\frac{\partial L}{\partial y_j}\frac{\partial y_j}{\partial x} $$</div>
-          <p>如果一个变量被多个后续节点使用，回来的 gradient contribution 要相加。</p>
+          <div class="head">Gradient accumulation：分叉要相加</div>
+          <div class="eq">$$ \bar{x}=\sum_{j:\,x\to y_j}\bar{y}_j\frac{\partial y_j}{\partial x} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x\to y_j$: $x$ 同时喂给多个 downstream values $y_j$；$\bar y_j$: 第 $j$ 条路径传回来的 gradient contribution；$\sum_j$: 把所有 branch 的 contribution 相加</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个值如果通过多条路径影响 loss，总责任就是每条路径责任的总和。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 变量分叉时，把所有回来的 gradient 都加到同一个 accumulator。代码里的同一个 tensor 被重复使用时，也会累加到同一个 .grad。</p>
         </div>
-        <div class="callout formula wide">
-          <div class="head">Shape check</div>
-          <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
-          <p>单样本层 $z=Wx+b$ 中，若 $x\in\mathbb{R}^{d}$、$W\in\mathbb{R}^{h\times d}$，则 $\partial L/\partial W=(\partial L/\partial z)x^\top$，shape 也是 $h\times d$。</p>
+        <div class="callout formula">
+          <div class="head">Affine layer 的 backward pass</div>
+          <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
+          <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a$: 这一层的 input activation；$W,b$: weight matrix 和 bias vector；$z$: pre-activation output；$g_z$: $z$ 处的 upstream gradient；$g_z a^\top$: outer product，shape 和 $W$ 一样</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> weight gradient = 上游 error × 这个 weight 当时看到的 input。转置 $W^\top$ 则把 error signal 送回上一层。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 已知 $g_z$ 后，单样本直接套这些公式。Mini-batch 时对每个 example 算同样的 contribution，再按 loss 的定义 sum 或 average。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">ReLU 的 backward pass</div>
+          <div class="eq">$$ a=\operatorname{ReLU}(z),\qquad \frac{\partial L}{\partial z}=\frac{\partial L}{\partial a}\odot \mathbf{1}[z>0] $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\odot$: elementwise multiplication；$\mathbf{1}[z&gt;0]$: mask：forward 时 $z$ 为正处为 $1$，否则为 $0$；$\partial L/\partial a$: ReLU 后面传回来的 upstream gradient</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 没激活的 ReLU unit 被截成了 $0$，所以局部上它后面的微小变化不会影响输出。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> forward 时 ReLU 激活的位置保留 upstream gradient；pre-activation 为负的位置直接清零。</p>
         </div>
       </div>
 
@@ -234,7 +280,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

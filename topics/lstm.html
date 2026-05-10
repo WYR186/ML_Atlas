@@ -70,17 +70,27 @@
     <div class="eq">$$ i^{(t)}=\sigma(W_{ix}x^{(t)}+W_{ih}h^{(t-1)}+b_i) $$</div>
     <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
     <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
-    <div class="eq">$$ \tilde c^{(t)}=\sigma_c(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+    <div class="eq">$$ \tilde c^{(t)}=\tanh(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x^{(t)}$ is current input and $h^{(t-1)}$ is previous hidden state. $i^{(t)}$ is the input gate, $f^{(t)}$ the forget gate, $o^{(t)}$ the output gate, and $\tilde c^{(t)}$ the candidate memory. Each $W$ and $b$ is gate-specific. $\sigma$ is sigmoid, so gate values lie between 0 and 1.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each gate looks at the current input and previous hidden state, then outputs a soft switch. Near 0 means closed; near 1 means open.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute the three gates and candidate memory first. Then plug them into the cell-state and hidden-state update formulas.</p>
   </div>
   <div class="callout formula">
     <div class="head">Cell and hidden updates</div>
     <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
-    <p>$\odot$ is elementwise multiplication. Sigmoid gates produce numbers between 0 and 1.</p>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c^{(t)}$ is internal cell memory. $f^{(t)}\odot c^{(t-1)}$ keeps old memory coordinate by coordinate. $i^{(t)}\odot\tilde c^{(t)}$ writes new candidate memory. $o^{(t)}$ controls how much updated memory becomes visible as $h^{(t)}$. $\odot$ means elementwise multiplication.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The cell update is keep-old-memory plus write-new-memory. The plus sign is the key: memory can flow additively instead of being overwritten every step.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If a problem gives gate values directly, skip matrix multiplications and plug vectors into the cell equation coordinate by coordinate.</p>
   </div>
   <div class="callout formula">
     <div class="head">GRU summary</div>
     <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
+    <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
     <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $z^{(t)}$ is the update/keep gate in this convention. $r^{(t)}$ is the reset gate. $\tilde h^{(t)}$ is candidate hidden state. $\odot$ is elementwise multiplication.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A GRU blends old hidden state with candidate hidden state using fewer gates than an LSTM. Large $z^{(t)}$ keeps more old hidden state in this written convention.</p>
+    <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute $z,r$, compute candidate $\tilde h$, then blend candidate and old hidden state coordinate by coordinate. Always read the formula because some texts use the opposite $z$ convention.</p>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
@@ -152,17 +162,27 @@
         <div class="eq">$$ i^{(t)}=\sigma(W_{ix}x^{(t)}+W_{ih}h^{(t-1)}+b_i) $$</div>
         <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
         <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
-        <div class="eq">$$ \tilde c^{(t)}=\sigma_c(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+        <div class="eq">$$ \tilde c^{(t)}=\tanh(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x^{(t)}$ 是当前 input，$h^{(t-1)}$ 是上一 hidden state；$i^{(t)}$ 是 input gate，$f^{(t)}$ 是 forget gate，$o^{(t)}$ 是 output gate，$\tilde c^{(t)}$ 是 candidate memory。每组 $W,b$ 都属于对应 gate；$\sigma$ 是 sigmoid，所以 gate 值在 0 到 1 之间。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每个 gate 都看当前 input 和上一 hidden state，然后输出一个 soft switch。接近 0 表示关，接近 1 表示开。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算三个 gates 和 candidate memory，再把它们代入 cell state / hidden state 更新公式。</p>
       </div>
       <div class="callout formula">
         <div class="head">cell state 与 hidden state</div>
         <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
-        <p>$\odot$ 是 elementwise multiplication；sigmoid gate 输出 0 到 1 之间的“开关强度”。</p>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c^{(t)}$ 是内部 cell memory；$f^{(t)}\odot c^{(t-1)}$ 表示逐坐标保留旧 memory；$i^{(t)}\odot\tilde c^{(t)}$ 表示写入新 candidate memory；$o^{(t)}$ 控制多少 memory 暴露成 $h^{(t)}$；$\odot$ 是 elementwise multiplication。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Cell update = 保留旧记忆 + 写入新记忆。中间的加号很关键：memory 可以 additive 地流动，而不是每一步都完全覆盖。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果题目直接给 gate values，就跳过矩阵乘法，把向量逐坐标代进 cell equation。</p>
       </div>
       <div class="callout formula">
         <div class="head">GRU 速记</div>
         <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
+        <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
         <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 在这个写法里，$z^{(t)}$ 是 update/keep gate；$r^{(t)}$ 是 reset gate；$\tilde h^{(t)}$ 是 candidate hidden state；$\odot$ 是 elementwise multiplication。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> GRU 用更少的 gates 混合旧 hidden state 和 candidate hidden state。按这个公式，$z^{(t)}$ 越大，越保留旧 hidden state。</p>
+        <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 $z,r$，再算 candidate $\tilde h$，最后逐坐标 blend。注意有些教材的 $z$ 方向相反，所以先看公式再解释。</p>
       </div>
 
       <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
@@ -205,7 +225,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -233,17 +253,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

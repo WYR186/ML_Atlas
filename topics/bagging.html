@@ -65,170 +65,108 @@
     <div class="callout formula">
       <div class="head">Bootstrap sample</div>
       <div class="eq">$$ D_t=\{(x_{i_s},y_{i_s})\}_{s=1}^{n},\qquad i_s\sim\text{Uniform}\{1,\dots,n\} $$</div>
-      <p>Sampling is with replacement, so some examples repeat and some are omitted.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $D_t$ is the resampled training set for base learner $t$. The original dataset has $n$ examples. $s$ is the draw number, $i_s$ is the index drawn on that draw, and the uniform distribution means every original example has the same chance each time.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A bootstrap set is built by drawing $n$ examples with replacement. Some original points may appear multiple times; some may be absent.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each base learner, sample $n$ indices with replacement, train $f_t$ on $D_t$, then repeat independently for the next learner.</p>
     </div>
     <div class="callout formula">
       <div class="head">Majority vote</div>
       <div class="eq">$$ F(x)=\operatorname{sign}\!\left(\sum_{t=1}^{T} f_t(x)\right) $$</div>
-      <p>For regression, replace vote with averaging.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F(x)$ is the ensemble prediction. $T$ is the number of trained base models. $f_t(x)\in\{-1,+1\}$ is model $t$'s vote on example $x$. $\operatorname{sign}$ converts the vote sum into a binary class.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each model votes; the ensemble adds the votes; the final label is whichever side has the larger total.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Run all trees on the test example, add their $+1/-1$ votes, and choose the sign. For multiclass, choose the most frequent class; for regression, average predictions.</p>
     </div>
     <div class="callout formula">
       <div class="head">Variance of an average</div>
       <div class="eq">$$ \operatorname{Var}\!\left(\frac1T\sum_t f_t\right)\approx \frac{\sigma^2}{T} $$</div>
-      <p>This clean reduction assumes roughly independent errors.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $T$ is ensemble size. $f_t$ is one base learner's prediction. $\sigma^2$ is the variance of one base learner. The approximation assumes the learners are roughly independent and similarly variable.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Averaging independent noisy predictors makes random fluctuation cancel out, so variance drops by about a factor of $T$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this as the variance-reduction intuition for bagging. If trees are highly correlated, the reduction is much smaller than $\sigma^2/T$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Random forest split idea</div>
       <div class="eq">$$ \text{consider about }\sqrt d\text{ features per split} $$</div>
-      <p>Feature subsampling makes trees less correlated.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $d$ is the total number of input features. $\sqrt d$ is the common rough number of candidate features checked at each tree split.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A random forest does not let every split inspect every feature. It randomly narrows the feature menu before choosing the best local split.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Mention this when explaining why random forests improve plain bagging: feature subsampling lowers correlation among trees.</p>
     </div>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
-  <div class="callout example">
-    <div class="head">Example A · Lecture 8 bagging algorithm</div>
-    <div class="example-source">Source: Lecture 8, bagging slide.</div>
-    <p>For each $t=1,\dots,T$, draw $n$ training examples with replacement, train a base classifier $f_t$, and return a majority-vote classifier over $f_1,\dots,f_T$.</p>
-  </div>
-  <div class="callout example">
-    <div class="head">Example B · Random forest adds feature randomness</div>
-    <div class="example-source">Source: Lecture 8, random forest slide.</div>
-    <p>A random forest still bootstraps datasets, but each tree split only searches a random feature subset. This lowers correlation among trees, which helps voting reduce variance.</p>
-  </div>
-  <div class="callout example">
-    <div class="head">Example C · Bagging vs boosting comparison</div>
-    <div class="example-source">Source: HW2 Problem 5.1, paraphrased.</div>
-    <p>Bagging trains independently in parallel and mainly reduces variance. Boosting trains sequentially and focuses on previously misclassified examples, so it often reduces bias but is more sensitive to noise.</p>
-  </div>
+  <div class="callout example"><div class="head">Example A · Lecture 8 bagging algorithm</div><div class="example-source">Source: Lecture 8, bagging slide.</div><p>For each $t=1,\dots,T$, draw $n$ training examples with replacement, train a base classifier $f_t$, and return a majority-vote classifier over $f_1,\dots,f_T$.</p></div>
+  <div class="callout example"><div class="head">Example B · Random forest adds feature randomness</div><div class="example-source">Source: Lecture 8, random forest slide.</div><p>A random forest still bootstraps datasets, but each tree split only searches a random feature subset. This lowers correlation among trees, which helps voting reduce variance.</p></div>
+  <div class="callout example"><div class="head">Example C · Bagging vs boosting comparison</div><div class="example-source">Source: HW2 Problem 5.1, paraphrased.</div><p>Bagging trains independently in parallel and mainly reduces variance. Boosting trains sequentially and focuses on previously misclassified examples, so it often reduces bias but is more sensitive to noise.</p></div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
-  <div class="mini-list">
-    <div><b>Identify bagging by:</b> bootstrap samples, independent base learners, majority vote or average.</div>
-    <div><b>When asked “what changes,”</b> say variance decreases; bias usually stays similar.</div>
-    <div><b>For random forests,</b> mention both data randomness and feature randomness.</div>
-    <div><b>For comparison questions,</b> contrast parallel vs sequential and variance vs bias.</div>
-  </div>
-
+  <div class="mini-list"><div><b>Identify bagging by:</b> bootstrap samples, independent base learners, majority vote or average.</div><div><b>When asked “what changes,”</b> say variance decreases; bias usually stays similar.</div><div><b>For random forests,</b> mention both data randomness and feature randomness.</div><div><b>For comparison questions,</b> contrast parallel vs sequential and variance vs bias.</div></div>
   <h3 class="section-red">7. Common Mistakes</h3>
-  <ul>
-    <li>Saying bagging reduces bias as its main effect. Its main exam answer is variance reduction.</li>
-    <li>Forgetting bootstrap means sampling with replacement.</li>
-    <li>Assuming voting helps if all models make identical errors. Correlated errors limit the gain.</li>
-    <li>Calling random forest just “many trees” without feature subsampling.</li>
-  </ul>
-
+  <ul><li>Saying bagging reduces bias as its main effect. Its main exam answer is variance reduction.</li><li>Forgetting bootstrap means sampling with replacement.</li><li>Assuming voting helps if all models make identical errors. Correlated errors limit the gain.</li><li>Calling random forest just “many trees” without feature subsampling.</li></ul>
   <h3 class="section-yellow">8. Exam Focus</h3>
-  <ul>
-    <li>State the bagging algorithm step by step.</li>
-    <li>Explain why averaging reduces variance.</li>
-    <li>Explain how random forests differ from plain bagging.</li>
-    <li>Compare bagging and boosting in one concise paragraph.</li>
-  </ul>
-
+  <ul><li>State the bagging algorithm step by step.</li><li>Explain why averaging reduces variance.</li><li>Explain how random forests differ from plain bagging.</li><li>Compare bagging and boosting in one concise paragraph.</li></ul>
   <h3 class="section-yellow">9. Quick Checklist</h3>
-  <ul>
-    <li>I know bootstrap means with replacement.</li>
-    <li>I know bagging trains base learners in parallel.</li>
-    <li>I can explain variance reduction.</li>
-    <li>I can define random forest as bagging plus feature subsampling.</li>
-    <li>I can contrast bagging with boosting.</li>
-  </ul>
+  <ul><li>I know bootstrap means with replacement.</li><li>I know bagging trains base learners in parallel.</li><li>I can explain variance reduction.</li><li>I can define random forest as bagging plus feature subsampling.</li><li>I can contrast bagging with boosting.</li></ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="bagging">
-      <h2><span class="icon">🎒</span> Bagging · 装袋法</h2>
-      <p class="topic-lede">Bagging 是 Lecture 8 的 parallel ensemble 思想：在 bootstrap samples 上训练多个 base learners，再 aggregate predictions，主要目标是降低 variance。</p>
+  <h2><span class="icon">🎒</span> Bagging · 装袋法</h2>
+  <p class="topic-lede">Bagging 是 Lecture 8 的 parallel ensemble 思想：在 bootstrap samples 上训练多个 base learners，再 aggregate predictions，主要目标是降低 variance。</p>
 
-      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
-      <p>Bagging = bootstrap aggregating。每个模型都在从原训练集有放回抽样得到的数据集上训练。预测时，classification 通常用 majority vote。</p>
-      <p>它特别适合 decision trees 这种 high-variance learners。单棵深树对数据微小变化很敏感；很多树一起投票，最终 prediction 更稳定。</p>
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p>Bagging = bootstrap aggregating。每个模型都在从原训练集有放回抽样得到的数据集上训练。预测时，classification 通常用 majority vote。</p>
+  <p>它特别适合 decision trees 这种 high-variance learners。单棵深树对数据微小变化很敏感；很多树一起投票，最终 prediction 更稳定。</p>
 
-      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
-      <p>不要只问一棵容易紧张的树；问一屋子树。每棵树都看过稍微不同版本的讲义，然后大家投票。</p>
-      <p>一棵树可能被噪声带跑偏；很多树一起投票就不容易被单个噪声点影响。前提是它们不能全犯同一个错误。</p>
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>不要只问一棵容易紧张的树；问一屋子树。每棵树都看过稍微不同版本的讲义，然后大家投票。</p>
+  <p>一棵树可能被噪声带跑偏；很多树一起投票就不容易被单个噪声点影响。前提是它们不能全犯同一个错误。</p>
 
-      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
-      <p>对 independent noisy predictors 做 average 会降低 variance。Bagging 用 bootstrap samples 制造 diversity；Random Forest 又在每个 split 只看随机 feature subset，让树之间更不相关。</p>
-      <p>Bagging 通常不解决 high bias。如果每个 base learner 都太弱、错法一致，那么投票只会保留这种 systematic error。</p>
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>对 independent noisy predictors 做 average 会降低 variance。Bagging 用 bootstrap samples 制造 diversity；Random Forest 又在每个 split 只看随机 feature subset，让树之间更不相关。</p>
+  <p>Bagging 通常不解决 high bias。如果每个 base learner 都太弱、错法一致，那么投票只会保留这种 systematic error。</p>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
-      <div class="cols2">
-        <div class="callout formula">
-          <div class="head">Bootstrap sample</div>
-          <div class="eq">$$ D_t=\{(x_{i_s},y_{i_s})\}_{s=1}^{n},\qquad i_s\sim\text{Uniform}\{1,\dots,n\} $$</div>
-          <p>有放回抽样，所以有些样本会重复，有些会没被抽到。</p>
-        </div>
-        <div class="callout formula">
-          <div class="head">Majority vote</div>
-          <div class="eq">$$ F(x)=\operatorname{sign}\!\left(\sum_{t=1}^{T} f_t(x)\right) $$</div>
-          <p>Regression 时通常换成 average。</p>
-        </div>
-        <div class="callout formula">
-          <div class="head">Variance of an average</div>
-          <div class="eq">$$ \operatorname{Var}\!\left(\frac1T\sum_t f_t\right)\approx \frac{\sigma^2}{T} $$</div>
-          <p>这个理想下降依赖 roughly independent errors。</p>
-        </div>
-        <div class="callout formula">
-          <div class="head">Random forest split idea</div>
-          <div class="eq">$$ \text{每个 split 只考虑约 }\sqrt d\text{ 个 features} $$</div>
-          <p>Feature subsampling 让 trees 的错误更不相关。</p>
-        </div>
-      </div>
+  <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Bootstrap sample</div>
+      <div class="eq">$$ D_t=\{(x_{i_s},y_{i_s})\}_{s=1}^{n},\qquad i_s\sim\text{Uniform}\{1,\dots,n\} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $D_t$ 是第 $t$ 个 base learner 的重采样训练集；原始 dataset 有 $n$ 个样本；$s$ 是第几次抽样；$i_s$ 是第 $s$ 次抽到的样本 index；Uniform 表示每次抽样时每个原始样本概率相同。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Bootstrap 就是“有放回抽样”：抽 $n$ 次组成一个新训练集。同一个样本可以重复出现，也可能完全没被抽到。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 base learner，先抽 $n$ 个 indices 组成 $D_t$，在这个 dataset 上训练 $f_t$，然后对下一个 learner 重新抽。</p>
+    </div>
+    <div class="callout formula"><div class="head">Majority vote</div>
+      <div class="eq">$$ F(x)=\operatorname{sign}\!\left(\sum_{t=1}^{T} f_t(x)\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F(x)$ 是 ensemble prediction；$T$ 是 base models 数量；$f_t(x)\in\{-1,+1\}$ 是第 $t$ 个模型对样本 $x$ 的 vote；$\operatorname{sign}$ 把 vote sum 变成二分类 label。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每棵树投一票，ensemble 把票加起来，哪边票更多就选哪边。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 测试时让所有 trees 预测，把 $+1/-1$ 加起来看正负号。Multiclass 用最多票的 class；regression 用 average。</p>
+    </div>
+    <div class="callout formula"><div class="head">Variance of an average</div>
+      <div class="eq">$$ \operatorname{Var}\!\left(\frac1T\sum_t f_t\right)\approx \frac{\sigma^2}{T} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $T$ 是 ensemble size；$f_t$ 是一个 base learner 的 prediction；$\sigma^2$ 是单个 learner 的 variance；这个近似默认 learners 基本 independent 且 variance 类似。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 多个 independent noisy predictors 做 average，随机波动会互相抵消，所以 variance 大约除以 $T$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 bagging 降 variance 的核心直觉。如果 trees 高度相关，实际下降会远小于 $\sigma^2/T$。</p>
+    </div>
+    <div class="callout formula"><div class="head">Random forest split idea</div>
+      <div class="eq">$$ \text{每个 split 只考虑约 }\sqrt d\text{ 个 features} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $d$ 是总 feature 数；$\sqrt d$ 是每次 tree split 常用的候选 feature 数量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Random Forest 不让每个 split 都看全部 features，而是先随机抽一小部分 feature，再在里面挑 best split。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 解释 Random Forest vs plain Bagging 时要提：feature subsampling 会降低 trees 之间的 correlation。</p>
+    </div>
+  </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
-      <div class="callout example">
-        <div class="head">Example A · Lecture 8 bagging algorithm</div>
-        <div class="example-source">来源：Lecture 8，bagging slide。</div>
-        <p>对每个 $t=1,\dots,T$，有放回抽 $n$ 个 training examples，训练 base classifier $f_t$，最后对 $f_1,\dots,f_T$ 做 majority vote。</p>
-      </div>
-      <div class="callout example">
-        <div class="head">Example B · Random Forest 加 feature randomness</div>
-        <div class="example-source">来源：Lecture 8，random forest slide。</div>
-        <p>Random Forest 仍然使用 bootstrap datasets，但每次 tree split 只在随机 feature subset 中找 best split。这样能降低 trees 之间的 correlation，投票才更有效。</p>
-      </div>
-      <div class="callout example">
-        <div class="head">Example C · Bagging vs Boosting</div>
-        <div class="example-source">来源：HW2 Problem 5.1，题意转述。</div>
-        <p>Bagging 独立并行训练，主要降低 variance。Boosting 串行训练，后续模型关注前面错分的样本，通常降低 bias，但对 noise 更敏感。</p>
-      </div>
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="callout example"><div class="head">Example A · Lecture 8 bagging algorithm</div><div class="example-source">来源：Lecture 8，bagging slide。</div><p>对每个 $t=1,\dots,T$，有放回抽 $n$ 个 training examples，训练 base classifier $f_t$，最后对 $f_1,\dots,f_T$ 做 majority vote。</p></div>
+  <div class="callout example"><div class="head">Example B · Random Forest 加 feature randomness</div><div class="example-source">来源：Lecture 8，random forest slide。</div><p>Random Forest 仍然使用 bootstrap datasets，但每次 tree split 只在随机 feature subset 中找 best split。这样能降低 trees 之间的 correlation，投票才更有效。</p></div>
+  <div class="callout example"><div class="head">Example C · Bagging vs Boosting</div><div class="example-source">来源：HW2 Problem 5.1，题意转述。</div><p>Bagging 独立并行训练，主要降低 variance。Boosting 串行训练，后续模型关注前面错分的样本，通常降低 bias，但对 noise 更敏感。</p></div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
-      <div class="mini-list">
-        <div><b>识别 bagging：</b> bootstrap samples、independent base learners、majority vote / average。</div>
-        <div><b>问 effect：</b> 主答 variance decreases；bias 通常差不多。</div>
-        <div><b>Random Forest：</b> 同时说 data randomness 和 feature randomness。</div>
-        <div><b>比较题：</b> parallel vs sequential，variance vs bias。</div>
-      </div>
-
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
-      <ul>
-        <li>把 bagging 的主效果说成降低 bias；考试标准答案通常是降低 variance。</li>
-        <li>忘记 bootstrap 是 sampling with replacement。</li>
-        <li>以为所有模型犯同样错误时投票仍然有用；correlated errors 会限制收益。</li>
-        <li>把 Random Forest 只说成 “many trees”，漏掉 feature subsampling。</li>
-      </ul>
-
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
-      <ul>
-        <li>能按步骤写出 bagging algorithm。</li>
-        <li>能解释 average / vote 为什么降低 variance。</li>
-        <li>能说明 Random Forest 和 plain bagging 的区别。</li>
-        <li>能用一段话比较 bagging 和 boosting。</li>
-      </ul>
-
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
-      <ul>
-        <li>我知道 bootstrap 是有放回抽样。</li>
-        <li>我知道 bagging 是 parallel training。</li>
-        <li>我能解释 variance reduction。</li>
-        <li>我能定义 Random Forest = bagging + feature subsampling。</li>
-        <li>我能和 boosting 对比。</li>
-      </ul>
-    </section>
-
-    
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <div class="mini-list"><div><b>识别 bagging：</b> bootstrap samples、independent base learners、majority vote / average。</div><div><b>问 effect：</b> 主答 variance decreases；bias 通常差不多。</div><div><b>Random Forest：</b> 同时说 data randomness 和 feature randomness。</div><div><b>比较题：</b> parallel vs sequential，variance vs bias。</div></div>
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul><li>把 bagging 的主效果说成降低 bias；考试标准答案通常是降低 variance。</li><li>忘记 bootstrap 是 sampling with replacement。</li><li>以为所有模型犯同样错误时投票仍然有用；correlated errors 会限制收益。</li><li>把 Random Forest 只说成 “many trees”，漏掉 feature subsampling。</li></ul>
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul><li>能按步骤写出 bagging algorithm。</li><li>能解释 average / vote 为什么降低 variance。</li><li>能说明 Random Forest 和 plain bagging 的区别。</li><li>能用一段话比较 bagging 和 boosting。</li></ul>
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul><li>我知道 bootstrap 是有放回抽样。</li><li>我知道 bagging 是 parallel training。</li><li>我能解释 variance reduction。</li><li>我能定义 Random Forest = bagging + feature subsampling。</li><li>我能和 boosting 对比。</li></ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

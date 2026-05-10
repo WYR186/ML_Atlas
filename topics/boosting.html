@@ -64,23 +64,40 @@
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Additive ensemble</div>
-      <div class="eq">$$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $$</div>
-      <p>Prediction is usually $\operatorname{sign}(F_T(x))$.</p>
+      <div class="eq">$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F_t(x)$ is the ensemble score after round $t$. $F_{t-1}(x)$ is the previous score. $f_t(x)$ is the weak learner added at round $t$. $\alpha_t$ is its voting weight.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Boosting builds the final classifier one weak learner at a time. Each new term nudges the current score toward fixing current mistakes.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update the score after each round, then predict with $\operatorname{sign}(F_T(x))$ for binary $\{-1,+1\}$ labels.</p>
     </div>
     <div class="callout formula">
       <div class="head">Exponential loss</div>
-      <div class="eq">$$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $$</div>
-      <p>Incorrect or low-margin examples have large loss.</p>
+      <div class="eq">$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $m$ is the number of training examples. $y_i\in\{-1,+1\}$ is the true label. $F(x_i)$ is the ensemble score. $y_iF(x_i)$ is the margin: positive means correct with confidence, negative means wrong.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Exponential loss punishes low or negative margins heavily, so badly handled examples dominate the next round.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If $y_iF(x_i)<0$, the example is misclassified and $\exp(-y_iF(x_i))$ is large. Those examples get more attention.</p>
     </div>
     <div class="callout formula">
       <div class="head">Example weights</div>
-      <div class="eq">$$ w_i=\exp(-y_iF_{t-1}(x_i)) $$</div>
-      <p>Misclassified examples get larger weights.</p>
+      <div class="eq">$ w_i=\exp(-y_iF_{t-1}(x_i)) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i$ is the weight of training example $i$ before round $t$. $F_{t-1}$ is the ensemble before adding $f_t$. A larger $w_i$ means the next weak learner should care more about that example.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The weight is an exponential transform of the current margin. Poorly classified points receive large weights.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Train the next weak classifier using these weights, so it focuses on examples the previous ensemble handled poorly.</p>
     </div>
     <div class="callout formula">
       <div class="head">Classifier coefficient</div>
-      <div class="eq">$$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $$</div>
-      <p>$\epsilon_t$ is the weighted error of the weak classifier.</p>
+      <div class="eq">$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon_t$ is the weighted error of weak learner $t$. $\alpha_t$ is its coefficient in the ensemble. The logarithm compares correct weighted mass $1-\epsilon_t$ against mistaken mass $\epsilon_t$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Better weak learners get larger positive voting weights. A learner with error $0.5$ gets weight $0$, because it is no better than random guessing.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute weighted error, plug into the log formula, then use $\alpha_t$ in the ensemble update. If $\epsilon_t<0.5$, $\alpha_t>0$.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Weight update after round $t$</div>
+      <div class="eq">$ w_i^{(t+1)}\propto w_i^{(t)}\exp\!\left(-\alpha_t y_i f_t(x_i)\right) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(t)}$ is the old sample weight. $\alpha_t$ is the classifier weight. $y_if_t(x_i)$ equals $+1$ for a correct prediction and $-1$ for a mistake. $\propto$ means normalize afterward so weights sum to 1.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Correct predictions are multiplied by $e^{-\alpha_t}$ and shrink. Mistakes are multiplied by $e^{\alpha_t}$ and grow.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update every sample weight, normalize, then train the next weak learner on the new weighted dataset.</p>
     </div>
   </div>
 
@@ -157,23 +174,40 @@
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Additive ensemble</div>
-          <div class="eq">$$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $$</div>
-          <p>通常 prediction 是 $\operatorname{sign}(F_T(x))$。</p>
+          <div class="eq">$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F_t(x)$ 是第 $t$ 轮后的 ensemble score；$F_{t-1}(x)$ 是加入新 learner 前的 score；$f_t(x)$ 是第 $t$ 个 weak learner；$\alpha_t$ 是它的 voting weight。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Boosting 是一轮一轮往当前 score 里加 weak learner，每一轮都在修补当前 ensemble 的薄弱点。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每轮更新 score，二分类 $\{-1,+1\}$ 时最后用 $\operatorname{sign}(F_T(x))$ 做 prediction。</p>
         </div>
         <div class="callout formula">
           <div class="head">Exponential loss</div>
-          <div class="eq">$$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $$</div>
-          <p>错分或 low-margin 样本 loss 大。</p>
+          <div class="eq">$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $m$ 是 training examples 数量；$y_i\in\{-1,+1\}$ 是真实 label；$F(x_i)$ 是 ensemble score；$y_iF(x_i)$ 是 margin，正值表示分类正确且有信心，负值表示错分。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Exponential loss 会特别惩罚 margin 小或为负的样本，所以这些样本会主导下一轮学习。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 $y_iF(x_i)<0$，样本被错分，$\exp(-y_iF(x_i))$ 会很大；下一轮就要更关注它。</p>
         </div>
         <div class="callout formula">
           <div class="head">Example weights</div>
-          <div class="eq">$$ w_i=\exp(-y_iF_{t-1}(x_i)) $$</div>
-          <p>当前被错分的样本会得到更大 weight。</p>
+          <div class="eq">$ w_i=\exp(-y_iF_{t-1}(x_i)) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i$ 是第 $i$ 个样本在第 $t$ 轮前的 weight；$F_{t-1}$ 是加入新 learner 前的 ensemble；weight 越大，下一轮越需要关心这个样本。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weight 是当前 margin 的 exponential transform。当前分得越差，weight 越大。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这些 weights 训练下一轮 weak classifier，让它更努力处理之前分错或低置信度的样本。</p>
         </div>
         <div class="callout formula">
           <div class="head">Classifier coefficient</div>
-          <div class="eq">$$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $$</div>
-          <p>$\epsilon_t$ 是 weak classifier 的 weighted error。</p>
+          <div class="eq">$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\epsilon_t$ 是第 $t$ 个 weak learner 的 weighted error；$\alpha_t$ 是它在 ensemble 里的 coefficient；log 里比较的是正确权重质量 $1-\epsilon_t$ 和错误权重质量 $\epsilon_t$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weak learner 越准，$\alpha_t$ 越大。若 $\epsilon_t=0.5$，它和 random guess 差不多，所以 $\alpha_t=0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 weighted error，再代入 log 公式，把 $\alpha_t$ 放进 ensemble update。若 $\epsilon_t<0.5$，则 $\alpha_t>0$。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Weight update after round $t$</div>
+          <div class="eq">$ w_i^{(t+1)}\propto w_i^{(t)}\exp\!\left(-\alpha_t y_i f_t(x_i)\right) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(t)}$ 是旧 sample weight；$\alpha_t$ 是 classifier weight；$y_if_t(x_i)=+1$ 表示预测正确，$-1$ 表示预测错误；$\propto$ 表示更新后还要 normalize。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 预测正确时权重乘 $e^{-\alpha_t}$ 变小；预测错误时权重乘 $e^{\alpha_t}$ 变大。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新所有 sample weights，normalize 到总和为 1，再训练下一轮 weak learner。</p>
         </div>
       </div>
 
@@ -228,7 +262,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

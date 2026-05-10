@@ -74,17 +74,29 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
-      <p>Best value available after landing in $s'$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> y: temporal-difference target； r: observed reward； s': next state； max_{a'}Q(s',a'): best estimated next-state value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The target is observed reward now plus discounted best estimated value of the next state.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use y as the supervised target when updating Q(s,a) from a sampled transition (s,a,r,s').</p>
     </div>
     <div class="callout formula"><div class="head">Incremental update</div>
       <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
-      <p>Old value plus learning-rate times TD error.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> α: learning rate； y-Q(s,a): TD error； ←: replace old value with updated value； Q(s,a): current estimate</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Move the old Q estimate a fraction α toward the TD target. The bracket is the TD error.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this online after each sampled transition. α controls how strongly new evidence overrides the old estimate.</p>
     </div>
     <div class="callout formula"><div class="head">Moving-average form</div>
       <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q'(s,a): updated Q value； 1-α: weight on old estimate； α: weight on target； r+γ max Q: TD target</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Same update as a weighted average: keep 1-α of the old estimate and mix in α of the new target.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this form to understand stability: small α is smoother; large α reacts faster but is noisier.</p>
     </div>
     <div class="callout formula"><div class="head">Greedy policy from Q</div>
       <div class="eq">$$ \pi(s)=\arg\max_a Q(s,a) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π(s): chosen policy action； argmax_a: action maximizing Q； Q(s,a): learned action-value estimate</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> After Q is learned, choose the action with highest estimated value in each state.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it at test time or to extract a deterministic policy. During training, often add exploration such as ε-greedy.</p>
     </div>
   </div>
 
@@ -182,17 +194,29 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
-      <p>落到 $s'$ 后能拿到的最好未来价值。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> y: TD 更新目标；r: 本次观察到的奖励；s': 下一状态；max_{a'}Q(s',a'): 下一状态最佳估计价值</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> TD target 表示：现在观察到的奖励 + 下一状态里当前估计的最佳未来价值。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 从样本转移 (s,a,r,s') 更新 Q(s,a) 时，把 y 当成 supervised target。</p>
     </div>
     <div class="callout formula"><div class="head">增量更新</div>
       <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
-      <p>旧值 + 学习率 × TD error。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> α: 学习率；y-Q(s,a): TD 误差；←: 用更新后的值替换旧值；Q(s,a): 当前估计值</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把旧 Q 估计朝 TD target 移动 α 的比例。中括号 y-Q(s,a) 是 TD error。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每采样到一个 transition 就可在线更新一次。α 控制新样本覆盖旧估计的力度。</p>
     </div>
     <div class="callout formula"><div class="head">滑动平均形式</div>
       <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q'(s,a): 更新后的 Q 值；1-α: 旧估计权重；α: 新 target 权重；r+γ max Q: TD target</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这是同一个更新的加权平均写法：保留 1-α 的旧估计，混入 α 的新 target。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这个形式理解稳定性：α 小更平滑；α 大反应更快但更噪。</p>
     </div>
     <div class="callout formula"><div class="head">由 Q 得 greedy 策略</div>
       <div class="eq">$$ \pi(s)=\arg\max_a Q(s,a) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π(s): 策略选择的动作；argmax_a: 让 Q 最大的动作；Q(s,a): 学到的 action-value 估计</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 学到 Q 后，每个 state 选择估计价值最高的 action。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 测试时或抽取确定性策略时使用。训练时通常还要加 exploration，例如 ε-greedy。</p>
     </div>
   </div>
 
@@ -274,6 +298,7 @@
 <script src="../assets/i18n.js"></script>
 <script src="../assets/topics-data.js"></script>
 <script src="../assets/popup-data.js"></script>
+<script src="../assets/equation-sheet.js"></script>
 <script src="../assets/main.js"></script>
 <script>
   // Auto-build TOC from h2/h3 in this topic body — language-aware.

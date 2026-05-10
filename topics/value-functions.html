@@ -64,26 +64,42 @@
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div>
-      <h4>State value</h4>
+    <div class="callout formula">
+      <div class="head">State value</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^π(s): value of state s under π； E: average over random actions/transitions； γ^t r_t: discounted reward at time t； S_0=s: start from state s</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> V^π(s) asks: starting from state s and following policy π, how much discounted reward should I expect?</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use V to score states. Bellman backups replace a next state by its value V^π(s').</p>
     </div>
-    <div>
-      <h4>Action value</h4>
+    <div class="callout formula">
+      <div class="head">Action value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s,A_0=a\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^π(s,a): value of action a in state s under π； A_0=a: first action is fixed to a； S_0=s: start state is s</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Q^π(s,a) asks: starting in state s, first take action a, then follow π; what return should I expect?</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Q to compare actions in the same state. A greedy policy chooses the action with largest Q.</p>
     </div>
-    <div>
-      <h4>Relationship under a policy</h4>
+    <div class="callout formula">
+      <div class="head">Relationship under a policy</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}_{a\sim\pi(\cdot\mid s)}[Q^\pi(s,a)] $$</div>
-      <p>For a deterministic policy, this becomes $V^\pi(s)=Q^\pi(s,\pi(s))$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> a ~ π(·|s): sample an action from π at state s； Q^π(s,a): value of that action； E: weighted average over actions</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> State value is the policy-weighted average of action values in that state.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to convert between V and Q. For deterministic π, it becomes V^π(s)=Q^π(s,π(s)).</p>
     </div>
-    <div>
-      <h4>Bellman evaluation equation</h4>
+    <div class="callout formula">
+      <div class="head">Bellman evaluation equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> R(s,a): immediate reward； s' ~ P(·|s,a): next state sampled from dynamics； γ E[V^π(s')]: discounted average future value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Q equals immediate reward plus discounted expected value of the next state.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to evaluate a known policy: repeatedly update Q or V until both sides agree.</p>
     </div>
-    <div class="wide">
-      <h4>Matrix form for finite MDPs</h4>
+    <div class="callout formula wide">
+      <div class="head">Matrix form for finite MDPs</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi,\qquad V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^π: vector of all state values； R^π: reward vector under π； P^π: transition matrix under π； I: identity matrix</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For finite states and fixed π, all Bellman equations form one linear system.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it when P^π and R^π are known: solve directly instead of iterating.</p>
     </div>
   </div>
 
@@ -162,26 +178,42 @@
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
-    <div>
-      <h4>State value</h4>
+    <div class="callout formula">
+      <div class="head">State value</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> V^π(s): 策略 π 下状态 s 的价值；E: 对随机动作和转移取平均；γ^t r_t: 第 t 步折扣奖励；S_0=s: 从状态 s 开始</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> V^π(s) 问：从状态 s 出发，之后按策略 π 行动，期望能拿到多少折扣总回报？</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用 V 给 state 打分。Bellman backup 里，下一状态 s' 的未来价值用 V^π(s') 表示。</p>
     </div>
-    <div>
-      <h4>Action value</h4>
+    <div class="callout formula">
+      <div class="head">Action value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s,A_0=a\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^π(s,a): 策略 π 下在状态 s 做动作 a 的价值；A_0=a: 第一步动作固定为 a；S_0=s: 初始状态是 s</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Q^π(s,a) 问：在状态 s 先做动作 a，然后按策略 π 行动，期望回报是多少？</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用 Q 在同一个 state 里比较不同 action。Greedy policy 会选 Q 最大的动作。</p>
     </div>
-    <div>
-      <h4>Policy 下的关系</h4>
+    <div class="callout formula">
+      <div class="head">Policy 下的关系</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}_{a\sim\pi(\cdot\mid s)}[Q^\pi(s,a)] $$</div>
-      <p>deterministic policy 下就是 $V^\pi(s)=Q^\pi(s,\pi(s))$。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> a ~ π(·|s): 在状态 s 按 π 采样动作；Q^π(s,a): 该动作的 Q-value；E: 对动作做加权平均</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> State value 就是在该 state 下，按策略 π 的动作分布对 Q-value 做加权平均。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它在 V 和 Q 之间转换。若 π 是确定性策略，就变成 V^π(s)=Q^π(s,π(s))。</p>
     </div>
-    <div>
-      <h4>Bellman evaluation equation</h4>
+    <div class="callout formula">
+      <div class="head">Bellman evaluation equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> R(s,a): 即时奖励；s' ~ P(·|s,a): 下一状态由环境转移采样；γ E[V^π(s')]: 折扣后的平均未来价值</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Q 等于“即时奖励 + 下一状态未来价值的折扣期望”。这是固定策略下的一步自洽方程。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用来评估已知策略：反复更新 Q 或 V，直到公式左右两边基本一致。</p>
     </div>
-    <div class="wide">
-      <h4>Finite MDP 的 matrix form</h4>
+    <div class="callout formula wide">
+      <div class="head">Finite MDP 的 matrix form</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi,\qquad V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> V^π: 所有状态价值向量；R^π: 策略 π 下奖励向量；P^π: 策略 π 下状态转移矩阵；I: 单位矩阵</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 有限状态空间、固定策略下，所有 Bellman 方程可以合并成一个线性方程组。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当 P^π 和 R^π 已知时，可以直接解线性系统，而不是反复迭代。</p>
     </div>
   </div>
 
@@ -251,6 +283,7 @@
 <script src="../assets/i18n.js"></script>
 <script src="../assets/topics-data.js"></script>
 <script src="../assets/popup-data.js"></script>
+<script src="../assets/equation-sheet.js"></script>
 <script src="../assets/main.js"></script>
 <script>
   (function () {

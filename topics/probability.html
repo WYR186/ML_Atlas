@@ -82,31 +82,56 @@
 
   <h3>4. Key Equations</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">Conditional Probability</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A, B$ are events. $P(A,B)$ is the <i>joint</i> probability that both occur. $P(B)$ is the <i>marginal</i> of the conditioning event (sum / integrate the joint over $A$). The formula is undefined when $P(B)=0$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Conditioning shrinks the world to outcomes where $B$ holds and renormalizes by the area of that "new world," $P(B)$. The denominator is the size of the slice you've kept.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Whenever a problem says "the probability of $A$ given $B$": look up the joint $P(A,B)$ in a table, divide by the marginal $P(B)$. The result is a probability in $[0,1]$.</p>
     </div>
+
     <div class="callout formula"><div class="head">Bayes' Rule</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
-      <p style="font-size:13px;">Posterior $\propto$ likelihood × prior.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $P(A)$ is the <b>prior</b> (your belief before seeing evidence). $P(B\mid A)$ is the <b>likelihood</b> (chance of observing $B$ when $A$ is true). $P(A\mid B)$ is the <b>posterior</b> (belief after seeing $B$). $P(B)$ is the normalizer that makes posteriors sum to 1.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Rational belief update — start with a prior, rescale each hypothesis by how well it explains the evidence. Slogan: <b>posterior $\propto$ likelihood × prior</b>.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use whenever you have $P(B\mid A)$ but want $P(A\mid B)$. Multiply prior × likelihood; if $P(B)$ is not given, expand it via the law of total probability ($P(B)=\sum_a P(B\mid A=a)P(A=a)$).</p>
     </div>
+
     <div class="callout formula"><div class="head">Independence</div>
       <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A, B$ are events. The two forms (joint factorization and conditional equality) are mathematically equivalent — pick whichever is easier to verify.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Knowing $B$ tells you nothing new about $A$; the joint distribution factorizes into the product of marginals.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> To test, compute both sides on a small contingency table and compare. To use as an assumption (e.g. dice rolls), substitute $P(A,B)\to P(A)P(B)$ to simplify joint probabilities into products.</p>
     </div>
+
     <div class="callout formula"><div class="head">Conditional Independence</div>
       <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
-      <p style="font-size:13px;">Equivalently $P(A\mid B,C)=P(A\mid C)$. Core NB assumption.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $C$ is the conditioning variable (in Naive Bayes, the class label $Y$). $A, B$ are the two events whose link you're testing. Equivalent form: $P(A\mid B,C)=P(A\mid C)$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> $A$ and $B$ may look correlated overall, but once $C$ is known, the link disappears. Two umbrellas opening together look correlated — until you condition on "it's raining" ($C$), at which point both events just react to $C$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> In NB or graphical-model problems, plug it in to factorize a high-dimensional joint $P(X_1,\dots,X_d\mid Y)$ as the product $\prod_i P(X_i\mid Y)$. Always verify the assumption is reasonable for the data.</p>
     </div>
+
     <div class="callout formula"><div class="head">Law of Total Probability</div>
       <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
-      <p style="font-size:13px;">Use this to compute $P(B)$ when it is not given.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\{A=a\}$ is a partition of the sample space into mutually exclusive cases. $P(A=a)$ is the weight of each case (must sum to 1). $P(B\mid A=a)$ is the probability of $B$ inside that case.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Split the world into cases of $A$, weight each case's probability of $B$ by how often that case occurs, and add them up.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use whenever you need $P(B)$ but only have the conditionals — the most common use is filling in the denominator of Bayes' rule.</p>
     </div>
+
     <div class="callout formula"><div class="head">Expectation & Variance</div>
       <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ is a random variable. $\mathbb{E}[X]$ is the <b>mean</b>. $\mathrm{Var}(X)$ is the <b>variance</b> (a measure of spread). Square root of variance is the standard deviation.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Expectation = long-run average outcome. Variance = how far typical outcomes deviate from that average (squared, so units are unit-of-$X$ squared).</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Plug each value $x$ and its probability $P(x)$ into the sum. Continuous case: replace $\sum_x x\,P(x)$ with $\int x\,p(x)\,dx$ against the density $p$. Variance shortcut: $\mathbb{E}[X^2]-(\mathbb{E}[X])^2$ is usually faster than $\mathbb{E}[(X-\mu)^2]$.</p>
     </div>
+
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes Factorization (preview)</div>
       <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
-      <p style="font-size:13px;">Bayes' rule (numerator) + conditional independence (factorization). Reduces $\sim 2^d$ joint parameters to $2d$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $Y$ is the class label. $X_i$ is feature $i$ (out of $d$). $P(Y)$ is the class <b>prior</b> (how common each class is). $P(X_i\mid Y)$ is the per-feature class-conditional likelihood. The "$\propto$" hides the normalizer $P(X)$, which doesn't depend on $y$ and so doesn't affect the $\arg\max$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Bayes' rule supplies the numerator; the conditional-independence assumption lets you factorize the likelihood as a product of one-feature pieces. This drops the number of parameters from $\sim 2^d$ down to $2d$ — the only reason NB is tractable in high dimensions.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Train by counting feature occurrences within each class to estimate $P(Y)$ and each $P(X_i\mid Y)$. Predict with $\hat y=\arg\max_y P(Y)\prod_i P(X_i\mid Y)$. In code, use $\log$ sums instead of products to avoid floating-point underflow.</p>
     </div>
+
   </div>
 
   <h3>5. Worked Examples</h3>
@@ -230,31 +255,56 @@
 
   <h3>4. 关键公式</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">条件概率</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A, B$ 为事件；$P(A,B)$ 是二者同时发生的<i>联合</i>概率；$P(B)$ 是被条件事件的<i>边缘</i>概率（把联合对 $A$ 求和 / 积分得到）；$P(B)=0$ 时未定义。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 条件化 = 把世界缩小到 $B$ 成立的那部分，再用"新世界"的面积 $P(B)$ 重新归一化；分母就是你保留的那块切片的大小。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 题目说"在 $B$ 已发生时 $A$ 的概率"——查表算出联合 $P(A,B)$，再除以边缘 $P(B)$；结果是落在 $[0,1]$ 的概率。</p>
     </div>
+
     <div class="callout formula"><div class="head">贝叶斯公式</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
-      <p style="font-size:13px;">Posterior $\propto$ likelihood × prior。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $P(A)$ 是 <b>prior</b>（看到证据前的信念）；$P(B\mid A)$ 是 <b>likelihood</b>（在 $A$ 下看到 $B$ 的概率）；$P(A\mid B)$ 是 <b>posterior</b>（看到 $B$ 后的信念）；$P(B)$ 是让 posterior 求和为 1 的归一化常数。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 理性的信念更新——从先验出发，按"假设解释证据的程度"重缩放。口诀：<b>posterior $\propto$ likelihood × prior</b>。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 题目给 $P(B\mid A)$ 而要 $P(A\mid B)$ 时使用；$P(B)$ 没给就用全概率公式展开 $P(B)=\sum_a P(B\mid A=a)P(A=a)$ 补上。</p>
     </div>
+
     <div class="callout formula"><div class="head">独立</div>
       <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A, B$ 为事件；联合因子分解与条件等式两种写法数学上等价，挑容易验证的那个用。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 知道 $B$ 对 $A$ 的概率没有任何新信息；联合分布拆成边缘的乘积。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 验独立：在小列联表上算两边再比较；用作假设时（如掷骰子），把 $P(A,B)$ 直接换成 $P(A)P(B)$ 简化联合概率。</p>
     </div>
+
     <div class="callout formula"><div class="head">条件独立</div>
       <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
-      <p style="font-size:13px;">等价 $P(A\mid B,C)=P(A\mid C)$。Naive Bayes 的核心假设。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $C$ 是被条件化的变量（在 Naive Bayes 里就是类别 $Y$）；$A, B$ 是要检验关系的两个事件。等价写法：$P(A\mid B,C)=P(A\mid C)$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 表面上 $A, B$ 相关，但一旦知道 $C$ 关联消失。两人同时打伞看上去相关，告诉你"在下雨" $C$ 之后，两件事就只是分别在响应共同因 $C$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> NB / 图模型题里直接代入，把高维联合 $P(X_1,\dots,X_d\mid Y)$ 拆成 $\prod_i P(X_i\mid Y)$。代入前要确认这个假设对数据合理。</p>
     </div>
+
     <div class="callout formula"><div class="head">全概率公式</div>
       <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
-      <p style="font-size:13px;">题目没给 $P(B)$ 时用它展开。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\{A=a\}$ 是样本空间的互斥划分；$P(A=a)$ 是各案的权重（求和必须为 1）；$P(B\mid A=a)$ 是该案下 $B$ 的条件概率。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 按 $A$ 的取值分情形，每个情形里 $B$ 的发生概率乘以该情形的出现频率，再加权求和。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 没给 $P(B)$ 但有条件概率时用——最常见的就是补贝叶斯公式的分母。</p>
     </div>
+
     <div class="callout formula"><div class="head">期望与方差</div>
       <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X$ 是随机变量；$\mathbb{E}[X]$ 是 <b>mean</b>（均值）；$\mathrm{Var}(X)$ 是 <b>variance</b>（离散程度）；标准差是方差的平方根。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 期望 = 长期平均；方差 = 典型取值偏离均值的程度（平方过，单位是 $X$ 的平方）。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 把每个取值 $x$ 与其概率 $P(x)$ 代入求和；连续情形换成对密度 $p$ 的积分 $\int x\,p(x)\,dx$。方差的快捷算法 $\mathbb{E}[X^2]-(\mathbb{E}[X])^2$ 通常比 $\mathbb{E}[(X-\mu)^2]$ 更省事。</p>
     </div>
+
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes 因子分解（预告）</div>
       <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
-      <p style="font-size:13px;">贝叶斯（分子）+ 条件独立（分解）。把 $\sim 2^d$ 个联合参数压到 $2d$。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $Y$ 是类别标签；$X_i$ 是第 $i$ 个特征（共 $d$ 个）；$P(Y)$ 是类 <b>prior</b>（每个类别有多常见）；$P(X_i\mid Y)$ 是各特征的类条件 likelihood。"$\propto$" 隐藏了归一化常数 $P(X)$，它与 $y$ 无关，所以不影响 $\arg\max$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 贝叶斯（分子）+ 条件独立假设（似然分解）。把参数数从 $\sim 2^d$ 压到 $2d$——NB 在高维可行的唯一原因。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 训练靠在每个类别下数特征出现次数，估出 $P(Y)$ 与各 $P(X_i\mid Y)$；预测 $\hat y=\arg\max_y P(Y)\prod_i P(X_i\mid Y)$。代码里用 $\log$ 求和代替乘积避免下溢。</p>
     </div>
+
   </div>
 
   <h3>5. 例题精解</h3>

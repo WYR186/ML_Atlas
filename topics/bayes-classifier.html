@@ -72,25 +72,43 @@
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div>
+    <div class="callout formula">
       <h4>Binary Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
-      <p>Predict the class with larger posterior probability.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ is the random input; $x$ is one observed feature value. $Y\in\{0,1\}$ is the true label. $\eta(x)=\Pr(Y=1\mid X=x)$ is the posterior probability of class 1 after seeing $x$. $f_{\text{Bayes}}(x)$ is the prediction made by the optimal rule.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The threshold $\frac12$ is majority vote under uncertainty: predict 1 if class 1 is at least as likely as class 0. This rule minimizes 0-1 loss pointwise; for each fixed $x$, choosing the larger posterior leaves the smaller posterior as the unavoidable local error.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute or compare $\Pr(Y=1\mid X=x)$ and $\Pr(Y=0\mid X=x)=1-\eta(x)$. If $\eta(x)=0.73$, predict 1; if $\eta(x)=0.41$, predict 0.</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>Bayes error</h4>
       <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
-      <p>At each $x$, the unavoidable local error is the smaller posterior mass.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon_\mu^*$ is the smallest possible true error under data distribution $\mu$. $\mathbb{E}_X[\cdot]$ averages over the marginal distribution of $X$. $\min\{\eta(X),1-\eta(X)\}$ picks the probability of the class the Bayes rule does <i>not</i> predict.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is "average unavoidable mistake." Near $\eta(X)=0$ or $1$, the label is almost certain, so local error is small. Near $\eta(X)=0.5$, the classes are intrinsically ambiguous, so even the best classifier often fails.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For discrete $X$, sum $\Pr(X=x)\min\{\eta(x),1-\eta(x)\}$ over all $x$. For continuous $X$, replace the sum with an integral against the density of $X$.</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>Equivalent binary form</h4>
       <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
-      <p>More confidence in the label means larger $|2\eta-1|$ and lower error.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $|2\eta(X)-1|$ is a confidence margin away from a coin flip. If $\eta(X)=0.5$, the margin is 0; if $\eta(X)=0$ or $1$, the margin is 1.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Start from the worst local binary uncertainty, $\frac12$, then subtract certainty. More posterior confidence means a larger absolute-value term, hence lower Bayes error.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This form is handy when a problem gives posterior confidence or asks for algebraic reasoning. It matches the min form because for any $p\in[0,1]$, $\min(p,1-p)=\frac12-\frac12|2p-1|$.</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>Squared-loss regression</h4>
       <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
-      <p>The best prediction is the conditional mean; leftover conditional variance is irreducible noise.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_{\text{Bayes}}(X)$ is the best prediction under squared loss. $\mathbb{E}[Y\mid X]$ is the conditional mean: the average value of $Y$ among examples with the same input. $\operatorname{Var}(Y\mid X)$ is the remaining randomness after $X$ is known.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Under squared loss, the best single summary of a conditional distribution is its mean. Any noise left around that mean is not learnable from $X$, so its conditional variance becomes Bayes error.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Identify the predictable part as the conditional mean. Then compute or read off the conditional variance; averaging it gives the irreducible squared-loss error.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="head">One-line workflow</div>
+    <div class="mini-list">
+      <div><b>Prediction:</b> choose the larger posterior probability.</div>
+      <div><b>Local error:</b> take the smaller posterior probability.</div>
+      <div><b>Total Bayes error:</b> average the local error over the distribution of $X$.</div>
     </div>
   </div>
 
@@ -178,25 +196,43 @@
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
-    <div>
+    <div class="callout formula">
       <h4>二分类 Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
-      <p>posterior probability 哪个大就选哪个。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$X$ 是输入特征 random variable；$x$ 是一个具体观测到的 feature value。$Y\in\{0,1\}$ 是真实 label。$\eta(x)=\Pr(Y=1\mid X=x)$ 表示看到 $x$ 之后 class 1 的 posterior probability；$f_{\text{Bayes}}(x)$ 是 optimal rule 给出的预测。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>$\frac12$ 阈值就是 uncertainty 下的 majority vote：class 1 至少和 class 0 一样可能，就预测 1。它是在 0-1 loss 下逐点最优的 classifier；固定一个 $x$ 后，选 posterior 更大的类，较小 posterior 就是 unavoidable local error。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>比较 $\Pr(Y=1\mid X=x)$ 和 $\Pr(Y=0\mid X=x)=1-\eta(x)$。例如 $\eta(x)=0.73$ 就预测 1；$\eta(x)=0.41$ 就预测 0。</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>Bayes error</h4>
       <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
-      <p>每个 $x$ 上不可避免的局部错误，就是较小的 posterior mass。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$\epsilon_\mu^*$ 是真实分布 $\mu$ 下能达到的最小 true error。$\mathbb{E}_X[\cdot]$ 表示按 $X$ 的 marginal distribution 做平均。$\min\{\eta(X),1-\eta(X)\}$ 选的是 Bayes rule 没有预测的那个 label 的概率。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>它是“平均不可避免错误”。Posterior 接近 0 或 1 时标签很确定，local error 小；接近 0.5 时类别本身模糊，最优 classifier 也容易错。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>如果 $X$ 是离散的，就算 $\sum_x \Pr(X=x)\min\{\eta(x),1-\eta(x)\}$；如果 $X$ 连续，就把求和换成对 $X$ density 的 integral。</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>等价形式</h4>
       <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
-      <p>$|2\eta-1|$ 越大，label 越确定，错误率越低。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$|2\eta(X)-1|$ 是离“抛硬币”有多远的 confidence margin。若 $\eta(X)=0.5$，margin 为 0；若 $\eta(X)=0$ 或 $1$，margin 为 1。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>从最糟的二分类不确定性 $\frac12$ 出发，再减去 certainty。Posterior 越确定，绝对值项越大，Bayes error 越低。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>题目如果给的是 posterior 的确定程度，或需要做代数化简，用这个形式更顺手。它与 min 形式等价，因为任意 $p\in[0,1]$ 都有 $\min(p,1-p)=\frac12-\frac12|2p-1|$。</p>
     </div>
-    <div>
+    <div class="callout formula">
       <h4>平方损失回归</h4>
       <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
-      <p>最优预测是 conditional mean；剩下的 conditional variance 是 irreducible noise。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$f_{\text{Bayes}}(X)$ 是 squared loss 下的最优预测函数；$\mathbb{E}[Y\mid X]$ 是 conditional mean，即给定同一个输入 $X$ 时 $Y$ 的平均值；$\operatorname{Var}(Y\mid X)$ 是知道 $X$ 后仍然剩下的随机波动。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>Squared loss 下，一个条件分布最好的单点代表是 mean。围绕 mean 剩下的随机噪声无法从 $X$ 学出来，所以它的 conditional variance 成为 Bayes error。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>先找 conditional mean 作为预测；再计算或读出 conditional variance，对它取平均就是不可消除的 squared-loss error。</p>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="head">一行解题流程</div>
+    <div class="mini-list">
+      <div><b>Prediction:</b> 选更大的 posterior probability。</div>
+      <div><b>Local error:</b> 取较小的 posterior probability。</div>
+      <div><b>Total Bayes error:</b> 对 $X$ 的分布做 average / integrate。</div>
     </div>
   </div>
 
@@ -255,7 +291,7 @@
   </ul>
 </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

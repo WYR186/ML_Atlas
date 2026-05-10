@@ -65,27 +65,39 @@
     <div class="callout formula">
       <div class="head">Centering</div>
       <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
-      <p>Never skip this step.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$: number of data points; $x^{(i)}$: the $i$-th original data vector in $\mathbb{R}^d$; $\mu$: the sample mean, or the center of the point cloud; $\bar x^{(i)}$: the centered version of point $i$</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">Empirical covariance</div>
       <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
-      <p>Use the convention from the lecture's column-data notation.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\bar X$: matrix whose columns are centered examples $\bar x^{(i)}$; $\Sigma$: covariance matrix; its diagonal entries are variances; $\bar x^{(i)}\bar x^{(i)\top}$: outer product showing how coordinates of one point move together</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">First principal component</div>
       <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
-      <p>Solution: top eigenvector of $\Sigma$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w$: a candidate direction vector; $\|w\|_2=1$: unit-length constraint, so scale cannot fake larger variance; $w^\top\Sigma w$: variance of the data after projection onto direction $w$; $\arg\max$: the value of $w$ that makes the expression largest</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">Projection and reconstruction</div>
       <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
-      <p>$U$ contains the selected principal directions.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: $d\times m$ matrix of selected principal directions; $\hat x$: low-dimensional PCA coordinates in $\mathbb{R}^m$; $\tilde x$: reconstructed approximation back in original space</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula wide">
       <div class="head">SVD route</div>
       <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
-      <p>The left singular vectors give the PCA directions.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: left singular vectors; PCA directions; $S$: diagonal singular-value matrix; $V^\top$: right singular-vector part; not usually needed for PCA directions; $S^2$: eigenvalues of the covariance matrix under this normalization</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
   </div>
 
@@ -163,27 +175,39 @@
         <div class="callout formula">
           <div class="head">Centering</div>
           <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
-          <p>这一步不要跳。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$: data points 的数量; $x^{(i)}$: 第 $i$ 个原始数据向量，维度是 $d$; $\mu$: sample mean，也就是点云中心; $\bar x^{(i)}$: centered point，表示点相对均值的位置</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">Empirical covariance</div>
           <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
-          <p>这里按 lecture 的 column-data notation 写。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\bar X$: 由 centered examples $\bar x^{(i)}$ 组成的数据矩阵; $\Sigma$: covariance matrix；对角线是各坐标 variance; $\bar x^{(i)}\bar x^{(i)\top}$: outer product，记录一个点各坐标如何一起变化</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">First principal component</div>
           <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
-          <p>解是 $\Sigma$ 的 top eigenvector。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w$: 候选 direction vector; $\|w\|_2=1$: unit-length constraint，防止靠放大 $w$ 作弊; $w^\top\Sigma w$: 数据投影到 $w$ 方向后的 variance; $\arg\max$: 让这个值最大的那个 $w$</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">Projection and reconstruction</div>
           <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
-          <p>$U$ 的列是选中的 principal directions。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: $d\times m$ matrix，列向量是选中的 principal directions; $\hat x$: 低维 PCA coordinates，维度是 $m$; $\tilde x$: 从低维坐标重建回原空间的 approximation</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula wide">
           <div class="head">SVD route</div>
           <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
-          <p>Left singular vectors 就是 PCA directions。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: left singular vectors，也就是 PCA directions; $S$: singular values 组成的 diagonal matrix; $V^\top$: right singular vectors；通常不是 PCA direction 本身; $S^2$: 在这个 normalization 下对应 covariance eigenvalues</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
       </div>
 
@@ -238,7 +262,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -266,20 +290,16 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
-      items.forEach((el) => {
+      items.forEach((el, idx) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        if (!el.id) el.id = `${sect.id}-h${idx}`;
         const li = document.createElement('li');
         const a  = document.createElement('a');
-        a.href = '#' + sect.id;
+        a.href = '#' + el.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';

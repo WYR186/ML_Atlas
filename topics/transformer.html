@@ -71,13 +71,26 @@
   <h2>4. Key Equations</h2>
   <h3>Block skeleton</h3>
   <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
-  <p>This is the common Pre-LN form. Some diagrams use Post-LN, but the conceptual parts are the same.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> $X\in\mathbb{R}^{T\times D}$ is the sequence of token states; $T$ is sequence length; $D$ is model width; $\mathrm{LN}$ is layer normalization; $\mathrm{MHA}$ mixes information across tokens; $\mathrm{FFN}$ is the per-token MLP; $X_{\text{out}}$ is the block output.</p>
+    <p><b>How to read it.</b> This is a Pre-LN Transformer block. Normalize $X$, run multi-head attention, then add the original $X$ back through a residual connection. Do the same pattern again with the feed-forward network.</p>
+    <p><b>How to use.</b> When explaining architecture, say "attention communicates across positions; FFN transforms each position independently; residuals preserve the input signal."</p>
+  </div>
   <h3>Multi-head attention projections</h3>
   <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
+  <div class="study-box">
+    <p><b>Symbols.</b> $W_Q,W_K,W_V,W_O$ are learned projection matrices. In the usual parameter-count simplification each is $D\times D$, even though internally the $N$ heads split the width into smaller pieces.</p>
+    <p><b>How to read it.</b> The block learns three views of each token: what it asks for ($Q$), how it is matched ($K$), and what content it contributes ($V$). Heads run attention in parallel, concatenate their outputs, then $W_O$ mixes them back into model width $D$.</p>
+    <p><b>How to use.</b> For parameter counting, do not multiply $4D^2$ by the number of heads again. The heads partition the same total width.</p>
+  </div>
   <h3>Parameter count from HW4 §2.4</h3>
   <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
   <div class="eq">$$ \text{full model}=L(4D^2+2DF)+2VD $$</div>
-  <p>$D$ is model width, $L$ layers, $F$ MLP hidden width, and $V$ vocabulary size. The $2VD$ term counts untied input embeddings and output LM head.</p>
+  <div class="study-box">
+    <p><b>Symbols.</b> $D$ is model width, $L$ is the number of layers, $F$ is the MLP hidden width, and $V$ is vocabulary size. The $2VD$ term counts untied input embeddings and output LM head.</p>
+    <p><b>How to read it.</b> The formula adds three parameter sources: attention projections in every layer, MLP matrices in every layer, and vocabulary matrices at the input/output ends.</p>
+    <p><b>How to use.</b> Count one layer first: $4D^2$ for $Q,K,V,O$ projections and $2DF$ for the up/down MLP matrices. Multiply by $L$, then add vocabulary matrices. Biases and layer norm parameters are usually ignored unless the problem explicitly asks for them.</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="transformer-examples-en">
@@ -165,13 +178,26 @@
   <h2>4. 核心公式 / Key Equations</h2>
   <h3>Block skeleton</h3>
   <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
-  <p>这是常见 Pre-LN 写法。不同实现可能是 Post-LN，但核心组件一样。</p>
+  <div class="study-box">
+    <p><b>符号.</b> $X\in\mathbb{R}^{T\times D}$ 是整段 token states；$T$ 是 sequence length；$D$ 是 model width；$\mathrm{LN}$ 是 layer normalization；$\mathrm{MHA}$ 负责跨 token 通信；$\mathrm{FFN}$ 是每个 token 独立经过的 MLP；$X_{\text{out}}$ 是 block 输出。</p>
+    <p><b>怎么理解.</b> 这是 Pre-LN Transformer block：先对 $X$ 做 layer norm，再做 multi-head attention，然后通过 residual 把原来的 $X$ 加回来；接着对 $X'$ 重复一次 LN + FFN + residual。</p>
+    <p><b>怎么用.</b> 解释架构时抓住三句话：attention 跨位置混合信息，FFN 对每个位置单独变换，residual 保留输入信号。</p>
+  </div>
   <h3>Multi-head attention projections</h3>
   <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
+  <div class="study-box">
+    <p><b>符号.</b> $W_Q,W_K,W_V,W_O$ 都是 learned projection matrices。常见参数量估算里它们都按 $D\times D$ 计算；$N$ 个 heads 只是把总宽度切成更窄的 head 维度。</p>
+    <p><b>怎么理解.</b> 模型把每个 token 投影成三种视角：$Q$ 表示“我要找什么”，$K$ 表示“我怎么被匹配”，$V$ 表示“我能提供什么内容”。多个 heads 并行算 attention，拼接后再用 $W_O$ 混回宽度 $D$。</p>
+    <p><b>怎么用.</b> 数参数时不要在 $4D^2$ 外面再乘 heads 数 $N$；heads 是在同一个总维度 $D$ 里拆分。</p>
+  </div>
   <h3>HW4 §2.4 参数量公式</h3>
   <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
   <div class="eq">$$ \text{full model}=L(4D^2+2DF)+2VD $$</div>
-  <p>$D$ 是 model width，$L$ 是层数，$F$ 是 MLP hidden width，$V$ 是 vocabulary size。$2VD$ 是 untied input embedding 和 output LM head。</p>
+  <div class="study-box">
+    <p><b>符号.</b> $D$ 是 model width，$L$ 是层数，$F$ 是 MLP hidden width，$V$ 是 vocabulary size。$2VD$ 是 untied input embedding 和 output LM head。</p>
+    <p><b>怎么理解.</b> 这个公式把参数分成三块：每层 attention projections、每层 MLP matrices，以及输入/输出端的 vocabulary matrices。</p>
+    <p><b>怎么用.</b> 先数一层：attention 的 $Q,K,V,O$ 是 $4D^2$，MLP 的 up/down 两个矩阵是 $2DF$。再乘 $L$，最后加 vocabulary matrices。bias 和 layer norm 参数通常忽略，除非题目特别要求。</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="transformer-examples-cn">

@@ -68,29 +68,41 @@
     <div class="callout formula">
       <div class="head">Signed distance / margin</div>
       <div class="eq">$$ \gamma(w,b)=\min_i \frac{y_i(w^\top x_i+b)}{\|w\|_2} $$</div>
-      <p>The numerator is signed confidence; dividing by $\|w\|$ makes it geometric distance.</p>
+      <p><b>Symbols.</b> $x_i$ is a training point; $y_i\in\{-1,+1\}$ is its label; $w^\top x_i+b=f(x_i)$ is the signed score before multiplying by $y_i$; $\|w\|_2$ is the Euclidean norm of the normal vector.</p>
+      <p><b>How to read it.</b> $y_i f(x_i)$ is positive when the point is correctly classified and larger when it is more confidently correct. Dividing by $\|w\|_2$ converts that functional score into actual distance from the hyperplane.</p>
+
+      <p><b>How to use.</b> Compute the normalized signed distance for each training point, then take the minimum. SVM tries to make this worst-case distance as large as possible.</p>
     </div>
     <div class="callout formula">
       <div class="head">Hard-margin SVM</div>
       <div class="eq">$$ \min_{w,b}\frac12\|w\|_2^2 \quad \text{s.t.}\quad y_i(w^\top x_i+b)\ge 1 $$</div>
-      <p>Use only when the data are linearly separable.</p>
+      <p><b>Symbols.</b> The variables are $w$ and $b$; the constraint must hold for every training example $i$; the right side 1 fixes the scale of $(w,b)$.</p>
+      <p><b>How to read it.</b> Minimizing $\|w\|^2$ maximizes the geometric margin because the margin width is proportional to $1/\|w\|$. The constraints say every point must be correctly classified with a safety buffer.</p>
+      <p><b>How to use.</b> Use this form only when the data are linearly separable. In derivations, start from this primal and introduce Lagrange multipliers $\alpha_i$ for each margin constraint.</p>
     </div>
     <div class="callout formula">
       <div class="head">Soft-margin SVM</div>
       <div class="eq">$$ \min_{w,b,\xi}\frac12\|w\|_2^2+C\sum_i\xi_i $$</div>
       <div class="eq">$$ y_i(w^\top x_i+b)\ge 1-\xi_i,\qquad \xi_i\ge 0 $$</div>
-      <p>$\xi_i$ measures how much example $i$ violates the margin constraint.</p>
+      <p><b>Symbols.</b> $\xi_i$ is the slack for example $i$; $C$ is the penalty strength for slack; the first term wants a wide margin and the second term pays for violations.</p>
+      <p><b>How to read it.</b> $\xi_i=0$ means the point satisfies the margin. $0<\xi_i\le1$ means correct sign but inside the margin. $\xi_i>1$ means the point is misclassified.</p>
+
+      <p><b>How to use.</b> Increase $C$ when you want fewer violations; decrease $C$ when you want more tolerance and a wider, smoother margin.</p>
     </div>
     <div class="callout formula">
       <div class="head">Hinge-loss form</div>
       <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\qquad t=y_i(w^\top x_i+b) $$</div>
-      <p>This is the unconstrained loss view of soft-margin SVM.</p>
+      <p><b>Symbols.</b> $t$ is the margin score for one example. The hinge loss is zero only when $t\ge1$, meaning the point is correctly classified and outside the margin.</p>
+      <p><b>How to read it.</b> Correct but not safe still costs loss: if $0<t<1$, the sign is right but the point lies inside the margin. If $t<0$, the point is misclassified and the loss is larger than 1.</p>
+      <p><b>How to use.</b> For hand calculation, first compute $f(x)$, then $t=yf(x)$, then plug into $\max(0,1-t)$.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Soft-margin dual shape</div>
       <div class="eq">$$ \max_\alpha \sum_i \alpha_i-\frac12\sum_i\sum_j \alpha_i\alpha_j y_i y_j x_i^\top x_j $$</div>
       <div class="eq">$$ 0\le \alpha_i\le C,\qquad \sum_i \alpha_i y_i=0 $$</div>
-      <p>The new feature versus hard margin is the upper bound $\alpha_i\le C$.</p>
+      <p><b>Symbols.</b> $\alpha_i$ is the Lagrange multiplier for example $i$'s margin constraint. $x_i^\top x_j$ is the inner product between training examples $i$ and $j$.</p>
+      <p><b>How to read it.</b> Points with $\alpha_i=0$ do not influence the boundary; points with $\alpha_i>0$ are support vectors. The box constraint $0\le\alpha_i\le C$ is what soft margin adds.</p>
+      <p><b>How to use.</b> After solving for $\alpha$, predict with $f(x)=\sum_i\alpha_i y_i x_i^\top x+b$. For kernel SVM, replace $x_i^\top x_j$ and $x_i^\top x$ by kernels.</p>
     </div>
   </div>
 
@@ -171,29 +183,41 @@
         <div class="callout formula">
           <div class="head">Signed distance / margin</div>
           <div class="eq">$$ \gamma(w,b)=\min_i \frac{y_i(w^\top x_i+b)}{\|w\|_2} $$</div>
-          <p>分子是 signed confidence，除以 $\|w\|$ 后才是几何距离。</p>
+          <p><b>符号.</b> $x_i$ 是第 $i$ 个 training point；$y_i\in\{-1,+1\}$ 是标签；$w^\top x_i+b=f(x_i)$ 是 score；$\|w\|_2$ 是 normal vector 的 Euclidean norm。</p>
+          <p><b>怎么理解.</b> $y_if(x_i)$ 为正表示分类正确，越大表示越有信心。除以 $\|w\|_2$ 后才变成点到 hyperplane 的真实几何距离。</p>
+
+      <p><b>怎么用.</b> 对每个 training point 算 normalized signed distance，然后取最小值。SVM 要 maximize 的就是这个最差点的距离。</p>
         </div>
         <div class="callout formula">
           <div class="head">Hard-margin SVM</div>
           <div class="eq">$$ \min_{w,b}\frac12\|w\|_2^2 \quad \text{s.t.}\quad y_i(w^\top x_i+b)\ge 1 $$</div>
-          <p>只适合 linearly separable data。</p>
+          <p><b>符号.</b> 优化变量是 $w,b$；constraint 对每个样本 $i$ 都要成立；右边的 1 是为了固定 $(w,b)$ 的 scale。</p>
+          <p><b>怎么理解.</b> 因为 margin width 和 $1/\|w\|$ 成正比，所以 minimize $\|w\|^2$ 等价于 maximize margin。Constraint 表示每个点都要分类正确并留出 buffer。</p>
+      <p><b>怎么用.</b> 只在 linearly separable data 上用。推 dual 时，从这个 primal 出发，给每个 margin constraint 加 Lagrange multiplier $\alpha_i$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Soft-margin SVM</div>
           <div class="eq">$$ \min_{w,b,\xi}\frac12\|w\|_2^2+C\sum_i\xi_i $$</div>
           <div class="eq">$$ y_i(w^\top x_i+b)\ge 1-\xi_i,\qquad \xi_i\ge 0 $$</div>
-          <p>$\xi_i$ 表示第 $i$ 个样本违反 margin constraint 的程度。</p>
+          <p><b>符号.</b> $\xi_i$ 是第 $i$ 个样本的 slack；$C$ 是 slack penalty；第一项想要 large margin，第二项为 violations 付费。</p>
+          <p><b>怎么理解.</b> $\xi_i=0$ 表示满足 margin；$0<\xi_i\le1$ 表示 sign 正确但在 margin 内；$\xi_i>1$ 表示 misclassified。</p>
+
+      <p><b>怎么用.</b> 想更少 violations 就增大 $C$；想更宽、更 tolerant 的 margin 就减小 $C$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Hinge loss form</div>
           <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\qquad t=y_i(w^\top x_i+b) $$</div>
-          <p>这是 soft-margin SVM 的 unconstrained loss 版本。</p>
+          <p><b>符号.</b> $t$ 是一个样本的 margin score。只有 $t\ge1$ 时 hinge loss 为 0，表示点分类正确且在 margin 外。</p>
+          <p><b>怎么理解.</b> 分类对但不够安全也会有 loss：$0<t<1$ 是 margin 内；$t<0$ 是 misclassified，loss 大于 1。</p>
+      <p><b>怎么用.</b> 手算时先算 $f(x)$，再算 $t=yf(x)$，最后代入 $\max(0,1-t)$。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Soft-margin dual shape</div>
           <div class="eq">$$ \max_\alpha \sum_i \alpha_i-\frac12\sum_i\sum_j \alpha_i\alpha_j y_i y_j x_i^\top x_j $$</div>
           <div class="eq">$$ 0\le \alpha_i\le C,\qquad \sum_i \alpha_i y_i=0 $$</div>
-          <p>相对 hard-margin，关键新增限制是 $\alpha_i\le C$。</p>
+          <p><b>符号.</b> $\alpha_i$ 是样本 $i$ 的 margin constraint 对应的 Lagrange multiplier；$x_i^\top x_j$ 是两个 training examples 的 inner product。</p>
+          <p><b>怎么理解.</b> $\alpha_i=0$ 的点不影响 boundary；$\alpha_i>0$ 的点是 support vectors。Soft-margin 相比 hard-margin 多出的核心是 box constraint $0\le\alpha_i\le C$。</p>
+          <p><b>怎么用.</b> 解出 $\alpha$ 后用 $f(x)=\sum_i\alpha_i y_i x_i^\top x+b$ 预测。Kernel SVM 中，把 $x_i^\top x_j$ 和 $x_i^\top x$ 换成 kernel。</p>
         </div>
       </div>
 
@@ -249,7 +273,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

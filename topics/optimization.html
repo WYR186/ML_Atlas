@@ -81,41 +81,77 @@
 
   <h3>4. Key Equations</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">Convexity (chord)</div>
       <div class="eq">$$ f((1-\lambda)w_1+\lambda w_2)\le (1-\lambda)f(w_1)+\lambda f(w_2) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_1, w_2$ are any two points in the (convex) domain; $\lambda\in[0,1]$ interpolates between them. Left side: $f$ at the interpolated point. Right side: same interpolation of the function values.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The chord from $(w_1,f(w_1))$ to $(w_2,f(w_2))$ lies above the graph of $f$ between them — bowl-shaped curves never bulge above their chords.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> The defining property of convexity. Most useful when $\nabla^2 f$ doesn't exist (norms, $|x|$): plug in the two points and the triangle / Jensen inequality usually closes the proof.</p>
     </div>
+
     <div class="callout formula"><div class="head">First-order test</div>
       <div class="eq">$$ f(w_1)\ge f(w_2)+\nabla f(w_2)^\top(w_1-w_2) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\nabla f(w_2)$ is the gradient at the anchor point $w_2$. The right side is the tangent (first-order Taylor) plane at $w_2$ evaluated at $w_1$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The graph of a convex $f$ lies above every tangent hyperplane — there's no point you can stand at where the surface curves underneath you.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Holds for all $w_1, w_2$ ⇔ $f$ convex (when $f$ is differentiable). Often paired with $\nabla f(w^*)=0$ to conclude $f(w_1)\ge f(w^*)$ — that's the proof local = global for convex problems.</p>
     </div>
+
     <div class="callout formula"><div class="head">Second-order test</div>
       <div class="eq">$$ \nabla^2 f(w)\succeq 0\ \forall w\ \Longleftrightarrow\ f \text{ convex} $$</div>
-      <p style="font-size:13px;">PD everywhere ⇒ strictly convex.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\nabla^2 f(w)\in\mathbb{R}^{d\times d}$ is the Hessian (symmetric). $\succeq 0$ means PSD: $v^\top \nabla^2 f(w)\,v\ge 0$ for all $v$. PD everywhere ⇒ strictly convex (unique minimizer if one exists).</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Curvature is non-negative in every direction → the surface bends upward everywhere → it's a bowl.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Compute the Hessian; show it factors as $X^\top D X$ with $D\succeq 0$ (sandwich identity), or show its eigenvalues are non-negative. The cleanest convexity proof for differentiable losses (logistic, ridge, log-sum-exp).</p>
     </div>
+
     <div class="callout formula"><div class="head">Optimality (convex)</div>
       <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ globally optimal} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w^*$ is a stationary point (zero gradient). The implication holds <b>only when $f$ is convex</b>. For non-convex $f$, $\nabla f(w^*)=0$ is necessary but not sufficient — could be a max, saddle, or weak local min.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> A bowl has exactly one bottom (or a flat valley of equally good bottoms). Standing where the slope is zero on a bowl means standing at the lowest point.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> If $f$ is convex, set $\nabla f=0$ and solve. For OLS that gives the normal equations $X^\top X w = X^\top y$. For non-convex $f$, you have to verify with a second-derivative test or rely on optimization-algorithm guarantees.</p>
     </div>
+
     <div class="callout formula"><div class="head">Gradient Descent</div>
       <div class="eq">$$ w_{k+1}=w_k-\alpha_k\,\nabla f(w_k) $$</div>
-      <p style="font-size:13px;">Stop when $\|\nabla f(w_k)\|\approx 0$. $\alpha=1/L$ is a safe constant.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_k$ is the iterate at step $k$. $\alpha_k>0$ is the step size (learning rate). $\nabla f(w_k)$ is the gradient at the current point — the direction of <i>steepest ascent</i>; the minus sign turns it into descent.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Look at the slope at your feet, take a step downhill, repeat. Step too large and you overshoot the valley; too small and progress crawls.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Initialize $w_0$, iterate the update, stop when $\|\nabla f(w_k)\|\approx 0$ or after a budget. Common step sizes: constant $\alpha=1/L$ (where $L$ is the gradient's Lipschitz constant — guaranteed safe), diminishing $\alpha_k=1/k$, or Armijo line search.</p>
     </div>
+
     <div class="callout formula"><div class="head">Subgradient inequality</div>
       <div class="eq">$$ f(x)\ge f(x_0)+\langle s, x-x_0\rangle,\quad s\in\partial f(x_0) $$</div>
-      <p style="font-size:13px;">Generalizes the first-order test to non-smooth $f$ (HW1 §4.6).</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\partial f(x_0)$ is the <b>subdifferential</b> at $x_0$ — the set of all valid subgradients $s$. At a smooth point $\partial f(x_0)=\{\nabla f(x_0)\}$ (singleton); at a kink (like $|x|$ at 0) it's a whole interval, e.g. $[-1,1]$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Even at kinks, a convex function lies above some line through the point. The subdifferential is the set of slopes of all such supporting lines.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Replaces the first-order test for non-differentiable convex $f$. Subgradient descent: $x_{t+1}=x_t-\eta_t s_t$ for any $s_t\in\partial f(x_t)$. The inequality $f(x)-f(x^*)\le \langle s, x-x^*\rangle$ is the starting point for convergence proofs (HW1 §4.6).</p>
     </div>
+
     <div class="callout formula"><div class="head">Armijo line search</div>
       <div class="eq">$$ f(w_k+\alpha d_k)-f(w_k)\le \sigma\alpha\,\nabla f(w_k)^\top d_k $$</div>
-      <p style="font-size:13px;">Try $\alpha=s,\beta s,\beta^2 s,\dots$ until inequality holds (Lecture 3, p. 24).</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $d_k$ is the descent direction (often $-\nabla f(w_k)$). $\sigma\in(0,1)$ is a "fraction of expected decrease," typically 0.1 or 0.5. The right side is negative because $\nabla f(w_k)^\top d_k<0$ for descent directions.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Demand that we get at least a fraction $\sigma$ of the linear-Taylor-predicted decrease. If we don't, the step was too big — shrink and retry.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Try $\alpha=s,\,\beta s,\,\beta^2 s,\dots$ (with backoff factor $\beta\in(0,1)$, e.g. 0.5) until the inequality is satisfied. Then take the step. This adapts step size automatically without needing to know $L$ (Lecture 3, p. 24).</p>
     </div>
+
     <div class="callout formula"><div class="head">Lagrangian</div>
       <div class="eq">$$ L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_i f_i(w)+\sum_j\nu_j h_j(w),\ \lambda_i\ge 0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_0$ = objective. $f_i\le 0$ are inequality constraints with multipliers $\lambda_i\ge 0$. $h_j=0$ are equality constraints with free-sign multipliers $\nu_j$. The multipliers are the "prices" charged per unit of constraint violation.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Don't forbid constraint violations — charge for them. If $\hat w$ violates $f_i\le 0$, the inner $\max$ pushes $\lambda_i\to+\infty$ and makes $L$ infinite, so the outer $\min$ refuses to choose $\hat w$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Convert constrained problem $\min_w f_0$ s.t. $f_i\le 0,\ h_j=0$ into the unconstrained min-max $\min_w\max_{\lambda\ge 0,\nu}L$. KKT conditions ($\nabla_w L=0$, $\lambda_i f_i=0$, …) characterize the optimum.</p>
     </div>
+
     <div class="callout formula"><div class="head">Primal vs Dual</div>
       <div class="eq">$$ \text{Primal: }\min_w\max_{\lambda\ge 0,\nu} L,\quad \text{Dual: }\max_{\lambda\ge 0,\nu}\min_w L $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Primal variables: the original $w$. Dual variables: the multipliers $\lambda,\nu$. Dual function $g(\lambda,\nu)=\min_w L(w,\lambda,\nu)$ — minimize $L$ in $w$ analytically, leaving a function of the multipliers only.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Two views of the same problem: primal asks "where in $w$-space is the answer?", dual asks "what prices should we charge to make the constraints non-binding?".</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Recipe (Lecture 3, p. 29): write $L$, minimize over $w$ to get $g$, read off any domain restrictions, solve $\max_{\lambda\ge 0,\nu} g$. SVM dual is special because it depends on the data only through inner products $x_i^\top x_j$ — that opens the door to the kernel trick.</p>
     </div>
+
     <div class="callout formula"><div class="head">Weak / Strong Duality</div>
       <div class="eq">$$ f_0(w^*)\ge g(\lambda^*,\nu^*)\ (\text{always}),\quad =\ \text{under strong duality} $$</div>
-      <p style="font-size:13px;">Strong duality typically holds for convex problems with Slater.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_0(w^*)$ = optimal primal value. $g(\lambda^*,\nu^*)$ = optimal dual value. The gap $f_0(w^*)-g(\lambda^*,\nu^*)\ge 0$ is the <b>duality gap</b>.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Game-theoretic: "whoever plays second has the advantage." On the LHS the inner $\max$ reacts to a chosen $w$; on the RHS the outer $\max$ commits first, so $\min_w\max_\lambda L\ge\max_\lambda\min_w L$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Weak duality always holds and gives a lower bound on the primal. Strong duality (zero gap) typically requires <b>convex</b> primal + a constraint qualification like <b>Slater's condition</b> (a strictly feasible interior point exists). For convex problems you can just solve the dual instead — same answer.</p>
     </div>
+
   </div>
 
   <h3>5. Worked Examples</h3>
@@ -248,41 +284,77 @@
 
   <h3>4. 关键公式</h3>
   <div class="cols2">
+
     <div class="callout formula"><div class="head">凸性（弦）</div>
       <div class="eq">$$ f((1-\lambda)w_1+\lambda w_2)\le (1-\lambda)f(w_1)+\lambda f(w_2) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_1, w_2$ 是定义域（凸集）里任意两点，$\lambda\in[0,1]$ 在它们间插值。左边：$f$ 在插值点的值；右边：函数值的同样插值。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 从 $(w_1,f(w_1))$ 到 $(w_2,f(w_2))$ 的弦永远在 $f$ 图像上方——碗形曲线不会鼓出弦之外。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 凸性的定义。最有用的场合是 $\nabla^2 f$ 不存在时（范数、$|x|$）：代两点用三角 / Jensen 不等式即可收尾。</p>
     </div>
+
     <div class="callout formula"><div class="head">一阶判定</div>
       <div class="eq">$$ f(w_1)\ge f(w_2)+\nabla f(w_2)^\top(w_1-w_2) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\nabla f(w_2)$ 是锚点 $w_2$ 处的梯度；右边是 $w_2$ 处一阶 Taylor 切超平面在 $w_1$ 的值。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 凸 $f$ 的图像永远在每条切超平面上方——找不到一个站着会被曲面"包住"的点。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 对所有 $w_1, w_2$ 成立 ⇔ $f$ 凸（可微情形）。常和 $\nabla f(w^*)=0$ 配合得 $f(w_1)\ge f(w^*)$——这就是凸问题"局部 = 全局"的证明。</p>
     </div>
+
     <div class="callout formula"><div class="head">二阶判定</div>
       <div class="eq">$$ \nabla^2 f(w)\succeq 0\ \forall w\ \Longleftrightarrow\ f \text{ 凸} $$</div>
-      <p style="font-size:13px;">处处 PD ⇒ 严格凸。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\nabla^2 f(w)\in\mathbb{R}^{d\times d}$ 是 Hessian（对称）；$\succeq 0$ 即 PSD：$v^\top \nabla^2 f(w)\,v\ge 0$ 对任意 $v$ 成立。处处 PD ⇒ 严格凸（若有最小值则唯一）。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 各方向曲率都 $\ge 0$ → 曲面处处向上弯 → 是个碗。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 算 Hessian，凑成 $X^\top D X$（$D\succeq 0$）用夹心恒等式，或证特征值非负。可微损失（logistic、ridge、log-sum-exp）的最干净凸性证法。</p>
     </div>
+
     <div class="callout formula"><div class="head">凸优化的最优性</div>
       <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ 全局最优} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w^*$ 是驻点（梯度为 0）。这条蕴含<b>只在 $f$ 凸时</b>成立；非凸时 $\nabla f(w^*)=0$ 必要但不充分——可能是极大、鞍点或弱局部极小。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 碗只有一个底（或一条等优的平谷）。在碗上找到斜率为 0 的点 = 最低点。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 凸 $f$ 时令 $\nabla f=0$ 直接解。OLS 给出 normal equations $X^\top X w = X^\top y$。非凸时要二阶补判或靠优化算法的保证。</p>
     </div>
+
     <div class="callout formula"><div class="head">梯度下降</div>
       <div class="eq">$$ w_{k+1}=w_k-\alpha_k\,\nabla f(w_k) $$</div>
-      <p style="font-size:13px;">$\|\nabla f(w_k)\|\approx 0$ 时停；$\alpha=1/L$ 安全常数。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_k$ 第 $k$ 步的迭代；$\alpha_k>0$ 步长（learning rate）；$\nabla f(w_k)$ 当前点的梯度——<i>最陡上升</i>方向，前面的负号让它变成下降。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 看脚下的坡度，朝下坡走一步，重复。步太大会冲出山谷；太小爬蜗牛。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 初始化 $w_0$，反复迭代，$\|\nabla f(w_k)\|\approx 0$ 或达预算时停。常用步长：常数 $\alpha=1/L$（$L$ 为梯度的 Lipschitz 常数，安全）；递减 $\alpha_k=1/k$；或 Armijo 线搜索。</p>
     </div>
+
     <div class="callout formula"><div class="head">次梯度不等式</div>
       <div class="eq">$$ f(x)\ge f(x_0)+\langle s, x-x_0\rangle,\quad s\in\partial f(x_0) $$</div>
-      <p style="font-size:13px;">把一阶判定推广到不可微 $f$（HW1 §4.6）。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\partial f(x_0)$ 是 <b>subdifferential</b>——$x_0$ 处所有合法 subgradient $s$ 的集合。光滑点 $\partial f(x_0)=\{\nabla f(x_0)\}$；尖点（如 $|x|$ 在 0）是整个区间，比如 $[-1,1]$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 即使在尖点，凸函数也躺在某条过该点的直线上方；subdifferential 就是所有这种支撑直线斜率的集合。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 替代不可微凸 $f$ 的一阶判定。Subgradient descent：$x_{t+1}=x_t-\eta_t s_t$（$s_t\in\partial f(x_t)$）。$f(x)-f(x^*)\le \langle s, x-x^*\rangle$ 是收敛性证明的起点（HW1 §4.6）。</p>
     </div>
+
     <div class="callout formula"><div class="head">Armijo 线搜索</div>
       <div class="eq">$$ f(w_k+\alpha d_k)-f(w_k)\le \sigma\alpha\,\nabla f(w_k)^\top d_k $$</div>
-      <p style="font-size:13px;">尝试 $\alpha=s,\beta s,\beta^2 s,\dots$ 直到不等式成立（Lecture 3, p. 24）。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $d_k$ 下降方向（常取 $-\nabla f(w_k)$）；$\sigma\in(0,1)$ 是"期望下降的占比"，常取 0.1 或 0.5。右侧为负——下降方向下 $\nabla f(w_k)^\top d_k<0$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 要求至少拿到一阶 Taylor 预测的下降量的 $\sigma$ 倍。拿不到说明步太大——缩小再试。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 尝试 $\alpha=s,\,\beta s,\,\beta^2 s,\dots$（回退因子 $\beta\in(0,1)$，常 0.5）直到不等式成立，再走这一步。无需知道 $L$ 即可自动适配步长（Lecture 3, p. 24）。</p>
     </div>
+
     <div class="callout formula"><div class="head">Lagrangian</div>
       <div class="eq">$$ L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_i f_i(w)+\sum_j\nu_j h_j(w),\ \lambda_i\ge 0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f_0$ 目标；$f_i\le 0$ 不等式约束、对应乘子 $\lambda_i\ge 0$；$h_j=0$ 等式约束、对应乘子 $\nu_j$ 自由号；乘子是"违约金"。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 不禁止违约，而是收费。$\hat w$ 违 $f_i\le 0$ 时内层 $\max$ 把 $\lambda_i\to+\infty$，$L$ 变正无穷，外层 $\min$ 自然不会选它。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 把有约束 $\min_w f_0$ s.t. $f_i\le 0,\ h_j=0$ 化为无约束 $\min_w\max_{\lambda\ge 0,\nu}L$。KKT 条件（$\nabla_w L=0$、$\lambda_i f_i=0$、…）刻画最优。</p>
     </div>
+
     <div class="callout formula"><div class="head">原始 vs 对偶</div>
       <div class="eq">$$ \text{Primal: }\min_w\max_{\lambda\ge 0,\nu} L,\quad \text{Dual: }\max_{\lambda\ge 0,\nu}\min_w L $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 原始变量：原来的 $w$；对偶变量：乘子 $\lambda,\nu$。对偶函数 $g(\lambda,\nu)=\min_w L(w,\lambda,\nu)$——把 $L$ 对 $w$ 解析地最小化掉，剩下只是乘子的函数。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 同一个问题的两个视角：原始问"答案在 $w$-空间的哪里"，对偶问"该收什么样的价让约束变松"。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 配方（Lecture 3, p. 29）：写 $L$ → 对 $w$ 取 min 得 $g$ → 读出域约束 → 解 $\max_{\lambda\ge 0,\nu} g$。SVM 对偶之所以特别，是因为它对数据的依赖只有内积 $x_i^\top x_j$——这就打开了 kernel trick 的大门。</p>
     </div>
+
     <div class="callout formula"><div class="head">弱 / 强对偶</div>
       <div class="eq">$$ f_0(w^*)\ge g(\lambda^*,\nu^*)\ (\text{恒成立}),\quad =\ \text{当强对偶成立时} $$</div>
-      <p style="font-size:13px;">凸 + Slater 通常给出强对偶。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f_0(w^*)$ 原始最优值；$g(\lambda^*,\nu^*)$ 对偶最优值；二者之差 $\ge 0$ 称为<b>对偶间隙</b>。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 博弈论解读："后手有优势"。LHS 内层 $\max$ 看到 $w$ 后再选；RHS 外层 $\max$ 先承诺，所以 $\min_w\max_\lambda L\ge\max_\lambda\min_w L$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 弱对偶恒成立，给原始一个下界。强对偶（间隙为 0）通常需要原始<b>凸</b> + 一条约束限定，如 <b>Slater 条件</b>（存在严格可行的内点）。凸问题下可以解对偶代替原始——答案相同。</p>
     </div>
+
   </div>
 
   <h3>5. 例题精解</h3>

@@ -66,21 +66,32 @@
       <div class="head">Objective</div>
       <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
       <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $J$: k-means objective, also called within-cluster sum of squares; $n$: number of data points; $K$: number of clusters chosen before running the algorithm; $x^{(i)}$: the $i$-th data point; $\mu_k$: center of cluster $k$; $r_{ik}$: assignment indicator: 1 if point $i$ is assigned to cluster $k$, otherwise 0</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">Assignment step</div>
       <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
-      <p>Nearest center wins.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\arg\min_j$: the index $j$ of the center with the smallest distance; $\|x^{(i)}-\mu_j\|_2^2$: squared Euclidean distance from point $i$ to center $j$</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">Update step</div>
       <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
-      <p>Center becomes the cluster mean.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\sum_i r_{ik}x^{(i)}$: sum of points currently assigned to cluster $k$; $\sum_i r_{ik}$: number of points assigned to cluster $k$; $\mu_k$: new center after averaging assigned points</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
     <div class="callout formula">
       <div class="head">Per-iteration cost</div>
       <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
-      <p>$N$ points, dimension $d$, $K$ clusters.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$: number of points; $d$: feature dimension of each point; $K$: number of centers compared against each point</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
     </div>
   </div>
 
@@ -160,21 +171,32 @@
           <div class="head">Objective</div>
           <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
           <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $J$: k-means objective，也叫 within-cluster sum of squares; $n$: data points 数量; $K$: 预先指定的 clusters 数量; $x^{(i)}$: 第 $i$ 个数据点; $\mu_k$: 第 $k$ 个 cluster center; $r_{ik}$: assignment indicator：点 $i$ 属于 cluster $k$ 时为 1，否则为 0</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">Assignment step</div>
           <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
-          <p>最近中心获胜。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\arg\min_j$: 让距离最小的 center index $j$; $\|x^{(i)}-\mu_j\|_2^2$: 点 $i$ 到 center $j$ 的 squared Euclidean distance</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">Update step</div>
           <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
-          <p>中心变成 cluster mean。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\sum_i r_{ik}x^{(i)}$: 当前分到 cluster $k$ 的所有点之和; $\sum_i r_{ik}$: 当前分到 cluster $k$ 的点数; $\mu_k$: 更新后的 cluster center</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
         <div class="callout formula">
           <div class="head">Per-iteration cost</div>
           <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
-          <p>$N$ 个点，dimension $d$，$K$ 个 clusters。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$: points 数量; $d$: 每个点的 feature dimension; $K$: 每个点要比较的 centers 数量</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
         </div>
       </div>
 
@@ -230,7 +252,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -258,20 +280,16 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
-      items.forEach((el) => {
+      items.forEach((el, idx) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        if (!el.id) el.id = `${sect.id}-h${idx}`;
         const li = document.createElement('li');
         const a  = document.createElement('a');
-        a.href = '#' + sect.id;
+        a.href = '#' + el.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';

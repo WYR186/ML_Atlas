@@ -65,23 +65,62 @@
   <p>This is the theory version of the bias-variance style trade-off: simple class means underfitting risk; overly rich class means generalization risk.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
-  <div class="eq">$$
-  \epsilon_\mu(f)=
-  \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
-  +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
-  +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
-  $$</div>
-  <p>Here $\epsilon_\mu(f)$ is test error under distribution $\mu$, and $\epsilon_\mu^*$ is the Bayes error.</p>
+  <div class="callout formula">
+    <div class="head">Total error split</div>
+    <div class="eq">$$
+    \epsilon_\mu(f)=
+    \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
+    +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
+    +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
+    $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+
+    <ul>
+      <li>$\epsilon_\mu(f)$ is the true/test error of predictor $f$ under the data distribution $\mu$.</li>
+      <li>$\mathcal{F}$ is the hypothesis class you allowed, such as linear classifiers or trees.</li>
+      <li>$g\in\mathcal{F}$ means "any candidate predictor inside this class."</li>
+      <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ is the smallest true error achievable by any predictor in $\mathcal{F}$.</li>
+      <li>$\epsilon_\mu^*$ is Bayes error, the best possible error if there were no restriction to $\mathcal{F}$.</li>
+    </ul>
+    <p><b>How to read it.</b> the equality adds and subtracts the same best-in-class error. The first gap asks how far the learned $f$ is from the best member of $\mathcal{F}$. The second gap asks how far the best member of $\mathcal{F}$ is from Bayes optimal. The last term is irreducible noise.</p>
+    <p><b>How to use.</b> more data mainly shrinks estimation error for fixed $\mathcal{F}$; a richer $\mathcal{F}$ can shrink approximation error but may make estimation harder; changing only the learner cannot remove Bayes error.</p>
+  </div>
   <div class="cols2">
-    <div>
-      <h4>Best-in-class predictor</h4>
+    <div class="callout formula">
+      <div class="head">Best-in-class predictor</div>
       <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
-      <p>This is the best predictor your model class could express.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+
+      <ul>
+        <li>$f_{\mathcal{F}}^*$ is one predictor in $\mathcal{F}$ with minimum true error.</li>
+        <li>$\arg\min$ returns the input/predictor that achieves the minimum, not the minimum value itself.</li>
+        <li>The star means "optimal," and the subscript $\mathcal{F}$ means "optimal within this class."</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This names the ideal predictor inside the chosen hypothesis class. It is the benchmark for estimation error, even though the learner does not know it directly.</p>
+
+      <p><b>How to use.</b> compare your learned model to $f_{\mathcal{F}}^*$ when a question asks about finite-sample learning gap.</p>
     </div>
-    <div>
-      <h4>Learned predictor</h4>
+    <div class="callout formula">
+      <div class="head">Learned predictor</div>
       <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
-      <p>This is what the training algorithm returns from finite data.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+
+      <ul>
+        <li>$\mathcal{D}$ is the training set.</li>
+        <li>$\mathcal{A}$ is the learning algorithm, such as ERM, SVM training, or tree induction.</li>
+        <li>The hat in $\hat f$ means the predictor is data-dependent and random through $\mathcal{D}$.</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This says the actual predictor is the output of an algorithm applied to a finite random dataset, so it can change when the sample changes.</p>
+
+      <p><b>How to use.</b> when $\mathcal{D}$ changes, $\hat f$ can change; that is why estimation error is a finite-sample issue.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="head">How to apply it in questions</div>
+    <div class="mini-list">
+      <div><b>If sample size changes:</b> focus on estimation error, because $\hat f$ has more or less data to find the best member of $\mathcal{F}$.</div>
+      <div><b>If the model class changes:</b> focus on approximation error, because the best-in-class benchmark itself may move.</div>
+      <div><b>If the label noise or distribution changes:</b> focus on Bayes error, because the irreducible lower bound changed.</div>
     </div>
   </div>
 
@@ -161,23 +200,62 @@
   <p>这就是 theory 版本的 underfitting / overfitting trade-off：太简单会表达不足，太复杂会泛化不稳。</p>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
-  <div class="eq">$$
-  \epsilon_\mu(f)=
-  \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
-  +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
-  +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
-  $$</div>
-  <p>$\epsilon_\mu(f)$ 是真实分布下 test error，$\epsilon_\mu^*$ 是 Bayes error。</p>
+  <div class="callout formula">
+    <div class="head">总误差分解</div>
+    <div class="eq">$$
+    \epsilon_\mu(f)=
+    \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
+    +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
+    +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
+    $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+
+    <ul>
+      <li>$\epsilon_\mu(f)$ 是 predictor $f$ 在真实数据分布 $\mu$ 下的 true/test error。</li>
+      <li>$\mathcal{F}$ 是允许使用的 hypothesis class，比如 linear classifier、tree。</li>
+      <li>$g\in\mathcal{F}$ 表示“$\mathcal{F}$ 里的任意一个 candidate predictor”。</li>
+      <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ 是 $\mathcal{F}$ 内能达到的最小 true error。</li>
+      <li>$\epsilon_\mu^*$ 是 Bayes error，也就是不限制在 $\mathcal{F}$ 时的理论最低错误。</li>
+    </ul>
+    <p><b>怎么理解.</b>这个等式本质是加减同一个 best-in-class error。第一项看学出来的 $f$ 离 $\mathcal{F}$ 内最优还有多远；第二项看 $\mathcal{F}$ 内最优离 Bayes optimal 还有多远；最后一项是数据本身噪声。</p>
+    <p><b>怎么用.</b>固定 $\mathcal{F}$ 时加数据主要降低 estimation error；换更强的 $\mathcal{F}$ 可能降低 approximation error，但 estimation 更难；只换算法不能消掉 Bayes error。</p>
+  </div>
   <div class="cols2">
-    <div>
-      <h4>Best-in-class predictor</h4>
+    <div class="callout formula">
+      <div class="head">Best-in-class predictor</div>
       <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
-      <p>这是模型类 $\mathcal{F}$ 理论上能做到的最好函数。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+
+      <ul>
+        <li>$f_{\mathcal{F}}^*$ 是 $\mathcal{F}$ 内 true error 最小的某个 predictor。</li>
+        <li>$\arg\min$ 返回的是“让误差最小的函数”，不是最小误差数值本身。</li>
+        <li>星号表示 optimal，下标 $\mathcal{F}$ 表示“只在这个 class 里面最优”。</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
+
+      <p><b>怎么用.</b>题目问有限样本学习差距时，把实际学到的 $\hat f$ 和 $f_{\mathcal{F}}^*$ 比。</p>
     </div>
-    <div>
-      <h4>Learned predictor</h4>
+    <div class="callout formula">
+      <div class="head">Learned predictor</div>
       <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
-      <p>这是算法从有限训练集 $\mathcal{D}$ 中实际学出来的函数。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+
+      <ul>
+        <li>$\mathcal{D}$ 是 training set。</li>
+        <li>$\mathcal{A}$ 是 learning algorithm，比如 ERM、SVM training、tree induction。</li>
+        <li>$\hat f$ 上面的 hat 表示它依赖数据；训练集换了，$\hat f$ 可能也会变。</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
+
+      <p><b>怎么用.</b>只要 predictor 是从有限 $\mathcal{D}$ 里学出来的，就要考虑 estimation error。</p>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="head">题目里怎么套</div>
+    <div class="mini-list">
+      <div><b>如果 sample size 变了：</b>优先看 estimation error，因为 $\hat f$ 有更多或更少数据去接近 $\mathcal{F}$ 内最优。</div>
+      <div><b>如果 model class 变了：</b>优先看 approximation error，因为 best-in-class benchmark 本身可能变了。</div>
+      <div><b>如果 label noise / distribution 变了：</b>优先看 Bayes error，因为不可消除的理论下界变了。</div>
     </div>
   </div>
 
@@ -235,7 +313,7 @@
   </ul>
 </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

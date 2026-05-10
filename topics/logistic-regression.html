@@ -66,27 +66,39 @@
     <div class="callout formula">
       <div class="head">Sigmoid</div>
       <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
-      <p>$\sigma(0)=0.5$, so the decision boundary is where the score is zero.</p>
+      <p><b>Symbols.</b> $z$ is any real-valued score, usually $z=w^\top\phi(x)$; $e^{-z}$ is the exponential term; $\sigma(z)$ is the predicted probability of the positive class.</p>
+      <p><b>How to read it.</b> The sigmoid turns an unbounded score into a number between 0 and 1. If $z$ is large positive, $e^{-z}$ is tiny and $\sigma(z)\approx1$; if $z$ is large negative, $\sigma(z)\approx0$.</p>
+
+      <p><b>How to use.</b> Compute the score first, then plug it into $\sigma$. Since $\sigma(0)=0.5$, probability-threshold classification at 0.5 is the same as checking whether the score is positive.</p>
     </div>
     <div class="callout formula">
       <div class="head">Decision boundary</div>
       <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
-      <p>The boundary is linear in feature space.</p>
+      <p><b>Symbols.</b> $p(y=1\mid x)$ is the model's probability for class $+1$; $w$ is the learned weight vector; $\phi(x)$ is the feature representation; $w^\top\phi(x)$ is the score.</p>
+      <p><b>How to read it.</b> The boundary is where the model is exactly unsure: positive class and negative class are tied. Because sigmoid is monotone, the tie happens exactly at score 0.</p>
+      <p><b>How to use.</b> For classification, compute $w^\top\phi(x)$. Positive score predicts $+1$; negative score predicts $-1$. The boundary is linear in feature space even though the probability curve is nonlinear.</p>
     </div>
     <div class="callout formula">
       <div class="head">Negative log-likelihood</div>
       <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
-      <p>This is also called log loss or cross-entropy in the binary setting.</p>
+      <p><b>Symbols.</b> $D$ is the training set; $x_i$ is example $i$; $y_i\in\{-1,+1\}$ is its label; $w^\top\phi(x_i)$ is the score; $y_iw^\top\phi(x_i)$ is the signed margin.</p>
+      <p><b>How to read it.</b> If the signed margin is large positive, the true label got high probability and the log term is near 0. If the margin is negative, the model is confidently wrong and the loss becomes large.</p>
+
+      <p><b>How to use.</b> Sum this term over all training examples, then minimize with gradient-based optimization. Do not mix this $y\in\{-1,+1\}$ form with the $y\in\{0,1\}$ cross-entropy form unless you convert labels.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gradient descent update</div>
       <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
-      <p>No analytic solution is available in general, so iterative optimization is the default.</p>
+      <p><b>Symbols.</b> $w_t$ is the current parameter vector; $\alpha$ is the learning rate / step size; $f(w)$ is the logistic objective; $\nabla f(w_t)$ points in the steepest increasing direction of loss.</p>
+      <p><b>How to read it.</b> Move opposite the gradient because we want to reduce loss. A larger $\alpha$ moves faster but can overshoot; a smaller $\alpha$ is safer but slower.</p>
+      <p><b>How to use.</b> Repeatedly compute predicted probabilities, form the gradient, and update $w$. Logistic regression generally has no normal-equation closed form.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Convexity check for $y\in\{0,1\}$ form</div>
       <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
-      <p>Because $p_i(1-p_i)\ge 0$, this Hessian is positive semidefinite.</p>
+      <p><b>Symbols.</b> $X$ is the design matrix with rows $x_i^\top$; $p_i=\sigma(w^\top x_i)$; $B$ is diagonal, with one curvature weight $p_i(1-p_i)$ per example.</p>
+      <p><b>How to read it.</b> $p_i(1-p_i)$ is never negative, so $B$ is positive semidefinite. The sandwich form $X^\top B X$ therefore has nonnegative quadratic form $v^\top X^\top B Xv$.</p>
+      <p><b>How to use.</b> For convexity proofs, write $v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$.</p>
     </div>
   </div>
 
@@ -166,27 +178,39 @@
         <div class="callout formula">
           <div class="head">Sigmoid</div>
           <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
-          <p>$\sigma(0)=0.5$，所以边界发生在 score = 0。</p>
+          <p><b>符号.</b> $z$ 是任意 real-valued score，通常 $z=w^\top\phi(x)$；$e^{-z}$ 是 exponential term；$\sigma(z)$ 是 positive class 的预测概率。</p>
+          <p><b>怎么理解.</b> Sigmoid 把无限范围的 score 压到 0 到 1。$z$ 很大为正时 $\sigma(z)\approx1$；$z$ 很大为负时 $\sigma(z)\approx0$。</p>
+
+      <p><b>怎么用.</b> 先算 score，再代入 $\sigma$。因为 $\sigma(0)=0.5$，用 0.5 做阈值分类等价于看 score 是否大于 0。</p>
         </div>
         <div class="callout formula">
           <div class="head">Decision boundary</div>
           <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
-          <p>在 feature space 里仍然是 linear boundary。</p>
+          <p><b>符号.</b> $p(y=1\mid x)$ 是 class $+1$ 的概率；$w$ 是 learned weight；$\phi(x)$ 是 feature representation；$w^\top\phi(x)$ 是 score。</p>
+          <p><b>怎么理解.</b> Boundary 是模型刚好不确定的位置：正负类概率打平。Sigmoid 单调，所以概率等于 0.5 正好对应 score = 0。</p>
+      <p><b>怎么用.</b> 分类时直接算 $w^\top\phi(x)$：正数预测 $+1$，负数预测 $-1$。Probability curve 非线性，但 boundary 在 feature space 中仍然 linear。</p>
         </div>
         <div class="callout formula">
           <div class="head">NLL / log loss</div>
           <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
-          <p>二分类里常叫 cross-entropy / log loss。</p>
+          <p><b>符号.</b> $D$ 是 training set；$x_i$ 是第 $i$ 个样本；$y_i\in\{-1,+1\}$ 是标签；$w^\top\phi(x_i)$ 是 score；$y_iw^\top\phi(x_i)$ 是 signed margin。</p>
+          <p><b>怎么理解.</b> Signed margin 很大为正时，真实标签概率高，loss 接近 0；margin 为负时，模型方向错了，loss 会快速变大。</p>
+
+      <p><b>怎么用.</b> 对所有样本求和后用 gradient descent 最小化。注意不要和 $y\in\{0,1\}$ 的 cross-entropy 公式混用，除非先转换标签。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gradient descent</div>
           <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
-          <p>没有一般的 analytic solution，所以用 iterative optimization。</p>
+          <p><b>符号.</b> $w_t$ 是当前参数；$\alpha$ 是 learning rate；$f(w)$ 是 logistic objective；$\nabla f(w_t)$ 是 loss 增长最快方向。</p>
+          <p><b>怎么理解.</b> 要让 loss 下降，就往 gradient 的反方向走。$\alpha$ 太大可能 overshoot，太小会很慢。</p>
+      <p><b>怎么用.</b> 每轮算 probability、算 gradient、更新 $w$。Logistic regression 一般没有 normal equation closed form。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Convexity check ($y\in\{0,1\}$ form)</div>
           <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
-          <p>因为 $p_i(1-p_i)\ge 0$，Hessian 是 positive semidefinite。</p>
+          <p><b>符号.</b> $X$ 是 design matrix，每行是 $x_i^\top$；$p_i=\sigma(w^\top x_i)$；$B$ 是 diagonal matrix，每个对角元是样本 $i$ 的 curvature weight $p_i(1-p_i)$。</p>
+          <p><b>怎么理解.</b> $p_i(1-p_i)$ 永远非负，所以 $B$ 是 positive semidefinite；夹心形式 $X^\top B X$ 的二次型也非负。</p>
+          <p><b>怎么用.</b> 证明 convexity 时写：$v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$。</p>
         </div>
       </div>
 
@@ -242,7 +266,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

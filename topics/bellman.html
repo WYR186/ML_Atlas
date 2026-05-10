@@ -74,21 +74,37 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Policy Q-value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^π(s,a): state-action value under π； s_0=s, a_0=a: initial state/action are fixed； γ^t r_t: discounted reward sequence</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Definition of Q under a fixed policy: force action a first, then follow π and average future discounted rewards.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it when asked for the value of a state-action pair under a given policy.</p>
     </div>
     <div class="callout formula"><div class="head">Policy Bellman equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Σ_{s'}P(s'|s,a): average over possible next states； Σ_{a'}π(a'|s'): average over next actions from π； Q^π(s',a'): future state-action value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Expands Q into immediate reward, then averages over next states and next actions chosen by π.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it for policy evaluation when transition probabilities and policy probabilities are known.</p>
     </div>
     <div class="callout formula"><div class="head">Optimality equations</div>
       <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V*(s): optimal state value； Q*(s,a): optimal value after taking action a； max_a: choose the best action； E_{s'}: average over next states</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Optimal value assumes the best action is chosen at every step.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use these equations to derive value iteration, optimal Bellman backups, and optimal policies.</p>
     </div>
     <div class="callout formula"><div class="head">Greedy optimal policy</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π*(s): optimal action in state s； argmax_a: the action that maximizes Q*； Q*(s,a): optimal action-value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once Q* is known, choose the action with the largest Q* in each state.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the final extraction step after value iteration or Q-learning estimates Q*.</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman optimality operator contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
-      <p>The operator has a unique fixed point when $\gamma&lt;1$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> T: Bellman optimality operator； ||·||∞: largest absolute difference over states； U,V: two candidate value functions； γ: discount/contraction factor</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> T is one optimal Bellman backup. The contraction inequality says repeated backups shrink value-function error by a factor at most γ.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to justify convergence of value iteration: because γ&lt;1, repeated T approaches the unique fixed point V*.</p>
     </div>
   </div>
 
@@ -183,21 +199,37 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">策略下的 Q-value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^π(s,a): 策略 π 下的状态-动作价值；s_0=s, a_0=a: 初始状态和动作固定；γ^t r_t: 折扣奖励序列</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 固定策略下 Q 的定义：先强制做动作 a，然后按 π 继续行动，对未来折扣奖励求期望。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 题目问某策略下 state-action pair 的价值时，用这个定义。</p>
     </div>
     <div class="callout formula"><div class="head">Policy Bellman equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Σ_{s'}P(s'|s,a): 对可能下一状态加权平均；Σ_{a'}π(a'|s'): 对 π 在下一状态会选的动作加权平均；Q^π(s',a'): 后续 state-action 的价值</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把 Q 展开成即时奖励，然后对下一状态以及策略 π 选择的下一动作做平均。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当转移概率和策略概率已知时，用它做 policy evaluation。</p>
     </div>
     <div class="callout formula"><div class="head">Bellman optimality</div>
       <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> V*(s): 状态 s 的最优价值；Q*(s,a): 先做 a 后的最优价值；max_a: 在动作中取最大；E_{s'}: 对下一状态取期望</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 最优价值假设每一步都选最好的动作。V* 是 Q* 对动作取最大；Q* 是即时奖励加下一状态最优价值。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它推导 value iteration、Bellman optimality backup，以及最优策略。</p>
     </div>
     <div class="callout formula"><div class="head">最优策略</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π*(s): 状态 s 的最优动作；argmax_a: 使 Q* 最大的动作；Q*(s,a): 最优 action-value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦知道 Q*，每个 state 的最优动作就是让 Q* 最大的动作。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Value iteration 或 Q-learning 估出 Q* 后，用这个公式抽取最终策略。</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman operator 是 $\gamma$-contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
-      <p>因为 $\gamma&lt;1$，fixed point 唯一，反复迭代会靠近它。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> T: Bellman 最优算子；||·||∞: 所有状态最大绝对差；U,V: 两个候选 value function；γ: 折扣 / 收缩系数</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> T 表示做一次最优 Bellman backup。Contraction 不等式说明反复 backup 会让 value function 误差按 γ 收缩。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它解释 value iteration 为什么收敛：因为 γ&lt;1，反复套 T 会逼近唯一不动点 V*。</p>
     </div>
   </div>
 
@@ -261,7 +293,7 @@
   </div>
 </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -275,6 +307,7 @@
 <script src="../assets/i18n.js"></script>
 <script src="../assets/topics-data.js"></script>
 <script src="../assets/popup-data.js"></script>
+<script src="../assets/equation-sheet.js"></script>
 <script src="../assets/main.js"></script>
 <script>
   // Auto-build TOC from h2/h3 in this topic body — language-aware.

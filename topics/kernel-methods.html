@@ -65,27 +65,39 @@
     <div class="callout formula">
       <div class="head">Kernel definition</div>
       <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
-      <p>The kernel must behave like an inner product in some feature space.</p>
+      <p><b>Symbols.</b> $x$ and $x'$ are two inputs; $\phi$ is the feature map into a possibly high-dimensional space; $k(x,x')$ is the similarity value computed without explicitly forming $\phi(x)$.</p>
+      <p><b>How to read it.</b> A kernel is not just any similarity score: it must equal an inner product in some feature space, which is why it can safely replace dot products in algorithms like SVM.</p>
+
+      <p><b>How to use.</b> Whenever a dual algorithm contains $\phi(x_i)^\top\phi(x_j)$, compute $k(x_i,x_j)$ instead. This is the kernel trick.</p>
     </div>
     <div class="callout formula">
       <div class="head">Kernelized SVM prediction</div>
       <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
-      <p>Only support vectors contribute because the other $\alpha_i$ are zero.</p>
+      <p><b>Symbols.</b> $x$ is the test point; $x_i$ are training points; $y_i$ are labels; $\alpha_i$ are dual weights; $b$ is the intercept.</p>
+      <p><b>How to read it.</b> The prediction is a weighted vote from training examples. Each support vector compares itself to the test point through $k(x_i,x)$, then votes with sign $y_i$ and strength $\alpha_i$.</p>
+      <p><b>How to use.</b> In practice, terms with $\alpha_i=0$ disappear. For a new $x$, compute its kernel similarity to support vectors, sum the weighted votes, add $b$, then take $\mathrm{sign}(f(x))$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Polynomial kernel</div>
       <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
-      <p>Degree $d$ controls the highest-order interactions.</p>
+      <p><b>Symbols.</b> $x^\top x'$ is the ordinary dot product; $d$ is the polynomial degree; the constant 1 adds lower-order and bias-like terms.</p>
+      <p><b>How to read it.</b> Expanding the power creates interaction features up to degree $d$. For $d=2$, the feature space includes constants, linear terms, squares, and pairwise products.</p>
+
+      <p><b>How to use.</b> For explicit feature-map questions, expand the polynomial and match each term to one coordinate of $\phi(x)$. Keep scaling factors such as $\sqrt2$ so the dot product matches exactly.</p>
     </div>
     <div class="callout formula">
       <div class="head">RBF / Gaussian kernel</div>
       <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
-      <p>Small $\sigma$ means narrow, local influence; large $\sigma$ means smoother, broader influence.</p>
+      <p><b>Symbols.</b> $\|x-x'\|_2^2$ is squared Euclidean distance; $\sigma$ is bandwidth; the exponential converts distance into similarity between 0 and 1.</p>
+      <p><b>How to read it.</b> If two points are identical, distance is 0 and the kernel is 1. As distance grows, the exponential shrinks toward 0. Small $\sigma$ makes the shrinkage faster.</p>
+      <p><b>How to use.</b> Compare distances first. With small $\sigma$, nearest support vectors dominate; with large $\sigma$, many points have similar influence and the boundary becomes smoother.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">XOR lifting from Lecture 7</div>
       <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
-      <p>The new interaction coordinate separates the diagonal XOR classes.</p>
+      <p><b>Symbols.</b> $x_1,x_2$ are the original two coordinates; $x_1x_2$ is the new interaction feature that records whether the signs of the coordinates agree.</p>
+      <p><b>How to read it.</b> XOR is hard in the original plane because diagonal classes cannot be separated by one line. The interaction coordinate sends same-sign points to one side and opposite-sign points to the other.</p>
+      <p><b>How to use.</b> For XOR-style questions, compute $x_1x_2$ for each point. A linear classifier using this third coordinate can separate the classes.</p>
     </div>
   </div>
 
@@ -164,27 +176,39 @@
         <div class="callout formula">
           <div class="head">Kernel definition</div>
           <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
-          <p>Kernel 必须像某个 feature space 里的 inner product。</p>
+          <p><b>符号.</b> $x,x'$ 是两个输入；$\phi$ 是 feature map，可能映射到很高维；$k(x,x')$ 是不显式构造 $\phi(x)$ 时直接算出来的 similarity value。</p>
+          <p><b>怎么理解.</b> Kernel 不是随便一个相似度；它必须等于某个 feature space 里的 inner product，所以才能安全替换 SVM 里的 dot product。</p>
+
+      <p><b>怎么用.</b> 只要 dual algorithm 出现 $\phi(x_i)^\top\phi(x_j)$，就直接算 $k(x_i,x_j)$。这就是 kernel trick。</p>
         </div>
         <div class="callout formula">
           <div class="head">Kernelized SVM prediction</div>
           <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
-          <p>因为其他 $\alpha_i=0$，实际只剩 support vectors。</p>
+          <p><b>符号.</b> $x$ 是 test point；$x_i$ 是 training points；$y_i$ 是 labels；$\alpha_i$ 是 dual weights；$b$ 是 intercept。</p>
+          <p><b>怎么理解.</b> Prediction 是 training examples 的 weighted vote。每个 support vector 通过 $k(x_i,x)$ 和 test point 比相似度，再用 $y_i$ 给方向、$\alpha_i$ 给权重。</p>
+      <p><b>怎么用.</b> $\alpha_i=0$ 的项直接消失。对新点 $x$，只算它和 support vectors 的 kernel similarity，加权求和后加 $b$，最后看 $\mathrm{sign}(f(x))$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Polynomial kernel</div>
           <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
-          <p>Degree $d$ 控制最高阶 interactions。</p>
+          <p><b>符号.</b> $x^\top x'$ 是普通 dot product；$d$ 是 polynomial degree；常数 1 会加入 lower-order 和 bias-like terms。</p>
+          <p><b>怎么理解.</b> 展开幂次后，会出现最高到 degree $d$ 的 interaction features。$d=2$ 时有常数、线性项、平方项和 pairwise products。</p>
+
+      <p><b>怎么用.</b> 显式 feature map 题就把 polynomial 展开，把每一项对应到 $\phi(x)$ 的一个坐标；注意 $\sqrt2$ 这类 scaling，保证内积完全匹配。</p>
         </div>
         <div class="callout formula">
           <div class="head">RBF / Gaussian kernel</div>
           <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
-          <p>$\sigma$ 小：影响范围窄、边界更局部；$\sigma$ 大：更平滑、更全局。</p>
+          <p><b>符号.</b> $\|x-x'\|_2^2$ 是 squared Euclidean distance；$\sigma$ 是 bandwidth；exponential 把 distance 转成 0 到 1 的 similarity。</p>
+          <p><b>怎么理解.</b> 两点完全相同距离为 0，kernel = 1；距离越远，kernel 越接近 0。$\sigma$ 越小，衰减越快。</p>
+      <p><b>怎么用.</b> 先比较 distances。$\sigma$ 小时，最近 support vectors dominate；$\sigma$ 大时，很多点都有相近影响，boundary 更 smooth。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">XOR lifting from Lecture 7</div>
           <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
-          <p>新增的 interaction coordinate 能把 XOR 的对角类别分开。</p>
+          <p><b>符号.</b> $x_1,x_2$ 是原始两个坐标；$x_1x_2$ 是新 interaction feature，记录两个坐标的符号是否一致。</p>
+          <p><b>怎么理解.</b> XOR 在原平面不能一条直线分开，因为类别在对角线上；interaction coordinate 会把同号点和异号点送到不同侧。</p>
+          <p><b>怎么用.</b> 遇到 XOR 类题，先算每个点的 $x_1x_2$。只用第三个坐标就能构造 linear classifier 分开类别。</p>
         </div>
       </div>
 
@@ -240,7 +264,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">

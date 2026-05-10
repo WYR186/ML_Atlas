@@ -64,28 +64,40 @@
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Entropy</div>
-      <div class="eq">$$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $$</div>
-      <p>Pure node gives 0; balanced binary node gives 1 bit.</p>
+      <div class="eq">$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $D$ is the examples at the current node. $C$ is the number of classes. $p(c\mid D)$ is the fraction of examples in $D$ with class $c$. $\log_2$ measures uncertainty in bits; terms with $p=0$ are treated as 0.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Entropy measures how mixed the labels are inside a node. Pure nodes have entropy 0; evenly mixed nodes have higher entropy.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Count labels in the node, convert counts to class probabilities, plug them in, then compare candidate splits by how much entropy they remove.</p>
     </div>
     <div class="callout formula">
       <div class="head">Information gain</div>
-      <div class="eq">$$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $$</div>
-      <p>Choose the split with the largest gain.</p>
+      <div class="eq">$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f$ is the candidate split rule. $D_j$ is child subset $j$ after the split. $|D_j|/|D|$ is that child's weight. $I(D)$ and $I(D_j)$ are parent and child impurity values.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Gain is parent impurity minus the weighted impurity left in the children. Good splits make children much purer than the parent.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute parent impurity, compute each child impurity, take the weighted child average, subtract, and pick the split with largest $IG$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gini impurity</div>
-      <div class="eq">$$ G(D)=1-\sum_c p_c^2 $$</div>
-      <p>Common CART-style alternative to entropy.</p>
+      <div class="eq">$ G(D)=1-\sum_c p_c^2 $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $D$ is the current node data. $p_c$ is the fraction of class $c$ in that node. The sum runs over all classes.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Squaring rewards dominance. If one class is near 1, $\sum_c p_c^2$ is large and impurity is low.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it like entropy inside information gain. Binary 50/50 gives $1-0.25-0.25=0.5$; a pure node gives 0.</p>
     </div>
     <div class="callout formula">
       <div class="head">Classification error</div>
-      <div class="eq">$$ E(D)=1-\max_c p(c\mid D) $$</div>
-      <p>Simple but less sensitive than entropy or Gini.</p>
+      <div class="eq">$ E(D)=1-\max_c p(c\mid D) $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $p(c\mid D)$ is the class fraction in the node. $\max_c$ picks the majority class fraction. $E(D)$ is the error if the leaf predicts that majority class.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If a leaf predicts the majority class, all non-majority examples are mistakes. This formula is exactly that leftover fraction.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Find the largest class count, divide by $|D|$, then subtract from 1. It is easy to compute but less sensitive than entropy or Gini for split selection.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Continuous split rule</div>
-      <div class="eq">$$ f(x)=\mathbf{1}\{x_j\ge\tau\} $$</div>
-      <p>HW2 asks for rules in this exact threshold style.</p>
+      <div class="eq">$ f(x)=\mathbf{1}\{x_j\ge\tau\} $</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$ is one example. $x_j$ is feature $j$. $\tau$ is the threshold. $\mathbf{1}\{\cdot\}$ is an indicator that returns 1 if the condition is true and 0 otherwise.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The split asks one yes/no question: is feature $j$ at least the threshold?</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Choose a feature and threshold, route examples to true/false branches, then compute information gain for that split.</p>
     </div>
   </div>
 
@@ -162,28 +174,40 @@
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Entropy</div>
-          <div class="eq">$$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $$</div>
-          <p>纯节点是 0；二分类 50/50 是 1 bit。</p>
+          <div class="eq">$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $D$ 是当前 node 里的样本；$C$ 是 class 数量；$p(c\mid D)$ 是 $D$ 中属于 class $c$ 的比例；$\log_2$ 用 bit 衡量 uncertainty，$p=0$ 的项按 0 处理。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Entropy 衡量 node 里 labels 有多混。Pure node 的 entropy 是 0；越均匀混合，entropy 越高。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先数每个 class 的数量，转成 probabilities，代入公式；比较 split 时看它能减少多少 entropy。</p>
         </div>
         <div class="callout formula">
           <div class="head">Information gain</div>
-          <div class="eq">$$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $$</div>
-          <p>选择 gain 最大的 split。</p>
+          <div class="eq">$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f$ 是候选 split rule；$D_j$ 是 split 后第 $j$ 个 child subset；$|D_j|/|D|$ 是 child 的权重；$I(D)$ 和 $I(D_j)$ 分别是 parent / child impurity。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Information gain = parent impurity 减去 children 剩下的 weighted impurity。好的 split 会让 children 更 pure。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 算 parent impurity，再算每个 child impurity，做 weighted average，最后相减；选择 $IG$ 最大的 split。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gini impurity</div>
-          <div class="eq">$$ G(D)=1-\sum_c p_c^2 $$</div>
-          <p>CART 常用的 entropy 替代指标。</p>
+          <div class="eq">$ G(D)=1-\sum_c p_c^2 $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $D$ 是当前 node data；$p_c$ 是 class $c$ 在该 node 中的比例；sum 遍历所有 classes。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 平方会奖励“某个 class 占绝对多数”。如果一个 class 的比例接近 1，$\sum_c p_c^2$ 很大，impurity 就很低。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 像 entropy 一样放进 information gain。二分类 50/50 时 $G=1-0.25-0.25=0.5$；pure node 时 $G=0$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Classification error</div>
-          <div class="eq">$$ E(D)=1-\max_c p(c\mid D) $$</div>
-          <p>更简单，但对分布变化不如 entropy / Gini 敏感。</p>
+          <div class="eq">$ E(D)=1-\max_c p(c\mid D) $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $p(c\mid D)$ 是 node 中 class $c$ 的比例；$\max_c$ 取 majority class 的比例；$E(D)$ 是 leaf 预测 majority class 时仍会错的比例。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Leaf 如果永远预测多数类，非多数类样本都会错；公式就是这部分 leftover fraction。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 找最大 class count 除以 $|D|$，再用 1 减掉。它好算，但比较 split 时不如 entropy / Gini 敏感。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Continuous split rule</div>
-          <div class="eq">$$ f(x)=\mathbf{1}\{x_j\ge\tau\} $$</div>
-          <p>HW2 要求用这种 threshold style 写 rule。</p>
+          <div class="eq">$ f(x)=\mathbf{1}\{x_j\ge\tau\} $</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$ 是一个样本；$x_j$ 是第 $j$ 个 feature；$\tau$ 是 threshold；$\mathbf{1}\{\cdot\}$ 是 indicator，条件成立返回 1，否则返回 0。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这个 split 就是在问一个 yes/no 问题：feature $j$ 是否至少达到 threshold。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 选 feature 和 threshold，把样本分到 true / false 两边，再计算这个 split 的 information gain。</p>
         </div>
       </div>
 
@@ -238,7 +262,7 @@
       </ul>
     </section>
 
-    
+
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
