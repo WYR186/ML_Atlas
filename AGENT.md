@@ -1,30 +1,30 @@
 # AGENT.md — ML Atlas project notes for Claude
 
-This is a working memo for any Claude session that touches this repo. Read it before making changes.
+A working memo for any Claude session that touches this repo. Read it before making changes.
 
 ---
 
 ## What this repo is
 
-`ML Atlas` is the user's personal final-exam review site for **ECE 449 / CS 446 — Introduction to Machine Learning** (Spring 2026, UIUC). It's a static-HTML study tool with a labuladong-style tree roadmap, click-popups for each algorithm, and a three-mode language switch.
+`ML Atlas` is the user's personal final-exam review site for **ECE 449 / CS 446 — Introduction to Machine Learning** (Spring 2026, UIUC). Static HTML/CSS/vanilla JS, labuladong-style tree roadmap on the homepage, click-anchored popups for each algorithm, three-mode language switch, and an optional Python server that persists learning progress to a local JSON file.
 
-GitHub remote: `git@github.com:WYR186/ML_Atlas.git` (branch `main`).
-
-Local working directory: `/Users/ipanda/Library/CloudStorage/OneDrive-Personal/ECE 449/ML Review`.
+- GitHub remote: `git@github.com:WYR186/ML_Atlas.git` (branch `main`, default branch deploys to Pages)
+- Live site: `https://wyr186.github.io/ML_Atlas/` (auto-deployed by `.github/workflows/deploy.yml`)
+- Local working directory: `/Users/ipanda/Library/CloudStorage/OneDrive-Personal/ECE 449/ML Review`
 
 The `ML Review/` folder lives next to (siblings, not children) the user's course PDFs:
 
 ```
 ECE 449/
 ├── ML Review/         ← this site (the git repo lives here)
-├── slides/            ← Lecture_1.pdf … Lecture_27.pdf, mt_course_review, final_review
-├── HW/                ← hw1.pdf … hw5.pdf + *_sol.pdf + midterm_practice_problems.pdf
-├── book/              ← 6 reference textbooks
+├── slides/            ← Lecture_*.pdf, mt_course_review, final_review
+├── HW/                ← hw1..5 + *_sol + midterm_practice_problems
+├── book/              ← reference textbooks
 ├── Block 1-4.rtf      ← user's consolidated bilingual notes (source of truth)
 └── Block 5-10.rtf
 ```
 
-`HW`, `slides`, `book` exist inside `ML Review/` as symlinks to the parent so PDF chips resolve when the local server runs from `ML Review/`. The symlinks are git-ignored; **PDFs are never committed** (they are the professor's copyrighted material).
+`HW`, `slides`, `book` exist inside `ML Review/` as **symlinks** to the parent so PDF chips resolve when the local server runs from `ML Review/`. The symlinks are `.gitignore`d. **PDFs are never committed** (copyrighted).
 
 ---
 
@@ -32,83 +32,248 @@ ECE 449/
 
 ```
 ML Review/
-├── index.html             roadmap homepage
-├── cheatsheet.html        one-page cram sheet
-├── resources.html         slides / HW / textbook index
-├── README.md              pure English
-├── AGENT.md               this file
-├── topics/                37 algorithm pages, one per topic
+├── index.html                  homepage: Atlas + Mermaid + algorithm index
+├── cheatsheet.html             one-page cram sheet (fully bilingual)
+├── resources.html              slides / HW / textbook map
+├── README.md                   pure English; deploy + run instructions
+├── AGENT.md                    this file
+├── serve.py                    local dev server with /api/progress
+├── .gitignore                  ignores HW/, slides/, book/, progress.json, .DS_Store…
+├── .github/workflows/
+│   └── deploy.yml              push-to-main → GitHub Pages
+├── topics/                     37 algorithm pages, one per topic
 └── assets/
-    ├── style.css          visuals + i18n visibility rules
-    ├── i18n.js            EN / EN+中 / 中 switching dictionary + DOM application
-    ├── topics-data.js     card metadata for the homepage
-    ├── popup-data.js      tutorial blurbs, Python templates, HW problem entries
-    ├── popup.js           click-anchored popup component
-    └── main.js            progress tracking, search, connector lines
+    ├── style.css               visuals + i18n visibility + popup + slider thumb
+    ├── progress-sync.js        ⚠ MUST load first; patches localStorage to /api/progress
+    ├── i18n.js                 EN / EN+中 / 中 + slider thumb alignment
+    ├── topics-data.js          GROUPS + TOPICS metadata for cards
+    ├── popup-data.js           tutorial / Python templates / HW problem entries
+    ├── popup.js                click-anchored popup component
+    └── main.js                 progress + search + connector lines + topic-page code injector
 ```
 
-37 algorithm slugs (in this order): `probability, linear-algebra, optimization, knn, naive-bayes, linear-regression, logistic-regression, svm, kernel-methods, decision-trees, bagging, boosting, pca, kmeans, mlp, backpropagation, cnn, rnn, lstm, autoencoder, vae, contrastive, attention, positional-encoding, transformer, llm, diffusion, bayes-classifier, error-decomposition, pac, vc-dimension, mdp, value-functions, bellman, dynamic-programming, q-learning, policy-gradient`.
+37 algorithm slugs (in homepage / table order):
+`probability, linear-algebra, optimization, knn, naive-bayes, linear-regression, logistic-regression, svm, kernel-methods, decision-trees, bagging, boosting, pca, kmeans, mlp, backpropagation, cnn, rnn, lstm, autoencoder, vae, contrastive, attention, positional-encoding, transformer, llm, diffusion, bayes-classifier, error-decomposition, pac, vc-dimension, mdp, value-functions, bellman, dynamic-programming, q-learning, policy-gradient`.
 
-Eleven groups: `foundations, supervised, trees, unsupervised, neural, sequential, representation, modern, generative, theory, rl`.
-
----
-
-## Hard rules from the user (do not violate)
-
-1. **Only one author on git.** Never add `Co-Authored-By:`. Never mention Claude / Anthropic / "generated by AI" in code, commits, README, or anywhere else. The user is the sole author. Use the existing global git config (`AaronWonMac <aaronw9@illinois.edu>`); don't override with `WYR186` unless asked.
-2. **Commit messages must read like a tired human typed them.** Lowercase, short, plain language. No emoji, no scopes/prefixes like `feat:` unless they fit naturally. Example tone: `add click-popup: tutorial + python template + HW problems`. Use `git commit -m "..."` with a HEREDOC for multi-line bodies. **No trailing attribution lines.**
-3. **Every change pushes.** After committing, `git push` immediately. The user said "以后每次更新都要git同步" — treat this as standing.
-4. **Never commit course PDFs** (HW, slides, textbooks). They are copyrighted. The symlinks in `.gitignore` enforce this.
-5. **HW problem content is paraphrased, not reproduced.** The `popup-data.js` `problems[]` entries use one-line topic descriptions in my own words and original conceptual answer sketches, then link out to the source PDFs (`HW/hwN.pdf`, `HW/hwN_sol.pdf`). Do not paste verbatim text from the homework or solution PDFs.
-6. **English is the default language.** First-time visitors see English. The `localStorage` key is `ml_review_lang_v1`, valid values are `en` (default), `mixed`, `cn`.
-7. **Each algorithm gets its own cell on the homepage and its own page.** Do not merge algorithms with `/` on a single card or page (e.g. no "Linear / Logistic" card). The 37 slugs above are the canonical list.
-8. **No Claude Code-specific framing in user-facing files.** No `🤖 Generated with...` footers. README is for humans.
+11 groups:
+`foundations, supervised, trees, unsupervised, neural, sequential, representation, modern, generative, theory, rl`.
 
 ---
 
-## Preferences and conventions
+## Hard rules (do not violate)
 
-- **Tone in user-facing copy:** terse, factual, sentence-case. Avoid marketing words ("powerful", "modern") and exclamation marks.
-- **Bilingual content pattern:** each translatable element either has `data-i18n="key"` (UI chrome — looked up in `assets/i18n.js`) or is wrapped in `<span class="en-only">…</span><span class="cn-only">…</span>` pairs (body content). The CSS in `assets/style.css` hides the wrong language per mode; `mixed` shows both with a thin left border per side.
-- **Code comments are English** in JS / CSS / Python. Chinese is only allowed inside data fields meant for CN-mode display (the `cn:` keys in dictionaries).
-- **Popup data shape** (`assets/popup-data.js`):
-  ```js
-  slug: {
-    tutorial: { cn, en },
-    code:     [{ title: { cn, en }, code: "...python..." }],
-    problems: [{ id, hw, section, title: { cn, en }, solution: { cn, en } }]
-  }
-  ```
-  Problem `id` follows `hw{N}-{section}` (e.g. `hw3-2-1-2`). `hw_pdf` and `sol_pdf` default to `HW/{hw}.pdf` and `HW/{hw}_sol.pdf`.
-- **Topic page shape:** generator-emitted shell + an `<div class="en-only">` block + a `<div class="cn-only">` block. The CN block contains the original section content extracted from `Block N.rtf` notes; the EN block is a hand-written parallel summary.
-- **Math is rendered with MathJax 3** loaded from jsDelivr. `\(`, `\)`, `$…$` are inline; `$$…$$` blocks are display.
-- **No build step.** Plain HTML/CSS/JS only. Python scripts in `/tmp/` are throwaway code generators.
+1. **Solo-author git.** Never add `Co-Authored-By:`. Never mention Claude / Anthropic / "generated by AI" anywhere. Use the existing global `user.name` / `user.email`.
+2. **Commit messages read like a tired human.** Lowercase, plain, short. No emojis, no scope prefixes (`feat:` / `fix:`) unless natural. Multi-line bodies fine. **No trailing attribution lines.**
+3. **Every change pushes.** After committing, `git push` immediately. Standing rule.
+4. **Course PDFs never committed.** They live in the parent dir; symlinks are `.gitignore`d.
+5. **HW problems are paraphrased, not reproduced.** Problem labels are 1-line summaries of what each problem tests; answer sketches are my own conceptual reasoning. Always link to the source PDF for the full text. Never paste verbatim from `hw*_sol.pdf`.
+6. **English is the default language.** First-time visitors see English. `localStorage` key `ml_review_lang_v1` accepts `en` (default), `mixed`, `cn`. Static HTML markup uses `<html lang="en" data-lang="en">`.
+7. **No Chinese in pure-EN mode anywhere visible.** This is enforced by an HTMLParser-based scan (every `data` event with CJK must have an `.en-only` / `.cn-only` / `data-i18n` ancestor). Run the scan after any content change — see "EN-leak audit" below.
+8. **One algorithm per cell, one page per topic.** No "Linear / Logistic" combo cards. The 37 slugs above are canonical.
+9. **No README/AGENT generation unless asked.** Don't proactively create planning docs.
 
 ---
 
-## Workflow that works for this repo
+## Language modes (3-mode i18n)
 
-When the user requests a change:
+| Mode    | Behavior |
+| ------- | -------- |
+| `en`    | EN-only. `.cn-only` hidden via CSS; `.bi-text .cn` hidden. Default for new users. |
+| `cn`    | CN-only. `.en-only` hidden; `.bi-text .en` hidden. |
+| `mixed` | Both visible. Stacked labels (EN line above CN), shared leading emoji deduped. |
 
-1. Make the edit (Edit, or Write for new files, or a one-shot Python script in `/tmp/` for bulk edits).
-2. If anything is HTML, smoke-test it with `python3 -m http.server 8765` from `ML Review/` and `curl` the affected pages for status 200.
-3. `git add -A && git commit -m "<lowercase one-liner>"`. Multi-line bodies are fine but no trailing attribution.
-4. `git push`.
-5. Briefly tell the user what changed.
+**Slider component:** segmented `EN | EN+中 | 中` in the topbar (left → right). Thumb is positioned **with JS** via `getBoundingClientRect()` — no fragile percentage math. CSS rules `[data-active="..."]` give a fallback before JS runs. See `assets/i18n.js` `alignSliderThumb()`.
 
-When the user reports something looks wrong:
+**Bilingual content patterns:**
 
-- They may pin a screenshot. Read it carefully — they reference specific cells and sometimes draw arrows.
-- The current homepage is in `index.html` lines roughly 20–110 (sidebar) and the inline `<script>` at the bottom (group rendering).
-- The popup component is `assets/popup.js`; styling is `assets/style.css` under `/* ===== Popup */`.
+```html
+<!-- UI chrome via dictionary lookup -->
+<button data-i18n="home.btn.export">📤 Save to file</button>
+<input data-i18n="search.placeholder" data-i18n-attr="placeholder" placeholder="..." />
+
+<!-- Body content with parallel siblings (CSS shows the right one) -->
+<h2><span class="en-only">Probability</span><span class="cn-only">概率论</span></h2>
+
+<!-- Inline data attribute pattern (atlas cards, index table) -->
+<span data-cn="概率论" data-en="Probability">概率论</span>
+
+<!-- Source-note style (already in the RTF) -->
+<div class="bi-text">
+  <span class="en">English summary.</span>
+  <span class="cn">中文摘要。</span>
+</div>
+```
+
+**Mixed mode rendering:**
+- For `data-i18n` elements: stacked `<span class="lbl-en">…</span><span class="lbl-cn">…</span>` with shared emoji deduped.
+- For `data-cn / data-en` elements: same stacking pattern in the inline scripts.
+- For `.en-only` / `.cn-only` blocks: both shown with a thin colored left border.
+
+**Topic pages** ship parallel structure:
+
+```html
+<h1><span class="en-only">Probability</span><span class="cn-only">概率论</span></h1>
+<div class="subtitle">
+  <span class="en-only">Bayes · Conditional · Expectation</span>
+  <span class="cn-only">Bayes · 条件概率 · 期望</span>
+</div>
+
+<div class="en-only">
+  <section class="topic" id="probability-en">…full English body…</section>
+</div>
+<div class="cn-only">
+  <section class="topic" id="probability-cn">…平行的中文原文…</section>
+</div>
+
+<!-- Python code injected at runtime by main.js, language-agnostic -->
+```
+
+`topics-data.js` groups + topics carry **both** `name_en` / `name_cn` and `sub_en` / `sub_cn`. No single-language fields.
+
+---
+
+## Progress system
+
+### Storage shape (localStorage key `ml_review_progress_v1`)
+
+```js
+{
+  "probability": true,                      // master flag (Mark as mastered)
+  "tut:probability": true,                  // tutorial read in popup
+  "prob:svm:hw2-2": true,                   // a HW problem checked in popup
+  "prob:svm:hw2-3-3": true,
+  …
+}
+```
+
+### Per-card progress is fractional
+
+`assets/popup.js` and the home grid in `index.html` compute:
+
+```
+fraction = (tutorial-checked + problems-checked) / (1 + total_problems)
+                                                 ↑ if data has tutorial
+```
+
+If the master flag `p[slug]` is set, fraction is **1.0** regardless of problem state. The `.progress-bar .fill` width is `fraction * 100%`; cards earn `.done` only at 100%; the home ring `progressNum / progressTotal` counts cards at 100%.
+
+### Custom events
+
+| Event                    | Fired by                                     | Listened by |
+| ------------------------ | -------------------------------------------- | ----------- |
+| `ml-progress-loaded`     | `progress-sync.js` after `GET /api/progress` succeeds | `main.js` (re-paints), home grid (re-renders) |
+| `ml-progress-rerender`   | popup checkbox toggles, mark-as-mastered, import | home grid `markProgress()` |
+
+### Persistence layers
+
+```
+[ user clicks something ]
+        │
+        ▼
+localStorage.setItem(KEY, …)
+        │     ↑ patched by progress-sync.js
+        ▼
+debounce 300 ms → POST /api/progress
+        │
+        ▼
+serve.py writes progress.json next to itself
+```
+
+On boot and on tab `focus`, `progress-sync.js` does `GET /api/progress` and merges (local wins on conflicts). If the endpoint isn't there (plain `python3 -m http.server`, file://, GitHub Pages), it silently falls back to localStorage-only.
+
+### Export / Import
+
+`window.MLProgress.export()` and `.import()` round-trip a JSON file. Useful when a user changes browsers, machines, or clears cache. Buttons live in the home sidebar with hover tooltips and a help paragraph spelling out use cases.
+
+---
+
+## Script load order (matters!)
+
+Every page loads scripts in this order:
+
+```html
+<script src="assets/progress-sync.js"></script>   <!-- patches localStorage; must be FIRST -->
+<script src="assets/i18n.js"></script>            <!-- reads localStorage immediately -->
+<script src="assets/topics-data.js"></script>     <!-- GROUPS + TOPICS -->
+<script src="assets/popup-data.js"></script>      <!-- POPUP_DATA (tutorials, code, problems) -->
+<script src="assets/popup.js"></script>           <!-- click handler -->
+<script src="assets/main.js"></script>            <!-- progress, search, code-section injector -->
+<script>…page-specific inline code…</script>
+```
+
+If you ever introduce a script that touches localStorage, make sure `progress-sync.js` still loads before it.
+
+---
+
+## Workflow when changing things
+
+1. Make edits (`Edit` for known files, `Write` for new files, throwaway Python in `/tmp/` for bulk transforms — keep them idempotent).
+2. Smoke-test:
+   ```bash
+   cd "ML Review"
+   python3 serve.py 8821 &  # any unused port
+   curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8821/
+   curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8821/topics/svm.html
+   curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8821/api/progress  # 200 with serve.py
+   ```
+3. **EN-leak audit** if any content was touched (see snippet below).
+4. `git add -A && git commit -m "<lowercase one-liner>" && git push`.
+5. Tell the user concisely what changed.
+
+### EN-leak audit (HTMLParser-based)
+
+Save as `/tmp/leak.py` and run from the repo:
+
+```python
+import re
+from html.parser import HTMLParser
+from pathlib import Path
+
+class S(HTMLParser):
+    def __init__(self): super().__init__(); self.lang=0; self.i18n=0; self.skip=0; self.st=[]; self.leaks=[]
+    def handle_starttag(self, t, attrs):
+        a = dict(attrs); cls = (a.get("class") or "").split()
+        if t in ("script","style"): self.skip += 1
+        in_lang = "en-only" in cls or "cn-only" in cls
+        if in_lang: self.lang += 1
+        if "data-i18n" in a: self.i18n += 1
+        self.st.append((in_lang, "data-i18n" in a))
+    def handle_endtag(self, t):
+        if t in ("script","style"): self.skip = max(0, self.skip-1); return
+        if not self.st: return
+        il, hi = self.st.pop()
+        if il: self.lang -= 1
+        if hi: self.i18n -= 1
+    def handle_data(self, d):
+        if self.skip or self.lang or self.i18n: return
+        if re.search(r"[一-鿿]", d):
+            s = d.strip()
+            if s: self.leaks.append((self.getpos(), s[:80]))
+
+for p in [*Path(".").glob("*.html"), *Path("topics").glob("*.html")]:
+    s = S(); s.feed(p.read_text(encoding="utf-8"))
+    if s.leaks:
+        print(f"{p}: {len(s.leaks)}")
+        for pos, t in s.leaks[:3]: print(f"  {pos}: {t}")
+```
+
+Target: **0 leaks** across all pages. Wrap any leak in `<span class="en-only">EN</span><span class="cn-only">CN</span>`.
+
+---
+
+## Build / deploy
+
+- `python3 serve.py [port]` — local dev with progress persistence (default 8000). Falls through to `SimpleHTTPRequestHandler` for static files; adds `GET /api/progress` and `POST /api/progress` endpoints. Quiet log mode (drops the access line for `/api/progress`).
+- `python3 -m http.server [port]` — works too, but progress is per-origin localStorage (so a port change wipes it).
+- `git push origin main` — triggers `.github/workflows/deploy.yml` which `actions/configure-pages@v5` + `upload-pages-artifact@v3` + `deploy-pages@v4`. Requires repo Settings → Pages → Source: GitHub Actions (one-time setup; user has done this).
 
 ---
 
 ## Source-note structure (for content updates)
 
-`Block 1-4.rtf` and `Block 5-10.rtf` are the user's consolidated notes. Each "Block" inside corresponds roughly to a chapter:
+`Block 1-4.rtf` and `Block 5-10.rtf` are the user's consolidated notes (source of truth). Each "Block" maps to a chapter:
 
-| Block | Topics | Topic slugs |
+| Block | Topics | Slugs |
 | --- | --- | --- |
 | 1 | Foundations | probability, linear-algebra, optimization |
 | 2 | KNN, NB | knn, naive-bayes |
@@ -121,14 +286,17 @@ When the user reports something looks wrong:
 | 9 | Learning theory | bayes-classifier, error-decomposition, pac, vc-dimension |
 | 10 | RL | mdp, value-functions, bellman, dynamic-programming, q-learning, policy-gradient |
 
-When the user asks to "update content" without naming a section, default to the topic page that maps from this table.
+When the user asks to "update content" without naming a section, infer from this table.
 
 ---
 
-## What to avoid
+## Common pitfalls
 
-- Spawning a background dev server and forgetting it (always kill `$SERVER_PID` after smoke test).
-- Editing topic pages by hand in bulk — write a Python script in `/tmp/` instead, idempotent if possible (e.g. strip prior wrappers before re-adding).
-- Adding new dependencies. The site has no `node_modules`, no bundler, no Python at runtime.
-- Using `git add .` from above the repo root or staging files outside the repo.
-- Writing a markdown file the user didn't ask for.
+- **Forgetting to dispatch `ml-progress-rerender`** after a localStorage progress change — UI stays stale until a reload. Any new place that mutates progress must dispatch.
+- **Inserting a script before `progress-sync.js`** — breaks the localStorage patch. Always put `progress-sync.js` first in `<script>` tags.
+- **Adding `data-i18n` without entries in `assets/i18n.js`** — element keeps its placeholder text in all modes. Always add the dictionary entry.
+- **Forgetting `sub_en` on a new topic / group** — the home index table will show empty cells in EN mode. Always add both `sub_en` and `sub_cn`.
+- **Bilingual `data-cn`/`data-en` rendered with `textContent` in mixed mode** — collapses to one language. Use the stacked-span pattern.
+- **Reading TOC from `h2.textContent` without filtering** — picks up both EN and CN headings. Filter by `closest('.en-only' / '.cn-only')` ancestor.
+- **Spinning up another http.server on a different port for testing** — kills cross-session progress. Stick to one port (or use `serve.py` which makes it irrelevant).
+- **Committing `progress.json`** — git-ignored already, but double-check on big patches.
