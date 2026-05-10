@@ -24,3 +24,6 @@ _*.txt
 HW
 slides
 book
+
+# Per-user learning state from serve.py — local only
+progress.json

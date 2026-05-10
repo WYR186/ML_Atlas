@@ -46,15 +46,30 @@ Per-problem and per-tutorial completion is stored in the browser's `localStorage
 
 ## Local preview
 
-Drop the `ML Review/` folder next to your `slides/`, `HW/`, `book/` folders, then start a local server from inside `ML Review/`:
+Drop the `ML Review/` folder next to your `slides/`, `HW/`, `book/` folders, then start a local server from inside `ML Review/`. Two options, depending on whether you want progress to survive across browsers / ports.
+
+**Recommended — `serve.py` keeps your progress in a local file:**
+
+```bash
+cd "ML Review"
+python3 serve.py        # http://localhost:8000
+python3 serve.py 5173   # custom port
+```
+
+`serve.py` is a tiny wrapper around Python's `http.server` that adds a single `/api/progress` endpoint. Every checked-off problem, every "mastered" topic, and the read-state of every tutorial is mirrored to `progress.json` next to the script. Open the site from another browser, another port, or after wiping cache — the progress is still there.
+
+**Plain — quick test, no persistence beyond the browser:**
 
 ```bash
 cd "ML Review"
 python3 -m http.server 8000
-# open http://localhost:8000
 ```
 
-The repo includes symlinks `HW`, `slides`, `book` pointing at the parent directory so all PDF chips on the site resolve cleanly when served from inside `ML Review/`. The symlinks themselves are git-ignored, and no PDFs are committed — the course material stays in your local filesystem.
+Same site, but progress lives only in `localStorage` for that exact origin (so a new port = a fresh slate). The site detects the missing endpoint at boot and silently falls back without spamming errors.
+
+**Either way:** the homepage's `📤 Export` / `📥 Import` buttons round-trip a `ml-atlas-progress-YYYY-MM-DD.json` file you can move between machines.
+
+The repo includes symlinks `HW`, `slides`, `book` pointing at the parent directory so all PDF chips on the site resolve cleanly when served from inside `ML Review/`. The symlinks themselves are git-ignored, and no PDFs are committed — the course material stays in your local filesystem. `progress.json` is also git-ignored so your personal study state never lands on GitHub.
 
 LaTeX is rendered with MathJax 3 from the jsDelivr CDN, so an internet connection is needed for math to look right.
 

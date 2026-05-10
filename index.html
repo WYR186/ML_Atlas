@@ -75,7 +75,15 @@
         <a class="btn btn-primary" href="cheatsheet.html" data-i18n="home.btn.cheatsheet">⚡ 1 小时速记</a>
         <a class="btn" href="topics/probability.html" data-i18n="home.btn.start">📖 从头开始</a>
         <a class="btn" href="resources.html" data-i18n="home.btn.resources">📂 课件 & 作业</a>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+          <button class="btn" id="exportProgress" data-i18n="home.btn.export" type="button">📤 Export</button>
+          <button class="btn" id="importProgress" data-i18n="home.btn.import" type="button">📥 Import</button>
+        </div>
         <button class="btn" id="resetProgress" data-i18n="home.btn.reset">🔄 重置进度</button>
+        <p id="syncStatus" class="sync-status"
+           data-en="Local progress is saved in this browser only. Run python3 serve.py for cross-port persistence."
+           data-cn="本地进度只在该浏览器保存。要跨端口持久化请用 python3 serve.py。"
+           style="font-size:11.5px; color: var(--text-muted); margin: 8px 0 0; line-height: 1.4;"></p>
       </div>
     </aside>
 
@@ -125,6 +133,7 @@
   <a href="resources.html" data-i18n="footer.viewMap">资源映射</a>
 </footer>
 
+<script src="assets/progress-sync.js"></script>
 <script src="assets/i18n.js"></script>
 <script src="assets/topics-data.js"></script>
 <script src="assets/popup-data.js"></script>
@@ -317,7 +326,13 @@
       btn.addEventListener("click", () => requestAnimationFrame(drawConnectors));
     });
 
-    // Mark progress dots
+    // Mark progress dots — also re-runs whenever progress is pulled from the
+    // server (or imported), so the ring + card states stay in sync without
+    // needing a page reload.
+    document.addEventListener("ml-progress-rerender", () => {
+      grid.querySelectorAll(".node[data-slug]").forEach(el => el.classList.remove("done"));
+      markProgress();
+    });
     function markProgress() {
       const p = JSON.parse(localStorage.getItem("ml_review_progress_v1") || "{}");
       let done = 0;

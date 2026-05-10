@@ -176,6 +176,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Export / Import buttons (wired through window.MLProgress from progress-sync.js)
+  const exportBtn = document.getElementById("exportProgress");
+  if (exportBtn && window.MLProgress?.export) {
+    exportBtn.addEventListener("click", () => window.MLProgress.export());
+  }
+  const importBtn = document.getElementById("importProgress");
+  if (importBtn && window.MLProgress?.import) {
+    importBtn.addEventListener("click", () => window.MLProgress.import());
+  }
+
+  // The .sync-status hint speaks to whichever language is active.
+  const syncStatus = document.getElementById("syncStatus");
+  function paintSyncStatus() {
+    if (!syncStatus) return;
+    const lang = localStorage.getItem("ml_review_lang_v1") || "en";
+    const en = syncStatus.dataset.en, cn = syncStatus.dataset.cn;
+    if (lang === "cn")      syncStatus.textContent = cn;
+    else if (lang === "en") syncStatus.textContent = en;
+    else                    syncStatus.textContent = `${en} / ${cn}`;
+  }
+  paintSyncStatus();
+  document.addEventListener("click", e => {
+    if (e.target.closest(".lang-switch button")) setTimeout(paintSyncStatus, 0);
+  });
+
+  // When progress-sync.js pulls a snapshot from the server (or after Import),
+  // re-paint everything that reflects the progress state.
+  document.addEventListener("ml-progress-loaded", () => {
+    if (typeof paintProgressOnHome === "function") paintProgressOnHome();
+    // The home grid keeps its own listener; firing a custom event lets it
+    // re-render card "done" markers without reloading the page.
+    document.dispatchEvent(new CustomEvent("ml-progress-rerender"));
+    // Refresh the mark-as-read button on topic pages.
+    const mb = document.getElementById("markRead");
+    if (mb && typeof mb.dataset.block === "string") {
+      const cur = getProgress();
+      mb.classList.toggle("btn-primary", !!cur[mb.dataset.block]);
+      mb.setAttribute("data-i18n", cur[mb.dataset.block] ? "btn.markRead.done" : "btn.markRead.todo");
+      if (typeof applyLang === "function") applyLang(localStorage.getItem("ml_review_lang_v1") || "en");
+    }
+  });
+
   // Block page: highlight TOC active section while scrolling
   const tocLinks = document.querySelectorAll(".toc a[href^='#']");
   if (tocLinks.length) {
