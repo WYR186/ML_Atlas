@@ -4,6 +4,7 @@
 (function () {
   const STORAGE = "ml_review_progress_v1";
   let popupEl = null;
+  let currentAnchor = null;     // remembered so resize can re-position
 
   function getProgress() {
     try { return JSON.parse(localStorage.getItem(STORAGE) || "{}"); }
@@ -199,49 +200,74 @@
   }
 
   function open(anchorEl) {
+    currentAnchor = anchorEl;
     popupEl.classList.add("open");
+    // Two-pass: position once, then again on the next frame so the popup's
+    // real height is known after the body finished laying out.
     position(anchorEl);
+    requestAnimationFrame(() => position(anchorEl));
   }
 
+  // Viewport-aware positioning. The .popup-overlay is `position: fixed`
+  // (covers the viewport), so popup coordinates are viewport-relative —
+  // do NOT add scrollX / scrollY.
   function position(anchorEl) {
     if (!popupEl || !anchorEl) return;
     const popup = popupEl.querySelector(".popup");
     const anchor = anchorEl.getBoundingClientRect();
-    const margin = 8;
+    if (anchor.width === 0 && anchor.height === 0) return;  // anchor detached
 
-    // Width preference (responsive)
-    const W = Math.min(480, window.innerWidth - 24);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 12;
+
+    // Anchor scrolled fully out of viewport — freeze the popup in place
+    // instead of warping it to an off-screen coordinate.
+    if (anchor.bottom <= 0 || anchor.top >= vh) return;
+
+    // Width: 480 max, shrink on narrow screens
+    const W = Math.min(480, vw - margin * 2);
     popup.style.width = W + "px";
 
-    // Try below; if not enough space, place above
-    let left = anchor.left + window.scrollX;
-    if (left + W + margin > window.innerWidth + window.scrollX) {
-      left = window.innerWidth + window.scrollX - W - margin;
-    }
-    if (left < margin + window.scrollX) left = margin + window.scrollX;
+    // Reset prior overrides — we may flip between top/bottom anchoring.
+    popup.style.top = "";
+    popup.style.bottom = "";
+    popup.style.maxHeight = "";
 
-    let top;
-    const spaceBelow = window.innerHeight - anchor.bottom;
-    const spaceAbove = anchor.top;
-    if (spaceBelow >= 320 || spaceBelow >= spaceAbove) {
-      top = anchor.bottom + window.scrollY + margin;
-    } else {
-      // place above; cap height by available space
-      const maxH = Math.max(280, anchor.top - margin * 2);
-      popup.style.maxHeight = maxH + "px";
-      top = anchor.top + window.scrollY - Math.min(maxH, popup.offsetHeight) - margin;
-      if (top < window.scrollY + margin) top = window.scrollY + margin;
-    }
+    // Horizontal alignment: prefer anchor's left edge, clamp to viewport.
+    let left = anchor.left;
+    if (left + W + margin > vw) left = vw - W - margin;
+    if (left < margin) left = margin;
     popup.style.left = left + "px";
-    popup.style.top  = top  + "px";
 
-    // Origin near the clicked card for the scale animation
-    const ax = anchor.left + anchor.width / 2 - left;
-    popup.style.transformOrigin = `${Math.max(20, Math.min(W - 20, ax))}px top`;
+    // Pick a vertical direction. We need at least 240 px of room to feel
+    // usable; otherwise use whichever side has more space.
+    const MIN_USABLE = 240;
+    const spaceBelow = Math.floor(vh - anchor.bottom - margin);
+    const spaceAbove = Math.floor(anchor.top - margin);
+    const placeBelow = spaceBelow >= MIN_USABLE || spaceBelow >= spaceAbove;
+
+    // Cap max height to whichever side we picked.
+    // The .popup-body inside is `overflow-y: auto`, so long content scrolls.
+    if (placeBelow) {
+      popup.style.top = (anchor.bottom + margin) + "px";
+      popup.style.maxHeight = Math.max(MIN_USABLE, spaceBelow) + "px";
+    } else {
+      // Anchor by `bottom` so the popup grows upward from anchor.top
+      // regardless of how tall its body actually is.
+      popup.style.bottom = (vh - anchor.top + margin) + "px";
+      popup.style.maxHeight = Math.max(MIN_USABLE, spaceAbove) + "px";
+    }
+
+    // Scale-in origin sits near the clicked card.
+    const cx = anchor.left + anchor.width / 2 - left;
+    const originX = Math.max(20, Math.min(W - 20, cx));
+    popup.style.transformOrigin = `${originX}px ${placeBelow ? "top" : "bottom"}`;
   }
 
   function close() {
     if (popupEl) popupEl.classList.remove("open");
+    currentAnchor = null;
   }
 
   // Public API
@@ -256,10 +282,20 @@
       e.preventDefault();
       render(card.dataset.slug, card);
     });
-    // Reposition on viewport change
-    window.addEventListener("resize", () => {
-      // Find currently anchored card by what's open — fall back: do nothing
-      // (popup re-anchors next time it opens)
-    });
+
+    // Re-position the open popup when the viewport changes — keeps the
+    // popup inside the viewport and re-picks above/below if its anchor is
+    // now near a different edge.
+    let resizeRaf = 0;
+    const reposition = () => {
+      if (!currentAnchor || !popupEl?.classList.contains("open")) return;
+      cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => position(currentAnchor));
+    };
+    window.addEventListener("resize", reposition);
+    // The popup is `position: fixed` so scrolling doesn't drag it, but
+    // re-running the math on scroll lets us flip above/below as the
+    // anchor card moves through the viewport.
+    window.addEventListener("scroll", reposition, { passive: true });
   });
 })();
