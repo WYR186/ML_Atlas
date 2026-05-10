@@ -154,16 +154,48 @@
     {
       "title": "Classification (majority vote)",
       "eq": "$$ \\hat{y}(x)=\\mathrm{mode}\\{y_i:\\ x_i \\in \\mathcal{N}_k(x)\\} $$",
+      "symbols": [
+        { sym: "$\\hat{y}(x)$",        en: "predicted label for query point $x$",                      cn: "对查询点 $x$ 的预测标签" },
+        { sym: "$x$",                  en: "query / test input we want to classify",                   cn: "待分类的查询样本" },
+        { sym: "$k$",                  en: "number of neighbors to consider (hyperparameter)",         cn: "考虑的最近邻个数（超参数）" },
+        { sym: "$\\mathcal{N}_k(x)$",  en: "set of the $k$ training points closest to $x$",            cn: "训练集中距 $x$ 最近的 $k$ 个样本" },
+        { sym: "$y_i$",                en: "known label of training point $x_i$",                      cn: "训练点 $x_i$ 的已知标签" },
+        { sym: "$\\mathrm{mode}$",     en: "majority vote — the most-frequent label in the set",        cn: "众数 —— 集合中出现最多的标签" }
+      ],
+      usage_en: "For each test point $x$, compute its distance to every training sample, sort and pick the $k$ smallest; the most-frequent label among those $k$ neighbors is the prediction. Choose $k$ via cross-validation — small $k$ overfits noise, large $k$ over-smooths the boundary.",
+      usage_cn: "对每个测试点 $x$，计算它到所有训练样本的距离，排序取最小的 $k$ 个；这 $k$ 个邻居中出现最多的标签就是预测结果。$k$ 用 cross-validation 选 —— $k$ 太小会过拟合噪声，$k$ 太大会把决策边界过度平滑。",
+      intuition_en: "KNN is a 'lazy learner' — there is no training, only a lookup. The prediction asks 'what do my $k$ closest historical neighbors say?' and goes with the majority. The whole method assumes that nearby points share labels, so accuracy depends entirely on whether the distance metric makes sense for your features.",
+      intuition_cn: "KNN 是 lazy learner —— 没有训练，只是查表。预测就是问 \"离我最近的 $k$ 个历史样本是什么类别？\" 然后投票决定。它假设 \"近邻点应该有相似标签\"，所以效果完全取决于距离度量是否对你的特征有意义。",
       "source": "topics/knn.html#eq-knn-classification-majority-vote"
     },
     {
       "title": "Regression (mean)",
       "eq": "$$ \\hat{y}(x)=\\frac{1}{k}\\sum_{x_i\\in \\mathcal{N}_k(x)} y_i $$",
+      "symbols": [
+        { sym: "$\\hat{y}(x)$",        en: "predicted real-valued target for $x$",                       cn: "对 $x$ 的实数预测值" },
+        { sym: "$y_i \\in \\mathbb{R}$", en: "real-valued target of training point $x_i$",               cn: "训练点 $x_i$ 的实数目标值" },
+        { sym: "$\\mathcal{N}_k(x)$",  en: "the $k$ nearest training points to $x$ (same as classification)", cn: "$x$ 的 $k$ 个最近训练点（与分类相同）" },
+        { sym: "$\\frac{1}{k}\\sum$",  en: "sum the $k$ neighbor targets, then divide by $k$ — the average", cn: "对 $k$ 个邻居的目标值求和后除以 $k$ —— 即平均" }
+      ],
+      usage_en: "Same neighbor-finding step as classification, but instead of voting, average the neighbors' target values. A common variant weights each neighbor by $1/d(x, x_i)$ so closer neighbors influence the prediction more.",
+      usage_cn: "找邻居的步骤与分类一致；但不再投票，而是把 $k$ 个邻居的目标值取平均。常见变体是用 $1/d(x, x_i)$ 加权，让更近的邻居权重更大。",
+      intuition_en: "Regression KNN is just a local average. The prediction is 'the typical target value seen near $x$.' It works well when the underlying function is roughly continuous and you have enough samples to densely cover the input space.",
+      intuition_cn: "回归型 KNN 就是局部平均：预测值是 \"$x$ 附近样本目标值的代表\"。当真实函数大致连续、训练样本能稠密覆盖输入空间时效果好。",
       "source": "topics/knn.html#eq-knn-regression-mean"
     },
     {
       "title": "Euclidean distance",
       "eq": "$$ d(x,x_i)=\\|x-x_i\\|_2=\\sqrt{\\sum_j (x_j-x_{ij})^2} $$",
+      "symbols": [
+        { sym: "$x \\in \\mathbb{R}^d$",   en: "query point with $d$ feature components $x_1, \\dots, x_d$", cn: "$d$ 维查询点，分量为 $x_1, \\dots, x_d$" },
+        { sym: "$x_i \\in \\mathbb{R}^d$", en: "the $i$-th training point with components $x_{i1}, \\dots, x_{id}$", cn: "第 $i$ 个训练点，分量为 $x_{i1}, \\dots, x_{id}$" },
+        { sym: "$j$",                       en: "feature index — the sum runs over all $d$ features",          cn: "特征下标 —— 对全部 $d$ 个特征求和" },
+        { sym: "$\\|\\cdot\\|_2$",          en: "L2 (Euclidean) norm",                                          cn: "L2 范数（欧氏范数）" }
+      ],
+      usage_en: "Compute the squared difference per feature, sum across features, take the square root. Standardize features first (subtract mean, divide by std) — otherwise a feature on a larger numerical scale (e.g. salary in dollars vs age in years) dominates the distance. Common alternatives: Manhattan ($L_1$), cosine, Mahalanobis.",
+      usage_cn: "每个特征算差的平方，对所有特征求和后开方。先做特征标准化（减均值、除标准差） —— 否则数值范围大的特征（如以美元计的工资 vs. 以年计的年龄）会主导距离。常见替代：Manhattan ($L_1$)、cosine、Mahalanobis。",
+      intuition_en: "Geometric 'ruler distance' — the straight-line length between two points in $d$-dimensional space. The squared per-coordinate gap means large per-feature differences hurt much more than small ones, which is why feature scale matters so much.",
+      intuition_cn: "几何上的 \"直尺距离\" —— $d$ 维空间中两点的直线长度。每个维度差的平方把大差异放大、小差异变小，所以特征尺度对它影响很大。",
       "source": "topics/knn.html#eq-knn-euclidean-distance"
     }
   ],
@@ -171,21 +203,61 @@
     {
       "title": "Conditional independence",
       "eq": "$$ P(X_1,\\ldots,X_d\\mid Y)=\\prod_{j=1}^{d} P(X_j\\mid Y) $$",
+      "symbols": [
+        { sym: "$X_1, \\ldots, X_d$", en: "the $d$ feature random variables for one sample",          cn: "一个样本的 $d$ 个特征随机变量" },
+        { sym: "$Y$",                  en: "the class label random variable",                          cn: "类别标签随机变量" },
+        { sym: "$P(X_j \\mid Y)$",     en: "likelihood of feature $j$ given the class",                cn: "给定类别下，第 $j$ 个特征的似然" },
+        { sym: "$\\prod_{j=1}^{d}$",   en: "product across all $d$ features",                          cn: "对全部 $d$ 个特征连乘" }
+      ],
+      usage_en: "This is the **assumption** Naive Bayes makes — given the class, the features are independent. It lets you estimate each $P(X_j \\mid Y)$ separately from data (count co-occurrences for discrete features, or fit a 1-D Gaussian per feature per class for continuous ones) instead of trying to learn the impossibly large joint $P(X_1, \\ldots, X_d \\mid Y)$.",
+      usage_cn: "这是 Naive Bayes 的核心**假设** —— 给定类别后，各特征条件独立。这样就可以分别估计每个 $P(X_j \\mid Y)$（离散特征数共现次数，连续特征对每个类别拟合一维 Gaussian），不必直接去估那个维度爆炸的联合分布 $P(X_1, \\ldots, X_d \\mid Y)$。",
+      intuition_en: "'Once you tell me the class, the features stop talking to each other.' The assumption is usually wrong (features stay correlated even within a class), but the resulting classifier is fast, robust on small data, and often surprisingly good — that's why it's 'naive but useful.'",
+      intuition_cn: "\"告诉我类别之后，各特征之间就互不相关。\" 这个假设通常是错的（同一类别内特征仍相关），但分类器训练快、小数据下也稳，效果常常出乎意料地好 —— 所以叫 \"naive 但好用\"。",
       "source": "topics/naive-bayes.html#eq-naive-bayes-conditional-independence"
     },
     {
       "title": "MAP decision",
       "eq": "$$ \\hat{y}=\\arg\\max_y P(Y=y)\\prod_j P(X_j\\mid y) $$",
+      "symbols": [
+        { sym: "$\\hat{y}$",          en: "predicted class",                                                   cn: "预测类别" },
+        { sym: "$\\arg\\max_y$",      en: "the value of $y$ that makes the expression largest",                cn: "让表达式最大的 $y$ 值" },
+        { sym: "$P(Y=y)$",            en: "class prior — fit as (count of class $y$) / (total samples)",       cn: "类别先验 —— 用 (该类样本数) / (总样本数) 估计" },
+        { sym: "$P(X_j \\mid y)$",    en: "likelihood of feature $j$ given class $y$, fit per class from data", cn: "给定类别 $y$ 下第 $j$ 个特征的似然，按类别从训练数据拟合" },
+        { sym: "$\\prod_j$",          en: "product over the $d$ features of the test sample",                  cn: "对测试样本的 $d$ 个特征连乘" }
+      ],
+      usage_en: "For each candidate class $y$, multiply the class prior by the product of per-feature likelihoods evaluated at the test sample's actual feature values; pick the class with the highest score. This is **Maximum A Posteriori (MAP)** — Bayes's rule with the constant denominator $P(X_1, \\ldots, X_d)$ dropped because it doesn't change the argmax.",
+      usage_cn: "对每个候选类别 $y$，把类别先验和各特征似然在测试样本特征值上的取值连乘，得分最高的类别就是预测。这就是 **Maximum A Posteriori (MAP)** —— Bayes 公式中常数分母 $P(X_1, \\ldots, X_d)$ 不影响 argmax，所以省掉了。",
+      intuition_en: "'Score each class by how well it explains the test sample, then pick the winner.' The prior gives a base rate ('which classes are common?') and the likelihood product asks 'would a sample from this class look like what I'm seeing?'. Multiply the two and take the largest.",
+      intuition_cn: "\"给每个类别打个分，看哪个最能 '解释' 这个测试样本，最高分就是答案。\" 先验告诉你 \"哪些类别本来就常见\"，似然连乘问 \"如果是这个类，会不会看到这种特征组合？\" 两者相乘后选最大。",
       "source": "topics/naive-bayes.html#eq-naive-bayes-map-decision"
     },
     {
       "title": "Log-space implementation",
       "eq": "$$ \\hat{y}=\\arg\\max_y\\Big[\\log P(y)+\\sum_j\\log P(X_j\\mid y)\\Big] $$",
+      "symbols": [
+        { sym: "$\\log$",                              en: "natural log (base $e$); any base works since it's monotonic", cn: "自然对数（底为 $e$）；任何底都可以，因为是单调函数" },
+        { sym: "$\\log P(y)$",                         en: "log of the class prior",                                       cn: "类别先验的对数" },
+        { sym: "$\\sum_j \\log P(X_j \\mid y)$",       en: "sum of per-feature log-likelihoods",                           cn: "各特征 log-likelihood 之和" }
+      ],
+      usage_en: "Take the log of both sides of the MAP formula. The product of $d$ probabilities (each often $\\ll 1$) becomes a sum, avoiding numerical underflow when $d$ is large. Always implement Naive Bayes this way in code.",
+      usage_cn: "对 MAP 公式两边取对数。$d$ 个概率（每个通常 $\\ll 1$）的乘积变成求和，避免在 $d$ 大时数值下溢。代码实现一律用这种 log 形式。",
+      intuition_en: "Same answer, no underflow. Multiplying 50 numbers like $0.001$ gives $10^{-150}$ — easily rounds to 0 in floating point. Adding their logs gives a comparable number you can actually compare across classes.",
+      intuition_cn: "答案完全一致，数值上不会下溢。50 个 $0.001$ 相乘得 $10^{-150}$，浮点数会直接变 0；改成把它们的 log 相加后，得到可正常比较的数。",
       "source": "topics/naive-bayes.html#eq-naive-bayes-log-space-implementation"
     },
     {
       "title": "Each feature is Gaussian per class",
       "eq": "$$ P(X_j\\mid Y=y)=\\mathcal{N}(X_j;\\,\\mu_{y,j},\\,\\sigma_{y,j}^2) $$",
+      "symbols": [
+        { sym: "$\\mathcal{N}(\\cdot; \\mu, \\sigma^2)$", en: "Gaussian density with mean $\\mu$, variance $\\sigma^2$", cn: "均值为 $\\mu$、方差为 $\\sigma^2$ 的 Gaussian density" },
+        { sym: "$\\mu_{y,j}$",                            en: "sample mean of feature $j$ within class $y$",            cn: "类别 $y$ 中第 $j$ 个特征的样本均值" },
+        { sym: "$\\sigma_{y,j}^2$",                       en: "sample variance of feature $j$ within class $y$",        cn: "类别 $y$ 中第 $j$ 个特征的样本方差" },
+        { sym: "$(\\mu_{y,j}, \\sigma_{y,j}^2)$",         en: "fit independently for each (class, feature) pair",       cn: "对每个 (类别, 特征) 单独拟合一对参数" }
+      ],
+      usage_en: "For continuous-valued features, model $P(X_j \\mid Y)$ as a 1-D Gaussian. Estimate $\\mu_{y,j}$ and $\\sigma_{y,j}^2$ from the subset of training data with $Y = y$ via the MLE formulas (sample mean / sample variance), then plug into the MAP formula as the likelihood. This is **Gaussian Naive Bayes**. (For discrete features, use multinomial / Bernoulli instead.)",
+      usage_cn: "对连续特征，把 $P(X_j \\mid Y)$ 建模成 1 维 Gaussian。用 $Y = y$ 的训练子集，通过 MLE 公式（样本均值 / 样本方差）估计 $\\mu_{y,j}$ 和 $\\sigma_{y,j}^2$，然后作为 likelihood 代入 MAP 公式。这就是 **Gaussian Naive Bayes**。（离散特征改用 multinomial / Bernoulli。）",
+      intuition_en: "Per (class, feature) you store just two numbers — the bell curve's center and width. Total parameters $= 2 \\times K \\times d$ for $K$ classes and $d$ features (versus exponential in the joint case). Cheap, transparent, surprisingly effective on text and tabular data.",
+      intuition_cn: "每个 (类别, 特征) 只存两个数 —— 钟形曲线的中心和宽度。共有 $2 \\times K \\times d$ 个参数（$K$ 类、$d$ 个特征），相比联合分布的指数级参数量少得多。便宜、透明、在文本和表格数据上效果意外地好。",
       "source": "topics/naive-bayes.html#eq-naive-bayes-each-feature-is-gaussian-per-class"
     }
   ],
@@ -193,21 +265,64 @@
     {
       "title": "Design-matrix objective",
       "eq": "$$ \\min_w \\; \\frac12\\|Y-Xw\\|_2^2 $$",
+      "symbols": [
+        { sym: "$w \\in \\mathbb{R}^d$",          en: "weight vector being optimized — one weight per feature",                cn: "待优化的权重向量 —— 每个特征一个权重" },
+        { sym: "$X \\in \\mathbb{R}^{n \\times d}$", en: "design matrix; row $i$ is feature vector $x_i^\\top$",              cn: "设计矩阵；第 $i$ 行是特征向量 $x_i^\\top$" },
+        { sym: "$Y \\in \\mathbb{R}^n$",          en: "vector of target values $(y_1, \\ldots, y_n)^\\top$",                   cn: "目标值向量 $(y_1, \\ldots, y_n)^\\top$" },
+        { sym: "$Xw \\in \\mathbb{R}^n$",         en: "vector of predictions $(\\hat{y}_1, \\ldots, \\hat{y}_n)^\\top$",       cn: "预测值向量 $(\\hat{y}_1, \\ldots, \\hat{y}_n)^\\top$" },
+        { sym: "$\\|\\cdot\\|_2^2$",              en: "squared L2 norm — sum of squared entries",                              cn: "L2 范数的平方 —— 各项平方求和" },
+        { sym: "$\\frac{1}{2}$",                  en: "convenience factor; cancels with the 2 from differentiating the square", cn: "方便因子；与平方求导出来的 2 相消" }
+      ],
+      usage_en: "Stack training inputs into rows of $X$, targets into $Y$. Find $w$ that minimizes the sum of squared residuals (predicted minus true). Solve in closed form via the normal equation when $d$ is small, or via gradient descent when $d$ is large. To include a bias term, prepend a column of 1's to $X$ and treat it as one more component of $w$.",
+      usage_cn: "把训练输入堆成 $X$ 的行、目标堆成 $Y$。找让残差平方和（预测 − 真实）最小的 $w$。$d$ 小时走 normal equation 闭式解，$d$ 大、数据多时走 gradient descent。要加 bias，在 $X$ 前面加一列全 1，把它当成 $w$ 的一个分量。",
+      intuition_en: "Geometrically: project $Y$ onto the column space of $X$. Squared error penalizes large residuals quadratically, so it's sensitive to outliers but mathematically clean — convex, differentiable, and unique-minimum whenever $X^\\top X$ is invertible.",
+      intuition_cn: "几何上：把 $Y$ 投影到 $X$ 的列空间上。平方误差对大残差是二次惩罚，对 outlier 敏感，但数学上很干净 —— 凸、可导、当 $X^\\top X$ 可逆时有唯一最小值。",
       "source": "topics/linear-regression.html#eq-linear-regression-design-matrix-objective"
     },
     {
       "title": "Gradient",
       "eq": "$$ \\nabla_w \\frac12\\|Y-Xw\\|_2^2 = X^\\top(Xw-Y) $$",
+      "symbols": [
+        { sym: "$\\nabla_w$",                          en: "gradient with respect to $w$; same shape as $w$ (a $d$-vector)", cn: "对 $w$ 求梯度；与 $w$ 同形状（$d$ 维向量）" },
+        { sym: "$Xw - Y \\in \\mathbb{R}^n$",          en: "residual vector — predictions minus targets",                     cn: "残差向量 —— 预测 − 真实" },
+        { sym: "$X^\\top \\in \\mathbb{R}^{d \\times n}$", en: "transpose of the design matrix",                            cn: "设计矩阵的转置" },
+        { sym: "$X^\\top(Xw - Y)$",                    en: "column-by-column inner product of features against the residual", cn: "各列特征与残差的内积" }
+      ],
+      usage_en: "Plug into gradient descent: $w_{t+1} = w_t - \\alpha\\,X^\\top(Xw_t - Y)$. Set the gradient to zero for the closed-form solution. The $j$-th component $[X^\\top r]_j$ tells you how to nudge weight $j$ to reduce error, where $r = Xw - Y$ is the residual.",
+      usage_cn: "代入 gradient descent: $w_{t+1} = w_t - \\alpha\\,X^\\top(Xw_t - Y)$。或令梯度等于 0 得到闭式解。第 $j$ 个分量 $[X^\\top r]_j$ 告诉你 \"怎样调整第 $j$ 个权重才能减小误差\"（$r = Xw - Y$ 是残差）。",
+      intuition_en: "$X^\\top r$ measures how much each feature column 'explains' the leftover error. If a feature is positively correlated with the residual, increasing its weight reduces error — that's exactly the direction the negative gradient points.",
+      intuition_cn: "$X^\\top r$ 衡量每个特征列与残余误差的相关程度。某个特征与残差正相关 → 增大它的权重能降低误差 —— 这正是负梯度的方向。",
       "source": "topics/linear-regression.html#eq-linear-regression-gradient"
     },
     {
       "title": "Normal equation",
       "eq": "$$ X^\\top Xw^* = X^\\top Y,\\qquad w^*=(X^\\top X)^{-1}X^\\top Y $$",
+      "symbols": [
+        { sym: "$w^*$",                                  en: "optimal weight vector — the minimizer",                                                              cn: "最优权重向量 —— 使目标函数最小的解" },
+        { sym: "$X^\\top X \\in \\mathbb{R}^{d \\times d}$", en: "Gram matrix — symmetric, positive-semidefinite",                                                cn: "Gram 矩阵 —— 对称、半正定" },
+        { sym: "$(X^\\top X)^{-1}$",                     en: "inverse of the Gram matrix; exists iff $X$ has linearly independent columns ($\\mathrm{rank}(X)=d$)", cn: "Gram 矩阵的逆；当且仅当 $X$ 列线性无关（即满列秩 $\\mathrm{rank}(X) = d$）时存在" },
+        { sym: "$X^\\top Y \\in \\mathbb{R}^d$",          en: "feature-target correlation vector",                                                                  cn: "特征与目标的相关向量" }
+      ],
+      usage_en: "Set the gradient $X^\\top(Xw - Y) = 0$, rearrange. The first form is the linear system to **solve** (don't actually invert the matrix in code — use `np.linalg.solve` or a Cholesky factorization for stability and speed); the second form is the explicit formula. If $X^\\top X$ is singular (e.g. $n < d$ or duplicated features), use ridge regression instead.",
+      usage_cn: "令梯度 $X^\\top(Xw - Y) = 0$ 整理即可。第一个形式是要**解**的线性方程组（代码里别真的求逆，用 `np.linalg.solve` 或 Cholesky 既稳定又快）；第二个形式是显式解。当 $X^\\top X$ 奇异（如 $n < d$ 或特征重复）时，改用 ridge regression。",
+      intuition_en: "'Stop where the gradient is zero.' The condition $X^\\top(Xw - Y) = 0$ says the residual is orthogonal to every feature column — geometrically, $Xw^*$ is the projection of $Y$ onto the column space of $X$, and the leftover $Y - Xw^*$ has zero correlation with any feature.",
+      intuition_cn: "\"梯度为 0 处停下\"。条件 $X^\\top(Xw - Y) = 0$ 表示残差与每个特征列正交 —— 几何上 $Xw^*$ 是 $Y$ 在 $X$ 列空间上的投影，残差 $Y - Xw^*$ 与任何特征都不再相关。",
       "source": "topics/linear-regression.html#eq-linear-regression-normal-equation"
     },
     {
       "title": "Ridge regularization",
       "eq": "$$ \\min_w \\frac12\\|Y-Xw\\|_2^2+\\frac{\\lambda}{2}\\|w\\|_2^2,\\qquad w^*=(X^\\top X+\\lambda I)^{-1}X^\\top Y $$",
+      "symbols": [
+        { sym: "$\\lambda \\ge 0$",                       en: "regularization strength (a hyperparameter)",                            cn: "正则强度（超参数）" },
+        { sym: "$\\|w\\|_2^2$",                           en: "$\\sum_j w_j^2$ — sum of squared weights",                              cn: "$\\sum_j w_j^2$ —— 权重平方和" },
+        { sym: "$\\frac{\\lambda}{2}\\|w\\|_2^2$",        en: "penalty term that shrinks weights toward 0",                            cn: "把权重拉向 0 的惩罚项" },
+        { sym: "$I \\in \\mathbb{R}^{d \\times d}$",      en: "identity matrix",                                                       cn: "单位矩阵" },
+        { sym: "$X^\\top X + \\lambda I$",                 en: "always invertible when $\\lambda > 0$ (positive-definite)",             cn: "$\\lambda > 0$ 时一定可逆（正定）" }
+      ],
+      usage_en: "Add the L2 penalty to the OLS objective. Pick $\\lambda$ via cross-validation: small $\\lambda \\approx$ OLS, large $\\lambda \\approx$ all-zero weights. The closed-form solution just adds $\\lambda I$ to the Gram matrix before inverting. **Standardize features first** — without it, weights with naturally large scales get over-penalized.",
+      usage_cn: "在 OLS 目标里加上 L2 惩罚项。$\\lambda$ 用 cross-validation 选：$\\lambda$ 小 ≈ OLS，$\\lambda$ 大 ≈ 全 0 解。闭式解就是在反矩阵前给 Gram 矩阵加 $\\lambda I$。**先做特征标准化** —— 否则尺度天然大的权重会被惩罚得过狠。",
+      intuition_en: "Two pressures fighting: 'fit the data well' vs. 'keep weights small.' Small weights → smoother model → less overfitting and a stable solution even when $X^\\top X$ is singular. Bayesian view: ridge $=$ MAP estimate under a Gaussian prior $w \\sim \\mathcal{N}(0, \\frac{1}{\\lambda} I)$.",
+      intuition_cn: "两股力在拔河：\"拟合好数据\" vs. \"权重不要太大\"。权重小 → 模型更平滑 → 减少过拟合，且即使 $X^\\top X$ 奇异也能有稳定解。Bayesian 视角：ridge $=$ 在 Gaussian prior $w \\sim \\mathcal{N}(0, \\frac{1}{\\lambda} I)$ 下的 MAP 估计。",
       "source": "topics/linear-regression.html#eq-linear-regression-ridge-regularization"
     }
   ],
@@ -962,6 +1077,60 @@
                       : (obj[base + "_en"] || obj[base + "_cn"] || obj[base] || "");
   }
 
+  // Optional per-formula explanation block. The renderer skips this entirely
+  // when an item has no symbols / usage / intuition fields, so existing
+  // formulas without explanations render unchanged.
+  function explainHtml(item) {
+    const hasSymbols = item.symbols && item.symbols.length;
+    const hasUsage   = item.usage_en   || item.usage_cn;
+    const hasIntuit  = item.intuition_en || item.intuition_cn;
+    if (!hasSymbols && !hasUsage && !hasIntuit) return "";
+    const parts = [];
+    if (hasSymbols) {
+      parts.push(`
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+            ${item.symbols.map(s => `
+              <li>
+                <span class="explain-sym">${esc(s.sym || "")}</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">${esc(s.en || s.cn || "")}</span>
+                  <span class="cn-only">${esc(s.cn || s.en || "")}</span>
+                </span>
+              </li>`).join("")}
+          </ul>
+        </div>`);
+    }
+    if (hasUsage) {
+      parts.push(`
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">${esc(item.usage_en || item.usage_cn || "")}</span>
+            <span class="cn-only">${esc(item.usage_cn || item.usage_en || "")}</span>
+          </div>
+        </div>`);
+    }
+    if (hasIntuit) {
+      parts.push(`
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">${esc(item.intuition_en || item.intuition_cn || "")}</span>
+            <span class="cn-only">${esc(item.intuition_cn || item.intuition_en || "")}</span>
+          </div>
+        </div>`);
+    }
+    return `<div class="equation-explain">${parts.join("")}</div>`;
+  }
+
   function renderEquationSheet() {
     const root = document.getElementById("equationSheetRoot");
     if (!root || !window.GROUPS || !window.TOPICS) return;
@@ -981,7 +1150,12 @@
       const cards = topics.map(topic => {
         const items = EQUATION_DATA[topic.slug] || [];
         const haystack = [topic.slug, topic.name_en, topic.name_cn, topic.sub_en, topic.sub_cn]
-          .concat(items.flatMap(item => [item.title, item.eq]))
+          .concat(items.flatMap(item => [
+            item.title, item.eq,
+            item.usage_en, item.usage_cn,
+            item.intuition_en, item.intuition_cn,
+            ...(item.symbols || []).flatMap(s => [s.sym, s.en, s.cn]),
+          ]))
           .filter(Boolean).join(" ").toLowerCase();
         return `
           <article class="equation-topic" data-equation-topic data-haystack="${esc(haystack)}">
@@ -1000,6 +1174,7 @@
                     ${item.source ? `<a class="equation-source" href="${esc(item.source)}"><span class="en-only">Source</span><span class="cn-only">出处</span></a>` : ""}
                   </div>
                   <div class="equation-math">${esc(item.eq).replace(/\\n/g, "<br />").replace(/\n/g, "<br />")}</div>
+                  ${explainHtml(item)}
                 </div>
               `).join("")}
             </div>

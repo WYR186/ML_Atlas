@@ -1371,6 +1371,58 @@ html[data-theme="dark"] .toc-problem-link:hover {
   gap: 12px;
   margin-top: 24px;
 }
+/* Optional per-formula explanation block — renders only for items with
+   symbols / usage / intuition fields. Visually subordinate to the formula
+   so the cheatsheet still reads as a formula sheet at a glance. */
+.equation-explain {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  display: grid;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+.explain-row { display: grid; gap: 4px; }
+.explain-label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+.explain-symbols {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+.explain-symbols li {
+  display: grid;
+  grid-template-columns: minmax(70px, max-content) 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.explain-sym {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.explain-sym-def { color: var(--text-soft); }
+.explain-text    { color: var(--text-soft); }
+html[data-theme="dark"] .explain-sym {
+  background: var(--bg-card);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
 @media (max-width: 760px) {
   .equation-grid { grid-template-columns: 1fr; }
   .equation-group-head { display: block; }
@@ -1381,6 +1433,7 @@ html[data-theme="dark"] .toc-problem-link:hover {
   .equation-topic-head { padding: 10px 12px; }
   .equation-item { padding: 10px 12px 12px; }
   .equation-math { font-size: 12.5px; }
+  .explain-symbols li { grid-template-columns: 1fr; gap: 2px; }
 }
 
 .bi-text { display: grid; gap: 4px; font-size: 14px; }
