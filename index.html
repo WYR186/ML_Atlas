@@ -130,7 +130,7 @@
       `).join("");
       const cols = items.length >= 4 ? "repeat(2, 1fr)" : (items.length >= 2 ? `repeat(${Math.min(items.length, 3)}, 1fr)` : "1fr");
       return `
-        <div class="group" style="position:relative; padding:18px 16px 14px; border:1px solid var(--border-strong); border-radius:12px; background:rgba(255,255,255,0.7);">
+        <div class="group" id="g-${gid}" style="position:relative; padding:18px 16px 14px; border:1px solid var(--border-strong); border-radius:12px; background:rgba(255,255,255,0.7);">
           <span class="group-label" data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
           <div class="group-cards" style="grid-template-columns: ${cols}; margin-top:6px;">
             ${cards}
@@ -138,6 +138,9 @@
         </div>
       `;
     }
+
+    grid.style.position = "relative";
+    grid.style.zIndex = "1";
 
     grid.innerHTML = order.map(row => {
       if (row.length === 1) {
@@ -156,6 +159,95 @@
     applyTopicLang();
     document.querySelectorAll(".lang-switch button").forEach(btn => {
       btn.addEventListener("click", () => setTimeout(applyTopicLang, 0));
+    });
+
+    // === Connector lines (root → groups, with arrowheads) ===
+    function drawConnectors() {
+      const root = document.getElementById("roadmap");
+      if (!root) return;
+      const NS = "http://www.w3.org/2000/svg";
+      let svg = document.getElementById("connectorSvg");
+      if (!svg) {
+        svg = document.createElementNS(NS, "svg");
+        svg.id = "connectorSvg";
+        svg.setAttribute("preserveAspectRatio", "none");
+        Object.assign(svg.style, {
+          position: "absolute", left: "0", top: "0",
+          width: "100%", height: "100%",
+          pointerEvents: "none", zIndex: "0",
+        });
+        const defs = document.createElementNS(NS, "defs");
+        defs.innerHTML =
+          '<marker id="connArrow" viewBox="0 0 10 10" refX="9" refY="5" ' +
+          'markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+          '<path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>';
+        svg.appendChild(defs);
+        root.insertBefore(svg, root.firstChild);
+      }
+
+      // Size SVG to roadmap
+      const r = root.getBoundingClientRect();
+      svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+      svg.setAttribute("width", r.width);
+      svg.setAttribute("height", r.height);
+
+      // Drop existing paths
+      svg.querySelectorAll("path:not(defs path)").forEach(p => p.remove());
+
+      const center = (el) => {
+        const b = el.getBoundingClientRect();
+        const o = root.getBoundingClientRect();
+        return {
+          cx: b.left - o.left + b.width / 2,
+          top: b.top - o.top,
+          bottom: b.bottom - o.top,
+        };
+      };
+
+      // Vertical spine: foundations → supervised → (split) → neural → (split) → modern → (split) → rl
+      const conns = [
+        ["n-root",          "g-foundations"],
+        ["g-foundations",   "g-supervised"],
+        ["g-supervised",    "g-trees"],
+        ["g-supervised",    "g-unsupervised"],
+        ["g-trees",         "g-neural"],
+        ["g-unsupervised",  "g-neural"],
+        ["g-neural",        "g-sequential"],
+        ["g-neural",        "g-representation"],
+        ["g-sequential",    "g-modern"],
+        ["g-representation","g-modern"],
+        ["g-modern",        "g-generative"],
+        ["g-modern",        "g-theory"],
+        ["g-generative",    "g-rl"],
+        ["g-theory",        "g-rl"],
+      ];
+
+      for (const [from, to] of conns) {
+        const a = document.getElementById(from);
+        const b = document.getElementById(to);
+        if (!a || !b) continue;
+        const A = center(a), B = center(b);
+        const sx = A.cx, sy = A.bottom + 2;
+        const ex = B.cx, ey = B.top - 8;            // leave room for arrowhead
+        const my = (sy + ey) / 2;
+        // S-curve: vertical out of source, horizontal mid, vertical into target
+        const d = `M ${sx},${sy} C ${sx},${my} ${ex},${my} ${ex},${ey}`;
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", d);
+        p.setAttribute("fill", "none");
+        p.setAttribute("stroke", "#9ca3af");
+        p.setAttribute("stroke-width", "1.6");
+        p.setAttribute("stroke-linecap", "round");
+        p.setAttribute("marker-end", "url(#connArrow)");
+        svg.appendChild(p);
+      }
+    }
+    // Initial draw + redraw on viewport changes.
+    requestAnimationFrame(drawConnectors);
+    window.addEventListener("resize", drawConnectors);
+    // Also redraw on language switch (card width can change with longer EN labels).
+    document.querySelectorAll(".lang-switch button").forEach(btn => {
+      btn.addEventListener("click", () => requestAnimationFrame(drawConnectors));
     });
 
     // Mark progress dots
