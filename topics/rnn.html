@@ -86,33 +86,46 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body.
+  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
-    const toc = document.getElementById('topicToc');
+    const toc  = document.getElementById('topicToc');
     if (!main || !toc) return;
-    const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
-    if (!items.length) return;
-    const ul = document.createElement('ul');
-    ul.style.listStyle = 'none';
-    ul.style.padding = '0';
-    ul.style.margin = '0';
-    ul.style.display = 'grid';
-    ul.style.gap = '4px';
-    items.forEach((el) => {
-      // find nearest section ancestor for the id
-      const sect = el.closest('section.topic');
-      if (!sect || !sect.id) return;
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = '#' + sect.id;
-      a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
-      a.style.color = 'var(--text-soft)';
-      a.style.fontSize = '13px';
-      li.appendChild(a);
-      ul.appendChild(li);
+
+    function build() {
+      const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
+      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
+      const seenSection = new Set();
+      items.forEach((el) => {
+        // Skip headings inside the inactive language wrapper.
+        if (lang === 'en' && el.closest('.cn-only')) return;
+        if (lang === 'cn' && el.closest('.en-only')) return;
+        const sect = el.closest('section.topic');
+        if (!sect || !sect.id) return;
+        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
+        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
+        if (lang === 'mixed' && seenSection.has(baseId)) return;
+        seenSection.add(baseId);
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href = '#' + sect.id;
+        a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
+        a.style.color = 'var(--text-soft)';
+        a.style.fontSize = '13px';
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+      toc.innerHTML = '';
+      toc.appendChild(ul);
+    }
+    build();
+    // Rebuild whenever the lang slider changes.
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });
-    toc.appendChild(ul);
   })();
 </script>
 </body>

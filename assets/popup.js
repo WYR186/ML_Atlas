@@ -152,6 +152,7 @@
         cb.classList.toggle("checked", next);
         cb.textContent = next ? "✓" : "";
         refreshProgressLabel(slug);
+        document.dispatchEvent(new CustomEvent("ml-progress-rerender"));
       });
     });
 
@@ -169,6 +170,7 @@
         checkbox.classList.toggle("checked", next);
         checkbox.textContent = next ? "✓" : "";
         refreshProgressLabel(slug);
+        document.dispatchEvent(new CustomEvent("ml-progress-rerender"));
       });
 
       row.addEventListener("click", e => {
