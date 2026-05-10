@@ -5,6 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ECE 449 / CS 446 · ML Atlas</title>
 <link rel="stylesheet" href="assets/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  // Initialize Mermaid; we render manually after building the graph.
+  if (window.mermaid) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      themeVariables: {
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        primaryColor: "#ffffff",
+        primaryBorderColor: "#d1d5db",
+        primaryTextColor: "#1f2937",
+        lineColor: "#9ca3af",
+        clusterBkg: "#f9fafb",
+        clusterBorder: "#d1d5db",
+      },
+      flowchart: { curve: "basis", padding: 14, nodeSpacing: 36, rankSpacing: 60 },
+    });
+  }
+</script>
 </head>
 <body>
 
@@ -59,12 +79,23 @@
       </div>
     </aside>
 
-    <div class="roadmap" id="roadmap">
-      <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:16px; width:280px;">
-        <span data-i18n="brand.short">ECE 449 / CS 446</span>
-        <span class="sub" data-i18n="home.subtitle.subtitle">机器学习 · 期末复习</span>
-      </a>
-      <div id="groupGrid" style="margin-top: 110px;"></div>
+    <div>
+      <div class="view-switch" id="viewSwitch" role="tablist">
+        <button data-view="atlas"   class="active" type="button">🌳 Atlas</button>
+        <button data-view="mermaid"               type="button">📊 Mermaid</button>
+      </div>
+
+      <div class="roadmap airy" id="roadmap">
+        <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:24px; width:300px;">
+          <span data-i18n="brand.short">ECE 449 / CS 446</span>
+          <span class="sub" data-i18n="home.subtitle.subtitle">机器学习 · 期末复习</span>
+        </a>
+        <div id="groupGrid" style="margin-top: 150px;"></div>
+      </div>
+
+      <div class="mermaid-view" id="mermaidView" style="display:none;">
+        <pre class="mermaid" id="mermaidGraph"></pre>
+      </div>
     </div>
   </section>
 
@@ -95,7 +126,7 @@
     if (total) total.textContent = window.TOPICS.length;
 
     grid.style.display = "grid";
-    grid.style.gap = "20px";
+    grid.style.gap = "32px";
     grid.style.gridTemplateColumns = "repeat(2, 1fr)";
 
     const order = [
@@ -270,6 +301,114 @@
       }
     }
     markProgress();
+  })();
+
+  // === Mermaid view (auto-generated from TOPICS / GROUPS) ===
+  (function () {
+    const VIEW_KEY = "ml_review_view_v1";
+    const switchBox = document.getElementById("viewSwitch");
+    const atlas    = document.getElementById("roadmap");
+    const mermView = document.getElementById("mermaidView");
+    const mermPre  = document.getElementById("mermaidGraph");
+    if (!switchBox || !atlas || !mermView || !mermPre) return;
+
+    const ORDER = [
+      "foundations", "supervised", "trees", "unsupervised",
+      "neural", "sequential", "representation",
+      "modern", "generative", "theory", "rl",
+    ];
+    const EDGES = [
+      ["root",          "foundations"],
+      ["foundations",   "supervised"],
+      ["supervised",    "trees"],
+      ["supervised",    "unsupervised"],
+      ["trees",         "neural"],
+      ["unsupervised",  "neural"],
+      ["neural",        "sequential"],
+      ["neural",        "representation"],
+      ["sequential",    "modern"],
+      ["representation","modern"],
+      ["modern",        "generative"],
+      ["modern",        "theory"],
+      ["generative",    "rl"],
+      ["theory",        "rl"],
+    ];
+
+    function escMer(s) {
+      // Mermaid is fussy about quotes inside node labels — strip / escape them.
+      return String(s).replace(/"/g, "'").replace(/[\[\]()<>]/g, " ");
+    }
+
+    function buildGraph() {
+      const lang = localStorage.getItem("ml_review_lang_v1") || "en";
+      const pickName = (o) => lang === "cn" ? (o.name_cn || o.name_en) : (o.name_en || o.name_cn);
+      const lines = [];
+      lines.push("flowchart TD");
+      lines.push('  root(["ECE 449 / CS 446<br/>' + (lang === "cn" ? "机器学习 · 期末复习" : "Machine Learning · Final Review") + '"])');
+
+      for (const gid of ORDER) {
+        const g = (window.GROUPS || []).find(x => x.id === gid);
+        if (!g) continue;
+        const topics = (window.TOPICS || []).filter(t => t.group === gid);
+        lines.push(`  subgraph ${gid}["${escMer(pickName(g))}"]`);
+        lines.push("    direction LR");
+        for (const t of topics) {
+          lines.push(`    ${t.slug}["${escMer(pickName(t))}"]`);
+          lines.push(`    click ${t.slug} "topics/${t.slug}.html" "Open ${escMer(t.name_en)}"`);
+        }
+        lines.push("  end");
+        // Difficulty colors for each topic
+        for (const t of topics) {
+          lines.push(`  class ${t.slug} ${t.diff || "yellow"}`);
+        }
+      }
+
+      for (const [a, b] of EDGES) lines.push(`  ${a} --> ${b}`);
+
+      lines.push("classDef green  fill:#d1fae5,stroke:#10b981,color:#065f46;");
+      lines.push("classDef yellow fill:#fef3c7,stroke:#f59e0b,color:#92400e;");
+      lines.push("classDef red    fill:#fee2e2,stroke:#ef4444,color:#991b1b;");
+      lines.push("style root fill:#fff,stroke:#10b981,stroke-width:2px,color:#065f46;");
+
+      return lines.join("\n");
+    }
+
+    let rendered = false;
+    async function renderMermaid() {
+      if (!window.mermaid) return;
+      mermPre.removeAttribute("data-processed");
+      mermPre.textContent = buildGraph();
+      try {
+        await mermaid.run({ nodes: [mermPre] });
+        rendered = true;
+      } catch (e) {
+        mermPre.textContent = "Mermaid render error:\n" + e.message;
+      }
+    }
+
+    function setView(view) {
+      atlas.style.display    = view === "atlas"   ? "" : "none";
+      mermView.style.display = view === "mermaid" ? "" : "none";
+      switchBox.querySelectorAll("button").forEach(b => {
+        b.classList.toggle("active", b.dataset.view === view);
+      });
+      localStorage.setItem(VIEW_KEY, view);
+      if (view === "mermaid") renderMermaid();
+    }
+
+    switchBox.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", () => setView(b.dataset.view));
+    });
+    // Re-render Mermaid when the user switches language while Mermaid is visible
+    document.querySelectorAll(".lang-switch button").forEach(b => {
+      b.addEventListener("click", () => {
+        if (mermView.style.display !== "none") setTimeout(renderMermaid, 0);
+      });
+    });
+
+    // Restore last view
+    const saved = localStorage.getItem(VIEW_KEY) || "atlas";
+    setView(saved);
   })();
 
   // === Render index table per group ===

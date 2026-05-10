@@ -562,6 +562,76 @@ footer {
 /* Mark */
 mark { background: #fef3c7; padding: 1px 3px; border-radius: 3px; }
 
+/* ===== Roadmap view switch (Atlas / Mermaid) ===== */
+.view-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+  font-size: 12.5px;
+  margin-bottom: 18px;
+}
+.view-switch button {
+  padding: 7px 16px;
+  border: 0;
+  background: #fff;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 12.5px;
+  transition: background 0.12s;
+}
+.view-switch button.active {
+  background: var(--accent);
+  color: #fff;
+}
+.view-switch button:hover:not(.active) { background: #f3f4f6; }
+
+/* Mermaid container */
+.mermaid-view {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+.mermaid-view .mermaid {
+  text-align: center;
+  background: transparent;
+  font-size: 14px;
+}
+
+/* ===== Roomier roadmap (override the cramped defaults) ===== */
+.roadmap.airy {
+  padding: 36px 28px;
+  min-height: 1700px;
+}
+.roadmap.airy .group {
+  padding: 22px 18px 18px !important;
+}
+.roadmap.airy .group-cards {
+  gap: 14px;
+}
+.roadmap.airy .node {
+  padding: 16px 20px;
+  font-size: 14.5px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.roadmap.airy .group-label {
+  top: -11px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.roadmap.airy .section-node {
+  padding: 20px 24px;
+}
+
 /* ===== Popup (click-anchored) ===== */
 .popup-overlay {
   position: fixed;
