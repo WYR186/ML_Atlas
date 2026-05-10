@@ -27,3 +27,7 @@ book
 
 # Per-user learning state from serve.py — local only
 progress.json
+
+# Python bytecode (serve.py imports etc.)
+__pycache__/
+*.pyc

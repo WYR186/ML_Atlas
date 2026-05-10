@@ -10,8 +10,8 @@ window.POPUP_DATA = {
   // ─────────────────── Foundations ───────────────────
   "probability": {
     tutorial: {
-      cn: "1. 先把题目翻译成事件：联合、条件、独立、条件独立。\n2. 条件概率就是缩小样本空间；贝叶斯就是 posterior ∝ likelihood × prior。\n3. 期末最容易考两类：手算 Bayes / 全概率，以及解释 Naive Bayes 为什么能把 P(X1,...,Xd|Y) 拆成乘积。",
-      en: "1. Translate the question into events first: joint, conditional, independence, or conditional independence.\n2. Conditioning shrinks the sample space; Bayes is posterior ∝ likelihood × prior.\n3. Exam favorites: hand Bayes / total-probability calculations, and explaining why Naive Bayes can factor P(X1,...,Xd|Y) into a product."
+      cn: "1. 条件概率 P(A|B)=P(A,B)/P(B)：分母不是 P(A)，而是“已知 B 后剩下的世界”大小。\n2. Bayes 公式 P(A|B)=P(B|A)P(A)/P(B)：posterior = likelihood × prior 再 normalize；P(B) 通常用全概率展开。\n3. 独立 P(A,B)=P(A)P(B)；条件独立 P(A,B|C)=P(A|C)P(B|C)。Naive Bayes 正是用条件独立把 P(X1,...,Xd|Y) 拆成 product。",
+      en: "1. Conditional probability P(A|B)=P(A,B)/P(B): the denominator is the size of the world left after B is known.\n2. Bayes' rule P(A|B)=P(B|A)P(A)/P(B): posterior = likelihood × prior, then normalize; expand P(B) with total probability when missing.\n3. Independence means P(A,B)=P(A)P(B); conditional independence means P(A,B|C)=P(A|C)P(B|C). Naive Bayes uses that assumption to factor P(X1,...,Xd|Y)."
     },
     code: [{
       title: { cn: "Bayes / 期望 (Python)", en: "Bayes / Expectation (Python)" },
@@ -53,8 +53,8 @@ def mean_var(values, probs):
 
   "linear-algebra": {
     tutorial: {
-      cn: "1. 线代是 ML 的 shape 语法：x、w、X、gradient、Hessian 都要先知道维度。\n2. 点积是相似度 / 投影，矩阵是线性变换；SVD 把矩阵拆成旋转、伸缩、旋转。\n3. HW1 高频是 rank / null space / pseudo-inverse，以及用 XᵀBX 的夹心结构证明 PSD。",
-      en: "1. Linear algebra is ML's shape grammar: know the dimensions of x, w, X, gradients, and Hessians first.\n2. Dot products measure similarity / projection; matrices are linear maps; SVD is rotate-stretch-rotate.\n3. HW1 favorites: rank / null space / pseudo-inverse, and proving PSD via the XᵀBX sandwich."
+      cn: "1. 点积 x^T y=Σ x_i y_i=||x||||y||cosθ：既是 component-wise 相乘求和，也是 similarity / projection 分数。\n2. Rank-nullity: dim Col(A)+dim Ker(A)=n。Col(A) 是能到达的输出空间，Ker(A) 是被压成 0 的输入方向；用它判断解是否存在/唯一。\n3. PSD 常用 x^T A x≥0 或 X^T D X sandwich 证明；SVD X=UΣV^T 则把矩阵理解成 rotate → stretch → rotate。",
+      en: "1. Dot product x^T y=Σ x_i y_i=||x||||y||cosθ: componentwise multiply-and-sum, also a similarity / projection score.\n2. Rank-nullity: dim Col(A)+dim Ker(A)=n. Col(A) is the reachable output space; Ker(A) is the input direction killed by A. Use it for existence and uniqueness.\n3. PSD is usually shown by x^T A x≥0 or an X^T D X sandwich. SVD X=UΣV^T means rotate → stretch → rotate."
     },
     code: [{
       title: { cn: "Shape 检查 + 特征值", en: "Shape check + eigendecomp" },
@@ -77,8 +77,8 @@ pc1 = v[:, np.argmax(w)]
 
   "optimization": {
     tutorial: {
-      cn: "1. 优化就是最小化损失：无约束看 ∇f=0，有约束先写 Lagrangian。\n2. 凸性是安全网：Hessian PSD ⇒ 凸；凸问题里局部最优就是全局最优。\n3. GD 是反复走负梯度，步长决定快慢与稳定；对偶则把“变量选择”换成“约束价格选择”。",
-      en: "1. Optimization means minimizing loss: unconstrained problems look for ∇f=0; constrained problems start with the Lagrangian.\n2. Convexity is the safety net: PSD Hessian ⇒ convex; in convex problems, local minima are global.\n3. GD repeatedly walks against the gradient; step size controls speed and stability. Duality swaps choosing variables for choosing constraint prices."
+      cn: "1. Convexity 公式 f((1-λ)w1+λw2)≤(1-λ)f(w1)+λf(w2)：函数图像在弦下方，像 bowl。\n2. 一阶判定 f(w1)≥f(w2)+∇f(w2)^T(w1-w2)：凸函数永远在 tangent plane 上方；二阶判定是 Hessian PSD。\n3. GD: w_{k+1}=w_k-α_k∇f(w_k)，负号表示走 steepest descent。有约束题先写 Lagrangian，λ_i 是 inequality constraint 的非负“价格”。",
+      en: "1. Convexity formula f((1-λ)w1+λw2)≤(1-λ)f(w1)+λf(w2): the graph stays below its chord, like a bowl.\n2. First-order test f(w1)≥f(w2)+∇f(w2)^T(w1-w2): convex functions sit above every tangent plane; the second-order test is PSD Hessian.\n3. GD: w_{k+1}=w_k-α_k∇f(w_k); the minus sign walks in steepest descent. For constraints, write the Lagrangian; λ_i is the nonnegative price of an inequality constraint."
     },
     code: [{
       title: { cn: "梯度下降模板", en: "Gradient Descent template" },
@@ -482,8 +482,8 @@ $$
   // ─────────────────── Classical Supervised ───────────────────
   "knn": {
     tutorial: {
-      cn: "记忆型分类器：取最近 k 个训练点投票（分类）或平均（回归）。距离用欧氏；高维下需小心 distance concentration。",
-      en: "Memory-based classifier: vote/average over k nearest training points by Euclidean distance. Watch distance concentration in high dim."
+      cn: "1. 分类公式 ŷ(x)=mode{y_i: x_i∈N_k(x)}：N_k(x) 是离 query x 最近的 k 个训练点；mode 是多数票。\n2. 回归公式 ŷ(x)=1/k Σ_{x_i∈N_k(x)} y_i：同一批邻居，分类投票，回归取平均。\n3. 距离 d(x,x_i)=sqrt(Σ_j(x_j-x_{ij})^2)。先算距离、排序、取前 k；只排序时可用 squared distance。Feature scaling 会直接影响谁算“最近”。",
+      en: "1. Classification formula ŷ(x)=mode{y_i: x_i∈N_k(x)}: N_k(x) is the k nearest training points to query x; mode is majority vote.\n2. Regression formula ŷ(x)=1/k Σ_{x_i∈N_k(x)} y_i: same neighbor set, but average numeric targets.\n3. Distance d(x,x_i)=sqrt(Σ_j(x_j-x_{ij})^2). Compute distances, sort, take top k; squared distance is enough for sorting. Feature scaling changes what counts as nearest."
     },
     code: [{
       title: { cn: "Python (NumPy)", en: "Python (NumPy)" },
@@ -807,8 +807,8 @@ def gnb_predict(X, classes, mu, var, prior):
 
   "linear-regression": {
     tutorial: {
-      cn: "MSE 最小化 → 闭式解 w* = (XᵀX)⁻¹Xᵀy。考点：闭式解存在条件、共线性、GD 收敛到最小范数解。",
-      en: "Minimize MSE; closed form w* = (XᵀX)⁻¹Xᵀy. Exam: existence conditions, collinearity, GD converges to min-norm solution."
+      cn: "1. Objective: min_w 1/2||Y-Xw||²。X 是 design matrix，Y 是 target vector，Xw 是 predictions，Y-Xw 是 residuals。\n2. Gradient: ∇=X^T(Xw-Y)。令它等于 0 得 normal equation X^T Xw*=X^T Y，本质是 residual 与每个 feature column 正交。\n3. Closed form w*=(X^T X)^(-1)X^T Y 需要 X^T X 可逆；不可逆时用 pseudoinverse 或 ridge: (X^T X+λI)^(-1)X^T Y。",
+      en: "1. Objective: min_w 1/2||Y-Xw||². X is the design matrix, Y is the target vector, Xw is predictions, and Y-Xw is residuals.\n2. Gradient: ∇=X^T(Xw-Y). Setting it to zero gives X^T Xw*=X^T Y; this means residuals are orthogonal to every feature column.\n3. Closed form w*=(X^T X)^(-1)X^T Y requires X^T X invertible. If singular, use a pseudoinverse or ridge: (X^T X+λI)^(-1)X^T Y."
     },
     code: [{
       title: { cn: "正规方程 + GD", en: "Normal equation + GD" },
@@ -985,8 +985,8 @@ def linreg_gd(X, y, eta=1e-3, n_iter=1000):
 
   "logistic-regression": {
     tutorial: {
-      cn: "Sigmoid + NLL（交叉熵）。决策边界仍线性。考点：Hessian PSD ⇒ 凸；为什么用 log loss 而非 MSE。",
-      en: "Sigmoid + NLL. Linear decision boundary. Convex (PSD Hessian). Use log loss for classification, not MSE."
+      cn: "Sigmoid 把 score z=w^Tφ(x) 压成 probability；0.5 阈值对应 score=0，所以 decision boundary 仍是 linear。NLL/log loss 看 signed margin y·score：margin 大且为正 loss 小，方向错 loss 大。Hessian X^T B X 中 B=diag(p_i(1-p_i))，用 v^T H v≥0 证明 convex。",
+      en: "Sigmoid maps score z=w^Tφ(x) to probability; threshold 0.5 means score=0, so the decision boundary is linear. NLL/log loss reads the signed margin y·score: large positive margin gives tiny loss; wrong sign gives large loss. Hessian X^T B X with B=diag(p_i(1-p_i)) proves convexity via v^T H v≥0."
     },
     code: [{
       title: { cn: "logistic + GD", en: "logistic + GD" },
@@ -1070,8 +1070,8 @@ def logreg_gd(X, y, eta=1e-2, n_iter=1000):
 
   "svm": {
     tutorial: {
-      cn: "最大间隔分类器：1/2‖w‖² s.t. yᵢ(wᵀxᵢ+b)≥1。Soft margin 加 ξᵢ + C 项，hinge loss = max(0, 1 - yf(x))。对偶仅依赖 xᵢᵀxⱼ ⇒ 可用核技巧。",
-      en: "Max-margin classifier; soft-margin adds slack ξᵢ. Hinge loss max(0, 1-yf(x)). Dual depends only on inner products → kernel trick."
+      cn: "SVM 先看 margin score t=y_i(w^T x_i+b)：t≥1 无 loss，0<t<1 分类对但在 margin 内，t<0 分类错。Hard-margin 最小化 1/2||w||² 并要求 t≥1；soft-margin 加 slack ξ_i 和 penalty C。Dual 里的 α_i 是样本权重，只有 α_i>0 的 support vectors 决定边界。",
+      en: "SVM starts from margin score t=y_i(w^T x_i+b): t≥1 has no loss, 0<t<1 is correct but inside the margin, t<0 is wrong. Hard-margin minimizes 1/2||w||² with t≥1; soft-margin adds slack ξ_i and penalty C. In the dual, α_i are sample weights; only support vectors with α_i>0 determine the boundary."
     },
     code: [{
       title: { cn: "Soft-margin (sklearn) + hinge loss", en: "Soft-margin (sklearn) + hinge" },
@@ -1163,8 +1163,8 @@ def hinge(y, fx):
 
   "kernel-methods": {
     tutorial: {
-      cn: "核技巧：k(x,x') = φ(x)ᵀφ(x')，让你在不显式构造 φ 的情况下做高维线性。常见 Polynomial (1+xᵀx')ᵈ 与 RBF exp(-γ‖x-x'‖²)。",
-      en: "Kernel trick: k(x,x') = φ(x)ᵀφ(x'). Use polynomial or RBF; γ controls RBF locality."
+      cn: "Kernel 是高维 feature map 后的 inner product：k(x,x')=φ(x)^Tφ(x')。用法是在 SVM dual / prediction 里把 x_i^T x_j 替换成 k(x_i,x_j)。Polynomial kernel 展开得到 interaction features；RBF exp(-||x-x'||²/(2σ²)) 用距离控制相似度，σ 越小越 local。",
+      en: "A kernel is the inner product after a feature map: k(x,x')=φ(x)^Tφ(x'). Use it by replacing x_i^T x_j in the SVM dual/prediction with k(x_i,x_j). Polynomial kernels expand into interaction features; RBF exp(-||x-x'||²/(2σ²)) turns distance into similarity, with smaller σ making the model more local."
     },
     code: [{
       title: { cn: "RBF / Polynomial kernel", en: "RBF / Polynomial kernel" },
@@ -2095,8 +2095,8 @@ def sample_xt(x0, t, alpha_bar, eps=None):
   // ─────────────────── Theory ───────────────────
   "bayes-classifier": {
     tutorial: {
-      cn: "Bayes 分类器 = 在 0-1 loss 下 η(x)≥0.5 预测 1。Bayes error 是任何分类器都无法突破的下界。",
-      en: "Bayes classifier (under 0-1 loss): predict 1 iff η(x)≥0.5. Bayes error is the irreducible lower bound."
+      cn: "1. Bayes classifier: η(x)=P(Y=1|X=x)，η(x)≥1/2 预测 1，否则预测 0。它是在 0-1 loss 下逐点最优的 rule。\n2. Bayes error ε*=E_X[min{η(X),1-η(X)}]：每个 x 处你选 posterior 大的类，较小 posterior 就是 local unavoidable error，再对 X 平均。\n3. 等价式 ε*=1/2-1/2 E|2η(X)-1|：|2η-1| 是 confidence margin；越接近 0.5 越难分，error 越高。",
+      en: "1. Bayes classifier: η(x)=P(Y=1|X=x); predict 1 if η(x)≥1/2, otherwise 0. It is pointwise optimal under 0-1 loss.\n2. Bayes error ε*=E_X[min{η(X),1-η(X)}]: at each x, choose the larger posterior; the smaller posterior is local unavoidable error, then average over X.\n3. Equivalent form ε*=1/2-1/2 E|2η(X)-1|: |2η-1| is a confidence margin. Closer to 0.5 means harder classification and larger error."
     },
     code: [{
       title: { cn: "Bayes 边界 + 错误率（高斯类）", en: "Gaussian classes: boundary + error" },
