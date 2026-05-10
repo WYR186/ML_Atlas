@@ -5,7 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ECE 449 / CS 446 · ML Atlas</title>
 <link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="https://esm.sh/@xyflow/react@12.3.5/dist/style.css" />
+<script type="importmap">
+  {
+    "imports": {
+      "react":              "https://esm.sh/react@18.3.1",
+      "react/":             "https://esm.sh/react@18.3.1/",
+      "react-dom":          "https://esm.sh/react-dom@18.3.1",
+      "react-dom/":         "https://esm.sh/react-dom@18.3.1/",
+      "@xyflow/react":      "https://esm.sh/@xyflow/react@12.3.5?external=react,react-dom"
+    }
+  }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
   // Initialize Mermaid; we render manually after building the graph.
   if (window.mermaid) {
@@ -15,13 +30,13 @@
       themeVariables: {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         primaryColor: "#ffffff",
-        primaryBorderColor: "#d1d5db",
+        primaryBorderColor: "#cbd5e1",
         primaryTextColor: "#1f2937",
         lineColor: "#9ca3af",
-        clusterBkg: "#f9fafb",
-        clusterBorder: "#d1d5db",
+        clusterBkg: "#ffffff",
+        clusterBorder: "#cbd5e1",
       },
-      flowchart: { curve: "basis", padding: 14, nodeSpacing: 36, rankSpacing: 60 },
+      flowchart: { curve: "basis", padding: 18, nodeSpacing: 44, rankSpacing: 78 },
     });
   }
 </script>
@@ -37,7 +52,8 @@
     <nav class="nav-links">
       <a href="index.html" class="active" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="topics/probability.html" data-i18n="nav.notes">📘 速查</a>
-      <a href="cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -47,9 +63,38 @@
   </div>
 </header>
 
-<div class="page">
-  <section class="hero">
-    <aside class="side-card">
+<!-- Full-viewport roadmap shell — Atlas / Mermaid render here, side-card and
+     view-switch float as overlays so they don't take a layout column. -->
+<section class="home-shell">
+  <div class="roadmap atlas-rf" id="roadmap">
+    <div id="rfMount" class="rf-mount"></div>
+  </div>
+
+  <div class="mermaid-view" id="mermaidView" style="display:none;">
+    <div class="mermaid-toolbar">
+      <button id="copyMermaidBtn" class="mermaid-btn" type="button" title="Copy Mermaid source to clipboard">
+        <span class="copy-icon">📋</span>
+        <span class="copy-label">Copy Mermaid code</span>
+      </button>
+      <button id="toggleSourceBtn" class="mermaid-btn" type="button">
+        <span>{ } View source</span>
+      </button>
+      <span class="copy-toast" id="copyToast">Copied ✓</span>
+    </div>
+    <pre class="mermaid" id="mermaidGraph"></pre>
+    <details id="mermaidSourceWrap" class="mermaid-source-wrap">
+      <summary>Raw Mermaid source</summary>
+      <textarea id="mermaidSource" readonly spellcheck="false"></textarea>
+    </details>
+  </div>
+
+  <aside class="side-card floating" id="progressPanel" aria-label="Progress panel">
+    <button class="progress-panel-handle" id="progressPanelToggle" type="button"
+            aria-controls="progressPanelBody" aria-expanded="true"
+            aria-label="Collapse progress panel" title="Collapse progress panel">
+      <span class="progress-panel-handle-icon" aria-hidden="true"></span>
+    </button>
+    <div class="side-card-content" id="progressPanelBody">
       <h3 data-i18n="home.progress">📊 复习进度</h3>
       <div class="progress-ring">
         <div class="ring">
@@ -72,7 +117,7 @@
         </div>
       </div>
       <div class="side-actions">
-        <a class="btn btn-primary" href="cheatsheet.html" data-i18n="home.btn.cheatsheet">⚡ 1 小时速记</a>
+        <a class="btn btn-primary" href="cheatsheet.html" data-i18n="home.btn.cheatsheet">⚡ 公式大全</a>
         <a class="btn" href="topics/probability.html" data-i18n="home.btn.start">📖 从头开始</a>
         <a class="btn" href="resources.html" data-i18n="home.btn.resources">📂 课件 & 作业</a>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
@@ -82,53 +127,15 @@
                   title="Pick a previously-exported JSON file and merge its progress into this browser.">📥 Load from file</button>
         </div>
         <button class="btn" id="resetProgress" data-i18n="home.btn.reset">🔄 重置进度</button>
-        <p id="syncStatus" class="sync-status"
-           data-en="📤 Save / 📥 Load round-trip your progress through a JSON file — useful for moving to another machine, sharing with a study buddy, or backing up before clearing your browser. For automatic local saves, run python3 serve.py instead of plain http.server."
-           data-cn="📤 保存 / 📥 加载 通过 JSON 文件来回传进度 — 换机器、和同学合并、清浏览器前备份都用它。本地自动保存请用 python3 serve.py 代替 http.server。"
-           style="font-size:11.5px; color: var(--text-muted); margin: 10px 0 0; line-height: 1.5;"></p>
-      </div>
-    </aside>
-
-    <div>
-      <div class="view-switch" id="viewSwitch" role="tablist">
-        <button data-view="atlas"   class="active" type="button">🌳 Atlas</button>
-        <button data-view="mermaid"               type="button">📊 Mermaid</button>
-      </div>
-
-      <div class="roadmap airy" id="roadmap">
-        <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:32px; width:320px;">
-          <span data-i18n="brand.short">ECE 449 / CS 446</span>
-          <span class="sub" data-i18n="home.subtitle.subtitle">机器学习 · 期末复习</span>
-        </a>
-        <div id="groupGrid" style="margin-top: 180px;"></div>
-      </div>
-
-      <div class="mermaid-view" id="mermaidView" style="display:none;">
-        <div class="mermaid-toolbar">
-          <button id="copyMermaidBtn" class="mermaid-btn" type="button" title="Copy Mermaid source to clipboard">
-            <span class="copy-icon">📋</span>
-            <span class="copy-label">Copy Mermaid code</span>
-          </button>
-          <button id="toggleSourceBtn" class="mermaid-btn" type="button">
-            <span>{ } View source</span>
-          </button>
-          <span class="copy-toast" id="copyToast">Copied ✓</span>
-        </div>
-        <pre class="mermaid" id="mermaidGraph"></pre>
-        <details id="mermaidSourceWrap" class="mermaid-source-wrap">
-          <summary>Raw Mermaid source</summary>
-          <textarea id="mermaidSource" readonly spellcheck="false"></textarea>
-        </details>
       </div>
     </div>
-  </section>
+  </aside>
 
-  <section style="margin-top: 28px;">
-    <h2 style="margin: 0 0 6px; font-size: 20px;" data-i18n="home.indexTitle">📚 完整核心算法表</h2>
-    <p style="margin: 0 0 14px; color: var(--text-soft); font-size: 14px;" data-i18n="home.indexSub">每个算法独立成页 · 点击行进入详情。</p>
-    <div id="indexTable"></div>
-  </section>
-</div>
+  <div class="view-switch floating" id="viewSwitch" role="tablist">
+    <button data-view="atlas"   class="active" type="button">🌳 Atlas</button>
+    <button data-view="mermaid"               type="button">📊 Mermaid</button>
+  </div>
+</section>
 
 <footer>
   <span data-i18n="footer.home">ML Atlas · ECE 449 / CS 446 期末复习 ·</span>
@@ -141,239 +148,8 @@
 <script src="assets/popup-data.js"></script>
 <script src="assets/popup.js"></script>
 <script src="assets/main.js"></script>
+<script type="module" src="assets/atlas-rf.js"></script>
 <script>
-  // === Render group grid (one card per algorithm) ===
-  (function () {
-    const grid = document.getElementById("groupGrid");
-    if (!grid || !window.GROUPS || !window.TOPICS) return;
-    const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
-    const total = document.getElementById("progressTotal");
-    if (total) total.textContent = window.TOPICS.length;
-
-    grid.style.display = "grid";
-    grid.style.gap = "48px 36px";
-    grid.style.gridTemplateColumns = "repeat(2, 1fr)";
-
-    const order = [
-      ["foundations"],
-      ["supervised"],
-      ["trees", "unsupervised"],
-      ["neural"],
-      ["sequential", "representation"],
-      ["modern"],
-      ["generative", "theory"],
-      ["rl"],
-    ];
-
-    function nameFor(g, lang) {
-      return lang === "en" ? g.name_en : g.name_cn;
-    }
-    function topicLabel(t, lang) {
-      return lang === "en" ? t.name_en : t.name_cn;
-    }
-    const diffColor = { green: "var(--accent)", yellow: "var(--warn)", red: "var(--danger)" };
-
-    function renderGroup(gid) {
-      const g = window.GROUPS.find(x => x.id === gid);
-      if (!g) return "";
-      const items = window.TOPICS.filter(t => t.group === gid);
-      const cards = items.map(t => `
-        <a class="node" href="topics/${t.slug}.html" data-slug="${t.slug}">
-          <span class="difficulty" style="background:${diffColor[t.diff]||'var(--border)'};"></span>
-          <span class="topic-label" data-cn="${t.name_cn}" data-en="${t.name_en}">${t.name_cn}</span>
-          <span class="progress-bar"><span class="fill"></span></span>
-        </a>
-      `).join("");
-      const cols = items.length >= 4 ? "repeat(2, 1fr)" : (items.length >= 2 ? `repeat(${Math.min(items.length, 3)}, 1fr)` : "1fr");
-      return `
-        <div class="group" id="g-${gid}" style="position:relative; padding:18px 16px 14px; border:1px solid var(--border-strong); border-radius:12px; background:rgba(255,255,255,0.7);">
-          <span class="group-label" data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
-          <div class="group-cards" style="grid-template-columns: ${cols}; margin-top:6px;">
-            ${cards}
-          </div>
-        </div>
-      `;
-    }
-
-    grid.style.position = "relative";
-    grid.style.zIndex = "1";
-
-    grid.innerHTML = order.map(row => {
-      if (row.length === 1) {
-        return `<div style="grid-column: 1 / 3;">${renderGroup(row[0])}</div>`;
-      }
-      return row.map(g => `<div>${renderGroup(g)}</div>`).join("");
-    }).join("");
-
-    // Apply CN / EN / Mixed to topic labels and group labels.
-    // Mixed mode stacks EN over CN (each on its own line) and dedupes a
-    // shared leading emoji so we don't render "📐 Foundations · 📐 基础".
-    function applyTopicLang() {
-      const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
-      const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      const stripEmoji = (s) => {
-        const m = String(s||"").match(/^(\p{Extended_Pictographic}+)\s*/u);
-        return m ? { emoji: m[1], rest: String(s).slice(m[0].length) } : { emoji: "", rest: String(s||"") };
-      };
-      grid.querySelectorAll("[data-cn][data-en]").forEach(el => {
-        const cn = el.dataset.cn, en = el.dataset.en;
-        if (lang === "cn")      el.textContent = cn || en;
-        else if (lang === "en") el.textContent = en || cn;
-        else if (en && cn && en !== cn) {
-          const e = stripEmoji(en), c = stripEmoji(cn);
-          const shared = e.emoji && e.emoji === c.emoji;
-          const enLine = shared ? `${e.emoji} ${e.rest}` : en;
-          const cnLine = shared ? c.rest : cn;
-          el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
-        } else {
-          el.textContent = en || cn;
-        }
-      });
-    }
-    applyTopicLang();
-    // Event delegation — works whether the lang-switch buttons exist now or
-    // get injected later by i18n.js's DOMContentLoaded handler.
-    document.addEventListener("click", (e) => {
-      if (e.target.closest(".lang-switch button")) {
-        setTimeout(applyTopicLang, 0);
-      }
-    });
-
-    // === Connector lines (root → groups, with arrowheads) ===
-    function drawConnectors() {
-      const root = document.getElementById("roadmap");
-      if (!root) return;
-      const NS = "http://www.w3.org/2000/svg";
-      let svg = document.getElementById("connectorSvg");
-      if (!svg) {
-        svg = document.createElementNS(NS, "svg");
-        svg.id = "connectorSvg";
-        svg.setAttribute("preserveAspectRatio", "none");
-        Object.assign(svg.style, {
-          position: "absolute", left: "0", top: "0",
-          width: "100%", height: "100%",
-          pointerEvents: "none", zIndex: "0",
-        });
-        const defs = document.createElementNS(NS, "defs");
-        defs.innerHTML =
-          '<marker id="connArrow" viewBox="0 0 10 10" refX="9" refY="5" ' +
-          'markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
-          '<path d="M0 0 L10 5 L0 10 z" fill="#9ca3af"/></marker>';
-        svg.appendChild(defs);
-        root.insertBefore(svg, root.firstChild);
-      }
-
-      // Size SVG to roadmap
-      const r = root.getBoundingClientRect();
-      svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
-      svg.setAttribute("width", r.width);
-      svg.setAttribute("height", r.height);
-
-      // Drop existing paths
-      svg.querySelectorAll("path:not(defs path)").forEach(p => p.remove());
-
-      const center = (el) => {
-        const b = el.getBoundingClientRect();
-        const o = root.getBoundingClientRect();
-        return {
-          cx: b.left - o.left + b.width / 2,
-          top: b.top - o.top,
-          bottom: b.bottom - o.top,
-        };
-      };
-
-      // Vertical spine: foundations → supervised → (split) → neural → (split) → modern → (split) → rl
-      const conns = [
-        ["n-root",          "g-foundations"],
-        ["g-foundations",   "g-supervised"],
-        ["g-supervised",    "g-trees"],
-        ["g-supervised",    "g-unsupervised"],
-        ["g-trees",         "g-neural"],
-        ["g-unsupervised",  "g-neural"],
-        ["g-neural",        "g-sequential"],
-        ["g-neural",        "g-representation"],
-        ["g-sequential",    "g-modern"],
-        ["g-representation","g-modern"],
-        ["g-modern",        "g-generative"],
-        ["g-modern",        "g-theory"],
-        ["g-generative",    "g-rl"],
-        ["g-theory",        "g-rl"],
-      ];
-
-      for (const [from, to] of conns) {
-        const a = document.getElementById(from);
-        const b = document.getElementById(to);
-        if (!a || !b) continue;
-        const A = center(a), B = center(b);
-        const sx = A.cx, sy = A.bottom + 2;
-        const ex = B.cx, ey = B.top - 8;            // leave room for arrowhead
-        const my = (sy + ey) / 2;
-        // S-curve: vertical out of source, horizontal mid, vertical into target
-        const d = `M ${sx},${sy} C ${sx},${my} ${ex},${my} ${ex},${ey}`;
-        const p = document.createElementNS(NS, "path");
-        p.setAttribute("d", d);
-        p.setAttribute("fill", "none");
-        p.setAttribute("stroke", "#9ca3af");
-        p.setAttribute("stroke-width", "1.6");
-        p.setAttribute("stroke-linecap", "round");
-        p.setAttribute("marker-end", "url(#connArrow)");
-        svg.appendChild(p);
-      }
-    }
-    // Initial draw + redraw on viewport changes.
-    requestAnimationFrame(drawConnectors);
-    window.addEventListener("resize", drawConnectors);
-    // Also redraw on language switch (card width can change with longer EN labels).
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      btn.addEventListener("click", () => requestAnimationFrame(drawConnectors));
-    });
-
-    // Mark progress — computes a per-card fraction (mastered topic flag
-    // counts as 100%, otherwise checked-off problems / total).  Drives the
-    // card progress bar fill, the .done class, and the home progress ring.
-    function cardFraction(slug, p) {
-      if (p[slug]) return 1;                                  // master flag
-      const data = (window.POPUP_DATA || {})[slug];
-      if (!data) return 0;
-      const tutN  = data.tutorial ? 1 : 0;
-      const probN = (data.problems || []).length;
-      const total = tutN + probN;
-      if (!total) return 0;
-      let done = 0;
-      if (data.tutorial && p[`tut:${slug}`]) done += 1;
-      (data.problems || []).forEach(pr => {
-        if (p[`prob:${slug}:${pr.id}`]) done += 1;
-      });
-      return done / total;
-    }
-
-    function markProgress() {
-      const p = JSON.parse(localStorage.getItem("ml_review_progress_v1") || "{}");
-      let totalCards = 0, completed = 0;
-      grid.querySelectorAll(".node[data-slug]").forEach(el => {
-        totalCards += 1;
-        const frac = cardFraction(el.dataset.slug, p);
-        const fill = el.querySelector(".progress-bar .fill");
-        if (fill) fill.style.width = `${Math.round(frac * 100)}%`;
-        el.classList.toggle("done", frac >= 1);
-        if (frac >= 1) completed += 1;
-      });
-      const num    = document.getElementById("progressNum");
-      const total  = document.getElementById("progressTotal");
-      const circle = document.getElementById("progressCircle");
-      if (num)   num.textContent = completed;
-      if (total) total.textContent = totalCards;
-      if (circle) {
-        const C = 2 * Math.PI * 33;
-        circle.setAttribute("stroke-dasharray", C.toFixed(2));
-        circle.setAttribute("stroke-dashoffset", (C * (1 - (totalCards ? completed / totalCards : 0))).toFixed(2));
-      }
-    }
-    // Run once now and again whenever any other code dispatches the rerender event.
-    document.addEventListener("ml-progress-rerender", markProgress);
-    markProgress();
-  })();
-
   // === Mermaid view (auto-generated from TOPICS / GROUPS) ===
   (function () {
     const VIEW_KEY = "ml_review_view_v1";
@@ -383,96 +159,142 @@
     const mermPre  = document.getElementById("mermaidGraph");
     if (!switchBox || !atlas || !mermView || !mermPre) return;
 
+    // Render order — Mermaid will lay subgraphs out top-down, but we keep a
+    // stable iteration order so the source diff is deterministic.
     const ORDER = [
       "foundations", "supervised", "trees", "unsupervised",
       "neural", "sequential", "representation",
       "modern", "generative", "theory", "rl",
     ];
+
+    // Inter-subgraph edges — course knowledge structure, not lecture order.
+    // Foundations is the prereq for everything; Theory and RL branch off
+    // directly from Foundations rather than living after Modern Models.
     const EDGES = [
-      ["root",          "foundations"],
-      ["foundations",   "supervised"],
-      ["supervised",    "trees"],
-      ["supervised",    "unsupervised"],
-      ["trees",         "neural"],
-      ["unsupervised",  "neural"],
-      ["neural",        "sequential"],
-      ["neural",        "representation"],
-      ["sequential",    "modern"],
-      ["representation","modern"],
-      ["modern",        "generative"],
-      ["modern",        "theory"],
-      ["generative",    "rl"],
-      ["theory",        "rl"],
+      ["root",            "foundations"],
+      ["foundations",     "supervised"],
+      ["foundations",     "unsupervised"],
+      ["foundations",     "theory"],
+      ["foundations",     "rl"],
+      ["supervised",      "trees"],
+      ["supervised",      "neural"],
+      ["neural",          "sequential"],
+      ["neural",          "representation"],
+      ["neural",          "modern"],
+      ["representation",  "generative"],
+      ["modern",          "generative"],
     ];
 
+    // Theory → Supervised is rendered with a dashed edge to flag it as an
+    // analytical / generalization view rather than a normal prereq link.
+    const DOTTED_EDGES = [
+      ["theory", "supervised"],
+    ];
+
+    // Intra-subgraph edges — small logical chains so sibling topics inside
+    // a group read in the right order.
+    const INTRA_EDGES = {
+      supervised: [
+        ["linear-regression", "logistic-regression"],
+        ["logistic-regression", "svm"],
+        ["svm", "kernel-methods"],
+      ],
+      trees: [
+        ["decision-trees", "bagging"],
+        ["decision-trees", "boosting"],
+      ],
+      neural: [
+        ["backpropagation", "mlp"],
+        ["backpropagation", "cnn"],
+      ],
+      sequential: [
+        ["rnn", "lstm"],
+      ],
+      modern: [
+        ["attention", "positional-encoding"],
+        ["positional-encoding", "transformer"],
+        ["transformer", "llm"],
+      ],
+      rl: [
+        ["mdp", "value-functions"],
+        ["value-functions", "bellman"],
+        ["bellman", "dynamic-programming"],
+        ["bellman", "q-learning"],
+      ],
+    };
+
     function escMer(s) {
-      // Mermaid is fussy about quotes inside node labels — strip / escape them.
+      // Mermaid is fussy about quotes / brackets inside node labels.
       return String(s).replace(/"/g, "'").replace(/[\[\]()<>]/g, " ");
     }
 
-    // Per-group color palette (background tint + accent stroke + label color).
-    const GROUP_COLORS = {
-      foundations:    { fill: "#ecfdf5", stroke: "#10b981", text: "#065f46" },
-      supervised:     { fill: "#eff6ff", stroke: "#3b82f6", text: "#1e3a8a" },
-      trees:          { fill: "#fff7ed", stroke: "#f97316", text: "#9a3412" },
-      unsupervised:   { fill: "#fdf2f8", stroke: "#ec4899", text: "#9d174d" },
-      neural:         { fill: "#faf5ff", stroke: "#a855f7", text: "#6b21a8" },
-      sequential:     { fill: "#ecfeff", stroke: "#06b6d4", text: "#155e75" },
-      representation: { fill: "#fefce8", stroke: "#ca8a04", text: "#713f12" },
-      modern:         { fill: "#eef2ff", stroke: "#6366f1", text: "#3730a3" },
-      generative:     { fill: "#fff1f2", stroke: "#f43f5e", text: "#9f1239" },
-      theory:         { fill: "#f8fafc", stroke: "#64748b", text: "#1e293b" },
-      rl:             { fill: "#fef2f2", stroke: "#ef4444", text: "#7f1d1d" },
-    };
-
     function buildGraph() {
-      const lang = localStorage.getItem("ml_review_lang_v1") || "en";
+      const lang = (typeof getLang === "function") ? getLang() : (localStorage.getItem("ml_review_lang_v1") || "en");
       const pickName = (o) => lang === "cn" ? (o.name_cn || o.name_en) : (o.name_en || o.name_cn);
       const rootSub  = lang === "cn" ? "机器学习 · 期末复习" : "Machine Learning · Final Review";
       const lines = [];
 
-      lines.push("flowchart TD");
-      // Rounded root node
+      lines.push("flowchart TB");
       lines.push(`  root(["<b>ECE 449 / CS 446</b><br/>${rootSub}"])`);
 
-      // Subgraphs + stadium-shaped child nodes
+      // Subgraphs with topic nodes + intra edges. Edges declared inside a
+      // subgraph block render visually inside that cluster.
       for (const gid of ORDER) {
         const g = (window.GROUPS || []).find(x => x.id === gid);
         if (!g) continue;
         const topics = (window.TOPICS || []).filter(t => t.group === gid);
         lines.push(`  subgraph ${gid}["${escMer(pickName(g))}"]`);
-        lines.push("    direction LR");
+        lines.push("    direction TB");
         for (const t of topics) {
-          // Stadium nodes (rounded pill)
           lines.push(`    ${t.slug}(["${escMer(pickName(t))}"])`);
-          lines.push(`    click ${t.slug} "topics/${t.slug}.html" "Open ${escMer(t.name_en)}"`);
+        }
+        for (const [a, b] of (INTRA_EDGES[gid] || [])) {
+          lines.push(`    ${a} --> ${b}`);
         }
         lines.push("  end");
-        // Difficulty class on each topic
-        for (const t of topics) {
-          lines.push(`  class ${t.slug} ${t.diff || "yellow"}`);
-        }
       }
 
-      // Edges along the spine
-      for (const [a, b] of EDGES) lines.push(`  ${a} ==> ${b}`);
+      // Click handlers (global; not edges).
+      for (const t of (window.TOPICS || [])) {
+        lines.push(`  click ${t.slug} "topics/${t.slug}.html" "Open ${escMer(t.name_en)}"`);
+      }
 
-      // Subgraph background + stroke + label color
+      // Inter-subgraph edges (knowledge tree).
+      for (const [a, b] of EDGES) lines.push(`  ${a} --> ${b}`);
+
+      // Dotted edges last so we can target their indices via linkStyle.
+      for (const [a, b] of DOTTED_EDGES) lines.push(`  ${a} -.-> ${b}`);
+
+      // Difficulty: border color only, white fill, dark text.
+      lines.push("");
+      lines.push("  classDef green  fill:#ffffff,stroke:#10b981,stroke-width:2px,color:#1f2937;");
+      lines.push("  classDef yellow fill:#ffffff,stroke:#f59e0b,stroke-width:2px,color:#1f2937;");
+      lines.push("  classDef red    fill:#ffffff,stroke:#ef4444,stroke-width:2px,color:#1f2937;");
+      for (const t of (window.TOPICS || [])) {
+        lines.push(`  class ${t.slug} ${t.diff || "yellow"};`);
+      }
+
+      // Subgraphs: unified white background, light gray thicker border.
       lines.push("");
       for (const gid of ORDER) {
-        const c = GROUP_COLORS[gid];
-        if (!c) continue;
-        lines.push(`  style ${gid} fill:${c.fill},stroke:${c.stroke},stroke-width:2px,color:${c.text};`);
+        lines.push(`  style ${gid} fill:#ffffff,stroke:#cbd5e1,stroke-width:2px,color:#475569;`);
       }
+      // Root: white fill, thick green border.
+      lines.push("  style root fill:#ffffff,stroke:#10b981,stroke-width:3px,color:#1f2937;");
 
-      // Difficulty palette — light fill, contrasting border, dark text
-      lines.push("");
-      lines.push("  classDef green  fill:#ffffff,stroke:#10b981,stroke-width:2px,color:#065f46;");
-      lines.push("  classDef yellow fill:#ffffff,stroke:#f59e0b,stroke-width:2px,color:#92400e;");
-      lines.push("  classDef red    fill:#ffffff,stroke:#ef4444,stroke-width:2px,color:#991b1b;");
-      lines.push("  style root fill:#ffffff,stroke:#10b981,stroke-width:3px,color:#065f46;");
-      // Edge styling: slightly thicker grey strokes
-      lines.push("  linkStyle default stroke:#94a3b8,stroke-width:1.6px;");
+      // Default edge style — gray stroke, 2.4px. Dashed pattern for the
+      // theory → supervised analytical edge is applied via index below.
+      lines.push("  linkStyle default stroke:#9ca3af,stroke-width:2.4px;");
+
+      // Edges are globally indexed in source order:
+      //   intra-subgraph edges → inter-subgraph edges → dotted edges
+      const intraTotal = Object.values(INTRA_EDGES)
+        .reduce((acc, arr) => acc + arr.length, 0);
+      const dottedStart = intraTotal + EDGES.length;
+      DOTTED_EDGES.forEach((_, i) => {
+        const idx = dottedStart + i;
+        lines.push(`  linkStyle ${idx} stroke:#9ca3af,stroke-width:2.4px,stroke-dasharray:6 4;`);
+      });
 
       return lines.join("\n");
     }
@@ -550,67 +372,6 @@
     setView(saved);
   })();
 
-  // === Render index table per group ===
-  (function () {
-    const root = document.getElementById("indexTable");
-    if (!root || !window.GROUPS || !window.TOPICS) return;
-
-    const html = window.GROUPS.map(g => {
-      const items = window.TOPICS.filter(t => t.group === g.id);
-      if (!items.length) return "";
-      return `
-        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;">
-          <h3 style="margin:0 0 8px; font-size:16px;">
-            <span data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
-            <span style="color:var(--text-muted); font-size:13px; font-weight:500; margin-left:8px;"
-                  data-cn="${g.sub_cn || ''}" data-en="${g.sub_en || ''}">${g.sub_cn || ''}</span>
-          </h3>
-          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:6px;">
-            ${items.map(t => `
-              <a href="topics/${t.slug}.html" style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:6px; color:var(--text); text-decoration:none; font-size:13.5px;">
-                <span style="width:6px; height:6px; border-radius:50%; background:${({green:'var(--accent)',yellow:'var(--warn)',red:'var(--danger)'})[t.diff]};"></span>
-                <span data-cn="${t.name_cn}" data-en="${t.name_en}">${t.name_cn}</span>
-                <span style="color:var(--text-muted); font-size:12px; margin-left:auto;"
-                      data-cn="${t.sub_cn || ''}" data-en="${t.sub_en || ''}">${t.sub_cn || ''}</span>
-              </a>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }).join("");
-    root.innerHTML = html;
-
-    // Apply lang to data-cn/data-en spans (handles cn / en / mixed)
-    function applyLang() {
-      const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
-      const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      const stripEmoji = (s) => {
-        const m = String(s||"").match(/^(\p{Extended_Pictographic}+)\s*/u);
-        return m ? { emoji: m[1], rest: String(s).slice(m[0].length) } : { emoji: "", rest: String(s||"") };
-      };
-      root.querySelectorAll("[data-cn][data-en]").forEach(el => {
-        const cn = el.dataset.cn, en = el.dataset.en;
-        if (lang === "cn")      el.textContent = cn || en;
-        else if (lang === "en") el.textContent = en || cn;
-        else if (en && cn && en !== cn) {
-          const e = stripEmoji(en), c = stripEmoji(cn);
-          const shared = e.emoji && e.emoji === c.emoji;
-          const enLine = shared ? `${e.emoji} ${e.rest}` : en;
-          const cnLine = shared ? c.rest : cn;
-          el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
-        } else {
-          el.textContent = en || cn;
-        }
-      });
-    }
-    applyLang();
-    // Event delegation — re-apply whenever any .lang-switch button is clicked.
-    document.addEventListener("click", (e) => {
-      if (e.target.closest(".lang-switch button")) {
-        setTimeout(applyLang, 0);
-      }
-    });
-  })();
 </script>
 </body>
 </html>
