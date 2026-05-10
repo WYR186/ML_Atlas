@@ -1256,8 +1256,11 @@ html[data-theme="dark"] .toc-problem-link:hover {
 }
 .equation-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 12px;
+  /* Each card needs enough room that most formulas fit on one line.
+     `min(440px, 100%)` keeps the column tracker happy on narrow
+     viewports — when the screen is <440px we just stretch to 100%. */
+  grid-template-columns: repeat(auto-fill, minmax(min(440px, 100%), 1fr));
+  gap: 14px;
 }
 .equation-topic {
   background: #fff;
@@ -1343,8 +1346,24 @@ html[data-theme="dark"] .toc-problem-link:hover {
   color: var(--text);
   font-size: 13px;
   line-height: 1.55;
-  overflow-x: auto;
   padding-bottom: 2px;
+  /* Don't scroll horizontally — MathJax is told to line-break long
+     display equations (chtml.displayOverflow: linebreak); any rare
+     overflow shrinks down rather than spilling off-screen. */
+  overflow-x: clip;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* MathJax containers inside .equation-math: never wider than the card,
+   stay block-level so they wrap onto new lines instead of side-by-side. */
+.equation-math mjx-container {
+  max-width: 100%;
+  display: block;
+  white-space: normal;
+}
+.equation-math mjx-container[display="true"] {
+  margin: 0;
+  overflow: visible;
 }
 .equation-actions {
   display: flex;
@@ -1357,6 +1376,11 @@ html[data-theme="dark"] .toc-problem-link:hover {
   .equation-group-head { display: block; }
   .equation-group-head p { margin-top: 4px; }
   .equation-actions { flex-direction: column; }
+  /* Tighter card padding + a notch smaller formula on phones so the
+     largest equations still fit without horizontal scroll. */
+  .equation-topic-head { padding: 10px 12px; }
+  .equation-item { padding: 10px 12px 12px; }
+  .equation-math { font-size: 12.5px; }
 }
 
 .bi-text { display: grid; gap: 4px; font-size: 14px; }
