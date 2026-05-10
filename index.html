@@ -194,14 +194,29 @@
       return row.map(g => `<div>${renderGroup(g)}</div>`).join("");
     }).join("");
 
-    // Apply CN / EN / Mixed to topic labels and group labels
+    // Apply CN / EN / Mixed to topic labels and group labels.
+    // Mixed mode stacks EN over CN (each on its own line) and dedupes a
+    // shared leading emoji so we don't render "📐 Foundations · 📐 基础".
     function applyTopicLang() {
       const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
+      const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const stripEmoji = (s) => {
+        const m = String(s||"").match(/^(\p{Extended_Pictographic}+)\s*/u);
+        return m ? { emoji: m[1], rest: String(s).slice(m[0].length) } : { emoji: "", rest: String(s||"") };
+      };
       grid.querySelectorAll("[data-cn][data-en]").forEach(el => {
         const cn = el.dataset.cn, en = el.dataset.en;
-        if (lang === "cn") el.textContent = cn || en;
+        if (lang === "cn")      el.textContent = cn || en;
         else if (lang === "en") el.textContent = en || cn;
-        else el.textContent = (en && cn && en !== cn) ? `${en} · ${cn}` : (en || cn);
+        else if (en && cn && en !== cn) {
+          const e = stripEmoji(en), c = stripEmoji(cn);
+          const shared = e.emoji && e.emoji === c.emoji;
+          const enLine = shared ? `${e.emoji} ${e.rest}` : en;
+          const cnLine = shared ? c.rest : cn;
+          el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
+        } else {
+          el.textContent = en || cn;
+        }
       });
     }
     applyTopicLang();
@@ -531,11 +546,24 @@
     // Apply lang to data-cn/data-en spans (handles cn / en / mixed)
     function applyLang() {
       const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
+      const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const stripEmoji = (s) => {
+        const m = String(s||"").match(/^(\p{Extended_Pictographic}+)\s*/u);
+        return m ? { emoji: m[1], rest: String(s).slice(m[0].length) } : { emoji: "", rest: String(s||"") };
+      };
       root.querySelectorAll("[data-cn][data-en]").forEach(el => {
         const cn = el.dataset.cn, en = el.dataset.en;
-        if (lang === "cn") el.textContent = cn || en;
+        if (lang === "cn")      el.textContent = cn || en;
         else if (lang === "en") el.textContent = en || cn;
-        else el.textContent = (en && cn && en !== cn) ? `${en} · ${cn}` : (en || cn);
+        else if (en && cn && en !== cn) {
+          const e = stripEmoji(en), c = stripEmoji(cn);
+          const shared = e.emoji && e.emoji === c.emoji;
+          const enLine = shared ? `${e.emoji} ${e.rest}` : en;
+          const cnLine = shared ? c.rest : cn;
+          el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
+        } else {
+          el.textContent = en || cn;
+        }
       });
     }
     applyLang();

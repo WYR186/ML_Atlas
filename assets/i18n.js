@@ -89,42 +89,85 @@ function setLang(lang) {
   localStorage.setItem(I18N_KEY, lang);
   applyLang(lang);
 }
+// Strip a leading emoji + spaces from a string. Returns { emoji, rest }.
+function stripLeadEmoji(s) {
+  s = String(s || "");
+  const m = s.match(/^(\p{Extended_Pictographic}+)\s*/u);
+  return m ? { emoji: m[1], rest: s.slice(m[0].length) } : { emoji: "", rest: s };
+}
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
 function applyLang(lang) {
   document.documentElement.setAttribute("data-lang", lang);
-  // Resolve text per element: in "mixed" mode prefer English (UI labels)
-  // and let .cn-only / .en-only blocks naturally show both bodies.
-  const pick = (dict) => {
-    if (!dict) return null;
-    if (lang === "cn") return dict.cn || dict.en;
-    if (lang === "en") return dict.en || dict.cn;
-    // mixed: show "EN · 中文" when both exist and they differ.
-    if (dict.en && dict.cn && dict.en !== dict.cn) return `${dict.en} · ${dict.cn}`;
-    return dict.en || dict.cn;
-  };
+
+  // Slide the segmented switch thumb to the active position.
+  document.querySelectorAll(".lang-switch").forEach(sw => {
+    sw.setAttribute("data-active", lang);
+  });
+
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    const value = pick(I18N[key]);
-    if (value == null) return;
+    const dict = I18N[key];
+    if (!dict) return;
     const attr = el.getAttribute("data-i18n-attr");
-    if (attr) el.setAttribute(attr, value);
-    else el.textContent = value;
+
+    // Single-language modes: just write text content (or attribute).
+    if (lang === "cn" || lang === "en") {
+      const value = lang === "cn" ? (dict.cn || dict.en) : (dict.en || dict.cn);
+      if (attr) el.setAttribute(attr, value);
+      else el.textContent = value;
+      return;
+    }
+
+    // Mixed mode. For attributes (placeholder, title, etc.) keep an inline
+    // string. For text content, stack EN above CN and deduplicate any
+    // shared leading emoji.
+    if (attr) {
+      const fallback = (dict.en && dict.cn && dict.en !== dict.cn)
+        ? `${dict.en} · ${dict.cn}` : (dict.en || dict.cn);
+      el.setAttribute(attr, fallback);
+      return;
+    }
+
+    if (!dict.en || !dict.cn || dict.en === dict.cn) {
+      el.textContent = dict.en || dict.cn;
+      return;
+    }
+
+    const en = stripLeadEmoji(dict.en);
+    const cn = stripLeadEmoji(dict.cn);
+    const sharedEmoji = en.emoji && en.emoji === cn.emoji;
+    const enLine = sharedEmoji ? `${en.emoji} ${en.rest}` : dict.en;
+    const cnLine = sharedEmoji ? cn.rest : dict.cn;
+    el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
   });
-  // Reflect in the toggle button
+
+  // Toggle button "active" state for accessibility / focus styling.
   document.querySelectorAll(".lang-switch button").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.lang === lang);
   });
 }
 
 function injectLangSwitch() {
-  // Adds the EN / Mixed / 中 toggle next to the search box on every page.
+  // Adds a segmented EN / EN+中 / 中 slider next to the search box.
+  // The order is fixed: EN (left), EN+中 (middle), 中 (right) — the
+  // CSS thumb position is keyed off [data-active] so it must match.
   const topbarInner = document.querySelector(".topbar-inner");
   if (!topbarInner || document.querySelector(".lang-switch")) return;
   const wrap = document.createElement("div");
   wrap.className = "lang-switch";
+  wrap.setAttribute("role", "tablist");
+  wrap.setAttribute("data-active", getLang());
   wrap.innerHTML = `
-    <button data-lang="en"    type="button" title="English only">EN</button>
-    <button data-lang="mixed" type="button" title="Both languages">EN+中</button>
-    <button data-lang="cn"    type="button" title="Chinese only">中</button>
+    <span class="lang-thumb" aria-hidden="true"></span>
+    <button data-lang="en"    type="button" role="tab" title="English only">EN</button>
+    <button data-lang="mixed" type="button" role="tab" title="Both languages">EN+中</button>
+    <button data-lang="cn"    type="button" role="tab" title="Chinese only">中</button>
   `;
   const search = topbarInner.querySelector(".search-box");
   if (search) topbarInner.insertBefore(wrap, search);
