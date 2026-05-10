@@ -1727,6 +1727,62 @@ mark { background: #fef3c7; padding: 1px 3px; border-radius: 3px; }
   to { stroke-dashoffset: -10; }
 }
 
+/* Edge hover glow — hover anywhere along a connector and that line
+   thickens + lights up green. React Flow ships an invisible 20px-wide
+   `.react-flow__edge-interaction` overlay under each edge for hit
+   detection, so the hover target is forgiving even though the visible
+   stroke is only ~2.6px.
+
+   Two reasons hover used to no-op:
+   1) React Flow's own stylesheet sets `pointer-events: visibleStroke`
+      on `.react-flow__edge`; some browsers don't count the transparent
+      interaction layer as "visible". We override to `all !important`
+      and load order doesn't matter.
+   2) Group node wrappers (`.react-flow__node-groupBox`) get
+      `pointer-events: all` from React Flow and cover huge rectangles
+      that overlap the edges underneath. Even though the inner
+      `.rf-group` div is pointer-events: none, the wrapper still eats
+      the mouse. We turn the wrapper transparent to the mouse — topic
+      cards still work because they render in their OWN
+      `.react-flow__node-topic` wrappers, not inside the group's. */
+.react-flow__node-groupBox,
+.react-flow__node-root {
+  pointer-events: none !important;
+}
+.react-flow__edge {
+  cursor: pointer !important;
+  pointer-events: all !important;
+}
+.react-flow__edge .react-flow__edge-interaction {
+  pointer-events: all !important;
+  stroke-width: 28 !important;   /* widen hit area for forgiving hover */
+}
+.react-flow__edge .react-flow__edge-path {
+  transition:
+    stroke 0.16s ease,
+    stroke-width 0.16s ease,
+    filter 0.16s ease;
+}
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #10b981 !important;
+  stroke-width: 5 !important;
+  filter:
+    drop-shadow(0 0 6px  rgba(16, 185, 129, 0.7))
+    drop-shadow(0 0 14px rgba(16, 185, 129, 0.45));
+}
+/* Animated frontier edges are already green; on hover, deepen the
+   green and add a denser glow without losing the dash animation. */
+.react-flow__edge.animated:hover .react-flow__edge-path {
+  stroke: #059669 !important;
+  stroke-width: 5 !important;
+  filter:
+    drop-shadow(0 0 7px  rgba(16, 185, 129, 0.85))
+    drop-shadow(0 0 16px rgba(16, 185, 129, 0.55));
+}
+/* Lift the hovered edge above its neighbors so the glow halo isn't
+   clipped by adjacent edges that happen to render later in the DOM. */
+.react-flow__edge:hover { z-index: 5; }
+
 /* ===== Mobile shell ===== */
 @media (max-width: 760px) {
   .home-shell { height: calc(100vh - 56px); }
