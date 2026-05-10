@@ -86,15 +86,29 @@
       </div>
 
       <div class="roadmap airy" id="roadmap">
-        <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:24px; width:300px;">
+        <a class="section-node" href="#" style="left:50%; transform:translateX(-50%); top:32px; width:320px;">
           <span data-i18n="brand.short">ECE 449 / CS 446</span>
           <span class="sub" data-i18n="home.subtitle.subtitle">机器学习 · 期末复习</span>
         </a>
-        <div id="groupGrid" style="margin-top: 150px;"></div>
+        <div id="groupGrid" style="margin-top: 180px;"></div>
       </div>
 
       <div class="mermaid-view" id="mermaidView" style="display:none;">
+        <div class="mermaid-toolbar">
+          <button id="copyMermaidBtn" class="mermaid-btn" type="button" title="Copy Mermaid source to clipboard">
+            <span class="copy-icon">📋</span>
+            <span class="copy-label">Copy Mermaid code</span>
+          </button>
+          <button id="toggleSourceBtn" class="mermaid-btn" type="button">
+            <span>{ } View source</span>
+          </button>
+          <span class="copy-toast" id="copyToast">Copied ✓</span>
+        </div>
         <pre class="mermaid" id="mermaidGraph"></pre>
+        <details id="mermaidSourceWrap" class="mermaid-source-wrap">
+          <summary>Raw Mermaid source</summary>
+          <textarea id="mermaidSource" readonly spellcheck="false"></textarea>
+        </details>
       </div>
     </div>
   </section>
@@ -126,7 +140,7 @@
     if (total) total.textContent = window.TOPICS.length;
 
     grid.style.display = "grid";
-    grid.style.gap = "32px";
+    grid.style.gap = "48px 36px";
     grid.style.gridTemplateColumns = "repeat(2, 1fr)";
 
     const order = [
@@ -339,13 +353,32 @@
       return String(s).replace(/"/g, "'").replace(/[\[\]()<>]/g, " ");
     }
 
+    // Per-group color palette (background tint + accent stroke + label color).
+    const GROUP_COLORS = {
+      foundations:    { fill: "#ecfdf5", stroke: "#10b981", text: "#065f46" },
+      supervised:     { fill: "#eff6ff", stroke: "#3b82f6", text: "#1e3a8a" },
+      trees:          { fill: "#fff7ed", stroke: "#f97316", text: "#9a3412" },
+      unsupervised:   { fill: "#fdf2f8", stroke: "#ec4899", text: "#9d174d" },
+      neural:         { fill: "#faf5ff", stroke: "#a855f7", text: "#6b21a8" },
+      sequential:     { fill: "#ecfeff", stroke: "#06b6d4", text: "#155e75" },
+      representation: { fill: "#fefce8", stroke: "#ca8a04", text: "#713f12" },
+      modern:         { fill: "#eef2ff", stroke: "#6366f1", text: "#3730a3" },
+      generative:     { fill: "#fff1f2", stroke: "#f43f5e", text: "#9f1239" },
+      theory:         { fill: "#f8fafc", stroke: "#64748b", text: "#1e293b" },
+      rl:             { fill: "#fef2f2", stroke: "#ef4444", text: "#7f1d1d" },
+    };
+
     function buildGraph() {
       const lang = localStorage.getItem("ml_review_lang_v1") || "en";
       const pickName = (o) => lang === "cn" ? (o.name_cn || o.name_en) : (o.name_en || o.name_cn);
+      const rootSub  = lang === "cn" ? "机器学习 · 期末复习" : "Machine Learning · Final Review";
       const lines = [];
-      lines.push("flowchart TD");
-      lines.push('  root(["ECE 449 / CS 446<br/>' + (lang === "cn" ? "机器学习 · 期末复习" : "Machine Learning · Final Review") + '"])');
 
+      lines.push("flowchart TD");
+      // Rounded root node
+      lines.push(`  root(["<b>ECE 449 / CS 446</b><br/>${rootSub}"])`);
+
+      // Subgraphs + stadium-shaped child nodes
       for (const gid of ORDER) {
         const g = (window.GROUPS || []).find(x => x.id === gid);
         if (!g) continue;
@@ -353,22 +386,36 @@
         lines.push(`  subgraph ${gid}["${escMer(pickName(g))}"]`);
         lines.push("    direction LR");
         for (const t of topics) {
-          lines.push(`    ${t.slug}["${escMer(pickName(t))}"]`);
+          // Stadium nodes (rounded pill)
+          lines.push(`    ${t.slug}(["${escMer(pickName(t))}"])`);
           lines.push(`    click ${t.slug} "topics/${t.slug}.html" "Open ${escMer(t.name_en)}"`);
         }
         lines.push("  end");
-        // Difficulty colors for each topic
+        // Difficulty class on each topic
         for (const t of topics) {
           lines.push(`  class ${t.slug} ${t.diff || "yellow"}`);
         }
       }
 
-      for (const [a, b] of EDGES) lines.push(`  ${a} --> ${b}`);
+      // Edges along the spine
+      for (const [a, b] of EDGES) lines.push(`  ${a} ==> ${b}`);
 
-      lines.push("classDef green  fill:#d1fae5,stroke:#10b981,color:#065f46;");
-      lines.push("classDef yellow fill:#fef3c7,stroke:#f59e0b,color:#92400e;");
-      lines.push("classDef red    fill:#fee2e2,stroke:#ef4444,color:#991b1b;");
-      lines.push("style root fill:#fff,stroke:#10b981,stroke-width:2px,color:#065f46;");
+      // Subgraph background + stroke + label color
+      lines.push("");
+      for (const gid of ORDER) {
+        const c = GROUP_COLORS[gid];
+        if (!c) continue;
+        lines.push(`  style ${gid} fill:${c.fill},stroke:${c.stroke},stroke-width:2px,color:${c.text};`);
+      }
+
+      // Difficulty palette — light fill, contrasting border, dark text
+      lines.push("");
+      lines.push("  classDef green  fill:#ffffff,stroke:#10b981,stroke-width:2px,color:#065f46;");
+      lines.push("  classDef yellow fill:#ffffff,stroke:#f59e0b,stroke-width:2px,color:#92400e;");
+      lines.push("  classDef red    fill:#ffffff,stroke:#ef4444,stroke-width:2px,color:#991b1b;");
+      lines.push("  style root fill:#ffffff,stroke:#10b981,stroke-width:3px,color:#065f46;");
+      // Edge styling: slightly thicker grey strokes
+      lines.push("  linkStyle default stroke:#94a3b8,stroke-width:1.6px;");
 
       return lines.join("\n");
     }
@@ -376,14 +423,49 @@
     let rendered = false;
     async function renderMermaid() {
       if (!window.mermaid) return;
+      const src = buildGraph();
       mermPre.removeAttribute("data-processed");
-      mermPre.textContent = buildGraph();
+      mermPre.textContent = src;
+      const sourceTa = document.getElementById("mermaidSource");
+      if (sourceTa) sourceTa.value = src;
       try {
         await mermaid.run({ nodes: [mermPre] });
         rendered = true;
       } catch (e) {
         mermPre.textContent = "Mermaid render error:\n" + e.message;
       }
+    }
+
+    // Copy Mermaid source to clipboard
+    const copyBtn  = document.getElementById("copyMermaidBtn");
+    const copyToast = document.getElementById("copyToast");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", async () => {
+        const src = (document.getElementById("mermaidSource") || {}).value || buildGraph();
+        try {
+          await navigator.clipboard.writeText(src);
+        } catch {
+          // Fallback for older browsers / file:// origins
+          const ta = document.getElementById("mermaidSource");
+          if (ta) { ta.select(); document.execCommand("copy"); ta.setSelectionRange(0, 0); }
+        }
+        copyBtn.classList.add("copied");
+        if (copyToast) {
+          copyToast.classList.add("show");
+          setTimeout(() => copyToast.classList.remove("show"), 1400);
+        }
+        setTimeout(() => copyBtn.classList.remove("copied"), 1400);
+      });
+    }
+
+    // "View source" button toggles the <details>
+    const toggleBtn = document.getElementById("toggleSourceBtn");
+    const wrap = document.getElementById("mermaidSourceWrap");
+    if (toggleBtn && wrap) {
+      toggleBtn.addEventListener("click", () => {
+        wrap.open = !wrap.open;
+        if (wrap.open) wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
     }
 
     function setView(view) {
