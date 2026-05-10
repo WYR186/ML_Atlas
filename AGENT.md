@@ -32,8 +32,10 @@ ECE 449/
 
 ```
 ML Review/
-├── index.html                  homepage: full-viewport React Flow Atlas + Mermaid + algorithm index
-├── cheatsheet.html             one-page cram sheet (fully bilingual)
+├── index.html                  homepage: full-viewport React Flow Atlas + Mermaid view switch
+├── algorithms.html             standalone algorithm index — multi-axis filter chips
+├── problems.html               standalone HW problem aggregator across all blocks
+├── cheatsheet.html             bilingual equation sheet (rendered from equation-sheet.js)
 ├── resources.html              slides / HW / textbook map
 ├── README.md                   pure English; deploy + run instructions
 ├── AGENT.md                    this file
@@ -43,14 +45,18 @@ ML Review/
 │   └── deploy.yml              push-to-main → GitHub Pages
 ├── topics/                     37 algorithm pages, one per topic
 └── assets/
-    ├── style.css               visuals + i18n visibility + popup + slider thumb + .home-shell + .rf-* nodes
+    ├── style.css               visuals + i18n visibility + popup + slider thumb + .home-shell + .rf-* + .algo-*
     ├── progress-sync.js        ⚠ MUST load first; patches localStorage to /api/progress
     ├── i18n.js                 EN / 中 + thumb alignment + scroll-preserving switches
-    ├── topics-data.js          GROUPS + TOPICS metadata for cards
-    ├── popup-data.js           tutorial / Python templates / HW problem entries
+    ├── topics-data.js          GROUPS + TOPICS metadata for cards (lectures + hw fields too)
+    ├── popup-data.js           tutorial / Python templates / HW problem entries (bilingual)
     ├── popup.js                click-anchored popup; exposes window.openTopicPopup(slug, anchor)
-    ├── main.js                 progress + search (also targets .rf-topic) + topic-page code injector
-    └── atlas-rf.js             ES module — mounts React Flow Atlas in #rfMount
+    ├── main.js                 progress + search (also targets .rf-topic + .algo-row) + code injector
+    ├── atlas-rf.js             ES module — mounts React Flow Atlas in #rfMount
+    ├── equation-sheet.js       cheatsheet.html data source — formula blocks per topic
+    ├── algorithm-tags.js       TOPIC_TAGS (paradigm/task/family) + TAG_DIMENSIONS for filter UI
+    ├── algorithm-index.js      algorithms.html renderer + chip filter logic
+    └── problems-page.js        problems.html renderer (all HW problems grouped by block)
 ```
 
 `index.html` `<head>` loads the React stack via an import map + esm.sh:
@@ -237,12 +243,16 @@ Every page loads scripts in this order:
 <script src="assets/topics-data.js"></script>        <!-- GROUPS + TOPICS -->
 <script src="assets/popup-data.js"></script>         <!-- POPUP_DATA (tutorials, code, problems) -->
 <script src="assets/popup.js"></script>              <!-- exposes window.openTopicPopup -->
-<script src="assets/main.js"></script>               <!-- progress, search (.rf-topic + .node), code-section injector -->
-<script type="module" src="assets/atlas-rf.js"></script>  <!-- mounts React Flow Atlas; only on index.html -->
-<script>…page-specific inline code (Mermaid IIFE, index table)…</script>
+<script src="assets/main.js"></script>               <!-- progress, search, code-section injector -->
+<!-- per-page extras, in order, AFTER main.js -->
+<script type="module" src="assets/atlas-rf.js"></script>     <!-- index.html only -->
+<script src="assets/algorithm-tags.js"></script>             <!-- algorithms.html only -->
+<script src="assets/algorithm-index.js"></script>            <!-- algorithms.html only -->
+<script src="assets/equation-sheet.js"></script>             <!-- cheatsheet.html only -->
+<script src="assets/problems-page.js"></script>              <!-- problems.html only -->
 ```
 
-`atlas-rf.js` is a `type="module"` script (deferred by spec), so it runs after the synchronous scripts above — by then `window.GROUPS` / `TOPICS` / `POPUP_DATA` are populated.
+`atlas-rf.js` is a `type="module"` script (deferred by spec), so it runs after the synchronous scripts above — by then `window.GROUPS` / `TOPICS` / `POPUP_DATA` are populated. The `algorithm-tags.js` file must load before `algorithm-index.js` (the renderer reads `window.TOPIC_TAGS` and `window.TAG_DIMENSIONS`).
 
 If you ever introduce a script that touches localStorage, make sure `progress-sync.js` still loads before it.
 
@@ -272,6 +282,36 @@ The Atlas view (default) and the Mermaid view share the same `<section class="ho
 - Reaching 100% across all topics fires `window.confetti(...)` once (re-arms when the user uncompletes anything).
 
 `popup.js` listens for clicks on `.node[data-slug]`. The React Flow cards use class `.rf-topic` (not `.node`), so popup.js's auto-listener does NOT intercept them — that's intentional, the click goes through `onNodeClick` instead. Don't add `.node` to the React Flow cards.
+
+---
+
+## Standalone pages off the homepage
+
+The homepage was getting overloaded, so two indices live as their own pages now:
+
+### `algorithms.html` — Complete Algorithm Index with filter chips
+
+Renders all 37 topics grouped by Block, with a collapsible filter panel above. Closed by default (so first paint is just the index). Opening it reveals chips for three **ML-knowledge** dimensions only:
+
+| Dimension | Chips | Source |
+| --- | --- | --- |
+| 🧭 Learning paradigm | Supervised / Unsupervised / Self-supervised / Reinforcement / Theory | `TOPIC_TAGS[slug].paradigm` |
+| 🎬 Task | Classification / Regression / Clustering / Dim-reduction / Representation / Sequence / Generation / Decision / Theoretical bound | `TOPIC_TAGS[slug].task` |
+| 🧬 Model family | Classical / Linear / Non-parametric / Probabilistic / Kernel / Tree-based / Ensemble / Neural / Deep / RL | `TOPIC_TAGS[slug].family` |
+
+Block / Group are NOT a filter dimension (already implicit in the section headers below). Difficulty isn't either (already shown via the colored dot on each card). Adding course-org metadata as filter chips clutters the panel — keep this page about ML knowledge taxonomy.
+
+`algorithm-tags.js` exports `window.TOPIC_TAGS` (slug → 3-axis tag arrays) and `window.TAG_DIMENSIONS` (chip definitions with `valueLabels` for both EN / CN). `algorithm-index.js` does the rendering and chip toggling. State shape is `{ paradigm: Set, task: Set, family: Set }` — chips check on by default, filters narrow the set. The visibility predicate is "**topic with no values for a dim is NOT filtered by that dim**" — that's how foundation topics (probability / linear-algebra / optimization) and theory topics (Bayes / PAC / VC) stay visible across all chip combinations without forcing them into stretched ML-model categories.
+
+Per-dimension `all` / `none` mini-buttons at each section head; global `Select all` / `Clear all` / `Reset` in the top bar (only visible when the panel is open). Search box on the topbar filters cards by name/sub haystack on top of the chip filters; whole groups hide when their last row is hidden.
+
+### `problems.html` — HW problem aggregator
+
+`assets/problems-page.js` walks every entry in `POPUP_DATA[slug].problems`, groups by HW number (and Block where useful), and renders a flat checklist. Same checkbox storage as the popup (`prob:slug:pid` localStorage keys), so a check on the index reflects the same flag the topic popup toggles. Useful for "show me everything I haven't ticked off yet" study sessions.
+
+### Cheatsheet rebuild — `cheatsheet.html` + `equation-sheet.js`
+
+`cheatsheet.html` is a thin shell; the actual content lives in `assets/equation-sheet.js` as data (one entry per topic, with a list of formula blocks each carrying an EN + CN explanation, the LaTeX, and an optional worked-example fragment). The cheatsheet renderer iterates that list and emits the purple formula callouts. To add a new equation, edit the data file — don't touch the HTML.
 
 ---
 
@@ -376,3 +416,6 @@ When the user asks to "update content" without naming a section, infer from this
 - **Adding `.node` class to React Flow cards** — popup.js's auto-listener would then double-fire alongside `onNodeClick`. React Flow cards use `.rf-topic` only.
 - **Tuning edges with `sourceHandle: "sb" / targetHandle: "tt"` everywhere** — every fork collapses onto the same vector. Use the directional handles (`sl / sr / sb / sb` etc.) per-edge in the object-form `CONNS`.
 - **Detail topic page that just rephrases the slide bullet.** The 9-section template (Concept Understanding → Quick Checklist) is the bar — see [class-material-to-website](~/.claude/skills/class-material-to-website/SKILL.md#topic-detail-page--9-section-template). Each section must be present in both EN and CN parallel bodies (CN is Chinese-dominant with English keywords inline, not a literal translation).
+- **Adding chips for course-org metadata to the algorithm index filter** — the user has explicitly trimmed the filter taxonomy to ML-knowledge axes (paradigm / task / family). Block / Group is already the section heading; difficulty is already the colored dot. Don't add them back as filter chips.
+- **Hard-coding lecture / hw chips on a topic page** — they're now derived from `topics-data.js` (`lectures` + `hw` arrays) and rendered automatically. Update the data file, not the HTML.
+- **Forgetting to add a new page to all five nav menus** — `index.html`, `algorithms.html`, `cheatsheet.html`, `problems.html`, `resources.html`, plus all 37 `topics/*.html`. The nav uses relative paths (`../algorithms.html` from a topic page, `algorithms.html` from a top-level page). When adding a nav link, do it on every page or it'll feel inconsistent on the pages that miss it.
