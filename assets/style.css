@@ -873,6 +873,35 @@ mark { background: #fef3c7; padding: 1px 3px; border-radius: 3px; }
   text-decoration: none;
 }
 .popup-full-link:hover { text-decoration: underline; }
+/* Link button replacing inline code in the popup */
+.popup-code-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.popup-code-link:hover {
+  background: var(--info-soft);
+  border-color: var(--info);
+  color: var(--info);
+  text-decoration: none;
+}
+.popup-code-link-meta {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+.popup-code-link:hover .popup-code-link-meta { color: var(--info); }
+
 .popup-code {
   background: #f8fafc;
   border: 1px solid var(--border);

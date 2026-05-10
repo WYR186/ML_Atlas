@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN" data-lang="cn">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -135,7 +135,7 @@
   (function () {
     const grid = document.getElementById("groupGrid");
     if (!grid || !window.GROUPS || !window.TOPICS) return;
-    const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+    const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
     const total = document.getElementById("progressTotal");
     if (total) total.textContent = window.TOPICS.length;
 
@@ -194,16 +194,23 @@
       return row.map(g => `<div>${renderGroup(g)}</div>`).join("");
     }).join("");
 
-    // Apply CN/EN to topic labels and group labels
+    // Apply CN / EN / Mixed to topic labels and group labels
     function applyTopicLang() {
-      const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+      const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
       grid.querySelectorAll("[data-cn][data-en]").forEach(el => {
-        el.textContent = lang === "en" ? el.dataset.en : el.dataset.cn;
+        const cn = el.dataset.cn, en = el.dataset.en;
+        if (lang === "cn") el.textContent = cn || en;
+        else if (lang === "en") el.textContent = en || cn;
+        else el.textContent = (en && cn && en !== cn) ? `${en} · ${cn}` : (en || cn);
       });
     }
     applyTopicLang();
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      btn.addEventListener("click", () => setTimeout(applyTopicLang, 0));
+    // Event delegation — works whether the lang-switch buttons exist now or
+    // get injected later by i18n.js's DOMContentLoaded handler.
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".lang-switch button")) {
+        setTimeout(applyTopicLang, 0);
+      }
     });
 
     // === Connector lines (root → groups, with arrowheads) ===
@@ -521,16 +528,22 @@
     }).join("");
     root.innerHTML = html;
 
-    // Apply lang
+    // Apply lang to data-cn/data-en spans (handles cn / en / mixed)
     function applyLang() {
-      const lang = (localStorage.getItem("ml_review_lang_v1") || "cn");
+      const lang = (localStorage.getItem("ml_review_lang_v1") || "en");
       root.querySelectorAll("[data-cn][data-en]").forEach(el => {
-        el.textContent = lang === "en" ? el.dataset.en : el.dataset.cn;
+        const cn = el.dataset.cn, en = el.dataset.en;
+        if (lang === "cn") el.textContent = cn || en;
+        else if (lang === "en") el.textContent = en || cn;
+        else el.textContent = (en && cn && en !== cn) ? `${en} · ${cn}` : (en || cn);
       });
     }
     applyLang();
-    document.querySelectorAll(".lang-switch button").forEach(btn => {
-      btn.addEventListener("click", () => setTimeout(applyLang, 0));
+    // Event delegation — re-apply whenever any .lang-switch button is clicked.
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".lang-switch button")) {
+        setTimeout(applyLang, 0);
+      }
     });
   })();
 </script>

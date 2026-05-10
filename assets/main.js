@@ -191,6 +191,68 @@ document.addEventListener("DOMContentLoaded", () => {
     onScroll();
   }
 
+  // === Topic page: inject "Python implementation" section from POPUP_DATA ===
+  // The popup used to show code inline; we link to topics/<slug>.html#code
+  // instead. This builds that section from popup-data.js at load time so we
+  // don't have to maintain code in two places.
+  (function injectTopicCodeSection() {
+    const main = document.querySelector(".block-main");
+    const markBtn0 = document.getElementById("markRead");
+    if (!main || !markBtn0 || !window.POPUP_DATA) return;
+    const slug = markBtn0.dataset.block;
+    const data = window.POPUP_DATA[slug];
+    if (!data || !data.code || !data.code.length) return;
+    if (document.getElementById("code")) return;  // idempotent
+
+    const lang = localStorage.getItem("ml_review_lang_v1") || "en";
+    const tr = (cn, en) => lang === "cn" ? cn : (lang === "en" ? en : `${en} · ${cn}`);
+    const pickL = (o) => o ? (lang === "cn" ? (o.cn || o.en) : (o.en || o.cn)) : "";
+
+    const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+
+    const blocks = data.code.map((c, i) => `
+      <details class="callout" ${i === 0 ? "open" : ""}
+               style="border-left-color: var(--info); background: var(--info-soft);">
+        <summary style="font-weight:700; cursor:pointer; color: var(--info); list-style: none;">
+          ${escHtml(pickL(c.title) || "Python")}
+        </summary>
+        <pre style="background:#fff; padding:14px 16px; border-radius:8px; overflow-x:auto; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; line-height:1.55; color: var(--text); margin:10px 0 0;"><code>${escHtml(c.code)}</code></pre>
+      </details>
+    `).join("");
+
+    const section = document.createElement("section");
+    section.className = "topic";
+    section.id = "code";
+    section.style.scrollMarginTop = "80px";
+    section.innerHTML = `
+      <h2>${tr("🐍 Python 实现", "🐍 Python Implementation")}</h2>
+      <p style="font-size:13.5px; color: var(--text-soft);">
+        ${tr("参考实现，不是课程重点。", "Reference implementation — not the focus of this course.")}
+      </p>
+      ${blocks}
+    `;
+
+    // Insert before the prev/next nav row.
+    const navDiv = main.querySelector('div[style*="space-between"][style*="margin-top"]');
+    if (navDiv) main.insertBefore(section, navDiv);
+    else main.appendChild(section);
+
+    // Add a TOC entry on the left sidebar.
+    const tocList = document.querySelector(".toc ul, .toc div ul, #topicToc ul");
+    if (tocList) {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#code";
+      a.textContent = tr("🐍 Python 实现", "🐍 Python Implementation");
+      a.style.color = "var(--text-soft)";
+      a.style.fontSize = "13px";
+      li.appendChild(a);
+      tocList.appendChild(li);
+    }
+  })();
+
   // Mark block as read button on block pages
   const markBtn = document.getElementById("markRead");
   if (markBtn) {

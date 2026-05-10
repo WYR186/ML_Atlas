@@ -94,18 +94,16 @@
         </section>`;
     }
 
-    // Code templates
+    // Code templates — moved off the popup to keep it short.
+    // The link below jumps to the #code section on the topic page.
     let codeHtml = "";
     if (data.code && data.code.length) {
       codeHtml = `
         <section class="popup-section">
-          <h4>${tr("🐍 代码模版（Python · 不是重点）", "🐍 Python templates (not the focus)")}</h4>
-          ${data.code.map((c, i) => `
-            <details class="popup-code" ${i === 0 ? "open" : ""}>
-              <summary>${escapeHtml(pickLang(c.title))}</summary>
-              <pre><code>${escapeHtml(c.code)}</code></pre>
-            </details>
-          `).join("")}
+          <a class="popup-code-link" href="topics/${slug}.html#code">
+            <span>${tr("🐍 Python 代码模板", "🐍 Python templates")}</span>
+            <span class="popup-code-link-meta">${data.code.length} ${tr("段", "snippet" + (data.code.length > 1 ? "s" : ""))} ›</span>
+          </a>
         </section>`;
     }
 
