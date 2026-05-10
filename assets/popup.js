@@ -14,18 +14,120 @@
   function probKey(slug, pid) { return `prob:${slug}:${pid}`; }
   function tutKey(slug)        { return `tut:${slug}`; }
 
-  function getLang() { return localStorage.getItem("ml_review_lang_v1") || "en"; }
+  function getLang() {
+    const v = localStorage.getItem("ml_review_lang_v1");
+    if (v === "cn" || v === "en") return v;
+    if (v === "mixed") localStorage.setItem("ml_review_lang_v1", "en");
+    return "en";
+  }
   function pickLang(obj) {
     if (!obj) return "";
     const lang = getLang();
     return obj[lang] || obj.cn || obj.en || "";
   }
-  function tr(cn, en) { return getLang() === "en" ? en : cn; }
+  function tr(cn, en) {
+    const lang = getLang();
+    if (lang === "en") return en;
+    return cn;
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[c]));
+  }
+
+  function formatDetailText(text) {
+    const blocks = String(text || "").trim().split(/\n{2,}/);
+    return blocks.map(block => {
+      const lines = block.split("\n").map(line => line.trim()).filter(Boolean);
+      if (!lines.length) return "";
+
+      if (lines[0].startsWith("$$") && lines[lines.length - 1].endsWith("$$")) {
+        return `<div class="popup-equation-block">${escapeHtml(lines.join("\n"))}</div>`;
+      }
+
+      if (lines.every(line => line.startsWith("- "))) {
+        return `<ul class="popup-detail-list">${lines.map(line => `<li>${escapeHtml(line.slice(2))}</li>`).join("")}</ul>`;
+      }
+
+      if (lines.length === 1 && lines[0].startsWith("### ")) {
+        return `<h5>${escapeHtml(lines[0].slice(4))}</h5>`;
+      }
+
+      return `<p>${escapeHtml(lines.join("\n"))}</p>`;
+    }).join("");
+  }
+
+  function typesetMath(root) {
+    if (!window.MathJax) return;
+    const ready = window.MathJax.startup?.promise || Promise.resolve();
+    ready.then(() => window.MathJax.typesetPromise?.([root])).catch(() => {});
+  }
+
+  function pickTips(tips) {
+    if (!tips) return [];
+    const lang = getLang();
+    const en = Array.isArray(tips.en) ? tips.en : [];
+    const cn = Array.isArray(tips.cn) ? tips.cn : [];
+    const local = Array.isArray(tips[lang]) ? tips[lang] : [];
+    if (local.length) return local;
+    if (cn.length) return cn;
+    return en;
+  }
+
+  function problemField(cnLabel, enLabel, value) {
+    const text = pickLang(value);
+    if (!text) return "";
+    return `
+      <div class="popup-problem-field">
+        <div class="popup-problem-field-label">${tr(cnLabel, enLabel)}</div>
+        <div class="popup-problem-field-text">${escapeHtml(text)}</div>
+      </div>`;
+  }
+
+  function problemTips(tips) {
+    const items = pickTips(tips);
+    if (!items.length) return "";
+    return `
+      <div class="popup-problem-field">
+        <div class="popup-problem-field-label">${tr("提示", "Tips")}</div>
+        <ul class="popup-problem-tips">
+          ${items.map(t => `<li>${escapeHtml(t)}</li>`).join("")}
+        </ul>
+      </div>`;
+  }
+
+  function problemBody(prob, hwPdf, solPdf, isLecture) {
+    const hasStructured =
+      prob.original_excerpt || prob.problem_understanding || prob.knowledge_points ||
+      prob.tips || prob.detailed_solution;
+
+    const linksHtml = `
+      <div class="popup-problem-links">
+        <a class="popup-full-link" href="${hwPdf}" target="_blank">📄 ${isLecture ? tr("课件出处", "Lecture source") : tr("完整原题", "Full problem")}</a>
+        ${solPdf ? `<a class="popup-full-link" href="${solPdf}" target="_blank">✅ ${tr("官方解答", "Official sol")}</a>` : ""}
+      </div>`;
+
+    if (!hasStructured) {
+      const sol = pickLang(prob.solution);
+      return `
+        ${sol ? `<div class="popup-problem-sol">${escapeHtml(sol)}</div>` : ""}
+        ${linksHtml}`;
+    }
+
+    const detailed = pickLang(prob.detailed_solution);
+    return `
+      ${problemField("原题线索", "Original cue", prob.original_excerpt)}
+      ${problemField("题意理解", "Problem understanding", prob.problem_understanding)}
+      ${problemField("知识点", "Knowledge points", prob.knowledge_points)}
+      ${problemTips(prob.tips)}
+      ${detailed ? `
+        <details class="popup-problem-detail">
+          <summary>${tr("详细解法", "Detailed solution")}</summary>
+          <div class="popup-problem-detail-text">${formatDetailText(detailed)}</div>
+        </details>` : ""}
+      ${linksHtml}`;
   }
 
   function build() {
@@ -112,26 +214,26 @@
     if (data.problems && data.problems.length) {
       problemsHtml = `
         <section class="popup-section">
-          <h4>${tr("📝 习题（HW 节选 · 我的解题思路）", "📝 HW Problems (my answer sketches)")}</h4>
+          <div class="popup-section-heading">
+            <h4>${tr("📝 习题（HW 节选 · 我的解题思路）", "📝 HW Problems (my answer sketches)")}</h4>
+            <a class="popup-section-link" href="problems.html?topic=${encodeURIComponent(slug)}" target="_self">${tr("查看全部 →", "View all →")}</a>
+          </div>
           ${data.problems.map(prob => {
             const pdone = !!p[probKey(slug, prob.id)];
             const title = pickLang(prob.title);
-            const sol = pickLang(prob.solution);
-            const hwPdf = prob.hw_pdf || `HW/${prob.hw}.pdf`;
-            const solPdf = prob.sol_pdf || `HW/${prob.hw}_sol.pdf`;
+            const isLecture = String(prob.hw || "").startsWith("Lecture_");
+            const hwPdf = prob.hw_pdf || (isLecture ? `slides/${prob.hw}.pdf` : `HW/${prob.hw}.pdf`);
+            const solPdf = prob.sol_pdf || (!isLecture ? `HW/${prob.hw}_sol.pdf` : "");
+            const meta = [String(prob.hw || "").toUpperCase(), prob.section || ""].filter(Boolean).join(" ");
             return `
               <div class="popup-problem" data-pid="${prob.id}">
                 <div class="popup-problem-row">
                   <span class="popup-checkbox ${pdone ? "checked" : ""}" data-prob="${prob.id}">${pdone ? "✓" : ""}</span>
                   <span class="popup-problem-title">${escapeHtml(title)}</span>
-                  <span class="popup-problem-meta">${escapeHtml(prob.hw)} ${escapeHtml(prob.section || "")}</span>
+                  <span class="popup-problem-meta">${escapeHtml(meta)}</span>
                 </div>
                 <div class="popup-problem-body">
-                  <div class="popup-problem-sol">${escapeHtml(sol)}</div>
-                  <div class="popup-problem-links">
-                    <a class="popup-full-link" href="${hwPdf}" target="_blank">📄 ${tr("完整原题", "Full problem")}</a>
-                    <a class="popup-full-link" href="${solPdf}" target="_blank">✅ ${tr("官方解答", "Official sol")}</a>
-                  </div>
+                  ${problemBody(prob, hwPdf, solPdf, isLecture)}
                 </div>
               </div>`;
           }).join("")}
@@ -140,6 +242,7 @@
 
     body.innerHTML = tutorialHtml + codeHtml + problemsHtml ||
       `<p class="popup-empty">${tr("本算法的速记内容尚未补充。", "Content coming soon.")}</p>`;
+    typesetMath(body);
 
     // Wire interactivity
     body.querySelectorAll(".popup-tutorial-row .popup-checkbox").forEach(cb => {
@@ -176,6 +279,7 @@
       row.addEventListener("click", e => {
         if (e.target.closest(".popup-checkbox")) return;
         div.classList.toggle("open");
+        if (div.classList.contains("open")) typesetMath(div);
       });
     });
 
