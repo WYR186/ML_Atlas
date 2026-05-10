@@ -222,8 +222,9 @@
             const pdone = !!p[probKey(slug, prob.id)];
             const title = pickLang(prob.title);
             const isLecture = String(prob.hw || "").startsWith("Lecture_");
+            const hasSolPdf = Object.prototype.hasOwnProperty.call(prob, "sol_pdf");
             const hwPdf = prob.hw_pdf || (isLecture ? `slides/${prob.hw}.pdf` : `HW/${prob.hw}.pdf`);
-            const solPdf = prob.sol_pdf || (!isLecture ? `HW/${prob.hw}_sol.pdf` : "");
+            const solPdf = hasSolPdf ? prob.sol_pdf : (!isLecture ? `HW/${prob.hw}_sol.pdf` : "");
             const meta = [String(prob.hw || "").toUpperCase(), prob.section || ""].filter(Boolean).join(" ");
             return `
               <div class="popup-problem" data-pid="${prob.id}">

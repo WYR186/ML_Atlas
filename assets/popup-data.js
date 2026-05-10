@@ -2701,6 +2701,433 @@ def reinforce_step(policy, traj, gamma=0.99):
   ]);
 })();
 
+// Final practice problem cards. These use the practice PDF as the source and
+// intentionally suppress the missing official-solution chip with sol_pdf: null.
+(function addFinalPracticeProblems() {
+  const data = window.POPUP_DATA || {};
+  const hw = "final-practice";
+  const hw_pdf = "HW/final_practice_problems.pdf";
+  const sol_pdf = null;
+  const join = parts => parts.join("\n\n");
+  const detail = (en, cn) => ({ en: join(en), cn: join(cn) });
+
+  Object.values(data).forEach(topic => {
+    topic.problems = (topic.problems || []).filter(p => p.hw !== hw);
+  });
+
+  const add = (slug, items) => {
+    if (!data[slug]) return;
+    data[slug].problems = data[slug].problems || [];
+    data[slug].problems.push(...items.map(item => ({ ...item, hw, hw_pdf, sol_pdf })));
+  };
+
+  add("kernel-methods", [
+    {
+      id: "final-practice-p1",
+      section: "Problem 1",
+      title: { en: "Compute a polynomial-kernel matrix and verify the feature map", cn: "计算 polynomial-kernel matrix 并验证 feature map" },
+      original_excerpt: { en: "Detailed cue: two vectors in R2, x1=(1,1) and x2=(2,-1); kernel k(x,y)=(x^T y)^2; compute the 2 by 2 kernel matrix, verify the explicit quadratic feature map, and explain the kernel trick.", cn: "题目要点：两个 R2 vectors，x1=(1,1)、x2=(2,-1)；kernel 为 k(x,y)=(x^T y)^2；计算 2 by 2 kernel matrix，验证 explicit quadratic feature map，并解释 kernel trick。" },
+      problem_understanding: { en: "The problem checks that a kernel matrix can be computed either directly from the kernel or indirectly by inner products after a feature map. Both routes must give the same Gram matrix.", cn: "这题检查 kernel matrix 可以直接用 kernel 算，也可以先做 feature map 再算 inner products。两条路线必须得到同一个 Gram matrix。" },
+      knowledge_points: { en: "For the degree-2 homogeneous polynomial kernel in R2, phi(x)=(x_1^2, sqrt(2)x_1x_2, x_2^2) makes phi(x)^T phi(y)=(x^T y)^2.", cn: "对 R2 中 degree-2 homogeneous polynomial kernel，phi(x)=(x_1^2, sqrt(2)x_1x_2, x_2^2) 使得 phi(x)^T phi(y)=(x^T y)^2。" },
+      tips: { en: ["Compute the four dot products before squaring.", "Use the sqrt(2) coordinate to create the coefficient 2 cross term.", "Explain that the kernel trick avoids explicitly building phi(x)."], cn: ["先算四个 dot products，再平方。", "用 sqrt(2) coordinate 产生 coefficient 2 的 cross term。", "说明 kernel trick 避免显式构造 phi(x)。"] },
+      detailed_solution: detail([
+        "### Dot products",
+        "$$\nx_1^\\top x_1=2,\n\\qquad\nx_1^\\top x_2=1,\n\\qquad\nx_2^\\top x_2=5\n$$",
+        "The matrix is symmetric, so x2^T x1 is also 1.",
+        "### Square for the polynomial kernel",
+        "$$\nK_{ij}=k(x_i,x_j)=(x_i^\\top x_j)^2\n$$",
+        "$$\nK=\\begin{pmatrix}\n2^2 & 1^2\\\\\n1^2 & 5^2\n\\end{pmatrix}\n=\n\\begin{pmatrix}\n4 & 1\\\\\n1 & 25\n\\end{pmatrix}\n$$",
+        "### Feature-map values",
+        "$$\n\\phi(x)=\\begin{pmatrix}x_1^2\\\\ \\sqrt2 x_1x_2\\\\ x_2^2\\end{pmatrix}\n$$",
+        "$$\n\\phi(1,1)=\\begin{pmatrix}1\\\\ \\sqrt2\\\\ 1\\end{pmatrix},\n\\qquad\n\\phi(2,-1)=\\begin{pmatrix}4\\\\ -2\\sqrt2\\\\ 1\\end{pmatrix}\n$$",
+        "### Verify inner products",
+        "$$\n\\phi(x_1)^\\top\\phi(x_1)=1+2+1=4\n$$",
+        "$$\n\\phi(x_1)^\\top\\phi(x_2)=4-4+1=1\n$$",
+        "$$\n\\phi(x_2)^\\top\\phi(x_2)=16+8+1=25\n$$",
+        "These match the entries of K.",
+        "### General identity",
+        "$$\n\\phi(x)^\\top\\phi(y)\n=x_1^2y_1^2+2x_1x_2y_1y_2+x_2^2y_2^2\n=(x^\\top y)^2\n$$",
+        "### Kernel trick",
+        "Instead of forming phi(x) in a larger feature space, compute (x^T y)^2 directly in the original space. For higher dimensions or higher degrees, this avoids a much larger explicit feature vector."
+      ], [
+        "### Dot products",
+        "$$\nx_1^\\top x_1=2,\n\\qquad\nx_1^\\top x_2=1,\n\\qquad\nx_2^\\top x_2=5\n$$",
+        "matrix symmetric，所以 x2^T x1 也是 1。",
+        "### 对 polynomial kernel 平方",
+        "$$\nK_{ij}=k(x_i,x_j)=(x_i^\\top x_j)^2\n$$",
+        "$$\nK=\\begin{pmatrix}\n2^2 & 1^2\\\\\n1^2 & 5^2\n\\end{pmatrix}\n=\n\\begin{pmatrix}\n4 & 1\\\\\n1 & 25\n\\end{pmatrix}\n$$",
+        "### Feature-map values",
+        "$$\n\\phi(x)=\\begin{pmatrix}x_1^2\\\\ \\sqrt2 x_1x_2\\\\ x_2^2\\end{pmatrix}\n$$",
+        "$$\n\\phi(1,1)=\\begin{pmatrix}1\\\\ \\sqrt2\\\\ 1\\end{pmatrix},\n\\qquad\n\\phi(2,-1)=\\begin{pmatrix}4\\\\ -2\\sqrt2\\\\ 1\\end{pmatrix}\n$$",
+        "### Verify inner products",
+        "$$\n\\phi(x_1)^\\top\\phi(x_1)=1+2+1=4\n$$",
+        "$$\n\\phi(x_1)^\\top\\phi(x_2)=4-4+1=1\n$$",
+        "$$\n\\phi(x_2)^\\top\\phi(x_2)=16+8+1=25\n$$",
+        "这些值正好 match K 的 entries。",
+        "### General identity",
+        "$$\n\\phi(x)^\\top\\phi(y)\n=x_1^2y_1^2+2x_1x_2y_1y_2+x_2^2y_2^2\n=(x^\\top y)^2\n$$",
+        "### Kernel trick",
+        "不用显式构造更高维 feature space 中的 phi(x)，直接在 original space 计算 (x^T y)^2。dimension 或 degree 变大时，这能避免很大的 explicit feature vector。"
+      ])
+    }
+  ]);
+
+  add("q-learning", [
+    {
+      id: "final-practice-p2",
+      section: "Problem 2",
+      title: { en: "Update a Q-learning table through two line-world episodes", cn: "通过两个 line-world episodes 更新 Q-learning table" },
+      original_excerpt: { en: "Detailed cue: four-state line world 0-1-2-3 with terminal goal 3, actions L/R, step reward -1 plus extra +10 when entering 3, gamma=0.9, alpha=1, zero initial Q table, and two specified episodes to process in order.", cn: "题目要点：四状态 line world 0-1-2-3，terminal goal 为 3，actions 为 L/R；每步 reward -1，进入 3 额外 +10；gamma=0.9、alpha=1、initial Q table 全 0，并按顺序处理两个给定 episodes。" },
+      problem_understanding: { en: "Because alpha is 1, each visited Q entry is replaced by the one-step target. The table must be updated immediately after each transition, so later transitions in episode 2 can use earlier updates.", cn: "因为 alpha=1，每个 visited Q entry 会直接替换成 one-step target。table 必须在每个 transition 后立刻更新，所以 episode 2 后面的 transitions 会使用前面刚更新的值。" },
+      knowledge_points: { en: "Q-learning target is r + gamma max_{a'} Q(s',a'). Terminal next states have future value 0.", cn: "Q-learning target 是 r + gamma max_{a'} Q(s',a')。terminal next state 的 future value 是 0。" },
+      tips: { en: ["With alpha=1, ignore the old value except through the current table.", "Update in trajectory order.", "Use terminal future value 0 when the agent reaches state 3."], cn: ["alpha=1 时，old value 不做 averaging，只通过 current table 影响 max。", "严格按 trajectory order 更新。", "到达 state 3 时 terminal future value 取 0。"] },
+      detailed_solution: detail([
+        "### Update rule",
+        "$$\nQ(s,a)\\leftarrow r+\\gamma\\max_{a'}Q(s',a')\n$$",
+        "because alpha=1.",
+        "### Episode 1",
+        "Transition 0 --R--> 1 has reward -1 and next values all zero.",
+        "$$\nQ(0,R)=-1+0.9\\max(0,0)=-1\n$$",
+        "Transition 1 --R--> 2 also has reward -1 and next values still zero.",
+        "$$\nQ(1,R)=-1+0.9\\max(0,0)=-1\n$$",
+        "Transition 2 --R--> 3 enters the terminal goal, so reward is 9 and future value is 0.",
+        "$$\nQ(2,R)=9+0.9\\cdot0=9\n$$",
+        "### Table after episode 1",
+        "$$\n\\begin{array}{c|cc}\ns & Q(s,L) & Q(s,R)\\\\\n\\hline\n0 & 0 & -1\\\\\n1 & 0 & -1\\\\\n2 & 0 & 9\\\\\n3 & 0 & 0\n\\end{array}\n$$",
+        "### Episode 2, first transition",
+        "Transition 1 --L--> 0 has reward -1.",
+        "$$\nQ(1,L)=-1+0.9\\max(Q(0,L),Q(0,R))=-1+0.9\\max(0,-1)=-1\n$$",
+        "### Episode 2, second transition",
+        "Transition 0 --R--> 1 uses the already-updated row for state 1.",
+        "$$\nQ(0,R)=-1+0.9\\max(Q(1,L),Q(1,R))=-1+0.9\\max(-1,-1)=-1.9\n$$",
+        "### Episode 2, third transition",
+        "Transition 1 --R--> 2 now sees Q(2,R)=9.",
+        "$$\nQ(1,R)=-1+0.9\\max(Q(2,L),Q(2,R))=-1+0.9\\max(0,9)=7.1\n$$",
+        "### Episode 2, final transition",
+        "Transition 2 --R--> 3 again has terminal reward 9.",
+        "$$\nQ(2,R)=9+0.9\\cdot0=9\n$$",
+        "### Final table",
+        "$$\n\\begin{array}{c|cc}\ns & Q(s,L) & Q(s,R)\\\\\n\\hline\n0 & 0 & -1.9\\\\\n1 & -1 & 7.1\\\\\n2 & 0 & 9\\\\\n3 & 0 & 0\n\\end{array}\n$$"
+      ], [
+        "### Update rule",
+        "$$\nQ(s,a)\\leftarrow r+\\gamma\\max_{a'}Q(s',a')\n$$",
+        "因为 alpha=1。",
+        "### Episode 1",
+        "transition 0 --R--> 1 的 reward 是 -1，next values 全为 zero。",
+        "$$\nQ(0,R)=-1+0.9\\max(0,0)=-1\n$$",
+        "transition 1 --R--> 2 也是 reward -1，next values 仍为 zero。",
+        "$$\nQ(1,R)=-1+0.9\\max(0,0)=-1\n$$",
+        "transition 2 --R--> 3 进入 terminal goal，reward 是 9，future value 是 0。",
+        "$$\nQ(2,R)=9+0.9\\cdot0=9\n$$",
+        "### Episode 1 后 table",
+        "$$\n\\begin{array}{c|cc}\ns & Q(s,L) & Q(s,R)\\\\\n\\hline\n0 & 0 & -1\\\\\n1 & 0 & -1\\\\\n2 & 0 & 9\\\\\n3 & 0 & 0\n\\end{array}\n$$",
+        "### Episode 2，第一个 transition",
+        "transition 1 --L--> 0 的 reward 是 -1。",
+        "$$\nQ(1,L)=-1+0.9\\max(Q(0,L),Q(0,R))=-1+0.9\\max(0,-1)=-1\n$$",
+        "### Episode 2，第二个 transition",
+        "transition 0 --R--> 1 会使用 state 1 已经更新过的 row。",
+        "$$\nQ(0,R)=-1+0.9\\max(Q(1,L),Q(1,R))=-1+0.9\\max(-1,-1)=-1.9\n$$",
+        "### Episode 2，第三个 transition",
+        "transition 1 --R--> 2 现在能看到 Q(2,R)=9。",
+        "$$\nQ(1,R)=-1+0.9\\max(Q(2,L),Q(2,R))=-1+0.9\\max(0,9)=7.1\n$$",
+        "### Episode 2，最后一个 transition",
+        "transition 2 --R--> 3 再次获得 terminal reward 9。",
+        "$$\nQ(2,R)=9+0.9\\cdot0=9\n$$",
+        "### Final table",
+        "$$\n\\begin{array}{c|cc}\ns & Q(s,L) & Q(s,R)\\\\\n\\hline\n0 & 0 & -1.9\\\\\n1 & -1 & 7.1\\\\\n2 & 0 & 9\\\\\n3 & 0 & 0\n\\end{array}\n$$"
+      ])
+    }
+  ]);
+
+  add("vae", [
+    {
+      id: "final-practice-p3",
+      section: "Problem 3",
+      title: { en: "Derive the VAE Gaussian KL term and gradients", cn: "推导 VAE Gaussian KL term 和 gradients" },
+      original_excerpt: { en: "Detailed cue: q_phi(z|x) is N(mu, sigma squared I), prior p0 is N(0,I), z is d-dimensional; simplify the KL and compute gradients with respect to mu and scalar sigma.", cn: "题目要点：q_phi(z|x)=N(mu, sigma squared I)，prior p0=N(0,I)，z 为 d-dimensional；化简 KL，并计算对 mu 与 scalar sigma 的 gradients。" },
+      problem_understanding: { en: "This is the closed-form Gaussian KL used in a VAE ELBO. The isotropic covariance makes the trace and determinant terms simple.", cn: "这是 VAE ELBO 中常用的 closed-form Gaussian KL。isotropic covariance 让 trace 和 determinant terms 变得很简单。" },
+      knowledge_points: { en: "For q=N(mu,Sigma) and p=N(0,I), KL is one half of trace(Sigma)+mu^T mu-d-log det(Sigma).", cn: "对 q=N(mu,Sigma)、p=N(0,I)，KL 是 one half of trace(Sigma)+mu^T mu-d-log det(Sigma)。" },
+      tips: { en: ["Use the multivariate Gaussian KL formula.", "For sigma squared I, trace is d sigma squared and determinant is sigma to the 2d.", "Differentiate the simplified expression."], cn: ["使用 multivariate Gaussian KL formula。", "sigma squared I 的 trace 是 d sigma squared，determinant 是 sigma to the 2d。", "对化简后的 expression 求导。"] },
+      detailed_solution: detail([
+        "### Gaussian KL formula",
+        "$$\nD_{KL}(q\\|p)=\\frac12\\left[\\operatorname{tr}(\\Sigma_p^{-1}\\Sigma_q)+(\mu_p-\mu_q)^\\top\\Sigma_p^{-1}(\\mu_p-\mu_q)-d+\log\\frac{|\\Sigma_p|}{|\\Sigma_q|}\\right]\n$$",
+        "Here Sigma_p=I, mu_p=0, Sigma_q=sigma^2 I, and mu_q=mu.",
+        "### Compute terms",
+        "$$\n\\operatorname{tr}(I\\cdot\\sigma^2I)=d\\sigma^2\n$$",
+        "$$\n(0-\\mu)^\\top I(0-\\mu)=\\|\\mu\\|_2^2\n$$",
+        "$$\n|I|=1,\n\\qquad\n|\\sigma^2I|=\\sigma^{2d}\n$$",
+        "$$\n\\log\\frac{|I|}{|\\sigma^2I|}=-2d\\log\\sigma\n$$",
+        "### KL expression",
+        "$$\nD_{KL}(q_\\phi(z\\mid x)\\|p_0)=\n\\frac12\\left[\\|\\mu\\|_2^2+d\\sigma^2-d-2d\\log\\sigma\\right]\n$$",
+        "Equivalently,",
+        "$$\nD_{KL}=\\frac12\\left[\\|\\mu\\|_2^2+d(\\sigma^2-1-\\log\\sigma^2)\\right]\n$$",
+        "### Gradient with respect to mu",
+        "$$\n\\nabla_\\mu D_{KL}=\\mu\n$$",
+        "### Gradient with respect to scalar sigma",
+        "$$\n\\frac{\\partial D_{KL}}{\\partial\\sigma}\n=\\frac12d\\left(2\\sigma-\\frac{2}{\\sigma}\\right)\n=d\\left(\\sigma-\\frac1\\sigma\\right)\n$$",
+        "If sigma is diagonal with separate entries, the same derivative applies coordinatewise."
+      ], [
+        "### Gaussian KL formula",
+        "$$\nD_{KL}(q\\|p)=\\frac12\\left[\\operatorname{tr}(\\Sigma_p^{-1}\\Sigma_q)+(\mu_p-\mu_q)^\\top\\Sigma_p^{-1}(\\mu_p-\mu_q)-d+\log\\frac{|\\Sigma_p|}{|\\Sigma_q|}\\right]\n$$",
+        "这里 Sigma_p=I，mu_p=0，Sigma_q=sigma^2 I，mu_q=mu。",
+        "### Compute terms",
+        "$$\n\\operatorname{tr}(I\\cdot\\sigma^2I)=d\\sigma^2\n$$",
+        "$$\n(0-\\mu)^\\top I(0-\\mu)=\\|\\mu\\|_2^2\n$$",
+        "$$\n|I|=1,\n\\qquad\n|\\sigma^2I|=\\sigma^{2d}\n$$",
+        "$$\n\\log\\frac{|I|}{|\\sigma^2I|}=-2d\\log\\sigma\n$$",
+        "### KL expression",
+        "$$\nD_{KL}(q_\\phi(z\\mid x)\\|p_0)=\n\\frac12\\left[\\|\\mu\\|_2^2+d\\sigma^2-d-2d\\log\\sigma\\right]\n$$",
+        "等价地，",
+        "$$\nD_{KL}=\\frac12\\left[\\|\\mu\\|_2^2+d(\\sigma^2-1-\\log\\sigma^2)\\right]\n$$",
+        "### 对 mu 的 gradient",
+        "$$\n\\nabla_\\mu D_{KL}=\\mu\n$$",
+        "### 对 scalar sigma 的 gradient",
+        "$$\n\\frac{\\partial D_{KL}}{\\partial\\sigma}\n=\\frac12d\\left(2\\sigma-\\frac{2}{\\sigma}\\right)\n=d\\left(\\sigma-\\frac1\\sigma\\right)\n$$",
+        "如果 sigma 是 diagonal entries，各 coordinate 使用同样的 derivative。"
+      ])
+    }
+  ]);
+
+  add("diffusion", [
+    {
+      id: "final-practice-p4",
+      section: "Problem 4",
+      title: { en: "Prove the diffusion terminal KL expectation identity", cn: "证明 diffusion terminal KL expectation identity" },
+      original_excerpt: { en: "Detailed cue: using the Markov forward noising factorization, rewrite an expectation over q(x_{T-1},x_T|x0) of log p(x_T)/q(x_T|x_{T-1}) as a negative expected KL over x_{T-1}.", cn: "题目要点：使用 Markov forward noising factorization，把 q(x_{T-1},x_T|x0) 下 log p(x_T)/q(x_T|x_{T-1}) 的 expectation 改写成对 x_{T-1} 的 negative expected KL。" },
+      problem_understanding: { en: "The inner expectation is over x_T conditioned on x_{T-1}. Since KL(q||p)=E_q log(q/p), the problem's log(p/q) is exactly negative KL.", cn: "inner expectation 是在给定 x_{T-1} 后对 x_T 取。因为 KL(q||p)=E_q log(q/p)，题里的 log(p/q) 正好是 negative KL。" },
+      knowledge_points: { en: "Use Markov factorization q(x_{T-1},x_T|x0)=q(x_{T-1}|x0)q(x_T|x_{T-1}) and recognize an inner KL divergence.", cn: "使用 Markov factorization q(x_{T-1},x_T|x0)=q(x_{T-1}|x0)q(x_T|x_{T-1})，并识别 inner KL divergence。" },
+      tips: { en: ["Write the joint expectation as a nested integral.", "Keep the minus sign from log(p/q).", "The outer expectation remains over q(x_{T-1}|x0)."], cn: ["把 joint expectation 写成 nested integral。", "不要丢掉 log(p/q) 带来的 minus sign。", "outer expectation 仍然是对 q(x_{T-1}|x0)。"] },
+      detailed_solution: detail([
+        "### Markov factorization",
+        "$$\nq(x_{T-1},x_T\\mid x_0)=q(x_{T-1}\\mid x_0)q(x_T\\mid x_{T-1})\n$$",
+        "### Write the expectation as nested expectations",
+        "$$\n\\mathbb E_{q(x_{T-1},x_T\\mid x_0)}\\left[\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\\right]\n$$",
+        "$$\n=\n\\mathbb E_{q(x_{T-1}\\mid x_0)}\\left[\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\n\\right]\n\\right]\n$$",
+        "### Recognize the inner term",
+        "For fixed x_{T-1},",
+        "$$\nD_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n=\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{q(x_T\\mid x_{T-1})}{p(x_T)}\n\\right]\n$$",
+        "Therefore",
+        "$$\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\n\\right]\n=\n-D_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n$$",
+        "### Substitute back",
+        "$$\n\\mathbb E_{q(x_{T-1},x_T\\mid x_0)}\\left[\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\\right]\n=\n-\\mathbb E_{q(x_{T-1}\\mid x_0)}\\left[\nD_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n\\right]\n$$"
+      ], [
+        "### Markov factorization",
+        "$$\nq(x_{T-1},x_T\\mid x_0)=q(x_{T-1}\\mid x_0)q(x_T\\mid x_{T-1})\n$$",
+        "### 写成 nested expectations",
+        "$$\n\\mathbb E_{q(x_{T-1},x_T\\mid x_0)}\\left[\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\\right]\n$$",
+        "$$\n=\n\\mathbb E_{q(x_{T-1}\\mid x_0)}\\left[\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\n\\right]\n\\right]\n$$",
+        "### 识别 inner term",
+        "固定 x_{T-1} 时，",
+        "$$\nD_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n=\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{q(x_T\\mid x_{T-1})}{p(x_T)}\n\\right]\n$$",
+        "因此",
+        "$$\n\\mathbb E_{q(x_T\\mid x_{T-1})}\\left[\n\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\n\\right]\n=\n-D_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n$$",
+        "### Substitute back",
+        "$$\n\\mathbb E_{q(x_{T-1},x_T\\mid x_0)}\\left[\\log\\frac{p(x_T)}{q(x_T\\mid x_{T-1})}\\right]\n=\n-\\mathbb E_{q(x_{T-1}\\mid x_0)}\\left[\nD_{KL}(q(x_T\\mid x_{T-1})\\|p(x_T))\n\\right]\n$$"
+      ])
+    }
+  ]);
+
+  add("optimization", [
+    {
+      id: "final-practice-p5",
+      section: "Problem 5",
+      title: { en: "Derive Gamma log-likelihood and prove concavity by Hessian", cn: "推导 Gamma log-likelihood 并用 Hessian 证明 concavity" },
+      original_excerpt: { en: "Detailed cue: iid Gamma(alpha,beta) samples with shape alpha and rate beta; derive log-likelihood, compute the Hessian using digamma/trigamma, and show the Hessian is negative semidefinite on alpha>0,beta>0.", cn: "题目要点：iid Gamma(alpha,beta) samples，alpha 是 shape、beta 是 rate；推导 log-likelihood，使用 digamma/trigamma 计算 Hessian，并在 alpha>0,beta>0 上证明 Hessian negative semidefinite。" },
+      problem_understanding: { en: "The likelihood becomes easier after taking logs. Concavity is checked by the 2 by 2 Hessian: negative diagonal entries plus nonnegative determinant.", cn: "likelihood 取 log 后更容易处理。concavity 通过 2 by 2 Hessian 检查：diagonal entries 为 negative，并且 determinant nonnegative。" },
+      knowledge_points: { en: "Derivative of log Gamma is digamma psi; derivative of psi is trigamma psi_1. The bound alpha psi_1(alpha)>1 makes the Hessian determinant positive.", cn: "log Gamma 的 derivative 是 digamma psi；psi 的 derivative 是 trigamma psi_1。bound alpha psi_1(alpha)>1 使 Hessian determinant 为 positive。" },
+      tips: { en: ["Use sufficient statistics sum x_i and sum log x_i.", "Differentiate log Gamma through psi and psi_1.", "For a symmetric 2 by 2 Hessian, check diagonal signs and determinant."], cn: ["使用 sufficient statistics sum x_i 和 sum log x_i。", "通过 psi 与 psi_1 来 differentiate log Gamma。", "对 symmetric 2 by 2 Hessian，检查 diagonal signs 与 determinant。"] },
+      detailed_solution: detail([
+        "### Log-likelihood",
+        "For iid samples, define",
+        "$$\nS_x=\\sum_{i=1}^n x^{(i)},\n\\qquad\nS_{\\log x}=\\sum_{i=1}^n\\log x^{(i)}\n$$",
+        "The log-likelihood is",
+        "$$\n\\ell(\\alpha,\\beta)=n\\alpha\\log\\beta-n\\log\\Gamma(\\alpha)+(\\alpha-1)S_{\\log x}-\\beta S_x\n$$",
+        "### First derivatives",
+        "$$\n\\frac{\\partial\\ell}{\\partial\\alpha}=n\\log\\beta-n\\psi(\\alpha)+S_{\\log x}\n$$",
+        "$$\n\\frac{\\partial\\ell}{\\partial\\beta}=\\frac{n\\alpha}{\\beta}-S_x\n$$",
+        "### Second derivatives",
+        "$$\n\\frac{\\partial^2\\ell}{\\partial\\alpha^2}=-n\\psi_1(\\alpha),\n\\qquad\n\\frac{\\partial^2\\ell}{\\partial\\alpha\\partial\\beta}=\\frac{n}{\\beta},\n\\qquad\n\\frac{\\partial^2\\ell}{\\partial\\beta^2}=-\\frac{n\\alpha}{\\beta^2}\n$$",
+        "### Hessian",
+        "$$\n\\nabla^2\\ell(\\alpha,\\beta)=\n\\begin{pmatrix}\n-n\\psi_1(\\alpha) & n/\\beta\\\\\nn/\\beta & -n\\alpha/\\beta^2\n\\end{pmatrix}\n$$",
+        "### Negative semidefinite check",
+        "The diagonal entries are negative because psi_1(alpha)>0, alpha>0, and beta>0.",
+        "The determinant is",
+        "$$\n\\det(\\nabla^2\\ell)=\n\\frac{n^2}{\\beta^2}\\left(\\alpha\\psi_1(\\alpha)-1\\right)\n$$",
+        "Using the given trigamma lower bound, alpha psi_1(alpha)>1, so the determinant is positive.",
+        "### Conclusion",
+        "The Hessian is negative definite, hence negative semidefinite. The Gamma log-likelihood is concave in (alpha,beta) over the positive parameter region."
+      ], [
+        "### Log-likelihood",
+        "对 iid samples，定义",
+        "$$\nS_x=\\sum_{i=1}^n x^{(i)},\n\\qquad\nS_{\\log x}=\\sum_{i=1}^n\\log x^{(i)}\n$$",
+        "log-likelihood 是",
+        "$$\n\\ell(\\alpha,\\beta)=n\\alpha\\log\\beta-n\\log\\Gamma(\\alpha)+(\\alpha-1)S_{\\log x}-\\beta S_x\n$$",
+        "### First derivatives",
+        "$$\n\\frac{\\partial\\ell}{\\partial\\alpha}=n\\log\\beta-n\\psi(\\alpha)+S_{\\log x}\n$$",
+        "$$\n\\frac{\\partial\\ell}{\\partial\\beta}=\\frac{n\\alpha}{\\beta}-S_x\n$$",
+        "### Second derivatives",
+        "$$\n\\frac{\\partial^2\\ell}{\\partial\\alpha^2}=-n\\psi_1(\\alpha),\n\\qquad\n\\frac{\\partial^2\\ell}{\\partial\\alpha\\partial\\beta}=\\frac{n}{\\beta},\n\\qquad\n\\frac{\\partial^2\\ell}{\\partial\\beta^2}=-\\frac{n\\alpha}{\\beta^2}\n$$",
+        "### Hessian",
+        "$$\n\\nabla^2\\ell(\\alpha,\\beta)=\n\\begin{pmatrix}\n-n\\psi_1(\\alpha) & n/\\beta\\\\\nn/\\beta & -n\\alpha/\\beta^2\n\\end{pmatrix}\n$$",
+        "### Negative semidefinite check",
+        "diagonal entries 为 negative，因为 psi_1(alpha)>0、alpha>0、beta>0。",
+        "determinant 是",
+        "$$\n\\det(\\nabla^2\\ell)=\n\\frac{n^2}{\\beta^2}\\left(\\alpha\\psi_1(\\alpha)-1\\right)\n$$",
+        "由题目给的 trigamma lower bound，alpha psi_1(alpha)>1，所以 determinant positive。",
+        "### Conclusion",
+        "Hessian 是 negative definite，因此也是 negative semidefinite。Gamma log-likelihood 在 positive parameter region 上 concave。"
+      ])
+    }
+  ]);
+
+  add("positional-encoding", [
+    {
+      id: "final-practice-p6",
+      section: "Problem 6",
+      title: { en: "Represent sinusoidal position shifts as rotation matrices", cn: "把 sinusoidal position shift 表示成 rotation matrix" },
+      original_excerpt: { en: "Detailed cue: for each frequency w_i, p_i(pos)=(sin(w_i pos), cos(w_i pos)); find a 2 by 2 matrix R_i(k) so that p_i(pos+k)=R_i(k)p_i(pos), explain relative-position usefulness, and count learnable parameters.", cn: "题目要点：对每个 frequency w_i，p_i(pos)=(sin(w_i pos), cos(w_i pos))；找 2 by 2 matrix R_i(k) 使 p_i(pos+k)=R_i(k)p_i(pos)，解释对 relative position 的作用，并数 learnable parameters。" },
+      problem_understanding: { en: "The shift pos to pos+k becomes angle addition. The sine/cosine pair at the shifted position is a linear transformation of the original pair, with coefficients depending only on k.", cn: "pos 到 pos+k 的 shift 变成 angle addition。shifted position 的 sine/cosine pair 是 original pair 的 linear transformation，coefficients 只依赖 k。" },
+      knowledge_points: { en: "Angle addition identities turn sinusoidal encodings into a rotation-like 2D linear map. Fixed sinusoidal encodings have zero learnable parameters.", cn: "angle addition identities 把 sinusoidal encodings 转成 rotation-like 2D linear map。fixed sinusoidal encodings 有 zero learnable parameters。" },
+      tips: { en: ["Let a=w_i pos and b=w_i k.", "Keep the vector order as (sin, cos).", "The matrix depends on k but not on pos."], cn: ["令 a=w_i pos，b=w_i k。", "注意 vector order 是 (sin, cos)。", "matrix 依赖 k，但不依赖 pos。"] },
+      detailed_solution: detail([
+        "### Define the pair",
+        "$$\np_i(pos)=\\begin{pmatrix}\\sin(w_i pos)\\\\ \\cos(w_i pos)\\end{pmatrix}\n$$",
+        "For a shift k, set a=w_i pos and b=w_i k.",
+        "### Apply angle addition",
+        "$$\n\\sin(a+b)=\\sin a\\cos b+\\cos a\\sin b\n$$",
+        "$$\n\\cos(a+b)=\\cos a\\cos b-\\sin a\\sin b\n$$",
+        "### Matrix form",
+        "$$\np_i(pos+k)=\n\\begin{pmatrix}\n\\cos b & \\sin b\\\\\n-\\sin b & \\cos b\n\\end{pmatrix}\n\\begin{pmatrix}\\sin a\\\\ \\cos a\\end{pmatrix}\n$$",
+        "Substitute b=w_i k.",
+        "$$\nR_i(k)=\n\\begin{pmatrix}\n\\cos(w_i k) & \\sin(w_i k)\\\\\n-\\sin(w_i k) & \\cos(w_i k)\n\\end{pmatrix}\n$$",
+        "### Relative-position meaning",
+        "R_i(k) depends on the offset k but not the absolute position. This gives a linear relationship between encodings at positions separated by the same offset.",
+        "### Learnable parameters",
+        "The frequencies are fixed by the sinusoidal scheme, so the number of learnable parameters is",
+        "$$\n0\n$$"
+      ], [
+        "### Define the pair",
+        "$$\np_i(pos)=\\begin{pmatrix}\\sin(w_i pos)\\\\ \\cos(w_i pos)\\end{pmatrix}\n$$",
+        "对 shift k，令 a=w_i pos，b=w_i k。",
+        "### Apply angle addition",
+        "$$\n\\sin(a+b)=\\sin a\\cos b+\\cos a\\sin b\n$$",
+        "$$\n\\cos(a+b)=\\cos a\\cos b-\\sin a\\sin b\n$$",
+        "### Matrix form",
+        "$$\np_i(pos+k)=\n\\begin{pmatrix}\n\\cos b & \\sin b\\\\\n-\\sin b & \\cos b\n\\end{pmatrix}\n\\begin{pmatrix}\\sin a\\\\ \\cos a\\end{pmatrix}\n$$",
+        "代入 b=w_i k。",
+        "$$\nR_i(k)=\n\\begin{pmatrix}\n\\cos(w_i k) & \\sin(w_i k)\\\\\n-\\sin(w_i k) & \\cos(w_i k)\n\\end{pmatrix}\n$$",
+        "### Relative-position meaning",
+        "R_i(k) 依赖 offset k，而不依赖 absolute position。这说明相同 offset 的 positional encodings 之间有固定 linear relationship。",
+        "### Learnable parameters",
+        "sinusoidal scheme 的 frequencies 是 fixed 的，所以 learnable parameters 数量是",
+        "$$\n0\n$$"
+      ])
+    }
+  ]);
+
+  add("pac", [
+    {
+      id: "final-practice-p7",
+      section: "Problem 7",
+      title: { en: "Compare realizable and agnostic PAC guarantees", cn: "比较 realizable 与 agnostic PAC guarantees" },
+      original_excerpt: { en: "Detailed cue: state the agnostic PAC guarantee, compare sample requirements with the realizable case, and give a real-world example where zero-error realizability fails.", cn: "题目要点：写出 agnostic PAC guarantee，比较它和 realizable case 的 sample requirements，并给出现实中 zero-error realizability 失败的例子。" },
+      problem_understanding: { en: "Realizable PAC compares the learned classifier to zero error. Agnostic PAC compares it to the best hypothesis available inside H, because zero error may be impossible.", cn: "realizable PAC 把 learned classifier 和 zero error 比。agnostic PAC 则和 H 内 best hypothesis 比，因为 zero error 可能根本不可能。" },
+      knowledge_points: { en: "Agnostic learning gives excess-risk guarantees. Typical finite-class sample complexity changes from 1/epsilon in the realizable case to 1/epsilon squared in the agnostic case.", cn: "agnostic learning 给出 excess-risk guarantee。finite-class 中常见 sample complexity 从 realizable case 的 1/epsilon 变成 agnostic case 的 1/epsilon squared。" },
+      tips: { en: ["Use best-in-class loss, not zero.", "Mention the worse epsilon dependence for agnostic learning.", "Use label noise or missing features as the real-world failure mode."], cn: ["用 best-in-class loss，不要和 zero 比。", "说明 agnostic learning 对 epsilon 的依赖更差。", "现实例子可用 label noise 或 missing features。"] },
+      detailed_solution: detail([
+        "### Agnostic guarantee",
+        "In the agnostic setting, H may not contain a perfect classifier. The correct target is the best loss achievable inside H.",
+        "$$\nL(\\hat h)\\le \\inf_{h\\in H}L(h)+\\epsilon\n$$",
+        "with probability at least 1-delta.",
+        "### Sample comparison",
+        "For finite H, a common comparison is",
+        "$$\n\\text{realizable: } n=O\\left(\\frac{\\log|H|+\\log(1/\\delta)}{\\epsilon}\\right)\n$$",
+        "$$\n\\text{agnostic: } n=O\\left(\\frac{\\log|H|+\\log(1/\\delta)}{\\epsilon^2}\\right)\n$$",
+        "Agnostic learning usually needs more samples because it must estimate noisy losses accurately enough to compare hypotheses.",
+        "### Intuition",
+        "- Realizable: a perfect classifier exists, so samples can eliminate hypotheses that make mistakes.\n- Agnostic: every classifier may make mistakes, so the learner must distinguish small differences in true risk.",
+        "### Real-world example",
+        "Medical diagnosis from limited measurements violates realizability: two patients can share the same recorded features but have different true labels due to unobserved factors, measurement noise, or disease stage. Then no classifier using only those features can have zero true error."
+      ], [
+        "### Agnostic guarantee",
+        "agnostic setting 中，H 里不一定有 perfect classifier。正确目标是 H 内能达到的 best loss。",
+        "$$\nL(\\hat h)\\le \\inf_{h\\in H}L(h)+\\epsilon\n$$",
+        "with probability at least 1-delta。",
+        "### Sample comparison",
+        "对 finite H，常见比较是",
+        "$$\n\\text{realizable: } n=O\\left(\\frac{\\log|H|+\\log(1/\\delta)}{\\epsilon}\\right)\n$$",
+        "$$\n\\text{agnostic: } n=O\\left(\\frac{\\log|H|+\\log(1/\\delta)}{\\epsilon^2}\\right)\n$$",
+        "agnostic learning 通常需要更多 samples，因为它要准确估计 noisy losses，才能比较 hypotheses。",
+        "### Intuition",
+        "- realizable：存在 perfect classifier，samples 用来 eliminate 会犯错的 hypotheses。\n- agnostic：每个 classifier 都可能犯错，learner 要分辨 true risk 的小差异。",
+        "### Real-world example",
+        "用 limited measurements 做 medical diagnosis 会违反 realizability：两个 patients 可能 recorded features 几乎相同，但因为 unobserved factors、measurement noise 或 disease stage 不同而 labels 不同。因此只用这些 features 的 classifier 不可能 zero true error。"
+      ])
+    }
+  ]);
+
+  add("linear-algebra", [
+    {
+      id: "final-practice-p8",
+      section: "Problem 8",
+      title: { en: "Derive Wishart log-likelihood and precision-matrix concavity", cn: "推导 Wishart log-likelihood 与 precision-matrix concavity" },
+      original_excerpt: { en: "Detailed cue: iid Wishart matrices with known degrees of freedom n and unknown scale Sigma; compute the log-likelihood, rewrite using precision Omega=Sigma^{-1}, and show the Hessian in Omega is negative semidefinite.", cn: "题目要点：iid Wishart matrices，degrees of freedom n known，scale Sigma unknown；计算 log-likelihood，改写为 precision Omega=Sigma^{-1}，并证明 Omega parameterization 下 Hessian negative semidefinite。" },
+      problem_understanding: { en: "The log-likelihood is not globally concave in Sigma, but it is concave in the precision matrix Omega. The nonlinear part is log det Omega, whose second differential is negative.", cn: "log-likelihood 对 Sigma 不一定 globally concave，但对 precision matrix Omega 是 concave。非线性部分是 log det Omega，它的 second differential 为 negative。" },
+      knowledge_points: { en: "Use trace linearity, log determinant identities, d log|Omega|=tr(Omega^{-1}dOmega), and d(Omega^{-1})=-Omega^{-1}(dOmega)Omega^{-1}.", cn: "使用 trace linearity、log determinant identities、d log|Omega|=tr(Omega^{-1}dOmega)、以及 d(Omega^{-1})=-Omega^{-1}(dOmega)Omega^{-1)。" },
+      tips: { en: ["Collect all data into S=sum X_r.", "Drop constants before differentiating.", "Use a direction H to show the Hessian quadratic form is nonpositive."], cn: ["把 data 汇总成 S=sum X_r。", "differentiate 前先 drop constants。", "用 direction H 证明 Hessian quadratic form nonpositive。"] },
+      detailed_solution: detail([
+        "### Log-likelihood in Sigma",
+        "Let S=sum_{r=1}^m X_r and collect all terms independent of Sigma into C.",
+        "$$\n\\ell(\\Sigma)=C-\\frac12\\operatorname{tr}(\\Sigma^{-1}S)-\\frac{mn}{2}\\log|\\Sigma|\n$$",
+        "### Switch to precision",
+        "Let Omega=Sigma^{-1}. Then log|Sigma|=-log|Omega| and tr(Sigma^{-1}S)=tr(Omega S).",
+        "$$\n\\ell(\\Omega)=C+\\frac{mn}{2}\\log|\\Omega|-\\frac12\\operatorname{tr}(\\Omega S)\n$$",
+        "### First differential",
+        "$$\nd\\log|\\Omega|=\\operatorname{tr}(\\Omega^{-1}d\\Omega)\n$$",
+        "$$\nd\\ell=\\operatorname{tr}\\left[\\left(\\frac{mn}{2}\\Omega^{-1}-\\frac12S\\right)d\\Omega\\right]\n$$",
+        "So",
+        "$$\n\\nabla_\\Omega\\ell=\\frac{mn}{2}\\Omega^{-1}-\\frac12S\n$$",
+        "### Hessian operator",
+        "Only Omega^{-1} is nonlinear.",
+        "$$\nd(\\Omega^{-1})[H]=-\\Omega^{-1}H\\Omega^{-1}\n$$",
+        "Therefore",
+        "$$\n\\nabla_\\Omega^2\\ell[H]=-\frac{mn}{2}\\Omega^{-1}H\\Omega^{-1}\n$$",
+        "### Negative semidefinite quadratic form",
+        "Using Frobenius inner product and symmetric direction H,",
+        "$$\nD^2\\ell(\\Omega)[H,H]\n=\\left\\langle H,-\\frac{mn}{2}\\Omega^{-1}H\\Omega^{-1}\\right\\rangle\n$$",
+        "$$\n=-\\frac{mn}{2}\\operatorname{tr}(H\\Omega^{-1}H\\Omega^{-1})\n$$",
+        "$$\n=-\\frac{mn}{2}\\left\\|\\Omega^{-1/2}H\\Omega^{-1/2}\\right\\|_F^2\\le0\n$$",
+        "### Conclusion",
+        "The Hessian is negative semidefinite in the precision parameter Omega, so the Wishart log-likelihood is concave in Omega."
+      ], [
+        "### Sigma parameterization 下的 log-likelihood",
+        "令 S=sum_{r=1}^m X_r，并把所有与 Sigma 无关的 terms 放进 C。",
+        "$$\n\\ell(\\Sigma)=C-\\frac12\\operatorname{tr}(\\Sigma^{-1}S)-\\frac{mn}{2}\\log|\\Sigma|\n$$",
+        "### 换成 precision",
+        "令 Omega=Sigma^{-1}。则 log|Sigma|=-log|Omega|，tr(Sigma^{-1}S)=tr(Omega S)。",
+        "$$\n\\ell(\\Omega)=C+\\frac{mn}{2}\\log|\\Omega|-\\frac12\\operatorname{tr}(\\Omega S)\n$$",
+        "### First differential",
+        "$$\nd\\log|\\Omega|=\\operatorname{tr}(\\Omega^{-1}d\\Omega)\n$$",
+        "$$\nd\\ell=\\operatorname{tr}\\left[\\left(\\frac{mn}{2}\\Omega^{-1}-\\frac12S\\right)d\\Omega\\right]\n$$",
+        "所以",
+        "$$\n\\nabla_\\Omega\\ell=\\frac{mn}{2}\\Omega^{-1}-\\frac12S\n$$",
+        "### Hessian operator",
+        "只有 Omega^{-1} 是 nonlinear。",
+        "$$\nd(\\Omega^{-1})[H]=-\\Omega^{-1}H\\Omega^{-1}\n$$",
+        "因此",
+        "$$\n\\nabla_\\Omega^2\\ell[H]=-\frac{mn}{2}\\Omega^{-1}H\\Omega^{-1}\n$$",
+        "### Negative semidefinite quadratic form",
+        "使用 Frobenius inner product 和 symmetric direction H，",
+        "$$\nD^2\\ell(\\Omega)[H,H]\n=\\left\\langle H,-\\frac{mn}{2}\\Omega^{-1}H\\Omega^{-1}\\right\\rangle\n$$",
+        "$$\n=-\\frac{mn}{2}\\operatorname{tr}(H\\Omega^{-1}H\\Omega^{-1})\n$$",
+        "$$\n=-\\frac{mn}{2}\\left\\|\\Omega^{-1/2}H\\Omega^{-1/2}\\right\\|_F^2\\le0\n$$",
+        "### Conclusion",
+        "Hessian 在 precision parameter Omega 下 negative semidefinite，所以 Wishart log-likelihood 对 Omega concave。"
+      ])
+    }
+  ]);
+})();
+
 // Structured HW5 data override. Removes older terse HW5 sketches and re-adds
 // the same homework as detailed bilingual problem cards.
 (function enhanceHw5Problems() {

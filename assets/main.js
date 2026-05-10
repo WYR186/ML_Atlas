@@ -435,6 +435,61 @@ function setupTopicPageToc() {
     return true;
   }
 
+  function buildProblems(lang) {
+    const data = (window.POPUP_DATA || {})[slug];
+    const probs = (data && data.problems) || [];
+    if (!probs.length) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "toc-page-section toc-problems-section";
+
+    const head = document.createElement("div");
+    head.className = "toc-section-head";
+    const title = document.createElement("span");
+    title.textContent = labelForLang("Related Problems", "本章题目", lang);
+    const count = document.createElement("span");
+    count.className = "toc-problems-count";
+    count.textContent = String(probs.length);
+    head.append(title, count);
+
+    const ul = document.createElement("ul");
+    ul.className = "toc-page-list toc-problems-list";
+
+    const progress = (function () {
+      try { return JSON.parse(localStorage.getItem("ml_review_progress_v1") || "{}"); }
+      catch { return {}; }
+    })();
+
+    probs.forEach((pr) => {
+      const li = document.createElement("li");
+      li.className = "toc-depth-2";
+      const a = document.createElement("a");
+      // Topic pages live under /topics/, so HW PDFs resolve via ../HW/.
+      a.href = pr.hw_pdf || `../HW/${pr.hw}.pdf`;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      a.className = "toc-problem-link";
+      const done = !!progress[`prob:${slug}:${pr.id}`] || !!progress[slug];
+      if (done) a.classList.add("toc-problem-done");
+
+      const meta = document.createElement("span");
+      meta.className = "toc-problem-meta";
+      meta.textContent = `${pr.hw}${pr.section ? " " + pr.section : ""}`;
+
+      const titleEl = document.createElement("span");
+      titleEl.className = "toc-problem-title";
+      const t = pr.title;
+      titleEl.textContent = (t && (lang === "cn" ? (t.cn || t.en) : (t.en || t.cn))) || pr.id;
+
+      a.append(meta, titleEl);
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+
+    wrap.append(head, ul);
+    return wrap;
+  }
+
   function render() {
     const lang = reviewLang();
     const headings = Array.from(main.querySelectorAll("section.topic > h2, section.topic > h3"))
@@ -471,6 +526,10 @@ function setupTopicPageToc() {
 
     section.append(sectionHead, ul);
     toc.appendChild(section);
+
+    const problems = buildProblems(lang);
+    if (problems) toc.appendChild(problems);
+
     updateCollapseCopy(aside.classList.contains("is-collapsed"));
     requestAnimationFrame(updateActiveTocLink);
   }
@@ -487,6 +546,12 @@ function setupTopicPageToc() {
     if (e.target.closest(".lang-switch button")) {
       setTimeout(render, 30);
     }
+  });
+  // Re-render TOC when popup checkbox toggles a problem's done state —
+  // the related-problems list shows a strike-through for completed
+  // problems. Listen for the existing progress event.
+  document.addEventListener("ml-progress-rerender", () => {
+    requestAnimationFrame(render);
   });
 }
 

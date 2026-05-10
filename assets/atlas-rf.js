@@ -108,6 +108,22 @@ const CONNS = [
   { from: "g-modern",         to: "g-generative",     sh: "sl", th: "tr" },
 ];
 
+// ─────────────────── Theme-aware edge colors ───────────────────
+// Read computed CSS variables off <html> so edges match the active
+// theme (light / dark). Re-runs whenever ml-theme-changed fires.
+function readThemeEdgeColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const get = (name, fallback) => {
+    const v = cs.getPropertyValue(name).trim();
+    return v || fallback;
+  };
+  return {
+    edge:        get("--rf-edge",        "#aeb4c0"),
+    edgeAnim:    get("--rf-edge-anim",   "#10b981"),
+    bgDot:       get("--rf-bg-dot",      "#e2e8f0"),
+  };
+}
+
 // ─────────────────── Layout helpers ───────────────────
 function groupSize(itemCount, cols) {
   const c = Math.max(1, cols);
@@ -226,7 +242,7 @@ const NODE_TYPES = {
 };
 
 // ─────────────────── Layout builder ───────────────────
-function buildLayout({ groups, topics, lang, progress, popupData }) {
+function buildLayout({ groups, topics, lang, progress, popupData, themeColors }) {
   const nodes = [];
   const edges = [];
 
@@ -303,7 +319,9 @@ function buildLayout({ groups, topics, lang, progress, popupData }) {
     } else if (from.startsWith("g-") && to.startsWith("g-")) {
       animated = groupDone[from.slice(2)] && !groupDone[to.slice(2)];
     }
-    const stroke = animated ? "#10b981" : "#aeb4c0";
+    const stroke = animated
+      ? (themeColors && themeColors.edgeAnim) || "#10b981"
+      : (themeColors && themeColors.edge) || "#aeb4c0";
     const strokeWidth = animated ? 3.0 : 2.6;
     const style = { stroke, strokeWidth };
     if (dashed) style.strokeDasharray = "7 6";
@@ -396,6 +414,16 @@ function useProgress() {
   }, []);
   return progress;
 }
+// Re-read CSS edge tokens whenever theme.js dispatches ml-theme-changed.
+function useThemeColors() {
+  const [colors, setColors] = useState(() => readThemeEdgeColors());
+  useEffect(() => {
+    const reload = () => setColors(readThemeEdgeColors());
+    document.addEventListener("ml-theme-changed", reload);
+    return () => document.removeEventListener("ml-theme-changed", reload);
+  }, []);
+  return colors;
+}
 
 // ─────────────────── App ───────────────────
 function AtlasInner() {
@@ -427,10 +455,11 @@ function AtlasInner() {
   }, []);
 
   useConfettiOnComplete(progress, topics, popupData);
+  const themeColors = useThemeColors();
 
   const { nodes, edges } = useMemo(
-    () => buildLayout({ groups, topics, lang, progress, popupData }),
-    [lang, progress, groups, topics, popupData]
+    () => buildLayout({ groups, topics, lang, progress, popupData, themeColors }),
+    [lang, progress, groups, topics, popupData, themeColors]
   );
 
   // Side-card ring update (the ring lives outside the React tree).
@@ -486,10 +515,10 @@ function AtlasInner() {
       minZoom: 0.2, maxZoom: 1.6,
       defaultEdgeOptions: {
         type: "smoothstep",
-        style: { stroke: "#aeb4c0", strokeWidth: 2.6 },
+        style: { stroke: (themeColors && themeColors.edge) || "#aeb4c0", strokeWidth: 2.6 },
       },
     },
-      h(Background, { color: "#e2e8f0", gap: 28, size: 1 }),
+      h(Background, { color: (themeColors && themeColors.bgDot) || "#e2e8f0", gap: 28, size: 1 }),
     ),
   );
 }

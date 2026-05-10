@@ -80,8 +80,9 @@
 
   function sourceLinks(prob) {
     const isLecture = String(prob.hw || "").startsWith("Lecture_");
+    const hasSolPdf = Object.prototype.hasOwnProperty.call(prob, "sol_pdf");
     const hwPdf = prob.hw_pdf || (isLecture ? `slides/${prob.hw}.pdf` : `HW/${prob.hw}.pdf`);
-    const solPdf = prob.sol_pdf || (!isLecture && prob.hw ? `HW/${prob.hw}_sol.pdf` : "");
+    const solPdf = hasSolPdf ? prob.sol_pdf : (!isLecture && prob.hw ? `HW/${prob.hw}_sol.pdf` : "");
     return `
       <div class="popup-problem-links">
         <a class="popup-full-link" href="${escapeHtml(hwPdf)}" target="_blank">${isLecture ? tr("课件出处", "Lecture source") : tr("完整原题", "Full problem")}</a>
