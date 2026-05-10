@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="llm.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,76 +37,215 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / LLM</div>
       <h1>🔮 <span class="en-only">LLM</span><span class="cn-only">大语言模型</span></h1>
       <div class="subtitle"><span class="en-only">Autoregressive NLL · Perplexity</span><span class="cn-only">Autoregressive NLL · PPL</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_18.pdf" target="_blank">📄 Lecture 18</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_19.pdf" target="_blank">📄 Lecture 19</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
-<section class="topic" id="llm-en">
-  <h2>🤖 Large Language Models</h2>
-  <p>Modern LLMs are decoder-only transformers trained on next-token prediction.</p>
+<section class="topic lesson-section concept" id="llm-concept-en">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">A large language model is a decoder-only Transformer trained to predict the next token from previous tokens. The model learns a probability distribution over the vocabulary at every position, then generation repeatedly samples one token and feeds it back into the context.</p>
+  <ul class="mini-list">
+    <li><b>Lecture 18</b>: architecture, tokenization, final prediction, and decoding.</li>
+    <li><b>Lecture 19</b>: pre-training objective, perplexity, SFT, alignment, LoRA, and limitations.</li>
+    <li><b>HW4</b>: positional encoding, attention, multi-head attention, and parameter counting for a decoder-only LLM.</li>
+  </ul>
+</section>
 
-  <div class="cols2">
-    <div class="callout formula"><div class="head">Autoregressive factorization</div>
-      <div class="eq">$$ P_\theta(X)=\prod_{t=1}^{T} P_\theta(x_t\mid x_{<t}) $$</div></div>
-    <div class="callout formula"><div class="head">NLL / cross-entropy</div>
-      <div class="eq">$$ L(X;\theta)=-\tfrac{1}{T}\sum_t \log P_\theta(x_t\mid x_{<t}) $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">Perplexity</div>
-      <div class="eq">$$ PP(X)=\exp(L(X;\theta)) $$</div>
-      <div style="font-size:13px;">If $L=2$ then $PP=e^2\approx 7.39$.</div></div>
-  </div>
+<section class="topic lesson-section plain" id="llm-plain-en">
+  <h2>2. Plain-English Explanation</h2>
+  <p>An LLM is an extremely practiced autocomplete system. It reads the current context, turns it into vectors, runs many Transformer blocks, and asks: "which token is most plausible next?"</p>
+  <p>The surprising part is scale. If the model sees enough text and has enough capacity, next-token prediction forces it to internalize grammar, facts, style, reasoning patterns, and code patterns because all of those help predict the next token.</p>
+</section>
 
-  <div class="callout">
-    <div class="head">🧱 BPE tokenization</div>
-    <p>Iteratively merges frequent symbol pairs to balance vocabulary size against sequence length.</p>
+<section class="topic lesson-section intuition-section" id="llm-intuition-en">
+  <h2>3. Core Intuition</h2>
+  <p>The training target is simple, but the hidden task is rich. To predict the next token well, the model often needs to identify topic, syntax, entities, long-range dependencies, and likely user intent. The decoder-only Transformer is efficient because all next-token losses for a training sequence can be computed in one parallel forward pass.</p>
+  <div class="study-box">
+    <p>Base models are document continuers. Instruction-tuned models are assistants. That distinction is the reason Lecture 19 separates pre-training from post-training.</p>
   </div>
+</section>
 
-  <div class="callout">
-    <div class="head">🛠️ Post-training stages</div>
-    <ul>
-      <li><b>Pre-training</b>: huge unlabeled text corpus, next-token loss.</li>
-      <li><b>SFT</b>: supervised fine-tuning on instruction–response pairs.</li>
-      <li><b>RLHF</b>: reinforcement learning from human preferences.</li>
-      <li><b>ICL</b>: in-context learning — no parameter updates, just prompt examples.</li>
-    </ul>
-  </div>
+<section class="topic lesson-section equations" id="llm-equations-en">
+  <h2>4. Key Equations</h2>
+  <h3>Autoregressive factorization</h3>
+  <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
+  <h3>Next-token probability</h3>
+  <div class="eq">$$ P_\theta(x_t=i\mid x_{\lt t})=\frac{\exp(z_{t,i})}{\sum_{j\in V}\exp(z_{t,j})} $$</div>
+  <p>$z_{t,i}$ is the logit from the LM head for vocabulary token $i$.</p>
+  <h3>NLL / cross-entropy loss</h3>
+  <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
+  <h3>Perplexity</h3>
+  <div class="eq">$$ PP(X)=\exp(\mathcal{L}(X;\theta))=\left(\prod_{t=1}^T P_\theta(x_t\mid x_{\lt t})\right)^{-1/T} $$</div>
+  <h3>Temperature decoding</h3>
+  <div class="eq">$$ P_T(i)=\mathrm{softmax}\!\left(\frac{z_i}{T}\right) $$</div>
+  <p>For any finite $T>0$, top-1 does not change because dividing logits by a positive constant preserves their order. The distribution sharpness changes.</p>
+  <h3>LoRA update</h3>
+  <div class="eq">$$ W = W_0+\Delta W,\qquad \Delta W=BA,\qquad r\ll \min(d,k) $$</div>
+</section>
+
+<section class="topic lesson-section examples" id="llm-examples-en">
+  <h2>5. Worked Examples</h2>
+  <h3>Lecture 19: perplexity from three correct-token probabilities</h3>
+  <p class="source-note">Source: Lecture 19, paraphrased.</p>
+  <p>If the model assigns probability $0.25$ to each of three true next tokens, then</p>
+  <div class="eq">$$ PP=(0.25\cdot 0.25\cdot 0.25)^{-1/3}=4 $$</div>
+  <p>Interpretation: on average, the model is as uncertain as choosing uniformly among four plausible next tokens.</p>
+  <h3>Lecture 18: top-1 under temperature</h3>
+  <p>Temperature rescales all logits by $1/T$. The highest logit remains the highest for $T>0$, so greedy top-1 does not change. Sampling behavior does change: small $T$ is sharper; large $T$ is flatter.</p>
+  <h3>HW4 §2.4: simplified decoder-only parameter count</h3>
+  <p>For the OLMo-style configuration in HW4, the simplified formula $L(4D^2+2DF)+2VD$ gives about 5.45B parameters. This is why the feed-forward width and vocabulary matrices matter so much.</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="llm-tips-en">
+  <h2>6. Problem-Solving Tips</h2>
+  <ol>
+    <li>For training objective questions, start with autoregressive factorization, then take negative log.</li>
+    <li>For perplexity, remember "exponential of average NLL."</li>
+    <li>For tokenization questions, compare word-level, character-level, and subword BPE tradeoffs.</li>
+    <li>For post-training questions, separate SFT from RLHF: SFT imitates demonstrations; RLHF optimizes preferences.</li>
+    <li>For decoding questions, distinguish choosing a token from changing the probability distribution.</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="llm-mistakes-en">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>Calling a base model an instruction follower. A base model is primarily a document continuer.</li>
+    <li>Forgetting to mask system/user tokens during SFT loss when the target is assistant-only generation.</li>
+    <li>Thinking lower perplexity always means safer or more truthful output. It measures predictive likelihood, not truth.</li>
+    <li>Sampling from all tokens without top-k/top-p filtering, which can select extremely low-probability nonsense tokens.</li>
+    <li>Assuming LoRA updates all weights. It freezes $W_0$ and trains small low-rank matrices.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="llm-exam-en">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>Write the autoregressive probability and NLL loss.</li>
+    <li>Compute and interpret perplexity.</li>
+    <li>Explain BPE: repeatedly merge frequent token pairs until the vocabulary target is reached.</li>
+    <li>Explain greedy, sampling, top-k, and top-p decoding.</li>
+    <li>Compare pre-training, SFT, RLHF, ICL, domain fine-tuning, and LoRA.</li>
+    <li>List current LLM limitations: context window, hallucination, prompt sensitivity, jailbreaks, and unreliable reasoning.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="llm-checklist-en">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>LLM = decoder-only Transformer + next-token prediction.</li>
+    <li>BPE balances vocabulary size and sequence length.</li>
+    <li>LM head maps hidden state to vocabulary logits.</li>
+    <li>Perplexity = $\exp(\text{average NLL})$.</li>
+    <li>SFT teaches instruction following; RLHF aligns preferences.</li>
+    <li>LoRA trains low-rank adapters, not the full matrix.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
-<section class="topic" id="llm">
-      <h2><span class="icon">🤖</span> 4. Large Language Models · LLM</h2>
-      <p>主流是 decoder-only Transformer，做 next-token prediction。</p>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">Autoregressive Factorization</div>
-          <div class="eq">$$ P_\theta(X)=\prod_{t=1}^{T} P_\theta(x_t\mid x_{<t}) $$</div></div>
-        <div class="callout formula"><div class="head">NLL / Cross-Entropy</div>
-          <div class="eq">$$ L(X;\theta)=-\tfrac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{<t}) $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">Perplexity</div>
-          <div class="eq">$$ PP(X)=\exp\!\big(L(X;\theta)\big) $$</div>
-          <div style="font-size:13px;">如 $L=2 \Rightarrow PP=e^2\approx 7.39$。</div></div>
-      </div>
-      <div class="callout">
-        <div class="head">🧱 BPE 分词</div>
-        <p>迭代合并高频符号对，平衡词表大小与序列长度。</p>
-      </div>
-      <div class="callout">
-        <div class="head">🛠️ Post-training 阶段（区分清楚！）</div>
-        <ul>
-          <li><b>Pre-training</b>：海量无标注文本上的 next-token loss。</li>
-          <li><b>SFT</b>（Supervised Fine-Tuning）：指令 - 回复对的监督学习。</li>
-          <li><b>RLHF</b>：人类反馈强化学习（偏好对齐）。</li>
-          <li><b>ICL</b>（In-context Learning）：不更新参数，仅靠 prompt 示例。</li>
-        </ul>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · Mask 必要性</div>
-        <p>训练时若允许关注未来 token，会信息泄露（“看答案”），训练–推理失配。Causal mask 保证每步只依赖过去。</p>
-      </div>
-    </section>
+<section class="topic lesson-section concept" id="llm-concept-cn">
+  <h2>1. 概念理解 / Concept Understanding</h2>
+  <p class="topic-lede">Large Language Model 是一个 decoder-only Transformer，训练目标是根据过去 tokens 预测下一个 token。模型在每个位置输出整个 vocabulary 上的概率分布；生成时反复采样下一个 token，再把它接回 context。</p>
+  <ul class="mini-list">
+    <li><b>Lecture 18</b>：architecture、tokenization、final prediction、decoding。</li>
+    <li><b>Lecture 19</b>：pre-training objective、perplexity、SFT、alignment、LoRA、limitations。</li>
+    <li><b>HW4</b>：positional encoding、attention、multi-head attention、decoder-only LLM 参数量。</li>
+  </ul>
+</section>
 
-    
+<section class="topic lesson-section plain" id="llm-plain-cn">
+  <h2>2. 大白话理解 / Plain-English Explanation</h2>
+  <p>LLM 可以先理解成一个“练到极致的 autocomplete”。它读当前上下文，把文字变成向量，经过很多 Transformer blocks，然后问自己：“下一个 token 最可能是什么？”</p>
+  <p>神奇的地方在 scale。只要文本够多、模型够大，next-token prediction 会逼着模型学语法、事实、风格、推理模式、代码模式，因为这些都能帮它更好预测下一个 token。</p>
+</section>
+
+<section class="topic lesson-section intuition-section" id="llm-intuition-cn">
+  <h2>3. 核心直觉 / Core Intuition</h2>
+  <p>训练目标看起来很简单，但背后隐藏任务很丰富。为了预测下一个 token，模型常常必须判断主题、语法、实体、长程依赖和用户意图。decoder-only Transformer 的训练效率高，是因为一个 sequence 里的所有 next-token losses 可以在一次并行 forward pass 里算完。</p>
+  <div class="study-box">
+    <p>Base model 本质是 document continuer；instruction-tuned model 才更像 assistant。这就是 Lecture 19 要区分 pre-training 和 post-training 的原因。</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="llm-equations-cn">
+  <h2>4. 核心公式 / Key Equations</h2>
+  <h3>Autoregressive factorization</h3>
+  <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
+  <h3>Next-token probability</h3>
+  <div class="eq">$$ P_\theta(x_t=i\mid x_{\lt t})=\frac{\exp(z_{t,i})}{\sum_{j\in V}\exp(z_{t,j})} $$</div>
+  <p>$z_{t,i}$ 是 LM head 对 vocabulary token $i$ 给出的 logit。</p>
+  <h3>NLL / cross-entropy loss</h3>
+  <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
+  <h3>Perplexity</h3>
+  <div class="eq">$$ PP(X)=\exp(\mathcal{L}(X;\theta))=\left(\prod_{t=1}^T P_\theta(x_t\mid x_{\lt t})\right)^{-1/T} $$</div>
+  <h3>Temperature decoding</h3>
+  <div class="eq">$$ P_T(i)=\mathrm{softmax}\!\left(\frac{z_i}{T}\right) $$</div>
+  <p>任何有限的 $T>0$ 都不会改变 top-1，因为除以正数不改变 logits 排序；改变的是分布尖锐程度。</p>
+  <h3>LoRA update</h3>
+  <div class="eq">$$ W = W_0+\Delta W,\qquad \Delta W=BA,\qquad r\ll \min(d,k) $$</div>
+</section>
+
+<section class="topic lesson-section examples" id="llm-examples-cn">
+  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h3>Lecture 19：三个 token 概率算 perplexity</h3>
+  <p class="source-note">出处：Lecture 19，题意转述。</p>
+  <p>如果模型对三个真实 next tokens 都给了 $0.25$ 的概率：</p>
+  <div class="eq">$$ PP=(0.25\cdot 0.25\cdot 0.25)^{-1/3}=4 $$</div>
+  <p>解释：平均来说，模型像是在 4 个同样可能的 token 中猜。</p>
+  <h3>Lecture 18：temperature 会不会改变 top-1?</h3>
+  <p>Temperature 只是把所有 logits 除以同一个正数 $T$。最大 logit 仍然最大，所以 greedy top-1 不变。但 sampling 会变：小 $T$ 更尖锐，大 $T$ 更平。</p>
+  <h3>HW4 §2.4：decoder-only 参数量估算</h3>
+  <p>HW4 的 OLMo-style 配置代入 $L(4D^2+2DF)+2VD$，约为 5.45B parameters。这说明 FFN width 和 vocabulary matrices 都是参数大头。</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="llm-tips-cn">
+  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <ol>
+    <li>训练目标题：先写 autoregressive factorization，再取 negative log。</li>
+    <li>Perplexity 记住一句：average NLL 的指数。</li>
+    <li>Tokenization 题：比较 word-level、character-level、subword BPE 的 tradeoff。</li>
+    <li>Post-training 题：SFT 是模仿 demonstrations；RLHF 是优化 human preferences。</li>
+    <li>Decoding 题：区分“怎么选 token”和“概率分布如何改变”。</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="llm-mistakes-cn">
+  <h2>7. 常见错误 / Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>把 base model 当成 instruction follower。base model 主要是 document continuer。</li>
+    <li>SFT 时忘记 mask system/user tokens，只应该让 assistant target 部分产生主要 loss。</li>
+    <li>以为 perplexity 低就代表更安全、更真实。它只衡量 predictive likelihood，不衡量 truth。</li>
+    <li>无过滤地从全部 tokens 采样，可能抽到极低概率的奇怪 token。</li>
+    <li>以为 LoRA 更新整张矩阵。LoRA 是冻结 $W_0$，训练低秩矩阵 $A,B$。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="llm-exam-cn">
+  <h2>8. 考试重点 / Exam Focus</h2>
+  <ul class="mini-list">
+    <li>会写 autoregressive probability 和 NLL loss。</li>
+    <li>会计算并解释 perplexity。</li>
+    <li>会解释 BPE：反复 merge 高频 token pair，直到达到目标 vocabulary size。</li>
+    <li>会区分 greedy、sampling、top-k、top-p decoding。</li>
+    <li>会比较 pre-training、SFT、RLHF、ICL、domain fine-tuning、LoRA。</li>
+    <li>会列 current LLM limitations：context window、hallucination、prompt sensitivity、jailbreaks、unreliable reasoning。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="llm-checklist-cn">
+  <h2>9. 速记清单 / Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>LLM = decoder-only Transformer + next-token prediction。</li>
+    <li>BPE 平衡 vocabulary size 和 sequence length。</li>
+    <li>LM head 把 hidden state 映射到 vocabulary logits。</li>
+    <li>Perplexity = $\exp(\text{average NLL})$。</li>
+    <li>SFT 教 instruction following；RLHF 做 preference alignment。</li>
+    <li>LoRA 训练 low-rank adapters，不训练整张矩阵。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -121,7 +261,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Auto-build TOC from the 9 section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
@@ -130,20 +270,15 @@
 
     function build() {
       const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
-      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const items = main.querySelectorAll('section.topic > h2');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="positional-encoding.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,42 +37,190 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / Positional Encoding</div>
       <h1>🔮 <span class="en-only">Positional Encoding</span><span class="cn-only">位置编码</span></h1>
       <div class="subtitle"><span class="en-only">sin / cos position injection</span><span class="cn-only">sin / cos 注入位置</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
-<section class="topic" id="pe-en">
-  <h2>🌊 Positional Encoding</h2>
-  <p>Self-attention is permutation-invariant, so token positions must be injected explicitly.</p>
+<section class="topic lesson-section concept" id="pe-concept-en">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">Positional encoding injects sequence order into a Transformer. Self-attention by itself sees a set of token vectors, so the model needs extra information telling it which token came first, second, third, and so on.</p>
+  <p>Lecture 16 introduces positional information as the missing ingredient that lets self-attention handle word order instead of treating tokens as an unordered set.</p>
+</section>
 
-  <div class="callout formula">
-    <div class="head">Sinusoidal PE</div>
-    <div class="eq">$$ PE_{(pos,2i)}=\sin\!\Big(\tfrac{pos}{10000^{2i/d}}\Big),\;PE_{(pos,2i+1)}=\cos\!\Big(\tfrac{pos}{10000^{2i/d}}\Big) $$</div>
-  </div>
+<section class="topic lesson-section plain" id="pe-plain-en">
+  <h2>2. Plain-English Explanation</h2>
+  <p>Think of token embeddings as words written on identical sticky notes. Without position, shuffling the notes can look too similar to the model. Positional encoding writes a small coordinate mark on every sticky note: "this is position 0", "this is position 1", and so on.</p>
+  <p>Sinusoidal positional encoding uses waves of different frequencies. Low-frequency waves change slowly and help with broad location; high-frequency waves change quickly and help distinguish nearby positions.</p>
+</section>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <p>$PE(pos+k)$ is a <b>linear function</b> of $PE(pos)$ (a 2-D rotation depending only on $k$). This lets the model learn relative positions easily.</p>
+<section class="topic lesson-section intuition-section" id="pe-intuition-en">
+  <h2>3. Core Intuition</h2>
+  <p>The sine/cosine design is useful because shifting position by $k$ becomes a rotation in each 2-D frequency pair. That means the model can learn relative distance patterns like "look two tokens back" using linear operations on the positional features.</p>
+  <div class="study-box">
+    <p>This is the key bridge to HW4 §2.1: $PE(pos+k)$ can be written as a linear function of $PE(pos)$, and the dot product between two positional encodings depends only on their distance $k$.</p>
   </div>
+</section>
+
+<section class="topic lesson-section equations" id="pe-equations-en">
+  <h2>4. Key Equations</h2>
+  <h3>Sinusoidal positional encoding</h3>
+  <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
+  <p>Let $\omega_i=10000^{-2i/d_{\text{model}}}$. Then each adjacent pair is $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$.</p>
+  <h3>Shift by $k$</h3>
+  <div class="eq">$$ \begin{aligned}
+PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
+PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
+\end{aligned} $$</div>
+  <h3>Relative-position dot product</h3>
+  <div class="eq">$$ PE(pos_1)^\top PE(pos_2)=\sum_i \cos\!\big((pos_2-pos_1)\omega_i\big) $$</div>
+</section>
+
+<section class="topic lesson-section examples" id="pe-examples-en">
+  <h2>5. Worked Examples</h2>
+  <h3>HW4 §2.1.1: write the formula</h3>
+  <p class="source-note">Source: HW4 §2.1, paraphrased.</p>
+  <p>For every frequency index $i$, put sine in the even coordinate and cosine in the odd coordinate. The denominator $10000^{2i/d_{\text{model}}}$ sets the wavelength.</p>
+  <h3>HW4 §2.1.2: prove the linear shift property</h3>
+  <p>Use the angle-addition identities:</p>
+  <div class="eq">$$ \sin((pos+k)\omega)=\sin(pos\omega)\cos(k\omega)+\cos(pos\omega)\sin(k\omega) $$</div>
+  <div class="eq">$$ \cos((pos+k)\omega)=\cos(pos\omega)\cos(k\omega)-\sin(pos\omega)\sin(k\omega) $$</div>
+  <p>The coefficients depend on $k$ and $\omega$, not on $pos$, so the shift is linear in the two coordinates of $PE(pos)$.</p>
+  <h3>HW4 §2.1.3: dot product depends only on distance</h3>
+  <p>For one frequency pair, $\sin a\sin b+\cos a\cos b=\cos(b-a)$. Summing over frequencies gives a function of $pos_2-pos_1$ only.</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="pe-tips-en">
+  <h2>6. Problem-Solving Tips</h2>
+  <ol>
+    <li>Define $\omega_i$ first. It makes every derivation shorter.</li>
+    <li>Group coordinates in pairs: $(2i,2i+1)$ is one sine/cosine pair.</li>
+    <li>Use angle-addition identities, not induction, for $PE(pos+k)$.</li>
+    <li>For dot products, pair sine with sine and cosine with cosine at the same frequency.</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="pe-mistakes-en">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>Swapping the sine and cosine coordinates. The exam usually follows the Transformer paper convention: even is sine, odd is cosine.</li>
+    <li>Writing the shift coefficients as functions of $pos$. They should depend on $k$ and frequency only.</li>
+    <li>Claiming self-attention naturally knows order. It does not without positional information.</li>
+    <li>Forgetting that the dot-product proof sums over every frequency pair.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="pe-exam-en">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>Memorize the two PE equations.</li>
+    <li>Be able to show $PE(pos+k)$ is a 2-D rotation applied to $PE(pos)$ for each frequency.</li>
+    <li>Be able to prove $PE(pos_1)^\top PE(pos_2)$ depends only on relative offset.</li>
+    <li>Explain in one sentence why Transformers need positional encoding.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="pe-checklist-en">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Self-attention is order-blind without PE.</li>
+    <li>Even coordinate: sine. Odd coordinate: cosine.</li>
+    <li>$\omega_i=10000^{-2i/d_{\text{model}}}$.</li>
+    <li>Shift by $k$ equals a rotation depending on $k$.</li>
+    <li>Dot product depends on relative distance, not absolute position.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
-<section class="topic" id="pe">
-      <h2><span class="icon">🌊</span> 2. Positional Encoding · 位置编码</h2>
-      <p>Self-attention 对输入顺序不敏感（permutation invariant），需要显式注入位置信息。</p>
-      <div class="callout formula">
-        <div class="head">Sinusoidal PE</div>
-        <div class="eq">$$ PE_{(pos,2i)}=\sin\!\Big(\tfrac{pos}{10000^{2i/d}}\Big),\quad PE_{(pos,2i+1)}=\cos\!\Big(\tfrac{pos}{10000^{2i/d}}\Big) $$</div>
-      </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <p>$PE(pos+k)$ 可表示为 $PE(pos)$ 的<b>线性变换</b>（旋转 / 相位移动），便于模型学习相对位置关系。</p>
-      </div>
-    </section>
+<section class="topic lesson-section concept" id="pe-concept-cn">
+  <h2>1. 概念理解 / Concept Understanding</h2>
+  <p class="topic-lede">Positional encoding 的作用是把序列顺序注入 Transformer。Self-attention 本身更像在看一堆 token 向量，如果不额外告诉它位置，它很难区分“谁在前，谁在后”。</p>
+  <p>Lecture 16 里，positional information 是 self-attention 能处理词序的关键：不加位置，模型更像在处理 unordered set。</p>
+</section>
 
-    
+<section class="topic lesson-section plain" id="pe-plain-cn">
+  <h2>2. 大白话理解 / Plain-English Explanation</h2>
+  <p>可以把 token embedding 想成写着单词的便利贴。如果不标位置，把便利贴打乱以后，模型看到的东西可能差不多。Positional encoding 就是在每张便利贴上写一个小坐标：“我是第 0 个”“我是第 1 个”。</p>
+  <p>sin/cos 版本用了很多不同频率的波。低频变化慢，帮助模型知道大概位置；高频变化快，帮助区分相邻位置。</p>
+</section>
+
+<section class="topic lesson-section intuition-section" id="pe-intuition-cn">
+  <h2>3. 核心直觉 / Core Intuition</h2>
+  <p>sin/cos 好用，是因为位置平移 $k$ 后，每一对二维坐标只是在做一个 rotation。也就是说，模型可以用线性操作学到“往前看两个 token”这种相对位置规律。</p>
+  <div class="study-box">
+    <p>这正是 HW4 §2.1 的核心：$PE(pos+k)$ 是 $PE(pos)$ 的线性函数；两个 positional encoding 的 dot product 只和距离 $k$ 有关。</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="pe-equations-cn">
+  <h2>4. 核心公式 / Key Equations</h2>
+  <h3>Sinusoidal positional encoding</h3>
+  <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
+  <p>记 $\omega_i=10000^{-2i/d_{\text{model}}}$，每一对坐标就是 $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$。</p>
+  <h3>平移 $k$</h3>
+  <div class="eq">$$ \begin{aligned}
+PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
+PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
+\end{aligned} $$</div>
+  <h3>只依赖相对距离的 dot product</h3>
+  <div class="eq">$$ PE(pos_1)^\top PE(pos_2)=\sum_i \cos\!\big((pos_2-pos_1)\omega_i\big) $$</div>
+</section>
+
+<section class="topic lesson-section examples" id="pe-examples-cn">
+  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h3>HW4 §2.1.1：写公式</h3>
+  <p class="source-note">出处：HW4 §2.1，题意转述。</p>
+  <p>每个 frequency index $i$ 对应两个维度：偶数维放 sine，奇数维放 cosine。分母 $10000^{2i/d_{\text{model}}}$ 控制 wavelength。</p>
+  <h3>HW4 §2.1.2：证明平移是线性变换</h3>
+  <p>直接用三角和角公式：</p>
+  <div class="eq">$$ \sin((pos+k)\omega)=\sin(pos\omega)\cos(k\omega)+\cos(pos\omega)\sin(k\omega) $$</div>
+  <div class="eq">$$ \cos((pos+k)\omega)=\cos(pos\omega)\cos(k\omega)-\sin(pos\omega)\sin(k\omega) $$</div>
+  <p>系数只依赖 $k$ 和 $\omega$，不依赖 $pos$，所以 $PE(pos+k)$ 是 $PE(pos)$ 的线性函数。</p>
+  <h3>HW4 §2.1.3：dot product 只看距离</h3>
+  <p>对每个频率，$\sin a\sin b+\cos a\cos b=\cos(b-a)$。把所有频率加起来，就只剩 $pos_2-pos_1$。</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="pe-tips-cn">
+  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <ol>
+    <li>先定义 $\omega_i$，公式会短很多。</li>
+    <li>把 $(2i,2i+1)$ 当成一组 sine/cosine 坐标。</li>
+    <li>证明 $PE(pos+k)$ 时用三角和角公式，不要绕远。</li>
+    <li>做 dot product 时，同一频率的 sine 和 cosine 配对看。</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="pe-mistakes-cn">
+  <h2>7. 常见错误 / Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>把 sine / cosine 的维度写反。Transformer paper 习惯是 even sine, odd cosine。</li>
+    <li>把平移系数写成 $pos$ 的函数。正确系数只依赖 $k$ 和 frequency。</li>
+    <li>以为 self-attention 天然知道顺序。没有 positional information 时它不知道。</li>
+    <li>dot product 证明时忘了对所有 frequency pair 求和。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="pe-exam-cn">
+  <h2>8. 考试重点 / Exam Focus</h2>
+  <ul class="mini-list">
+    <li>会默写两条 PE 公式。</li>
+    <li>会证明每个 frequency pair 下，$PE(pos+k)$ 是对 $PE(pos)$ 的 rotation。</li>
+    <li>会证明 $PE(pos_1)^\top PE(pos_2)$ 只依赖 relative offset。</li>
+    <li>能用一句话解释 Transformer 为什么需要 positional encoding。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="pe-checklist-cn">
+  <h2>9. 速记清单 / Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Self-attention 不加 PE 就基本不懂顺序。</li>
+    <li>偶数维 sine，奇数维 cosine。</li>
+    <li>$\omega_i=10000^{-2i/d_{\text{model}}}$。</li>
+    <li>平移 $k$ = 旋转，旋转角和 $k$ 有关。</li>
+    <li>dot product 只依赖相对距离。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -87,7 +236,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Auto-build TOC from the 9 section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
@@ -96,20 +245,15 @@
 
     function build() {
       const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
-      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const items = main.querySelectorAll('section.topic > h2');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

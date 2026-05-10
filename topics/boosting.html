@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="boosting.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,38 +37,194 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / AdaBoost</div>
       <h1>🌳 <span class="en-only">AdaBoost</span><span class="cn-only">AdaBoost</span></h1>
       <div class="subtitle"><span class="en-only">Sequential focus → ↓bias</span><span class="cn-only">串行关注难样本 → 降偏差</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_11.pdf" target="_blank">📄 Lecture 11</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_8.pdf" target="_blank">📄 Lecture 8</a>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="boosting-en">
   <h2>🚀 Boosting · AdaBoost</h2>
+  <p class="topic-lede">Boosting is the sequential ensemble idea at the end of Lecture 8. AdaBoost builds a strong classifier by repeatedly adding weak classifiers that focus on the examples the current ensemble handles poorly.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>AdaBoost maintains weights over training examples. Initially all examples are equally weighted. After each weak classifier, examples that were misclassified receive more weight, so the next weak learner pays more attention to them.</p>
+  <p>The final classifier is an additive vote $F_T(x)=\sum_t \alpha_t f_t(x)$, where more accurate weak learners receive larger voting weights.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Boosting is like a tutor who keeps a mistake notebook. Every time you miss a type of question, that question gets circled, highlighted, and shown again in the next practice round.</p>
+  <p>Easy examples fade into the background; hard examples get louder. The final decision is a weighted committee of all the small tutors.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Bagging reduces variance by averaging independent learners. Boosting reduces bias by combining weak learners sequentially, each one correcting the current ensemble's weak spots.</p>
+  <p>AdaBoost can be derived from minimizing exponential loss. The sample weights are exactly the loss-induced emphasis on examples with low or negative margins $y_iF(x_i)$.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula">
+      <div class="head">Additive ensemble</div>
+      <div class="eq">$$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $$</div>
+      <p>Prediction is usually $\operatorname{sign}(F_T(x))$.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Exponential loss</div>
+      <div class="eq">$$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $$</div>
+      <p>Incorrect or low-margin examples have large loss.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Example weights</div>
+      <div class="eq">$$ w_i=\exp(-y_iF_{t-1}(x_i)) $$</div>
+      <p>Misclassified examples get larger weights.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Classifier coefficient</div>
+      <div class="eq">$$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $$</div>
+      <p>$\epsilon_t$ is the weighted error of the weak classifier.</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · Lecture 8 boosting scheme</div>
+    <div class="example-source">Source: Lecture 8, boosting slide.</div>
+    <p>Start with a uniform distribution over data. Ask a weak learning oracle for a classifier. Reweight examples where the ensemble is bad. Repeat. This is the high-level AdaBoost loop.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example B · Why weights focus on mistakes</div>
+    <div class="example-source">Source: HW2 Problem 5.2(a-b), paraphrased.</div>
+    <p>The new loss factors as $w_i\exp(-\alpha_t y_i f_t(x_i))$, where $w_i=\exp(-y_iF_{t-1}(x_i))$. If the current ensemble gets example $i$ wrong, $y_iF_{t-1}(x_i)&lt;0$, so $w_i$ becomes large.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · Deriving the best $\alpha_t$</div>
+    <div class="example-source">Source: HW2 Problem 5.2(d-e), paraphrased.</div>
+    <p>For a fixed weak classifier, the loss becomes proportional to $(1-\epsilon)e^{-\alpha}+\epsilon e^\alpha$. Setting the derivative to zero gives $e^{2\alpha}=(1-\epsilon)/\epsilon$, hence $\alpha^*=\frac12\log((1-\epsilon)/\epsilon)$.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>Identify boosting by:</b> sequential training, reweighted examples, and weighted votes.</div>
+    <div><b>When deriving AdaBoost,</b> split sums into correct and incorrect predictions.</div>
+    <div><b>Interpret $\alpha_t$ by error:</b> if $\epsilon&lt;0.5$, then $\alpha_t&gt;0$; if $\epsilon=0.5$, it contributes nothing.</div>
+    <div><b>For comparison questions,</b> mention boosting's noise sensitivity.</div>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
   <ul>
-    <li>Train weak classifiers <b>sequentially</b>; each one focuses on examples the ensemble previously misclassified (via reweighting).</li>
-    <li>Effect: <b>reduces bias</b>; can overfit, especially with noisy labels.</li>
-    <li>The weight of each weak classifier in the final vote depends on its error rate.</li>
+    <li>Calling boosting parallel. It is sequential because later learners depend on earlier mistakes.</li>
+    <li>Forgetting the weak learner is chosen using weighted error, not plain error.</li>
+    <li>Assuming a classifier with $\epsilon&gt;0.5$ should be trusted as-is. It should be flipped or rejected.</li>
+    <li>Ignoring noisy labels: boosting can chase them because their weights keep growing.</li>
   </ul>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Exam warning</div>
-    <p>Memorize the dichotomy: bagging cuts variance, boosting cuts bias — but boosting is also more sensitive to noise.</p>
-  </div>
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Explain the AdaBoost loop from weights to weak learner to reweighting.</li>
+    <li>Derive the factorized exponential loss.</li>
+    <li>Derive $\alpha_t^*=\frac12\log((1-\epsilon_t)/\epsilon_t)$.</li>
+    <li>Compare bagging and boosting cleanly.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I know boosting is sequential.</li>
+    <li>I know hard examples get larger weights.</li>
+    <li>I can write $F_t=F_{t-1}+\alpha_t f_t$.</li>
+    <li>I can derive or recognize the AdaBoost $\alpha_t$ formula.</li>
+    <li>I remember boosting is more noise-sensitive than bagging.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="boosting">
-      <h2><span class="icon">🚀</span> 3. Boosting · AdaBoost 思想</h2>
-      <ul>
-        <li>顺序训练，后续学习器更关注被前面错分的样本（提高其权重）。</li>
-        <li>常常 <b>降低偏差</b>；对噪声 / 离群点更敏感。</li>
-        <li>每个 weak learner 的影响来自其样本权重和投票权重。</li>
-      </ul>
-      <div class="callout warn">
-        <div class="head">⚠️ Exam warning</div>
-        <p>区分清楚 “bagging 降方差，boosting 降偏差” —— 但 boosting 也可能过拟合，特别是噪声样本。</p>
+      <h2><span class="icon">🚀</span> Boosting · AdaBoost</h2>
+      <p class="topic-lede">Boosting 是 Lecture 8 末尾的 sequential ensemble 思想。AdaBoost 通过不断加入 weak classifiers，专门修正当前 ensemble 处理不好的样本，最后组成 strong classifier。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>AdaBoost 会维护 training examples 的 weights。初始时每个样本同权；每加入一个 weak classifier，被错分的样本权重变大，下一轮 weak learner 会更关注它们。</p>
+      <p>最终 classifier 是 additive vote：$F_T(x)=\sum_t \alpha_t f_t(x)$。更准确的 weak learner 会有更大的 voting weight。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>Boosting 像一个拿着错题本的老师。你错过的题会被圈出来、加粗、下一轮继续练。</p>
+      <p>简单样本慢慢退到背景里；难样本声音越来越大。最后的判断来自一组小老师的 weighted committee。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>Bagging 通过 averaging independent learners 降低 variance；Boosting 通过 sequential correction 降低 bias，让每个新 learner 盯着当前 ensemble 的弱点。</p>
+      <p>AdaBoost 可以从 exponential loss 推出来。Sample weights 本质上是在强调 margin $y_iF(x_i)$ 小或为负的样本。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <div class="cols2">
+        <div class="callout formula">
+          <div class="head">Additive ensemble</div>
+          <div class="eq">$$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $$</div>
+          <p>通常 prediction 是 $\operatorname{sign}(F_T(x))$。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Exponential loss</div>
+          <div class="eq">$$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $$</div>
+          <p>错分或 low-margin 样本 loss 大。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Example weights</div>
+          <div class="eq">$$ w_i=\exp(-y_iF_{t-1}(x_i)) $$</div>
+          <p>当前被错分的样本会得到更大 weight。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Classifier coefficient</div>
+          <div class="eq">$$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $$</div>
+          <p>$\epsilon_t$ 是 weak classifier 的 weighted error。</p>
+        </div>
       </div>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · Lecture 8 boosting scheme</div>
+        <div class="example-source">来源：Lecture 8，boosting slide。</div>
+        <p>从 uniform distribution over data 开始；调用 weak learning oracle 得到一个 classifier；把当前 ensemble 表现差的样本 reweight；重复这个过程。这就是 AdaBoost 的高层循环。</p>
+      </div>
+      <div class="callout example">
+        <div class="head">Example B · 为什么 weights 会关注错题</div>
+        <div class="example-source">来源：HW2 Problem 5.2(a-b)，题意转述。</div>
+        <p>新 loss 可分解成 $w_i\exp(-\alpha_t y_i f_t(x_i))$，其中 $w_i=\exp(-y_iF_{t-1}(x_i))$。如果当前 ensemble 把样本 $i$ 分错，$y_iF_{t-1}(x_i)&lt;0$，所以 $w_i$ 变大。</p>
+      </div>
+      <div class="callout example">
+        <div class="head">Example C · 推出最优 $\alpha_t$</div>
+        <div class="example-source">来源：HW2 Problem 5.2(d-e)，题意转述。</div>
+        <p>固定 weak classifier 后，loss 正比于 $(1-\epsilon)e^{-\alpha}+\epsilon e^\alpha$。令导数为 0 得 $e^{2\alpha}=(1-\epsilon)/\epsilon$，所以 $\alpha^*=\frac12\log((1-\epsilon)/\epsilon)$。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>识别 boosting：</b> sequential training、reweighted examples、weighted votes。</div>
+        <div><b>推 AdaBoost：</b> 把 sum 拆成 correct predictions 和 incorrect predictions 两部分。</div>
+        <div><b>解释 $\alpha_t$：</b> 若 $\epsilon&lt;0.5$，则 $\alpha_t&gt;0$；若 $\epsilon=0.5$，它基本没贡献。</div>
+        <div><b>比较题：</b> 一定提 boosting 对 noise 更敏感。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>把 boosting 说成 parallel；它是 sequential，因为后一轮依赖前一轮错误。</li>
+        <li>忘记 weak learner 是按 weighted error 选择，不是 plain error。</li>
+        <li>以为 $\epsilon&gt;0.5$ 的 classifier 可以直接信任；通常要 flip 或 reject。</li>
+        <li>忽略 noisy labels：boosting 会反复追着它们，因为它们的 weights 不断变大。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>能解释 AdaBoost 从 weights 到 weak learner 再到 reweighting 的循环。</li>
+        <li>能推导 factorized exponential loss。</li>
+        <li>能推导 $\alpha_t^*=\frac12\log((1-\epsilon_t)/\epsilon_t)$。</li>
+        <li>能清楚比较 bagging 和 boosting。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我知道 boosting 是 sequential。</li>
+        <li>我知道 hard examples 会得到更大 weights。</li>
+        <li>我能写 $F_t=F_{t-1}+\alpha_t f_t$。</li>
+        <li>我能识别 / 推出 AdaBoost 的 $\alpha_t$ 公式。</li>
+        <li>我记得 boosting 比 bagging 更 noise-sensitive。</li>
+      </ul>
     </section>
 
     

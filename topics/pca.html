@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="pca.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,62 +36,205 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎯 无监督</span><span class="en-only">🎯 Unsupervised</span> / PCA</div>
       <h1>🎯 <span class="en-only">PCA</span><span class="cn-only">主成分分析</span></h1>
-      <div class="subtitle"><span class="en-only">Centering · Top-variance direction</span><span class="cn-only">中心化 · 最大方差方向</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_12.pdf" target="_blank">📄 Lecture 12</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+      <div class="subtitle"><span class="en-only">Centering · Eigenvectors · SVD</span><span class="cn-only">中心化 · Eigenvectors · SVD</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="pca-en">
   <h2>📉 Principal Component Analysis</h2>
-  <p>Reduce dimension while keeping as much variance as possible.</p>
+  <p class="topic-lede">PCA is the first unsupervised learning method in Lecture 9. It finds low-dimensional linear directions that preserve as much variance as possible.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>PCA projects unlabeled data into a lower-dimensional subspace. The first principal component is the unit direction with maximum projected variance; later components are orthogonal directions with the next largest variances.</p>
+  <p>The method solves dimension reduction, compression, visualization, and feature-construction problems. The crucial first step is centering the data.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Imagine shining a flashlight on a cloud of points and looking at its shadow. PCA chooses the angle where the shadow is spread out the most, because that shadow preserves the most structure.</p>
+  <p>If you choose a bad angle, many distinct points collapse together. PCA chooses directions that keep the cloud's main shape visible.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Variance measures how much data changes along a direction. A direction with high variance carries more signal about how examples differ from one another.</p>
+  <p>The optimization becomes an eigenvalue problem: maximizing $w^\top\Sigma w$ subject to $\|w\|=1$ picks the eigenvector of the covariance matrix with the largest eigenvalue. SVD computes the same subspace efficiently in practice.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Step 0 · Centering (mandatory)</div>
-      <div class="eq">$$ X_c = X - \mu $$</div>
-      <div style="font-size:13px;">Without centering, PC1 may pick up "distance from origin" instead of true variance directions.</div></div>
-    <div class="callout formula"><div class="head">Empirical covariance</div>
-      <div class="eq">$$ \Sigma = \frac{1}{n}\sum_i x_c^{(i)}\big(x_c^{(i)}\big)^\top $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">First principal component</div>
-      <div class="eq">$$ w_1=\arg\max_{\|w\|=1}\operatorname{Var}(X_c w) $$</div>
-      <div style="font-size:13px;">Solution: top eigenvector of $\Sigma$.</div></div>
+    <div class="callout formula">
+      <div class="head">Centering</div>
+      <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
+      <p>Never skip this step.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Empirical covariance</div>
+      <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
+      <p>Use the convention from the lecture's column-data notation.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">First principal component</div>
+      <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
+      <p>Solution: top eigenvector of $\Sigma$.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Projection and reconstruction</div>
+      <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
+      <p>$U$ contains the selected principal directions.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">SVD route</div>
+      <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
+      <p>The left singular vectors give the PCA directions.</p>
+    </div>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <p>Often a 2-D problem: center, write $\Sigma$, find the top eigenvector. Don't forget to center first.</p>
-  </div>
-
+  <h3 class="section-gray">5. Worked Examples</h3>
   <div class="callout example">
-    <div class="head">🧩 Quick example</div>
-    <p>Points (1, 3) and (4, 7), $\mu=(2.5, 5)$. Centered: (−1.5, −2), (1.5, 2). PC1 is along [0.6, 0.8].</p>
+    <div class="head">Example A · Two-point first PC</div>
+    <div class="example-source">Source: HW2 Problem 6.1, paraphrased.</div>
+    <p>For $(1,3)$ and $(4,7)$, the mean is $(2.5,5)$. Centered points are $(-1.5,-2)$ and $(1.5,2)$, so the spread lies along $(3,4)$. The unit first PC is $(0.6,0.8)$ up to sign.</p>
   </div>
+  <div class="callout example">
+    <div class="head">Example B · Four-point covariance</div>
+    <div class="example-source">Source: HW2 Problem 6.2, paraphrased.</div>
+    <p>For $(2,0),(2,2),(6,0),(6,2)$, the mean is $(4,1)$. Centering gives combinations of $(\pm2,\pm1)$, so $\Sigma=\begin{bmatrix}4&0\\0&1\end{bmatrix}$. The $x$ direction has larger variance.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · Diagonal covariance</div>
+    <div class="example-source">Source: HW2 Problem 6.3, paraphrased.</div>
+    <p>If $\Sigma=\operatorname{diag}(12,6,20,10)$, the largest eigenvalue is 20. The optimal direction is the third standard basis vector, and the optimal objective value is 20.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>Always center first.</b> Most wrong PCA computations start by skipping $\mu$.</div>
+    <div><b>For 2D hand problems,</b> compute the covariance matrix, then use eigenvectors.</div>
+    <div><b>For diagonal covariance,</b> the answer is the axis with the largest diagonal entry.</div>
+    <div><b>For reconstruction questions,</b> project with $U^\top(x-\mu)$ and add $\mu$ back at the end.</div>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Forgetting that eigenvector sign does not matter: $w$ and $-w$ span the same component.</li>
+    <li>Using raw data instead of centered data.</li>
+    <li>Confusing rows-as-examples and columns-as-examples conventions when forming $\Sigma$.</li>
+    <li>Thinking PCA uses labels. It is unsupervised.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Center a small dataset and compute covariance.</li>
+    <li>Solve the max-variance problem via eigenvectors.</li>
+    <li>Project and reconstruct with $U$ and $\mu$.</li>
+    <li>Explain how SVD yields PCA directions.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I center data before PCA.</li>
+    <li>I can write $\max_{\|w\|=1}w^\top\Sigma w$.</li>
+    <li>I choose the top eigenvector.</li>
+    <li>I know how to project and reconstruct.</li>
+    <li>I know PCA is unsupervised dimension reduction.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pca">
-      <h2><span class="icon">📉</span> 4. PCA · 主成分分析</h2>
-      <p>在尽量保留方差的前提下降维。</p>
+      <h2><span class="icon">📉</span> PCA · 主成分分析</h2>
+      <p class="topic-lede">PCA 是 Lecture 9 的第一个 unsupervised learning 方法：找到低维 linear directions，让投影后的数据尽量保留 variance。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>PCA 把 unlabeled data 投影到低维 subspace。第一主成分是 projected variance 最大的 unit direction；后续主成分是在 orthogonal 约束下继续找剩余最大 variance。</p>
+      <p>它解决 dimension reduction、compression、visualization 和 feature construction 问题。最关键的第一步是 centering。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>想象你拿手电照一团点云，看它在墙上的影子。PCA 选择那个让影子铺得最开的角度，因为这个影子保留了最多结构。</p>
+      <p>角度选差了，不同点会挤在一起。PCA 选择能保留数据主要形状的方向。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>Variance 衡量数据沿某个方向变化多少。High-variance direction 通常携带更多样本差异的信息。</p>
+      <p>优化问题会变成 eigenvalue problem：在 $\|w\|=1$ 下最大化 $w^\top\Sigma w$，会选 covariance matrix 最大 eigenvalue 对应的 eigenvector。实际计算常用 SVD。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Step 0 · Centering（关键第一步）</div>
-          <div class="eq">$$ X_c = X - \mu $$</div>
-          <div style="font-size:13px;">不居中：PC1 可能反映“离原点的距离”。</div></div>
-        <div class="callout formula"><div class="head">Empirical Covariance</div>
-          <div class="eq">$$ \Sigma = \frac{1}{n}\sum_{i=1}^{n} x_c^{(i)}\big(x_c^{(i)}\big)^\top $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">PC1 · 最大方差方向</div>
-          <div class="eq">$$ w_1=\arg\max_{\|w\|=1}\operatorname{Var}(X_c w) $$</div>
-          <div style="font-size:13px;">解：$\Sigma$ 最大特征值对应的特征向量。</div></div>
+        <div class="callout formula">
+          <div class="head">Centering</div>
+          <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
+          <p>这一步不要跳。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Empirical covariance</div>
+          <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
+          <p>这里按 lecture 的 column-data notation 写。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">First principal component</div>
+          <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
+          <p>解是 $\Sigma$ 的 top eigenvector。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Projection and reconstruction</div>
+          <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
+          <p>$U$ 的列是选中的 principal directions。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">SVD route</div>
+          <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
+          <p>Left singular vectors 就是 PCA directions。</p>
+        </div>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <p>常考 2D：先居中 → 写出协方差矩阵 → 求最大特征值方向。注意必须先居中。</p>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · 两点求 PC1</div>
+        <div class="example-source">来源：HW2 Problem 6.1，题意转述。</div>
+        <p>对 $(1,3)$ 和 $(4,7)$，均值是 $(2.5,5)$。居中后是 $(-1.5,-2)$ 和 $(1.5,2)$，所以 spread 沿 $(3,4)$ 方向。单位 PC1 是 $(0.6,0.8)$，符号可反。</p>
       </div>
       <div class="callout example">
-        <div class="head">🧩 Example</div>
-        <p>$(1,3),(4,7)$，$\mu=(2.5,5)$，居中后 $(-1.5,-2),(1.5,2)$，第一主方向 $\propto[0.6,0.8]^\top$。</p>
+        <div class="head">Example B · 四点 covariance</div>
+        <div class="example-source">来源：HW2 Problem 6.2，题意转述。</div>
+        <p>对 $(2,0),(2,2),(6,0),(6,2)$，均值是 $(4,1)$。居中后是 $(\pm2,\pm1)$ 的组合，所以 $\Sigma=\begin{bmatrix}4&0\\0&1\end{bmatrix}$，$x$ 方向 variance 更大。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example C · 对角 covariance</div>
+        <div class="example-source">来源：HW2 Problem 6.3，题意转述。</div>
+        <p>若 $\Sigma=\operatorname{diag}(12,6,20,10)$，最大 eigenvalue 是 20。最优方向是第三个 standard basis vector，objective value 是 20。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>永远先 center。</b> PCA 错题很多都是少了 $\mu$。</div>
+        <div><b>2D 手算：</b> 算 covariance matrix，再找 eigenvectors。</div>
+        <div><b>Diagonal covariance：</b> 最大 diagonal entry 对应的 axis 就是答案。</div>
+        <div><b>Reconstruction：</b> 先用 $U^\top(x-\mu)$ 投影，最后一定把 $\mu$ 加回去。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>忘记 eigenvector 的 sign 不重要：$w$ 和 $-w$ 表示同一条 component direction。</li>
+        <li>用 raw data 直接算 PCA，没有 centering。</li>
+        <li>混淆 rows-as-examples 和 columns-as-examples 的 covariance 写法。</li>
+        <li>以为 PCA 用 labels；它是 unsupervised。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>会 center 小数据集并计算 covariance。</li>
+        <li>会用 eigenvectors 解 max-variance problem。</li>
+        <li>会用 $U$ 和 $\mu$ 做 projection / reconstruction。</li>
+        <li>能解释 SVD 如何得到 PCA directions。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我做 PCA 前会 center data。</li>
+        <li>我能写 $\max_{\|w\|=1}w^\top\Sigma w$。</li>
+        <li>我会选择 top eigenvector。</li>
+        <li>我知道如何 project 和 reconstruct。</li>
+        <li>我知道 PCA 是 unsupervised dimension reduction。</li>
+      </ul>
     </section>
 
     

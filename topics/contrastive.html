@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="contrastive.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,57 +37,165 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎭 表示学习</span><span class="en-only">🎭 Representation Learning</span> / Contrastive Learning</div>
       <h1>🎭 <span class="en-only">Contrastive Learning</span><span class="cn-only">对比学习</span></h1>
       <div class="subtitle"><span class="en-only">InfoNCE · Pull positive, push negative</span><span class="cn-only">InfoNCE · 拉正推负</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_15.pdf" target="_blank">📄 Lecture 15</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="contrastive-en">
-  <h2>🔥 Contrastive Learning</h2>
-  <p>Pull representations of positive pairs together; push negatives apart.</p>
+  <h2>Contrastive and Self-Supervised Learning</h2>
+  <p class="topic-lede">Lecture 15 asks a practical question: if labels are expensive, can we create a useful training signal from unlabeled data? Contrastive learning is one major answer.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>Self-supervised learning builds a supervised-looking task from raw data itself. The goal is not usually the pretext task; the goal is a reusable representation that transfers to downstream tasks.</p>
+  <div class="mini-list">
+    <div><b>Pretext task.</b> Predict rotation, fill missing image patches, reconstruct an input, or predict masked language tokens.</div>
+    <div><b>Contrastive task.</b> Make two related views of the same item close in embedding space and unrelated items farther away.</div>
+    <div><b>Representation learning.</b> Pretrain an encoder, then fine-tune it for classification, detection, retrieval, or other downstream tasks.</div>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of a model learning to recognize a person from different photos. A front-facing photo and a cropped photo of the same person should land near each other; a different person should land farther away.</p>
+  <p>The labels are created by the data pipeline: two augmentations of one image are a positive pair; other images in the batch become negatives.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Contrastive learning combines two pressures. Alignment pulls positives together; separation keeps negatives apart. Good embeddings preserve semantic content while ignoring nuisance transformations such as crop, color jitter, or mild rotation.</p>
+  <p>That is why the lecture emphasizes invariance: the identity of an image should survive common augmentations, so the representation should be stable under those augmentations.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">Cosine similarity</div>
+    <div class="eq">$$ s(f(x),f(x'))=\frac{f(x)^\top f(x')}{\|f(x)\|_2\|f(x')\|_2} $$</div>
+    <p>If features are normalized to unit length, cosine similarity is just a dot product.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">InfoNCE loss</div>
+    <div class="eq">$$ \mathcal L_{\mathrm{NCE}}=-\log\frac{\exp(s(f(x),f(x^+))/\tau)}{\exp(s(f(x),f(x^+))/\tau)+\sum_{i=1}^{N}\exp(s(f(x),f(x_i^-))/\tau)} $$</div>
+    <p>$x$ is the anchor, $x^+$ is a positive view, $x_i^-$ are negatives, and $\tau$ is temperature.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Dual-encoder form</div>
+    <div class="eq">$$ \mathcal L_{\mathrm{dual}}(x,z)=-\log\frac{\exp(f_1(x)^\top f_2(z))}{\sum_{j=1}^{C}\exp(f_1(x)^\top f_2(z_j))} $$</div>
+    <p>This is the CLIP-style image-text matching form used in HW4.</p>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div><b>HW4 1.1 normalized InfoNCE.</b> With unit-norm vectors, compute similarities by dot products, then compare how lowering $\tau$ sharpens the probability assigned to the most similar item.</div>
+    <div><b>HW4 1.2 cross-entropy as contrastive learning.</b> Treat the image feature as one encoder output and each class weight vector as a candidate text/class embedding. The usual softmax classifier becomes a dual-encoder loss.</div>
+    <div><b>Lecture 15 CLIP example.</b> Paired image and caption embeddings are positives; mismatched captions in the batch are negatives, enabling zero-shot classification through text prompts.</div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <ul>
-    <li><b>Positive</b>: two augmented views of the same input $x$.</li>
-    <li><b>Negative</b>: other samples in the batch.</li>
+    <li>Always label anchor, positive, negatives, encoder, and score function before writing the loss.</li>
+    <li>If vectors are normalized, use dot products directly for cosine similarity.</li>
+    <li>Lower temperature makes the softmax more confident; it magnifies score gaps.</li>
+    <li>For CLIP-style questions, ask what each encoder can embed at test time. That usually explains zero-shot behavior.</li>
   </ul>
 
-  <div class="callout formula">
-    <div class="head">InfoNCE</div>
-    <div class="eq">$$ \mathcal{L}_{NCE}=-\mathbb{E}\!\left[\log \frac{e^{s(f(x),f(x^+))/\tau}}{e^{s(f(x),f(x^+))/\tau}+\sum_{i} e^{s(f(x),f(x_i^-))/\tau}}\right] $$</div>
-    <p style="font-size:13px;">$s$ is typically cosine similarity. Temperature $\tau\downarrow$ sharpens the softmax and emphasizes hard negatives.</p>
-  </div>
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Using the positive sample in the denominator twice incorrectly. The denominator includes the positive term plus negatives.</li>
+    <li>Forgetting temperature $\tau$ in every logit, not just the positive one.</li>
+    <li>Calling every unlabeled method "contrastive." Reconstruction and masked prediction are self-supervised, but not necessarily contrastive.</li>
+    <li>Explaining CLIP zero-shot as magic rather than as text encoder reuse over new class prompts.</li>
+  </ul>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Why negatives?</div>
-    <p>Without negative pairs, representations can <b>collapse</b> to a single constant vector. Negatives keep the embedding space spread out.</p>
-  </div>
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Define positive and negative pairs for SimCLR-like training.</li>
+    <li>Compute InfoNCE for a small set of feature vectors.</li>
+    <li>Explain temperature qualitatively.</li>
+    <li>Show how softmax classification is a special case of dual-encoder contrastive learning.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>SSL creates labels from data itself.</li>
+    <li>Contrastive learning pulls positives together and pushes negatives apart.</li>
+    <li>InfoNCE is softmax cross-entropy over one positive among candidates.</li>
+    <li>CLIP works because both images and text are embedded into the same space.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="contrastive">
-      <h2><span class="icon">🔥</span> 3. Contrastive Learning · 对比学习</h2>
-      <p>核心：拉近正样本对（同一样本的不同增强）；推开负样本对（不同样本）。</p>
-      <ul>
-        <li><b>Positive</b>：同一 $x$ 的两种 augmentation：$x,x^+$。</li>
-        <li><b>Negative</b>：batch 中其他样本：$x_i^-$。</li>
-      </ul>
+      <h2>对比学习与自监督学习 · Contrastive / SSL</h2>
+      <p class="topic-lede">Lecture 15 的核心问题很现实：label 很贵时，能不能从 unlabeled data 自己构造训练信号？Contrastive learning 是其中最重要的一种答案。</p>
+
+      <h3 class="section-blue">1. 概念理解 / Concept Understanding</h3>
+      <p>Self-supervised learning 是从原始数据本身构造一个“像监督学习一样”的任务。真正目标通常不是 pretext task 本身，而是学到可迁移的 representation。</p>
+      <div class="mini-list">
+        <div><b>Pretext task</b>：预测旋转角、补全图像 patch、重建输入、预测 masked token。</div>
+        <div><b>Contrastive task</b>：同一对象的两个 view 在 embedding space 里靠近，不相关对象拉远。</div>
+        <div><b>Representation learning</b>：先 pretrain encoder，再 fine-tune 到分类、检测、检索等 downstream tasks。</div>
+      </div>
+
+      <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
+      <p>想象模型在学“认人”：同一个人的正脸照和裁剪照应该离得近；另一个人的照片应该离得远。</p>
+      <p>这里的 label 不是人工标的，而是 data pipeline 造出来的：同一图片的两个 augmentations 是 positive pair，batch 里的其它图片就是 negatives。</p>
+
+      <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
+      <p>Contrastive learning 同时做两件事：alignment 把 positives 拉近，separation 把 negatives 拉开。好的 embedding 应该保留语义内容，同时忽略 crop、颜色扰动、轻微旋转这些 nuisance transformations。</p>
+      <p>所以 Lecture 15 强调 invariance principle：图片内容经过常见变换后仍然是同一个对象，representation 也应该稳定。</p>
+
+      <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
-        <div class="head">InfoNCE Loss</div>
-        <div class="eq">$$ \mathcal{L}_{NCE}=-\mathbb{E}\!\left[\log \frac{\exp\!\big(s(f(x),f(x^+))/\tau\big)}{\exp\!\big(s(f(x),f(x^+))/\tau\big)+\sum_{i=1}^{N}\exp\!\big(s(f(x),f(x_i^-))/\tau\big)}\right] $$</div>
-        <p style="font-size:13px;">$s(\cdot,\cdot)$ 常用 cosine similarity；$\tau$ 越小越“挑剔”（softmax 更尖锐）。</p>
+        <div class="head">Cosine similarity</div>
+        <div class="eq">$$ s(f(x),f(x'))=\frac{f(x)^\top f(x')}{\|f(x)\|_2\|f(x')\|_2} $$</div>
+        <p>如果 feature 都已经 unit norm，cosine similarity 就等于 dot product。</p>
       </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Why negatives?</div>
-        <p>没有负样本 ⇒ 表示坍塌（collapse）：把所有样本映射到同一点。负样本鼓励 uniformity。</p>
+      <div class="callout formula">
+        <div class="head">InfoNCE loss</div>
+        <div class="eq">$$ \mathcal L_{\mathrm{NCE}}=-\log\frac{\exp(s(f(x),f(x^+))/\tau)}{\exp(s(f(x),f(x^+))/\tau)+\sum_{i=1}^{N}\exp(s(f(x),f(x_i^-))/\tau)} $$</div>
+        <p>$x$ 是 anchor，$x^+$ 是 positive view，$x_i^-$ 是 negatives，$\tau$ 是 temperature。</p>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>解释 $\tau$ 变小：softmax 更尖锐，emphasizes hard negatives。</li>
-          <li>明确正负样本来源 + 相似度函数。</li>
-        </ul>
+      <div class="callout formula">
+        <div class="head">Dual-encoder form</div>
+        <div class="eq">$$ \mathcal L_{\mathrm{dual}}(x,z)=-\log\frac{\exp(f_1(x)^\top f_2(z))}{\sum_{j=1}^{C}\exp(f_1(x)^\top f_2(z_j))} $$</div>
+        <p>这是 HW4 里 CLIP-style image-text matching 的形式。</p>
       </div>
+
+      <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
+      <div class="mini-list">
+        <div><b>HW4 1.1 normalized InfoNCE</b>：feature 是 unit norm 时，similarity 直接算 dot product；降低 $\tau$ 会让 softmax 更尖锐，放大 score gap。</div>
+        <div><b>HW4 1.2 cross-entropy 特例</b>：把 image feature 当作 $f_1(x)$，把每个 class weight 当作候选 embedding，普通 softmax classifier 就是 dual-encoder loss 的特例。</div>
+        <div><b>Lecture 15 CLIP</b>：配对 image-caption 是 positive，不匹配 caption 是 negatives；测试时可用文本 prompt 做 zero-shot classification。</div>
+      </div>
+
+      <h3 class="section-yellow">6. 解题技巧 / Problem-Solving Tips</h3>
+      <ul>
+        <li>写 loss 前先标出 anchor、positive、negatives、encoder、score function。</li>
+        <li>向量已归一化时，cosine similarity 直接用 dot product。</li>
+        <li>$\tau$ 越小，softmax 越自信，score 差距被放大。</li>
+        <li>CLIP 题要问：测试时 $f_2$ 能不能编码新的文本类别？这通常就是 zero-shot 的关键。</li>
+      </ul>
+
+      <h3 class="section-red">7. 常见错误 / Common Mistakes</h3>
+      <ul>
+        <li>denominator 写错：它包含 positive term 加 negatives，不是只有 negatives。</li>
+        <li>只给 positive 除以 $\tau$，忘记所有 logits 都要除以 temperature。</li>
+        <li>把所有 unlabeled method 都叫 contrastive；reconstruction 和 masked prediction 是 SSL，但不一定是 contrastive。</li>
+        <li>把 CLIP zero-shot 解释成玄学，而不是 text encoder 对新 class prompt 的泛化。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. 考试重点 / Exam Focus</h3>
+      <ul>
+        <li>能定义 SimCLR-style positive / negative pairs。</li>
+        <li>能对小 feature set 手算 InfoNCE。</li>
+        <li>能定性解释 temperature。</li>
+        <li>能说明 softmax classification 是 dual-encoder contrastive learning 的特例。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. 速记清单 / Quick Checklist</h3>
+      <ul>
+        <li>SSL 从数据本身造 supervision。</li>
+        <li>Contrastive = 拉近 positives，推远 negatives。</li>
+        <li>InfoNCE = 在候选集合中识别唯一 positive 的 softmax CE。</li>
+        <li>CLIP 的关键是 image 和 text 进同一个 embedding space。</li>
+      </ul>
     </section>
 
     

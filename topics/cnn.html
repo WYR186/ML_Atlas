@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="cnn.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,69 +37,200 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧠 神经网络</span><span class="en-only">🧠 Neural Networks</span> / CNN</div>
       <h1>🧠 <span class="en-only">CNN</span><span class="cn-only">卷积神经网络</span></h1>
       <div class="subtitle"><span class="en-only">Local conn + weight sharing</span><span class="cn-only">局部连接 + 权重共享</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
-        <a class="ref-chip hw" href="../HW/hw4_sol.pdf" target="_blank">📝 hw4_sol</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_12.pdf" target="_blank">📄 Lecture 12</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="cnn-en">
-  <h2>🖼️ Convolutional Neural Networks</h2>
+  <h2>Convolutional Neural Networks</h2>
+  <p class="topic-lede">A CNN is a neural network designed for grid-like data, especially images. Lecture 12 emphasizes two ideas: each filter looks at a local patch, and the same filter is reused across the image.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A fully connected layer treats every pixel position as unrelated. For images, that wastes parameters and ignores spatial structure. CNNs solve this by using convolution layers, pooling layers, nonlinear activations, and eventually fully connected heads.</p>
   <ul>
-    <li>Local connectivity: each filter sees a small spatial patch (edges, textures).</li>
-    <li>Weight sharing: same filter slides across the input → translation invariance with far fewer parameters.</li>
-    <li>Typical block: Conv → Pool → Conv → Pool → ... → FC.</li>
+    <li><b>Local connectivity:</b> a filter sees a small receptive field, not the whole image at once.</li>
+    <li><b>Weight sharing:</b> the same filter slides over many positions, so one edge detector can be reused everywhere.</li>
+    <li><b>Pooling:</b> a fixed operation such as max or average summarizes a local window and usually reduces spatial size.</li>
   </ul>
 
-  <div class="callout formula">
-    <div class="head">Output size (must-know)</div>
-    <div class="eq">$$ \text{Output}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
-    <div style="font-size:13px;">$N$ input, $P$ padding, $F$ kernel, $S$ stride. For 2D, apply per axis.</div>
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of a convolution filter as a tiny stencil that scans over an image. At each location it asks, “does this little pattern appear here?” One stencil might detect vertical edges; another might detect a corner; deeper layers combine those into object parts.</p>
+  <p>Pooling is like making a lower-resolution summary: keep the strongest signal in each small neighborhood, or average the neighborhood, so later layers do not have to track every pixel exactly.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Images have repeated local patterns. An edge can appear in the top-left or bottom-right; it is still the same edge. Weight sharing gives CNNs translation equivariance: shifting the input tends to shift the feature map rather than forcing a brand-new detector.</p>
+  <div class="callout intuition">
+    <div class="head">Why CNNs use fewer parameters</div>
+    <p>If a $500\times500$ image feeds a 1024-unit fully connected layer, the weight matrix has hundreds of millions of entries. A $3\times3$ convolution with 16 filters has only a few hundred parameters because the same small kernels are reused.</p>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfalls</div>
-    <ul>
-      <li>Forgetting the floor.</li>
-      <li>Writing $P$ instead of $2P$.</li>
-      <li>Mixing up $F$ (kernel) with $S$ (stride).</li>
-    </ul>
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula">
+      <div class="head">Output size per axis</div>
+      <div class="eq">$$ N_{\text{out}}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
+      <p>$N$ is input size, $F$ filter size, $P$ padding on each side, and $S$ stride.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Convolution parameters</div>
+      <div class="eq">$$ \#\text{params}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
+      <p>The $+1$ is one bias per output channel. Omit it if the layer has no bias.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">One output activation</div>
+      <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=1}^{F_h}\sum_{j=1}^{F_w}W_{i,j,c,k}\,x_{u+i,v+j,c} $$</div>
+      <p>Most deep-learning libraries implement cross-correlation, but the course intuition is the same: slide a shared kernel and take weighted local sums.</p>
+    </div>
   </div>
 
-  <div class="callout example">
-    <div class="head">🧩 Plug in numbers</div>
-    <p>$N=32,\,F=5,\,P=2,\,S=1$ → $\lfloor (32+4-5)/1\rfloor+1 = 32$. Padding 2 cancels the kernel-5 shrink.</p>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example A · HW3 §3.1 output shape and parameters</h4>
+      <p class="example-source">Source: HW3 §3.1. Paraphrased.</p>
+      <p>Input is $3\times32\times32$. Use 16 filters of size $3\times3$, stride $1$, padding $1$. Spatial size is $\lfloor(32+2-3)/1\rfloor+1=32$, so output is $16\times32\times32$. Parameters are $3\cdot3\cdot3\cdot16+16=448$.</p>
+    </div>
+    <div>
+      <h4>Example B · HW3 §3.1 average-pooling-like convolution</h4>
+      <p class="example-source">Source: HW3 §3.1. Paraphrased.</p>
+      <p>A $2\times2$ kernel whose entries are all $0.25$, with stride $2$ and no padding, replaces each non-overlapping $2\times2$ patch by its average. That is exactly average pooling when the kernel is fixed and has no learned bias.</p>
+    </div>
+    <div>
+      <h4>Example C · HW3 §3.3 convolution as a matrix</h4>
+      <p class="example-source">Source: HW3 §3.3. Paraphrased.</p>
+      <p>Flatten a small image into a vector and flatten the outputs too. The convolution becomes a sparse matrix multiplication. Each row has only the kernel entries in the positions covered by that sliding window; neighboring rows reuse the same values shifted over.</p>
+    </div>
   </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ul>
+    <li>Compute height and width separately; do not assume square inputs unless the problem says so.</li>
+    <li>Track channels: filters span all input channels and create output channels.</li>
+    <li>For parameter count, multiply kernel height, kernel width, input channels, and number of filters; then add biases if present.</li>
+    <li>For pooling, remember there are usually no learned parameters.</li>
+  </ul>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Using $P$ instead of $2P$ in the output-size formula.</li>
+    <li>Forgetting the floor when stride does not divide evenly.</li>
+    <li>Counting one kernel per pixel location; CNNs share the same kernel across locations.</li>
+    <li>Forgetting that a $3\times3$ filter on RGB input has $3\times3\times3$ weights, not just $9$.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Output volume size with stride and padding.</li>
+    <li>Number of trainable parameters in convolution layers.</li>
+    <li>Max pooling and average pooling by hand on a small grid.</li>
+    <li>Explain local connectivity, weight sharing, and why CNNs suit images.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can compute $N_{\text{out}}=\lfloor(N+2P-F)/S\rfloor+1$.</li>
+    <li>I can count convolution weights including channels and bias.</li>
+    <li>I can explain the difference between convolution, pooling, stride, and padding.</li>
+    <li>I can turn a tiny convolution into a sparse matrix pattern.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="cnn">
-      <h2><span class="icon">🖼️</span> 3. CNN</h2>
+      <h2>CNN · 卷积神经网络</h2>
+      <p class="topic-lede">CNN 是专门处理 grid-like data 的神经网络，尤其适合 image。Lecture 12 的核心是两件事：filter 只看局部 patch；同一个 filter 在整张图上重复使用。</p>
+
+      <h3 class="section-blue">1. Concept Understanding</h3>
+      <p>Fully-connected layer 会把每个像素位置都当成独立特征，参数量巨大，也不利用空间结构。CNN 用 convolution layer、pooling layer、activation，最后接 fully connected head 来解决这个问题。</p>
       <ul>
-        <li><b>局部连接</b>：感受野关注局部（边缘/纹理）。</li>
-        <li><b>权重共享</b>：同一卷积核滑动 → 参数更少 + 平移不变性。</li>
-        <li><b>核心结构</b>：Conv（特征提取）→ Pooling（降采样）→ FC（分类/回归）。</li>
+        <li><b>Local connectivity</b>：filter 只看小的 receptive field，不是一上来就看全图。</li>
+        <li><b>Weight sharing</b>：同一个 filter 在不同位置滑动，edge detector 可以全图复用。</li>
+        <li><b>Pooling</b>：用 max / average 等固定操作总结局部窗口，通常会降低 spatial size。</li>
       </ul>
-      <div class="callout formula">
-        <div class="head">必考 · Output Size（一维，2D 对 H/W 分别算）</div>
-        <div class="eq">$$ \text{Output}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
-        <div style="font-size:13px;">$N$ 输入；$P$ padding；$F$ kernel；$S$ stride。</div>
+
+      <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
+      <p>把 convolution filter 想成一个小模板，在图片上从左到右、从上到下扫描。每扫到一个位置，它就问：“这个局部有没有我关心的 pattern？”浅层可能看边缘，深层会把边缘组合成纹理、部件、物体。</p>
+      <p>Pooling 像是在做低清版摘要：每个小区域只保留最大反应，或者取平均，让后面的层不用追踪每一个像素。</p>
+
+      <h3 class="section-orange">3. Core Intuition</h3>
+      <p>图片里的局部模式会重复出现。边缘出现在左上角还是右下角，本质仍然是边缘。Weight sharing 给 CNN 带来 translation equivariance：输入平移时，feature map 也大致平移，而不是需要重新学习一个 detector。</p>
+      <div class="callout intuition">
+        <div class="head">为什么 CNN 参数少</div>
+        <p>如果 $500\times500$ 图片接到 1024 维 fully connected layer，weight matrix 会有数亿项。一个 $3\times3$ convolution 加 16 个 filters，只有几百个参数，因为小 kernel 被全图复用。</p>
       </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfall</div>
-        <ul>
-          <li>忘记取 floor。</li>
-          <li>把 $2P$ 写成 $P$。</li>
-          <li>用错 $F$ 与 $S$。</li>
-        </ul>
+
+      <h3 class="section-purple">4. Key Equations</h3>
+      <div class="cols2">
+        <div class="callout formula">
+          <div class="head">单轴 output size</div>
+          <div class="eq">$$ N_{\text{out}}=\left\lfloor\frac{N+2P-F}{S}\right\rfloor+1 $$</div>
+          <p>$N$ 是输入长度，$F$ 是 filter size，$P$ 是每边 padding，$S$ 是 stride。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">卷积层参数量</div>
+          <div class="eq">$$ \#\text{params}=(F_hF_wC_{\text{in}}+1)C_{\text{out}} $$</div>
+          <p>$+1$ 表示每个 output channel 一个 bias；如果 no bias 就不加。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">一个输出位置</div>
+          <div class="eq">$$ y_{u,v,k}=b_k+\sum_{c=1}^{C_{\text{in}}}\sum_{i=1}^{F_h}\sum_{j=1}^{F_w}W_{i,j,c,k}\,x_{u+i,v+j,c} $$</div>
+          <p>深度学习库里常实现的是 cross-correlation，但课堂直觉一样：共享 kernel 滑动，对局部区域做 weighted sum。</p>
+        </div>
       </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · 输出尺寸</div>
-        <p>$N=32,F=5,P=2,S=1$：</p>
-        <div class="eq">$$ \left\lfloor\frac{32+4-5}{1}\right\rfloor+1 = 31+1 = 32 $$</div>
-        <p>$P=2$ 抵消 $F=5$ 的缩小效应。</p>
+
+      <h3 class="section-gray">5. Worked Examples</h3>
+      <div class="mini-list">
+        <div>
+          <h4>Example A · HW3 §3.1 输出尺寸和参数量</h4>
+          <p class="example-source">来源：HW3 §3.1，已转述。</p>
+          <p>输入 $3\times32\times32$，16 个 $3\times3$ filters，stride $1$，padding $1$。空间尺寸：$\lfloor(32+2-3)/1\rfloor+1=32$，所以输出是 $16\times32\times32$。参数量：$3\cdot3\cdot3\cdot16+16=448$。</p>
+        </div>
+        <div>
+          <h4>Example B · HW3 §3.1 类似 average pooling 的卷积</h4>
+          <p class="example-source">来源：HW3 §3.1，已转述。</p>
+          <p>如果 $2\times2$ kernel 的每个值都是 $0.25$，stride $2$，no padding，那么每个不重叠的 $2\times2$ patch 都会被替换成平均值。这个 fixed kernel、no bias 的 convolution 等价于 average pooling。</p>
+        </div>
+        <div>
+          <h4>Example C · HW3 §3.3 convolution 写成矩阵</h4>
+          <p class="example-source">来源：HW3 §3.3，已转述。</p>
+          <p>把小图片 flatten 成向量，输出也 flatten。Convolution 可以写成 sparse matrix multiplication。每一行只在当前 sliding window 覆盖的位置放 kernel 权重，相邻行是同一组权重的平移版本。</p>
+        </div>
       </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+      <ul>
+        <li>Height 和 width 分开算，不要默认一定是正方形。</li>
+        <li>一定追踪 channel：filter 会跨过所有 input channels，并产生 output channels。</li>
+        <li>参数量先乘 kernel height、kernel width、input channels、filters 数量，再看有没有 bias。</li>
+        <li>Pooling 通常没有 learnable parameters。</li>
+      </ul>
+
+      <h3 class="section-red">7. Common Mistakes</h3>
+      <ul>
+        <li>Output size 公式里把 $2P$ 写成 $P$。</li>
+        <li>Stride 不能整除时忘记 floor。</li>
+        <li>以为每个空间位置都有独立 kernel；CNN 的 kernel 是共享的。</li>
+        <li>RGB 输入上的 $3\times3$ filter 有 $3\times3\times3$ 个权重，不是只有 $9$ 个。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus</h3>
+      <ul>
+        <li>带 stride / padding 的 output volume size。</li>
+        <li>Convolution layer 的 trainable parameter count。</li>
+        <li>在小 grid 上手算 max pooling / average pooling。</li>
+        <li>解释 local connectivity、weight sharing，以及为什么 CNN 适合 image。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist</h3>
+      <ul>
+        <li>我会算 $N_{\text{out}}=\lfloor(N+2P-F)/S\rfloor+1$。</li>
+        <li>我会把 channels 和 bias 算进参数量。</li>
+        <li>我能区分 convolution、pooling、stride、padding。</li>
+        <li>我能把小卷积看成 sparse matrix pattern。</li>
+      </ul>
     </section>
 
     

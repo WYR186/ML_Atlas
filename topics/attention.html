@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="attention.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,78 +37,198 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / Attention</div>
       <h1>🔮 <span class="en-only">Attention</span><span class="cn-only">注意力机制</span></h1>
       <div class="subtitle"><span class="en-only">softmax(QKᵀ/√d) V</span><span class="cn-only">softmax(QKᵀ/√d) V</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
-<section class="topic" id="attention-en">
-  <h2>👀 Attention</h2>
-  <div class="callout">
-    <div class="head">🧠 Intuition · retrieve on demand</div>
-    <p>Query asks, Key indexes, Value supplies content. Attention lets each token dynamically read from other tokens — bypassing the RNN information bottleneck.</p>
-  </div>
+<section class="topic lesson-section concept" id="attention-concept-en">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">Attention is a differentiable retrieval operation: for each token, the model computes how strongly it should read information from other tokens, then returns a weighted average of their value vectors.</p>
+  <ul class="mini-list">
+    <li><b>Query</b> is what the current token is looking for.</li>
+    <li><b>Key</b> is the searchable index attached to each candidate token.</li>
+    <li><b>Value</b> is the content returned after the search.</li>
+    <li><b>Masked self-attention</b> is the decoder-only version used by LLMs: future positions are blocked so training matches left-to-right generation.</li>
+  </ul>
+</section>
 
-  <div class="callout formula">
-    <div class="head">Scaled dot-product attention (memorize)</div>
-    <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
-  </div>
+<section class="topic lesson-section plain" id="attention-plain-en">
+  <h2>2. Plain-English Explanation</h2>
+  <p>Imagine every word in a sentence can ask the rest of the sentence a question. The query says "what am I looking for?", each key says "what kind of information do I contain?", and each value is the actual information that can be copied back.</p>
+  <p>The softmax turns the match scores into a budget that sums to 1. A token can spend most of that budget on one important word, or spread it across several words.</p>
+</section>
 
-  <div class="callout">
-    <div class="head">⚖️ Why divide by $\sqrt{d_k}$?</div>
-    <p>Without scaling, dot products grow with $d_k$, the softmax saturates, and gradients vanish. Scaling keeps the variance roughly constant and stabilizes training.</p>
+<section class="topic lesson-section intuition-section" id="attention-intuition-en">
+  <h2>3. Core Intuition</h2>
+  <p>Attention works because it avoids compressing the entire past into one fixed hidden state. Every layer can build a fresh routing pattern: syntax heads may follow nearby words, semantic heads may follow topic words, and causal heads may only read from the past.</p>
+  <div class="study-box">
+    <p><b>Why multiple heads?</b> A single head has one attention distribution. Multi-head attention gives the model several distributions in parallel, so one representation can combine different relationships before the next layer processes it.</p>
   </div>
+</section>
 
-  <h3>Self-attention</h3>
-  <p>$Q, K, V$ all come from the same sequence: $Q=XW_Q$, $K=XW_K$, $V=XW_V$. Parallelizable; captures long-range dependencies.</p>
+<section class="topic lesson-section equations" id="attention-equations-en">
+  <h2>4. Key Equations</h2>
+  <h3>Single-query attention</h3>
+  <div class="eq">$$ s_i = k_i^\top q,\qquad \alpha_i=\frac{\exp(s_i)}{\sum_j \exp(s_j)},\qquad y=\sum_i \alpha_i v_i $$</div>
+  <p>$q$ is the query, $k_i$ is the key for candidate $i$, $v_i$ is its value, and $y$ is the returned mixture.</p>
+  <h3>Scaled dot-product attention</h3>
+  <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
+  <p>The division by $\sqrt{d_k}$ keeps dot products from becoming too large in high dimension, which prevents softmax saturation.</p>
+  <h3>Causal mask</h3>
+  <div class="eq">$$ \mathrm{softmax}\!\left(\frac{QK^\top + M}{\sqrt{d_k}}\right),\qquad M_{ij}=\begin{cases}0,&j\le i\\-\infty,&j>i\end{cases} $$</div>
+  <p>The mask is added before softmax; future-token weights become exactly 0.</p>
+</section>
 
-  <div class="callout warn">
-    <div class="head">🕶️ Masked attention (causal mask)</div>
-    <ul>
-      <li>Set future logits to $-\infty$ so their softmax weights become 0.</li>
-      <li>The mask is added <b>before</b> softmax, not after.</li>
-      <li>Without it, the decoder leaks future information at training time.</li>
-    </ul>
-  </div>
+<section class="topic lesson-section examples" id="attention-examples-en">
+  <h2>5. Worked Examples</h2>
+  <h3>HW4 §2.2: two queries with one-hot keys</h3>
+  <p class="source-note">Source: HW4 §2.2, paraphrased. The keys are the standard basis vectors, so each attention score is just one coordinate of $q$.</p>
+  <ul class="mini-list">
+    <li>For $q^{(1)}=(6,1,0)$, the scores are $(6,1,0)$. Since $e^6$ dominates, the output is close to $v_1=(2,0,1)$.</li>
+    <li>For $q^{(2)}=(1,1,6)$, the third score dominates, so the output is close to $v_3=(1,1,2)$.</li>
+    <li>The output becomes approximately one value vector when the query is much more aligned with that key than with the others.</li>
+  </ul>
+  <h3>HW4 §2.3: averaging two values</h3>
+  <p>With orthogonal unit keys, choose $q=\lambda(k_a+k_b)$ and make $\lambda$ large. Keys $a$ and $b$ receive equal large logits; other keys receive nearly 0 logits. The output approaches $\frac12(v_a+v_b)$.</p>
+  <p>When one key's magnitude is noisy, that single-head average is brittle. A two-head construction can use one head for $v_a$ and one head for $v_b$, then average the two head outputs.</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="attention-tips-en">
+  <h2>6. Problem-Solving Tips</h2>
+  <ol>
+    <li>Check the key geometry first. If keys are one-hot or orthogonal, dot products simplify immediately.</li>
+    <li>Compute logits before softmax. The largest logit usually tells you the qualitative output.</li>
+    <li>For masked attention, modify logits first, then apply softmax.</li>
+    <li>For multi-head questions, describe what each head specializes in, then combine the head outputs.</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="attention-mistakes-en">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>Putting the causal mask after softmax. It belongs on the logits.</li>
+    <li>Forgetting the $\sqrt{d_k}$ scaling in the standard Transformer formula.</li>
+    <li>Thinking values decide attention weights. Keys and queries decide weights; values are what gets averaged.</li>
+    <li>Assuming multi-head attention always increases computation by the number of heads. Usually each head is narrower, so the total projection size stays tied to $D$.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="attention-exam-en">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>Be able to write and explain $\mathrm{softmax}(QK^\top/\sqrt{d_k})V$.</li>
+    <li>Be able to compute a small attention output by hand.</li>
+    <li>Know why causal masking is required for decoder-only language models.</li>
+    <li>Know the robustness story behind multi-head attention from HW4 §2.3.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="attention-checklist-en">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Query asks; key matches; value returns content.</li>
+    <li>Softmax weights sum to 1.</li>
+    <li>Large logit gap means the output is close to one value vector.</li>
+    <li>Mask before softmax.</li>
+    <li>Multiple heads let the model attend in several ways at once.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
-<section class="topic" id="attention">
-      <h2><span class="icon">👀</span> 1. Attention · 注意力机制</h2>
-      <div class="callout">
-        <div class="head">🧠 直觉 · 按需检索</div>
-        <p>Query 提问，Key 做索引，Value 提供内容。让模型在处理某个 token 时，动态“关注”序列中其它 token，缓解 RNN 必须把信息压缩到固定向量的瓶颈。</p>
-      </div>
+<section class="topic lesson-section concept" id="attention-concept-cn">
+  <h2>1. 概念理解 / Concept Understanding</h2>
+  <p class="topic-lede">Attention 是一个可微的“检索 / retrieval”操作：当前 token 先算自己应该从哪些 token 读取信息，再把对应的 value 向量按权重加权平均。</p>
+  <ul class="mini-list">
+    <li><b>Query</b>：当前 token 想找什么。</li>
+    <li><b>Key</b>：每个候选 token 的索引标签，用来和 query 匹配。</li>
+    <li><b>Value</b>：真正被读回来的内容。</li>
+    <li><b>Masked self-attention</b>：decoder-only LLM 用的版本，未来位置会被挡住，保证训练和从左到右生成一致。</li>
+  </ul>
+</section>
 
-      <div class="callout formula">
-        <div class="head">Scaled Dot-Product Attention（必背公式）</div>
-        <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
-      </div>
+<section class="topic lesson-section plain" id="attention-plain-cn">
+  <h2>2. 大白话理解 / Plain-English Explanation</h2>
+  <p>可以把一句话里的每个词想成一个人在查资料。Query 是“我现在想问的问题”，Key 是“每份资料贴的标签”，Value 才是“资料正文”。</p>
+  <p>softmax 会把匹配分数变成一笔总和为 1 的预算。某个词特别相关，就多分一点；几个词都相关，就平均分一点。</p>
+</section>
 
-      <div class="callout">
-        <div class="head">⚖️ 为什么除以 $\sqrt{d_k}$？</div>
-        <p>$d_k$ 越大，点积幅值越大，softmax 更易饱和导致梯度变小。除以 $\sqrt{d_k}$ 让方差近似常数级，训练更稳定。</p>
-      </div>
+<section class="topic lesson-section intuition-section" id="attention-intuition-cn">
+  <h2>3. 核心直觉 / Core Intuition</h2>
+  <p>Attention 有效，是因为它不用把整段历史硬塞进一个固定 hidden state。每一层都能重新决定“我现在该看哪里”：有的 head 看邻近词，有的 head 看主题词，有的 head 只看过去。</p>
+  <div class="study-box">
+    <p><b>为什么要 multi-head?</b> 单个 head 只有一种 attention distribution。多头就是让模型同时开几条检索通道，分别学不同关系，然后把结果拼起来给下一层。</p>
+  </div>
+</section>
 
-      <h3>自注意力 Self-Attention</h3>
-      <p>$Q,K,V$ 都来自同一输入 $X$：$Q=XW_Q,\ K=XW_K,\ V=XW_V$。</p>
-      <ul>
-        <li>并行计算（相比 RNN）。</li>
-        <li>捕捉长程依赖。</li>
-      </ul>
+<section class="topic lesson-section equations" id="attention-equations-cn">
+  <h2>4. 核心公式 / Key Equations</h2>
+  <h3>单个 query 的 attention</h3>
+  <div class="eq">$$ s_i = k_i^\top q,\qquad \alpha_i=\frac{\exp(s_i)}{\sum_j \exp(s_j)},\qquad y=\sum_i \alpha_i v_i $$</div>
+  <p>$q$ 是 query，$k_i$ 是第 $i$ 个 key，$v_i$ 是对应 value，$y$ 是最后读出来的混合向量。</p>
+  <h3>Scaled dot-product attention</h3>
+  <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
+  <p>除以 $\sqrt{d_k}$ 是为了避免维度一大，点积太大导致 softmax 饱和、梯度变小。</p>
+  <h3>Causal mask</h3>
+  <div class="eq">$$ \mathrm{softmax}\!\left(\frac{QK^\top + M}{\sqrt{d_k}}\right),\qquad M_{ij}=\begin{cases}0,&j\le i\\-\infty,&j>i\end{cases} $$</div>
+  <p>mask 要加在 softmax 前的 logits 上；未来 token 的权重会变成 0。</p>
+</section>
 
-      <div class="callout warn">
-        <div class="head">🕶️ Masked Attention（必考考点）</div>
-        <ul>
-          <li>Decoder 自回归生成中：把未来位置的 logits 设为 $-\infty$ → softmax 后权重 0。</li>
-          <li><b>易错点</b>：mask 是加到 softmax <b>之前</b>的 logits 上，<b>不是</b> softmax 之后。</li>
-          <li><b>为什么必须？</b>避免 train–test mismatch（训练时偷看未来 → 推理无法复现）。</li>
-        </ul>
-      </div>
-    </section>
+<section class="topic lesson-section examples" id="attention-examples-cn">
+  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h3>HW4 §2.2：one-hot keys 下两个 query</h3>
+  <p class="source-note">出处：HW4 §2.2，题意转述。keys 是标准基向量，所以 attention score 就等于 $q$ 的对应坐标。</p>
+  <ul class="mini-list">
+    <li>$q^{(1)}=(6,1,0)$ 时，scores 是 $(6,1,0)$。$e^6$ 最大，softmax 几乎压到第 1 个 value，所以输出接近 $v_1=(2,0,1)$。</li>
+    <li>$q^{(2)}=(1,1,6)$ 时，第 3 个 score 最大，所以输出接近 $v_3=(1,1,2)$。</li>
+    <li>一句话结论：当 query 和某个 key 的内积远大于其他 key，输出就会接近那个 key 对应的 value。</li>
+  </ul>
+  <h3>HW4 §2.3：让单头输出两个 value 的平均</h3>
+  <p>如果 keys 正交且单位长度，取 $q=\lambda(k_a+k_b)$，并让 $\lambda$ 很大。这样 $a,b$ 两个位置的 logits 同样大，其他位置接近 0，softmax 会给 $a,b$ 约各一半，输出接近 $\frac12(v_a+v_b)$。</p>
+  <p>但如果某个 key 的长度很不稳定，单头平均就会 brittle。两个 head 分别专门取 $v_a$ 和 $v_b$，最后再平均，会更稳。</p>
+</section>
 
-    
+<section class="topic lesson-section tips-section" id="attention-tips-cn">
+  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <ol>
+    <li>先看 key 的几何结构：one-hot / orthogonal 的题通常可以秒化简。</li>
+    <li>先算 logits，再看谁最大；softmax 的直觉基本就出来了。</li>
+    <li>遇到 mask：先改 logits，再 softmax。</li>
+    <li>遇到 multi-head：说明每个 head 负责什么，再说怎么合并。</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="attention-mistakes-cn">
+  <h2>7. 常见错误 / Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>把 causal mask 放在 softmax 后面。正确做法是放在 logits 上。</li>
+    <li>漏掉标准 Transformer 里的 $\sqrt{d_k}$ scaling。</li>
+    <li>以为 value 决定 attention 权重。真正决定权重的是 query 和 key；value 只是被加权平均的内容。</li>
+    <li>以为 head 数变多就一定等比例增加计算量。通常每个 head 更窄，总投影维度仍然围绕 $D$。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="attention-exam-cn">
+  <h2>8. 考试重点 / Exam Focus</h2>
+  <ul class="mini-list">
+    <li>会写并解释 $\mathrm{softmax}(QK^\top/\sqrt{d_k})V$。</li>
+    <li>会手算一个小 attention 例子。</li>
+    <li>知道 decoder-only language model 为什么必须 causal mask。</li>
+    <li>能讲清 HW4 §2.3 里的 multi-head robustness 直觉。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="attention-checklist-cn">
+  <h2>9. 速记清单 / Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Query 提问，Key 匹配，Value 返回内容。</li>
+    <li>softmax 权重总和为 1。</li>
+    <li>logit 差距很大时，输出接近某一个 value。</li>
+    <li>mask before softmax。</li>
+    <li>multi-head = 同时用多种方式看上下文。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -123,7 +244,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Auto-build TOC from the 9 section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
@@ -132,20 +253,15 @@
 
     function build() {
       const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
-      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const items = main.querySelectorAll('section.topic > h2');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

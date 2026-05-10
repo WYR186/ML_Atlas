@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="probability.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,7 +36,7 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Probability</div>
       <h1>📐 <span class="en-only">Probability</span><span class="cn-only">概率论</span></h1>
-      <div class="subtitle"><span class="en-only">Bayes · Conditional · Expectation</span><span class="cn-only">Bayes · 条件概率 · 期望</span></div>
+      <div class="subtitle"><span class="en-only">Conditional · Independence · Bayes · Conditional Independence</span><span class="cn-only">条件概率 · 独立 · 贝叶斯 · 条件独立</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_1.pdf" target="_blank">📄 Lecture 1</a>
         <a class="ref-chip lecture" href="../slides/Lecture_2.pdf" target="_blank">📄 Lecture 2</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
@@ -45,126 +46,297 @@
 <div class="en-only">
 <section class="topic" id="probability-en">
   <h2>🎲 Probability</h2>
+
+  <h3>1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧠 Core intuition</div>
-    <p>Probability is the language for reasoning under uncertainty: condition, factor by independence, update via Bayes.</p>
+    <div class="head">Formal definitions and the problem they solve</div>
+    <p>A <b>random variable</b> $X$ assigns a number to each outcome of a random experiment, and its <b>distribution</b> $P(X=x)$ tells you how often each value occurs. Two variables also have a <b>joint distribution</b> $P(X_1, X_2)$ over all pairs.</p>
+    <p>From there, four ideas matter for ML:</p>
+    <ul>
+      <li><b>Conditional probability</b>: $P(A\mid B)=P(A,B)/P(B)$ — the probability of $A$ once we know $B$ happened.</li>
+      <li><b>Independence</b>: $P(A,B)=P(A)P(B)$ — knowing one does not change the other.</li>
+      <li><b>Conditional independence</b>: $P(A,B\mid C)=P(A\mid C)\,P(B\mid C)$ — the apparent link between $A$ and $B$ disappears once $C$ is known.</li>
+      <li><b>Bayes' rule</b>: lets us flip the direction of conditioning, turning $P(B\mid A)$ into $P(A\mid B)$ via the prior.</li>
+    </ul>
+    <p>Why ML needs this: every classifier silently asks "given features $X_1,\dots,X_d$, which label $Y$ is most likely?" — i.e. compute $P(Y\mid X)$. Bayes' rule rewrites that in terms of the class prior $P(Y)$ and class-conditional likelihood $P(X\mid Y)$, both estimable from data.</p>
   </div>
 
-  <h3>Concepts</h3>
-  <ul>
-    <li><b>Conditional probability</b>: probability of A given B has occurred.</li>
-    <li><b>Independence</b>: knowing B does not change the probability of A.</li>
-    <li><b>Conditional independence</b>: the central assumption behind Naive Bayes.</li>
-  </ul>
+  <h3>2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Without formulas first</div>
+    <p><b>Conditioning</b> means narrowing the world: "given that $B$ already happened, how often does $A$ also happen?" You first slice the pie down to the part where $B$ holds, then count.</p>
+    <p><b>Independence</b> is "the two events have nothing to do with each other" — observing one tells you nothing about the other.</p>
+    <p><b>Conditional independence</b> is the subtler one. Two umbrellas opening at the same time look correlated, but once you condition on "it is raining," that link vanishes — both were just reacting to the rain.</p>
+    <p><b>Bayes' rule</b> is rational belief updating: start with a prior, look at the evidence, and rescale. <i>posterior $\propto$ likelihood × prior</i>.</p>
+  </div>
 
-  <h3>Core formulas (memorize)</h3>
+  <h3>3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why these ideas actually work</div>
+    <p><b>Conditioning shrinks the sample space.</b> $P(A\mid B)$ literally throws away outcomes where $B$ failed and renormalizes by the area of the remaining "new world," $P(B)$.</p>
+    <p><b>Bayes' rule is just algebra.</b> Multiply $P(A\mid B)P(B)=P(A,B)=P(B\mid A)P(A)$ and divide by $P(B)$ — two seconds of work, but flipping causes and effects unlocks an enormous amount of inference.</p>
+    <p><b>Conditional independence is how ML escapes the curse of dimensionality.</b> With $d$ binary features, the joint $P(X_1,\dots,X_d\mid Y)$ has $\sim 2^d$ free parameters. Assume conditional independence and it collapses to $2d$. Naive Bayes lives or dies by this single trick (Lecture 2, p. 18–22).</p>
+    <p><b>Where this shows up later.</b> <i>Posterior $\propto$ likelihood × prior</i> reappears in MAP estimation, the Bayes classifier, MLE for Naive Bayes, Gaussian NB (HW1 §2), VAE / diffusion priors, and Bellman expectation in RL.</p>
+  </div>
+
+  <h3>4. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula"><div class="head">Conditional Probability</div>
-      <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)} $$</div></div>
+      <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
+    </div>
     <div class="callout formula"><div class="head">Bayes' Rule</div>
-      <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)P(A)}{P(B)} $$</div>
-      <div style="font-size:13px;">ML slogan: <b>Posterior ∝ Likelihood × Prior</b></div></div>
+      <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
+      <p style="font-size:13px;">Posterior $\propto$ likelihood × prior.</p>
+    </div>
     <div class="callout formula"><div class="head">Independence</div>
-      <div class="eq">$$ P(A,B)=P(A)P(B) $$</div></div>
+      <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
+    </div>
     <div class="callout formula"><div class="head">Conditional Independence</div>
-      <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">Expectation & Variance</div>
-      <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\qquad \mathrm{Var}(X)=\mathbb{E}[X^2]-(\mathbb{E}[X])^2 $$</div></div>
+      <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
+      <p style="font-size:13px;">Equivalently $P(A\mid B,C)=P(A\mid C)$. Core NB assumption.</p>
+    </div>
+    <div class="callout formula"><div class="head">Law of Total Probability</div>
+      <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
+      <p style="font-size:13px;">Use this to compute $P(B)$ when it is not given.</p>
+    </div>
+    <div class="callout formula"><div class="head">Expectation & Variance</div>
+      <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
+    </div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes Factorization (preview)</div>
+      <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
+      <p style="font-size:13px;">Bayes' rule (numerator) + conditional independence (factorization). Reduces $\sim 2^d$ joint parameters to $2d$.</p>
+    </div>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Common pitfalls</div>
-    <ul>
-      <li>The denominator in conditioning is P(B), not P(A).</li>
-      <li>Independence ≠ conditional independence: variables can be independent overall but dependent given C, or vice versa.</li>
-    </ul>
-  </div>
+  <h3>5. Worked Examples</h3>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Recognize conditional independence in graphical / NB problems and write the factorization.</li>
-      <li>Map "Posterior ∝ Likelihood × Prior" onto concrete variables.</li>
-    </ul>
+  <div class="callout example">
+    <div class="head">Example 1 · Two dice and conditioning  (Lecture 2, p. 5–6)</div>
+    <p>Roll two fair six-sided dice with values $X_1, X_2$. Find $P(X_1=2 \mid X_1+X_2\le 4)$.</p>
+    <p>Outcomes with $X_1+X_2\le 4$: $(1,1),(1,2),(1,3),(2,1),(2,2),(3,1)$ — six total. Among them, $X_1=2$ occurs in $(2,1)$ and $(2,2)$.</p>
+    <div class="eq">$$ P(X_1=2 \mid X_1+X_2\le 4)=\frac{2}{6}=\frac{1}{3}. $$</div>
   </div>
 
   <div class="callout example">
-    <div class="head">🧩 Worked example · Bayes calculation</div>
-    <p>Given P(A)=0.3, P(B|A)=0.8, P(B|¬A)=0.2, find P(A|B).</p>
-    <div class="eq">$$ P(B)=0.8\cdot 0.3 + 0.2\cdot 0.7 = 0.38 $$</div>
+    <div class="head">Example 2 · Bayes calculation</div>
+    <p>Given $P(A)=0.3,\ P(B\mid A)=0.8,\ P(B\mid \neg A)=0.2$, find $P(A\mid B)$.</p>
+    <div class="eq">$$ P(B)=0.8(0.3)+0.2(0.7)=0.38 $$</div>
     <div class="eq">$$ P(A\mid B)=\frac{0.8\cdot 0.3}{0.38}\approx 0.6316 $$</div>
+    <p>Reading: prior on $A$ was 30%, but observing $B$ raised it to ~63% because $B$ is much more likely under $A$ than under $\neg A$.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 3 · Conditional independence trap (Lecture 2, p. 9–10)</div>
+    <p>Two dice. Let $A=\{X_1\text{ odd}\}$, $B=\{X_2\text{ odd}\}$, $S=\{X_1+X_2\text{ even}\}$. Unconditionally $A\perp B$ (each $\tfrac12$, joint $\tfrac14$).</p>
+    <p>But given $S$, they become dependent: if $A$ holds, then $B$ <i>must</i> hold too for the sum to be even, so $P(B\mid A,S)=1\ne P(B\mid S)=\tfrac12$.</p>
+    <p>Lesson: independence does not imply conditional independence (and vice versa). Always check the definition.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 4 · Estimating from a contingency table (Lecture 2, p. 14–17)</div>
+    <p>From the lung-cancer toy table, estimate $P(\text{Cancer}=Y\mid \text{Gender}=M,\ \text{Smoke}=Y)$. Rows with $M,Y,Y$: 1000. Rows with $M,Y$ regardless of cancer: $1000+5000=6000$. So $\hat P=1000/6000\approx 16.7\%$.</p>
+    <p>This works because the table is small. With 100 binary features the table would have $2^{100}\approx 10^{30}$ rows — far more than people on Earth — and most cells would be empty. That is the curse of dimensionality (Lecture 2 p. 17–18).</p>
+  </div>
+
+  <h3>6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to attack a probability question</div>
+    <ol>
+      <li><b>Spot the question type.</b> "A and B" → joint, factor with chain rule. "A given B" → conditional, use Bayes if you only have $P(B\mid A)$. "Independent?" → check $P(A,B)=P(A)P(B)$.</li>
+      <li><b>If $P(B)$ is missing</b>, expand it with the law of total probability.</li>
+      <li><b>For "$A\perp B$ given $C$?"</b>, compute $P(A\mid B,C)$ and $P(A\mid C)$ on a tiny table — equal iff conditionally independent.</li>
+      <li><b>For ML classification</b>, write $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$ and $\arg\max_y$.</li>
+      <li><b>Sanity check</b>: try extreme priors (e.g. $P(B\mid A)=1$, $P(B\mid \neg A)=0$); if your formula does not give the obvious answer, you dropped a term.</li>
+    </ol>
+  </div>
+
+  <h3>7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">Easy ways to lose points</div>
+    <ul>
+      <li>Wrong denominator: $P(A\mid B)=P(A,B)/P(B)$ — never $P(A)$.</li>
+      <li>Confusing $P(A\mid B)$ with $P(B\mid A)$ ("prosecutor's fallacy"); they are linked only through priors.</li>
+      <li>Treating independence and conditional independence as the same thing — Example 3 is the textbook counterexample.</li>
+      <li>Dropping the prior in Bayes (base-rate neglect).</li>
+      <li>Using "$\propto$" but forgetting to normalize at the end.</li>
+      <li>Multiplying conditionals when variables are not conditionally independent — the NB factorization is an <i>assumption</i>, not a free identity.</li>
+    </ul>
+  </div>
+
+  <h3>8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">What you must walk in able to do</div>
+    <ul>
+      <li>Write the five core formulas (conditional, Bayes, independence, conditional independence, total probability) from memory in 30 seconds.</li>
+      <li>Compute $P(A\mid B)$ by hand from $P(A), P(B\mid A), P(B\mid \neg A)$, showing the total-probability expansion.</li>
+      <li>Recognize conditional independence in a graphical / NB problem and write the factorization.</li>
+      <li>Map "posterior $\propto$ likelihood × prior" onto the variables in a word problem.</li>
+      <li>Argue why a probability table fails in high dimensions ($2^d$ growth).</li>
+    </ul>
+  </div>
+
+  <h3>9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>$P(A\mid B)=P(A,B)/P(B)$ — denominator is the conditioning event.</li>
+      <li>Bayes: $P(A\mid B)=P(B\mid A)P(A)/P(B)$.</li>
+      <li>$P(B)=\sum_a P(B\mid A=a)P(A=a)$ when missing.</li>
+      <li>Independence: $P(A,B)=P(A)P(B)$. CI: $P(A,B\mid C)=P(A\mid C)P(B\mid C)$.</li>
+      <li>Independence ↮ conditional independence.</li>
+      <li>Naive Bayes: $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$ — $2^d$ → $2d$ params.</li>
+      <li>Probabilities in $[0,1]$, conditionals sum to 1 over the conditioned variable.</li>
+    </ul>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="probability">
-      <h2><span class="icon">🎲</span> Probability · 概率论</h2>
-      <div class="callout">
-        <div class="head">🧠 Core intuition</div>
-        <div class="bi-text">
-          <span class="cn">概率论提供“从已知到未知”的推理规则：条件化、独立性、贝叶斯更新。</span>
-          <span class="en">Probability is the language for reasoning under uncertainty (conditioning, independence, Bayes updates).</span>
-        </div>
-      </div>
+  <h2>🎲 概率论</h2>
 
-      <h3>🔵 概念理解</h3>
-      <ul>
-        <li><b>条件概率 / Conditional probability</b>：在 $B$ 已发生时，$A$ 发生的概率。</li>
-        <li><b>独立 / Independence</b>：知道 $B$ 不会改变 $A$ 的概率。</li>
-        <li><b>条件独立 / Conditional independence</b>：Naive Bayes 的核心假设。</li>
-      </ul>
+  <h3>1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">正式定义与它解决的问题</div>
+    <p><b>随机变量</b> $X$ 给随机试验的每个结果赋一个数值，<b>分布</b> $P(X=x)$ 描述每个值出现的频率；两个变量还有<b>联合分布</b> $P(X_1, X_2)$，记录所有取值组合。</p>
+    <p>从这里出发，ML 真正用到的核心只有四件事：</p>
+    <ul>
+      <li><b>条件概率</b>：$P(A\mid B)=P(A,B)/P(B)$，已知 $B$ 发生时 $A$ 的概率。</li>
+      <li><b>独立</b>：$P(A,B)=P(A)P(B)$，知道其中一个不会改变另一个。</li>
+      <li><b>条件独立</b>：$P(A,B\mid C)=P(A\mid C)\,P(B\mid C)$，给定 $C$ 后 $A$、$B$ 的关联消失。</li>
+      <li><b>贝叶斯</b>：把 $P(B\mid A)$ 翻转成 $P(A\mid B)$，借助先验。</li>
+    </ul>
+    <p>ML 为什么需要它：每个分类器其实都在问“给定特征 $X_1,\dots,X_d$，最可能的标签 $Y$ 是什么？”——也就是 $P(Y\mid X)$。贝叶斯把它改写成类先验 $P(Y)$ 与类条件似然 $P(X\mid Y)$，二者都可以从带标签数据中估出。</p>
+  </div>
 
-      <h3>🟣 核心公式（默写）</h3>
-      <div class="cols2">
-        <div class="callout formula">
-          <div class="head">Conditional Probability</div>
-          <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)} $$</div>
-        </div>
-        <div class="callout formula">
-          <div class="head">Bayes' Rule</div>
-          <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)P(A)}{P(B)} $$</div>
-          <div style="font-size:13px;">ML slogan: <b>Posterior ∝ Likelihood × Prior</b></div>
-        </div>
-        <div class="callout formula">
-          <div class="head">Independence</div>
-          <div class="eq">$$ P(A,B)=P(A)P(B) $$</div>
-        </div>
-        <div class="callout formula">
-          <div class="head">Conditional Independence (Naive Bayes)</div>
-          <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
-        </div>
-        <div class="callout formula" style="grid-column:1/3;">
-          <div class="head">Expectation & Variance</div>
-          <div class="eq">$$ \mathbb{E}[X]=\sum_x xP(x)\quad\text{or}\quad\int x\,p(x)\,dx,\qquad \mathrm{Var}(X)=\mathbb{E}[X^2]-(\mathbb{E}[X])^2 $$</div>
-        </div>
-      </div>
+  <h3>2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">不看公式先懂大概</div>
+    <p><b>条件化</b>就是把世界缩小：“在 $B$ 已经发生的世界里，$A$ 占多少？”先切饼，再数。</p>
+    <p><b>独立</b>意思是“两件事毫无关系”——知道一个对猜另一个完全没帮助。</p>
+    <p><b>条件独立</b>更微妙：两个人同时打伞看上去相关，但只要告诉你“在下雨”，两件事的关联就消失了——它们都只是在响应同一件事。</p>
+    <p><b>贝叶斯</b>就是“理性的信念更新”：先验 → 见证据 → 重缩放，<i>posterior $\propto$ likelihood × prior</i>。</p>
+  </div>
 
-      <div class="callout warn">
-        <div class="head">⚠️ Common pitfalls</div>
-        <ul>
-          <li>条件概率分母是 $P(B)$，不是 $P(A)$。</li>
-          <li>独立 ≠ 条件独立：可能在总体不独立，但在给定 $C$ 时独立（或反之）。</li>
-        </ul>
-      </div>
+  <h3>3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">这些概念为什么真的有效</div>
+    <p><b>条件化是在缩样本空间</b>。$P(A\mid B)$ 把 $B$ 不成立的结果丢掉，再用剩下“新世界”的面积 $P(B)$ 重新归一化。</p>
+    <p><b>贝叶斯就是两步代数</b>：$P(A\mid B)P(B)=P(A,B)=P(B\mid A)P(A)$，除以 $P(B)$ 而已。但“倒推”这一能力解锁了大量推理。</p>
+    <p><b>条件独立是 ML 跳出维度灾难的唯一手段</b>。$d$ 个二值特征下 $P(X_1,\dots,X_d\mid Y)$ 有 $\sim 2^d$ 个参数；假设条件独立后只剩 $2d$。Naive Bayes 全靠这一招（Lecture 2, p. 18–22）。</p>
+    <p><b>串联后面的内容</b>：MAP、Bayes 分类器、Naive Bayes 的 MLE、Gaussian NB（HW1 §2）、VAE / 扩散先验、强化学习的 Bellman 期望，都在反复用 <i>posterior $\propto$ likelihood × prior</i>。</p>
+  </div>
 
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>能在图模型 / 朴素贝叶斯中识别并写出条件独立因子分解。</li>
-          <li>能把 “Posterior ∝ Likelihood × Prior” 映射到具体变量。</li>
-        </ul>
-      </div>
+  <h3>4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">条件概率</div>
+      <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
+    </div>
+    <div class="callout formula"><div class="head">贝叶斯公式</div>
+      <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
+      <p style="font-size:13px;">Posterior $\propto$ likelihood × prior。</p>
+    </div>
+    <div class="callout formula"><div class="head">独立</div>
+      <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">条件独立</div>
+      <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
+      <p style="font-size:13px;">等价 $P(A\mid B,C)=P(A\mid C)$。Naive Bayes 的核心假设。</p>
+    </div>
+    <div class="callout formula"><div class="head">全概率公式</div>
+      <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
+      <p style="font-size:13px;">题目没给 $P(B)$ 时用它展开。</p>
+    </div>
+    <div class="callout formula"><div class="head">期望与方差</div>
+      <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
+    </div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes 因子分解（预告）</div>
+      <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
+      <p style="font-size:13px;">贝叶斯（分子）+ 条件独立（分解）。把 $\sim 2^d$ 个联合参数压到 $2d$。</p>
+    </div>
+  </div>
 
-      <div class="callout example">
-        <div class="head">🧩 Example · Bayes 计算</div>
-        <p>已知 $P(A)=0.3,\ P(B\mid A)=0.8,\ P(B\mid \neg A)=0.2$，求 $P(A\mid B)$。</p>
-        <div class="eq">$$ P(B)=0.8\cdot 0.3+0.2\cdot 0.7=0.38 $$</div>
-        <div class="eq">$$ P(A\mid B)=\frac{0.8\cdot 0.3}{0.38}\approx 0.6316 $$</div>
-      </div>
-    </section>
+  <h3>5. 例题精解</h3>
 
-    
+  <div class="callout example">
+    <div class="head">例 1 · 两骰子的条件概率（Lecture 2, p. 5–6）</div>
+    <p>掷两枚公平六面骰，记 $X_1, X_2$。求 $P(X_1=2 \mid X_1+X_2\le 4)$。</p>
+    <p>$X_1+X_2\le 4$ 的结果：$(1,1),(1,2),(1,3),(2,1),(2,2),(3,1)$ 共 6 个；其中 $X_1=2$ 的是 $(2,1),(2,2)$。</p>
+    <div class="eq">$$ P(X_1=2 \mid X_1+X_2\le 4)=\frac{2}{6}=\frac{1}{3}. $$</div>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 2 · 贝叶斯计算</div>
+    <p>已知 $P(A)=0.3,\ P(B\mid A)=0.8,\ P(B\mid \neg A)=0.2$，求 $P(A\mid B)$。</p>
+    <div class="eq">$$ P(B)=0.8(0.3)+0.2(0.7)=0.38 $$</div>
+    <div class="eq">$$ P(A\mid B)=\frac{0.8\cdot 0.3}{0.38}\approx 0.6316 $$</div>
+    <p>解读：原本只有 30% 信 $A$，看到 $B$ 后升到 63%——因为 $B$ 在 $A$ 下出现的概率比在 $\neg A$ 下高得多。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 3 · 条件独立反例（Lecture 2, p. 9–10）</div>
+    <p>两骰子。$A=\{X_1\text{ 奇}\}$，$B=\{X_2\text{ 奇}\}$，$S=\{X_1+X_2\text{ 偶}\}$。无条件下 $A\perp B$（各 $\tfrac12$，联合 $\tfrac14$）。</p>
+    <p>但给定 $S$ 后二者相关：若 $A$ 成立，$B$ 必须成立才能让和为偶，所以 $P(B\mid A,S)=1\ne P(B\mid S)=\tfrac12$。</p>
+    <p>结论：独立 ≠ 条件独立（反之亦然），永远回到定义验证。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 4 · 列联表估概率（Lecture 2, p. 14–17）</div>
+    <p>从肺癌玩具表估 $P(\text{Cancer}=Y\mid \text{Gender}=M,\ \text{Smoke}=Y)$。$M,Y,Y$ 行 1000；$M,Y$ 行（不论癌否）共 $1000+5000=6000$。$\hat P=1000/6000\approx 16.7\%$。</p>
+    <p>表小才能这么数。100 个二值特征的表会有 $2^{100}\approx 10^{30}$ 行，远超地球总人口；绝大多数格子是空的——这就是维度灾难（Lecture 2, p. 17–18）。</p>
+  </div>
+
+  <h3>6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">看到题怎么下手</div>
+    <ol>
+      <li><b>识别题型</b>：“A 与 B 同时”→联合，链式分解；“给 B 求 A”→条件，只有 $P(B\mid A)$ 时用贝叶斯；“是否独立？”→验 $P(A,B)=P(A)P(B)$。</li>
+      <li><b>$P(B)$ 没给</b>就用全概率公式展开。</li>
+      <li><b>“给定 $C$，$A,B$ 是否独立？”</b>列小表算 $P(A\mid B,C)$ 与 $P(A\mid C)$，相等即条件独立。</li>
+      <li><b>ML 分类题</b>：写 $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$，再 $\arg\max_y$。</li>
+      <li><b>极端情形自检</b>：取 $P(B\mid A)=1$、$P(B\mid \neg A)=0$，公式给不出明显答案就是漏了项。</li>
+    </ol>
+  </div>
+
+  <h3>7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">容易丢分的地方</div>
+    <ul>
+      <li>分母错：$P(A\mid B)=P(A,B)/P(B)$，不是 $P(A)$。</li>
+      <li>把 $P(A\mid B)$ 与 $P(B\mid A)$ 当成同一回事（“检察官谬误”）；它们只通过先验相联系。</li>
+      <li>把独立和条件独立混为一谈——例 3 是经典反例。</li>
+      <li>贝叶斯里漏了先验（base-rate neglect）。</li>
+      <li>用了 $\propto$ 但忘了最后归一化。</li>
+      <li>变量并非条件独立时强行连乘——NB 的因子分解是<i>假设</i>，不是恒等式。</li>
+    </ul>
+  </div>
+
+  <h3>8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须会的内容</div>
+    <ul>
+      <li>30 秒内默写五条核心公式：条件、贝叶斯、独立、条件独立、全概率。</li>
+      <li>给 $P(A), P(B\mid A), P(B\mid \neg A)$ 手算 $P(A\mid B)$，含全概率展开过程。</li>
+      <li>能在图模型 / NB 题里识别条件独立并写出因子分解。</li>
+      <li>把 “posterior $\propto$ likelihood × prior” 落到具体变量上。</li>
+      <li>能解释概率表为何在高维失效（$2^d$ 增长）。</li>
+    </ul>
+  </div>
+
+  <h3>9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>$P(A\mid B)=P(A,B)/P(B)$，分母是被条件的事件。</li>
+      <li>贝叶斯：$P(A\mid B)=P(B\mid A)P(A)/P(B)$。</li>
+      <li>$P(B)=\sum_a P(B\mid A=a)P(A=a)$，没给时自己展开。</li>
+      <li>独立：$P(A,B)=P(A)P(B)$；条件独立：$P(A,B\mid C)=P(A\mid C)P(B\mid C)$。</li>
+      <li>独立 ↮ 条件独立。</li>
+      <li>Naive Bayes：$P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$，$2^d \to 2d$。</li>
+      <li>概率落在 $[0,1]$，被条件变量上的条件概率求和为 1。</li>
+    </ul>
+  </div>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -180,8 +352,6 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
-  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
     const toc  = document.getElementById('topicToc');
@@ -194,21 +364,21 @@
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
       const seenSection = new Set();
       items.forEach((el) => {
-        // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
         const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        const isH2 = el.tagName === 'H2';
+        if (lang === 'mixed' && isH2 && seenSection.has(baseId)) return;
+        if (isH2) seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';
+        if (!isH2) { a.style.paddingLeft = '10px'; a.style.fontSize = '12px'; }
         li.appendChild(a);
         ul.appendChild(li);
       });
@@ -216,7 +386,6 @@
       toc.appendChild(ul);
     }
     build();
-    // Rebuild whenever the lang slider changes.
     document.addEventListener('click', (e) => {
       if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });

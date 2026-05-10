@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="optimization.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,60 +36,174 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Optimization</div>
       <h1>📐 <span class="en-only">Optimization</span><span class="cn-only">优化</span></h1>
-      <div class="subtitle"><span class="en-only">Convexity · GD · Lagrangian</span><span class="cn-only">凸性 · GD · Lagrangian</span></div>
+      <div class="subtitle"><span class="en-only">Convexity · Gradient Descent · Lagrangian · Primal/Dual</span><span class="cn-only">凸性 · 梯度下降 · Lagrangian · 原始 / 对偶</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
-        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a></div>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="opt-en">
   <h2>🧭 Optimization</h2>
+
+  <h3>1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧠 Core intuition</div>
-    <p>Optimization tells you how to reach the best parameters. Convexity is the safety net: a PSD Hessian everywhere ⇒ no bad local minima.</p>
+    <div class="head">Formal definitions and the problem they solve</div>
+    <p>Training a model = solving an optimization problem with the loss as objective. The unconstrained version (Lecture 3, p. 7) is $\min_w f(w)$; the constrained version adds inequalities $f_i(w)\le 0$ and equalities $h_j(w)=0$.</p>
+    <p>Three things matter:</p>
+    <ul>
+      <li><b>Convexity</b>: chord above the graph; equivalently, tangent below the graph; equivalently, $\nabla^2 f\succeq 0$. PD everywhere ⇒ strictly convex with a unique minimizer.</li>
+      <li><b>Gradient descent</b>: iterate $w_{k+1}=w_k-\alpha_k\nabla f(w_k)$. For convex $f$, $\nabla f(w^*)=0$ is necessary <i>and</i> sufficient for global optimality (Lecture 3, p. 18).</li>
+      <li><b>Lagrangian / duality</b>: turn constraints into penalties via $L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_if_i(w)+\sum_j\nu_jh_j(w)$ with $\lambda_i\ge 0$. The dual function $g(\lambda,\nu)=\min_w L$ gives a lower bound; under strong duality the bound is tight.</li>
+    </ul>
+    <p>Convexity decides whether GD's stationary point is the right answer; the Lagrangian gives us SVM duals, kernel tricks, and the conceptual basis for primal-dual algorithms.</p>
   </div>
 
-  <h3>Concepts</h3>
-  <ul>
-    <li><b>Convex function</b>: bowl-shaped. Local min = global min.</li>
-    <li><b>PSD / PD Hessian</b>: convex / strictly convex (unique optimum).</li>
-  </ul>
+  <h3>2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Without formulas first</div>
+    <p>Think of the parameters as a hiker's location and the loss as elevation. <b>Optimization</b> is "find the lowest point," and a <b>convex</b> function is a single bowl — drop a ball anywhere and it always rolls to the same bottom.</p>
+    <p><b>Gradient descent</b> is just "look at the steepest downhill direction here, take a step, repeat." Step too big and you launch yourself across the valley; step too small and it takes forever.</p>
+    <p><b>Constraints are walls</b>. The Lagrangian doesn't forbid you from crossing them — it charges $\lambda_i$ per unit of violation, turning the constrained problem back into ordinary unconstrained optimization.</p>
+    <p><b>Duality is looking at the same problem from the other side</b>: instead of "minimize over locations," you "maximize over prices." For convex problems the two answers match, and sometimes the price-side problem is much easier.</p>
+  </div>
 
-  <h3>Core formulas</h3>
+  <h3>3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why these ideas actually work</div>
+    <p><b>Convexity is the safety net</b>. Without it, the solver may stop at a local minimum or saddle point that is much worse than the global one. With it, $\nabla f(w^*)=0$ alone is enough — no further checks needed (Lecture 3, p. 18).</p>
+    <p><b>The two convexity tests agree</b>. The first-order test ("graph above every tangent") and the second-order test ("$\nabla^2 f\succeq 0$ everywhere") are equivalent, but the second is usually easier because you can read PSD off the structure (e.g. $X^\top BX$).</p>
+    <p><b>Gradient descent's direction is locally optimal</b>: among unit vectors, $-\nabla f(w)$ maximizes the rate of decrease. Step size matters: too large diverges, too small crawls; constant $\alpha=1/L$ (Lipschitz constant $L$) is a textbook safe choice, and Armijo line search adapts.</p>
+    <p><b>The Lagrangian turns constraints into penalties</b>. If $\hat w$ violates a constraint, $\max_\lambda L(\hat w,\lambda)=+\infty$, so the outer min refuses to choose it. Inside the feasible set, $\sum_i\lambda_if_i(w)\le 0$, so $L\le f_0$ — that is exactly where the dual lower bound comes from.</p>
+    <p><b>Why bother with the dual</b> (Lecture 3, p. 31): sometimes fewer / simpler constraints, sometimes easier to optimize, and always provides a lower bound for the primal even when strong duality fails. The SVM dual depends only on inner products $x_i^\top x_j$, which is what enables the kernel trick.</p>
+  </div>
+
+  <h3>4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Second-order convexity test</div>
-      <div class="eq">$$ \nabla^2 f(w)\succeq 0 \;\Rightarrow\; f \text{ is convex} $$</div></div>
-    <div class="callout formula"><div class="head">Gradient descent</div>
-      <div class="eq">$$ w_{t+1}=w_t-\eta\,\nabla f(w_t) $$</div></div>
+    <div class="callout formula"><div class="head">Convexity (chord)</div>
+      <div class="eq">$$ f((1-\lambda)w_1+\lambda w_2)\le (1-\lambda)f(w_1)+\lambda f(w_2) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">First-order test</div>
+      <div class="eq">$$ f(w_1)\ge f(w_2)+\nabla f(w_2)^\top(w_1-w_2) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Second-order test</div>
+      <div class="eq">$$ \nabla^2 f(w)\succeq 0\ \forall w\ \Longleftrightarrow\ f \text{ convex} $$</div>
+      <p style="font-size:13px;">PD everywhere ⇒ strictly convex.</p>
+    </div>
+    <div class="callout formula"><div class="head">Optimality (convex)</div>
+      <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ globally optimal} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Gradient Descent</div>
+      <div class="eq">$$ w_{k+1}=w_k-\alpha_k\,\nabla f(w_k) $$</div>
+      <p style="font-size:13px;">Stop when $\|\nabla f(w_k)\|\approx 0$. $\alpha=1/L$ is a safe constant.</p>
+    </div>
+    <div class="callout formula"><div class="head">Subgradient inequality</div>
+      <div class="eq">$$ f(x)\ge f(x_0)+\langle s, x-x_0\rangle,\quad s\in\partial f(x_0) $$</div>
+      <p style="font-size:13px;">Generalizes the first-order test to non-smooth $f$ (HW1 §4.6).</p>
+    </div>
+    <div class="callout formula"><div class="head">Armijo line search</div>
+      <div class="eq">$$ f(w_k+\alpha d_k)-f(w_k)\le \sigma\alpha\,\nabla f(w_k)^\top d_k $$</div>
+      <p style="font-size:13px;">Try $\alpha=s,\beta s,\beta^2 s,\dots$ until inequality holds (Lecture 3, p. 24).</p>
+    </div>
     <div class="callout formula"><div class="head">Lagrangian</div>
-      <div class="eq">$$ L(w,\lambda)=f_0(w)+\sum_i \lambda_i f_i(w),\ \lambda_i\ge 0 $$</div>
-      <div style="font-size:13px;">For $\min f_0$ subject to $f_i \le 0$.</div></div>
+      <div class="eq">$$ L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_i f_i(w)+\sum_j\nu_j h_j(w),\ \lambda_i\ge 0 $$</div>
+    </div>
     <div class="callout formula"><div class="head">Primal vs Dual</div>
-      <div class="eq">$$ \min_w\max_\lambda L \;|\; \max_\lambda\min_w L $$</div>
-      <div style="font-size:13px;">SVM dual depends only on $x_i^\top x_j$ → kernel trick.</div></div>
+      <div class="eq">$$ \text{Primal: }\min_w\max_{\lambda\ge 0,\nu} L,\quad \text{Dual: }\max_{\lambda\ge 0,\nu}\min_w L $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Weak / Strong Duality</div>
+      <div class="eq">$$ f_0(w^*)\ge g(\lambda^*,\nu^*)\ (\text{always}),\quad =\ \text{under strong duality} $$</div>
+      <p style="font-size:13px;">Strong duality typically holds for convex problems with Slater.</p>
+    </div>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Common pitfalls</div>
-    <ul>
-      <li>PSD ⇒ convex (possibly non-strict). PD ⇒ strictly convex with a unique optimum.</li>
-      <li>Step size $\eta$ too large diverges; too small converges painfully slowly.</li>
-    </ul>
-  </div>
+  <h3>5. Worked Examples</h3>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Use PSD / PD of the Hessian to argue convexity / uniqueness.</li>
-      <li>Write the Lagrangian for a constrained problem and explain its dual.</li>
-    </ul>
+  <div class="callout example">
+    <div class="head">Example 1 · Logistic loss is convex (HW1 §4.1–4.2)</div>
+    <p>The Hessian factors as $H=X^\top BX$ with $B$ diagonal, $B_{ii}=\sigma(w^\top x_i)(1-\sigma(w^\top x_i))\in[0,\tfrac14]$. For any $v$, $v^\top H v=(Xv)^\top B(Xv)=\sum_i B_{ii}(Xv)_i^2\ge 0$, so $H\succeq 0$. By the second-order test the loss is convex everywhere; every local minimum is global.</p>
   </div>
 
   <div class="callout example">
-    <div class="head">🧩 Logistic Hessian PD meaning</div>
+    <div class="head">Example 2 · $\|x\|_2$ is convex (HW1 §4.3)</div>
+    <p>By the triangle inequality, $\|(1-\lambda)x_1+\lambda x_2\|\le (1-\lambda)\|x_1\|+\lambda\|x_2\|$ — the chord definition. Same argument works for any norm. The Hessian fails to exist at $x=0$, so the chord definition is the cleanest path.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 3 · Log-sum-exp is convex (HW1 §4.4, Lecture 3 p. 16)</div>
+    <p>Let $f(x)=\log\sum_i\exp(x_i)$. Then $\partial f/\partial x_i=p_i$ where $p$ is the softmax of $x$, and $\nabla^2 f=\mathrm{diag}(p)-pp^\top$. By Cauchy-Schwarz, $\langle v,p\rangle^2\le\sum_i p_iv_i^2$, so $v^\top(\mathrm{diag}(p)-pp^\top)v\ge 0$ and $f$ is convex.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 4 · Lagrangian for a Linear Program (Lecture 3, p. 30)</div>
+    <p>$\min_w c^\top w$ s.t. $Aw\le b$. Then $L(w,\lambda)=(c+A^\top\lambda)^\top w-b^\top\lambda$ with $\lambda\ge 0$.</p>
+    <p>Minimizing over $w$ gives $-b^\top\lambda$ if $c+A^\top\lambda=0$, otherwise $-\infty$. The dual is therefore $\max_{\lambda\ge 0}\,-b^\top\lambda$ s.t. $A^\top\lambda+c=0$ — also an LP, so we can pick whichever is easier.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 5 · Duality T/F (HW1 §4.5)</div>
+    <p>(a) Feasible set $\{x:g(x)\le 0\}$ for convex $g$ is convex — <b>True</b>, sublevel sets of convex functions are convex.</p>
+    <p>(b) The dual function is always concave — <b>True</b>, it is a pointwise infimum of affine functions of $(\lambda,\nu)$.</p>
+    <p>(c) Strong duality ⇒ primal value = dual value — <b>True</b>, by definition.</p>
+    <p>(d) The dual always has the same solution as the primal — <b>False</b>: only the optimal <i>values</i> match (under strong duality); the variables live in different spaces (Lecture 3, p. 33).</p>
+  </div>
+
+  <h3>6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to tackle an optimization problem</div>
+    <ol>
+      <li><b>"Is $f$ convex?"</b> Try second-order ($\nabla^2 f\succeq 0$) first; for non-smooth $f$, fall back to the chord or first-order definition.</li>
+      <li><b>"Find the optimum."</b> Convex + differentiable: solve $\nabla f(w)=0$. Quadratic: invert the Hessian. Otherwise: gradient descent.</li>
+      <li><b>"Show local = global."</b> Cite convexity + second-order test.</li>
+      <li><b>"Constrained problem."</b> Write the Lagrangian with $\lambda_i\ge 0$ on inequalities, $\nu_j$ free on equalities; then either KKT (closed form) or take the dual.</li>
+      <li><b>"Compute the dual"</b> (Lecture 3 recipe, p. 29): write $L$, minimize over $w$ with $\lambda,\nu$ fixed, read off domain restrictions, write the dual as $\max g(\lambda,\nu)$.</li>
+      <li><b>Subgradient question.</b> Use $f(x)\ge f(x_0)+\langle s, x-x_0\rangle$, $s\in\partial f(x_0)$; e.g. $\partial|x|(0)=[-1,1]$.</li>
+      <li><b>GD sanity check</b>: if loss diverges, halve $\alpha$; if it crawls, double it. With Lipschitz $L$, $\alpha=1/L$ is a default that always works.</li>
+    </ol>
+  </div>
+
+  <h3>7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">Frequent traps</div>
     <ul>
-      <li>Hessian shape: $\nabla^2 f(w)\in\mathbb{R}^{d\times d}$, symmetric.</li>
-      <li>PD ⇒ strictly convex ⇒ unique global minimizer; gradient descent with a sensible step size converges cleanly.</li>
+      <li>Confusing PSD and PD — PSD allows zero eigenvalues, so the optimum need not be unique.</li>
+      <li>Treating $\nabla f(w^*)=0$ as sufficient for non-convex $f$ — it only marks a stationary point.</li>
+      <li>Step size too large — GD can diverge spectacularly; always check the loss decreases.</li>
+      <li>Forgetting $\lambda_i\ge 0$ on inequality multipliers (equality multipliers $\nu_j$ are free).</li>
+      <li>Confusing primal and dual variables — they live in different spaces; only optimal <i>values</i> match.</li>
+      <li>Asserting strong duality without justification — typically needs convexity + Slater.</li>
+      <li>Using ordinary gradient on a non-differentiable $f$ (e.g. $|x|$ at 0) — use a subgradient.</li>
+    </ul>
+  </div>
+
+  <h3>8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">What you must walk in able to do</div>
+    <ul>
+      <li>State the chord, first-order, and second-order definitions of convexity, and switch between them.</li>
+      <li>Use $\nabla^2 f\succeq 0$ to prove logistic, log-sum-exp, ridge, etc. convex.</li>
+      <li>Recognize $X^\top BX\succeq 0$ via the sandwich trick.</li>
+      <li>Write one step of gradient descent and explain step-size trade-offs.</li>
+      <li>Set up the Lagrangian for a constrained problem, then derive the dual via the four-step recipe.</li>
+      <li>State weak duality and distinguish from strong duality.</li>
+      <li>Know the four T/F items in HW1 §4.5 — they recur on quizzes.</li>
+    </ul>
+  </div>
+
+  <h3>9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>Convex ⇔ chord above graph ⇔ tangent below graph ⇔ Hessian PSD.</li>
+      <li>Convex $f$: $\nabla f(w^*)=0\Rightarrow$ global minimum.</li>
+      <li>GD: $w_{k+1}=w_k-\alpha\nabla f(w_k)$; $\alpha=1/L$ safe.</li>
+      <li>$H=X^\top BX\succeq 0$ when $B\succeq 0$ — logistic loss convex.</li>
+      <li>Norms, log-sum-exp, exp, non-negative weighted sums of convex are convex.</li>
+      <li>Lagrangian: $L=f_0+\sum\lambda_if_i+\sum\nu_jh_j$, $\lambda_i\ge 0$.</li>
+      <li>Dual $g(\lambda,\nu)=\min_w L$; problem $\max_{\lambda\ge 0,\nu} g$.</li>
+      <li>Weak duality: $\min\max L\ge\max\min L$ (always).</li>
+      <li>Strong duality: equality, typically convex + Slater.</li>
+      <li>Subgradient: $f(x)\ge f(x_0)+\langle s,x-x_0\rangle$, $s\in\partial f(x_0)$.</li>
     </ul>
   </div>
 </section>
@@ -96,61 +211,169 @@
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="opt">
-      <h2><span class="icon">🧭</span> Optimization · 优化</h2>
-      <div class="callout">
-        <div class="head">🧠 Core intuition</div>
-        <div class="bi-text">
-          <span class="cn">优化告诉你“怎么走到最好”。凸性保证你不会走错盆地。</span>
-          <span class="en">Optimization tells you how to reach the best; convexity guarantees no bad local minima.</span>
-        </div>
-      </div>
+  <h2>🧭 优化</h2>
 
-      <h3>🔵 概念理解</h3>
-      <ul>
-        <li><b>凸函数 / Convex</b>：像“碗”；局部最小 = 全局最小。</li>
-        <li><b>PSD / PD（半正定 / 正定）</b>：通过 Hessian 判断曲率。</li>
-      </ul>
+  <h3>1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">正式定义与它解决的问题</div>
+    <p>训练模型 = 解“以损失为目标”的优化问题。无约束版本（Lecture 3, p. 7）是 $\min_w f(w)$；有约束版本再加上 $f_i(w)\le 0$ 与 $h_j(w)=0$。</p>
+    <p>真正要掌握三件事：</p>
+    <ul>
+      <li><b>凸性</b>：弦在图像上方，等价于切线在图像下方，等价于 $\nabla^2 f\succeq 0$。处处 PD ⇒ 严格凸、唯一极小。</li>
+      <li><b>梯度下降</b>：$w_{k+1}=w_k-\alpha_k\nabla f(w_k)$。凸 $f$ 下，$\nabla f(w^*)=0$ 既必要也充分（Lecture 3, p. 18）。</li>
+      <li><b>Lagrangian / 对偶</b>：把约束化为罚金，$L(w,\lambda,\nu)=f_0+\sum_i\lambda_if_i+\sum_j\nu_jh_j$，$\lambda_i\ge 0$。对偶函数 $g(\lambda,\nu)=\min_w L$ 给出下界；强对偶时下界取等。</li>
+    </ul>
+    <p>凸性决定了 GD 找到的驻点是不是真答案；Lagrangian 给我们 SVM 对偶、核技巧，以及原始-对偶算法的概念基础。</p>
+  </div>
 
-      <h3>🟣 核心公式（默写）</h3>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">Second-order Convexity Test</div>
-          <div class="eq">$$ \nabla^2 f(w)\succeq 0\quad(\text{PSD}) \Rightarrow f\ \text{convex} $$</div></div>
-        <div class="callout formula"><div class="head">Gradient Descent</div>
-          <div class="eq">$$ w_{t+1}=w_t-\eta\nabla f(w_t) $$</div></div>
-        <div class="callout formula"><div class="head">Lagrangian</div>
-          <div class="eq">$$ L(w,\lambda)=f_0(w)+\sum_i \lambda_i f_i(w),\ \lambda_i\ge 0 $$</div>
-          <div style="font-size:13px;">用于 $\min f_0(w)$ s.t. $f_i(w)\le 0$。</div></div>
-        <div class="callout formula"><div class="head">Primal vs Dual</div>
-          <div class="eq">$$ \text{Primal: }\min_w\max_\lambda L \quad|\quad \text{Dual: }\max_\lambda\min_w L $$</div>
-          <div style="font-size:13px;">SVM 对偶只依赖内积 $x_i^\top x_j$ → 核技巧。</div></div>
-      </div>
+  <h3>2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">不看公式先懂大概</div>
+    <p>把参数想成登山者位置，损失就是海拔。<b>优化</b>就是“找最低点”，而<b>凸函数</b>是个单一碗——任意位置放球都会滚到同一个底。</p>
+    <p><b>梯度下降</b>就是“看哪个方向最陡，迈一步，重复”。步长太大会把自己甩出山谷，太小爬蜗牛。</p>
+    <p><b>约束就是墙</b>。Lagrangian 不禁止你越界，而是对每单位违规收 $\lambda_i$，把有约束问题变回普通的无约束问题。</p>
+    <p><b>对偶就是从另一面看同一题</b>：与其“在位置上取最小”，不如“在价格上取最大”。凸问题下两个答案一致，且价格那一面有时简单很多。</p>
+  </div>
 
-      <div class="callout warn">
-        <div class="head">⚠️ Common pitfalls</div>
-        <ul>
-          <li>PSD 只保证凸（可能非严格）；PD 才保证严格凸（唯一最优）。</li>
-          <li>学习率 $\eta$ 太大：发散；太小：收敛慢。</li>
-        </ul>
-      </div>
+  <h3>3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">这些概念为何有效</div>
+    <p><b>凸性是安全网</b>。没有它，优化器可能停在比全局还差很多的局部 / 鞍点；有它，$\nabla f(w^*)=0$ 就够了，不需要再补条件（Lecture 3, p. 18）。</p>
+    <p><b>判凸的两条等价路径</b>：一阶（图像在每条切平面上方）与二阶（$\nabla^2 f\succeq 0$）等价；二阶通常更好用，因为可以从结构（如 $X^\top BX$）直接读出 PSD。</p>
+    <p><b>梯度下降的方向是局部最优</b>：单位向量中 $-\nabla f(w)$ 让一阶 Taylor 下降率最大。步长很关键：太大发散，太小爬慢；常数 $\alpha=1/L$（Lipschitz $L$）是教科书安全选择，Armijo 线搜索自适应。</p>
+    <p><b>Lagrangian 把约束变成罚金</b>。若 $\hat w$ 违约，$\max_\lambda L(\hat w,\lambda)=+\infty$，外层 min 就不会选它；可行域内 $\sum_i\lambda_if_i(w)\le 0$，所以 $L\le f_0$——对偶下界由此而来。</p>
+    <p><b>为什么要做对偶</b>（Lecture 3, p. 31）：约束更少 / 更简、有时更易解、永远提供原始的下界（即便强对偶不成立）。SVM 对偶只依赖内积 $x_i^\top x_j$，这正是核技巧的源头。</p>
+  </div>
 
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>会用 Hessian 的 PSD/PD 判断凸性与唯一性。</li>
-          <li>会写带约束问题的 Lagrangian 并解释对偶形式。</li>
-        </ul>
-      </div>
+  <h3>4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">凸性（弦）</div>
+      <div class="eq">$$ f((1-\lambda)w_1+\lambda w_2)\le (1-\lambda)f(w_1)+\lambda f(w_2) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">一阶判定</div>
+      <div class="eq">$$ f(w_1)\ge f(w_2)+\nabla f(w_2)^\top(w_1-w_2) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">二阶判定</div>
+      <div class="eq">$$ \nabla^2 f(w)\succeq 0\ \forall w\ \Longleftrightarrow\ f \text{ 凸} $$</div>
+      <p style="font-size:13px;">处处 PD ⇒ 严格凸。</p>
+    </div>
+    <div class="callout formula"><div class="head">凸优化的最优性</div>
+      <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ 全局最优} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">梯度下降</div>
+      <div class="eq">$$ w_{k+1}=w_k-\alpha_k\,\nabla f(w_k) $$</div>
+      <p style="font-size:13px;">$\|\nabla f(w_k)\|\approx 0$ 时停；$\alpha=1/L$ 安全常数。</p>
+    </div>
+    <div class="callout formula"><div class="head">次梯度不等式</div>
+      <div class="eq">$$ f(x)\ge f(x_0)+\langle s, x-x_0\rangle,\quad s\in\partial f(x_0) $$</div>
+      <p style="font-size:13px;">把一阶判定推广到不可微 $f$（HW1 §4.6）。</p>
+    </div>
+    <div class="callout formula"><div class="head">Armijo 线搜索</div>
+      <div class="eq">$$ f(w_k+\alpha d_k)-f(w_k)\le \sigma\alpha\,\nabla f(w_k)^\top d_k $$</div>
+      <p style="font-size:13px;">尝试 $\alpha=s,\beta s,\beta^2 s,\dots$ 直到不等式成立（Lecture 3, p. 24）。</p>
+    </div>
+    <div class="callout formula"><div class="head">Lagrangian</div>
+      <div class="eq">$$ L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_i f_i(w)+\sum_j\nu_j h_j(w),\ \lambda_i\ge 0 $$</div>
+    </div>
+    <div class="callout formula"><div class="head">原始 vs 对偶</div>
+      <div class="eq">$$ \text{Primal: }\min_w\max_{\lambda\ge 0,\nu} L,\quad \text{Dual: }\max_{\lambda\ge 0,\nu}\min_w L $$</div>
+    </div>
+    <div class="callout formula"><div class="head">弱 / 强对偶</div>
+      <div class="eq">$$ f_0(w^*)\ge g(\lambda^*,\nu^*)\ (\text{恒成立}),\quad =\ \text{当强对偶成立时} $$</div>
+      <p style="font-size:13px;">凸 + Slater 通常给出强对偶。</p>
+    </div>
+  </div>
 
-      <div class="callout example">
-        <div class="head">🧩 Example · Logistic Hessian PD 含义</div>
-        <ul>
-          <li>形状：$\nabla^2 f(w)\in\mathbb{R}^{d\times d}$（对称）。</li>
-          <li>PD ⇒ 严格凸 ⇒ 唯一全局最小值；GD 在合适学习率下收敛可控。</li>
-        </ul>
-      </div>
-    </section>
+  <h3>5. 例题精解</h3>
 
-    
+  <div class="callout example">
+    <div class="head">例 1 · Logistic 损失为凸（HW1 §4.1–4.2）</div>
+    <p>Hessian 写成 $H=X^\top BX$，$B$ 对角且 $B_{ii}=\sigma(w^\top x_i)(1-\sigma(w^\top x_i))\in[0,\tfrac14]$。对任意 $v$，$v^\top H v=(Xv)^\top B(Xv)=\sum_i B_{ii}(Xv)_i^2\ge 0$，所以 $H\succeq 0$。二阶判定 ⇒ 损失处处凸；任意局部最优都是全局。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 2 · $\|x\|_2$ 凸（HW1 §4.3）</div>
+    <p>三角不等式给出 $\|(1-\lambda)x_1+\lambda x_2\|\le (1-\lambda)\|x_1\|+\lambda\|x_2\|$ —— 这就是弦定义。任意范数都成立。$x=0$ 处 Hessian 不存在，所以弦定义是最干净的路径。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 3 · Log-sum-exp 凸（HW1 §4.4，Lecture 3 p. 16）</div>
+    <p>$f(x)=\log\sum_i\exp(x_i)$。$\partial f/\partial x_i=p_i$（$p$ 为 $x$ 的 softmax），$\nabla^2 f=\mathrm{diag}(p)-pp^\top$。由 Cauchy-Schwarz，$\langle v,p\rangle^2\le\sum_i p_iv_i^2$，故 $v^\top(\mathrm{diag}(p)-pp^\top)v\ge 0$，$f$ 凸。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 4 · LP 的 Lagrangian（Lecture 3, p. 30）</div>
+    <p>$\min_w c^\top w$ s.t. $Aw\le b$。$L(w,\lambda)=(c+A^\top\lambda)^\top w-b^\top\lambda$，$\lambda\ge 0$。</p>
+    <p>对 $w$ 取 min：$c+A^\top\lambda=0$ 时为 $-b^\top\lambda$，否则为 $-\infty$。对偶：$\max_{\lambda\ge 0}\,-b^\top\lambda$ s.t. $A^\top\lambda+c=0$——也是 LP，可挑更易解的那边。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 5 · 对偶判断题（HW1 §4.5）</div>
+    <p>(a) $g$ 凸时可行域 $\{x:g(x)\le 0\}$ 凸——<b>对</b>，凸函数下水平集是凸集。</p>
+    <p>(b) 对偶函数总是凹——<b>对</b>，它是 $(\lambda,\nu)$ 仿射函数族的逐点下确界。</p>
+    <p>(c) 强对偶 ⇒ 原始最优值 = 对偶最优值——<b>对</b>，这就是定义。</p>
+    <p>(d) 对偶问题总是与原始有相同的解——<b>错</b>：只有最优<i>值</i>相等（强对偶下），变量在不同空间（Lecture 3, p. 33）。</p>
+  </div>
+
+  <h3>6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">看到题怎么下手</div>
+    <ol>
+      <li><b>“$f$ 凸吗？”</b>先用二阶（$\nabla^2 f\succeq 0$）；不可微就回到弦或一阶定义。</li>
+      <li><b>“求最优”</b>：凸 + 可微 ⇒ $\nabla f(w)=0$；二次型直接求逆 Hessian；否则梯度下降。</li>
+      <li><b>“证局部 = 全局”</b>：引用凸 + 二阶判定。</li>
+      <li><b>“有约束”</b>：写 Lagrangian（$\lambda_i\ge 0$ 给不等式，$\nu_j$ 自由给等式）；之后 KKT 或对偶化。</li>
+      <li><b>“求对偶”</b>（Lecture 3 配方，p. 29）：写 $L$ → 把 $\lambda,\nu$ 当常数对 $w$ 取 min → 域限制 ⇒ 对偶约束 → 对偶为 $\max g$。</li>
+      <li><b>“次梯度题”</b>：$f(x)\ge f(x_0)+\langle s,x-x_0\rangle$，$s\in\partial f(x_0)$；$\partial|x|(0)=[-1,1]$。</li>
+      <li><b>GD 自检</b>：发散就把 $\alpha$ 减半；爬得慢就放大；Lipschitz $L$ 已知时 $\alpha=1/L$ 默认安全。</li>
+    </ol>
+  </div>
+
+  <h3>7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>PSD 与 PD 混淆——PSD 允许 0 特征值，最优可能不唯一。</li>
+      <li>非凸时把 $\nabla f(w^*)=0$ 当充分——它只标驻点。</li>
+      <li>步长过大——GD 可能爆，每步检查损失是否下降。</li>
+      <li>忘了 $\lambda_i\ge 0$（等式乘子 $\nu_j$ 自由）。</li>
+      <li>原始变量与对偶变量混为一谈——只有最优<i>值</i>相等。</li>
+      <li>无凭据声称强对偶——通常需要凸 + Slater。</li>
+      <li>对不可微 $f$（如 $|x|$ 在 0）用普通梯度——要用次梯度。</li>
+    </ul>
+  </div>
+
+  <h3>8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须会的内容</div>
+    <ul>
+      <li>能默写并互换凸的三种定义（弦 / 一阶 / 二阶）。</li>
+      <li>用 $\nabla^2 f\succeq 0$ 证 logistic、log-sum-exp、岭等的凸性。</li>
+      <li>用夹心法识别 $X^\top BX\succeq 0$（$B\succeq 0$）。</li>
+      <li>写一步 GD 并解释步长权衡。</li>
+      <li>会写有约束问题的 Lagrangian，并按四步配方推导对偶。</li>
+      <li>会陈述弱对偶并区分强对偶。</li>
+      <li>HW1 §4.5 那四条判断题反复出现，每条都要会论证。</li>
+    </ul>
+  </div>
+
+  <h3>9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>凸 ⇔ 弦在图像上方 ⇔ 切线在图像下方 ⇔ Hessian PSD。</li>
+      <li>凸 $f$：$\nabla f(w^*)=0\Rightarrow$ 全局最优。</li>
+      <li>GD：$w_{k+1}=w_k-\alpha\nabla f(w_k)$，$\alpha=1/L$ 安全。</li>
+      <li>$H=X^\top BX\succeq 0$（$B\succeq 0$）—— logistic 损失凸。</li>
+      <li>范数、log-sum-exp、指数、凸函数的非负加权和都是凸。</li>
+      <li>Lagrangian：$L=f_0+\sum\lambda_if_i+\sum\nu_jh_j$，$\lambda_i\ge 0$。</li>
+      <li>对偶 $g(\lambda,\nu)=\min_w L$；$\max_{\lambda\ge 0,\nu} g$。</li>
+      <li>弱对偶：$\min\max L\ge\max\min L$（恒成立）。</li>
+      <li>强对偶：等号（凸 + Slater 通常成立）。</li>
+      <li>次梯度：$f(x)\ge f(x_0)+\langle s,x-x_0\rangle$，$s\in\partial f(x_0)$。</li>
+    </ul>
+  </div>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -166,8 +389,6 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
-  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
     const toc  = document.getElementById('topicToc');
@@ -180,21 +401,21 @@
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
       const seenSection = new Set();
       items.forEach((el) => {
-        // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
         const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        const isH2 = el.tagName === 'H2';
+        if (lang === 'mixed' && isH2 && seenSection.has(baseId)) return;
+        if (isH2) seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';
+        if (!isH2) { a.style.paddingLeft = '10px'; a.style.fontSize = '12px'; }
         li.appendChild(a);
         ul.appendChild(li);
       });
@@ -202,7 +423,6 @@
       toc.appendChild(ul);
     }
     build();
-    // Rebuild whenever the lang slider changes.
     document.addEventListener('click', (e) => {
       if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });

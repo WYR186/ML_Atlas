@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="policy-gradient.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,65 +37,236 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Policy Gradient</div>
       <h1>🎮 <span class="en-only">Policy Gradient</span><span class="cn-only">策略梯度</span></h1>
       <div class="subtitle"><span class="en-only">log-deriv · on-policy</span><span class="cn-only">log-deriv · on-policy</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_25.pdf" target="_blank">📄 Lecture 25</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
+        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="pg-en">
-  <h2>🟪 Policy Gradient · On-policy</h2>
-  <div class="callout formula">
-    <div class="head">Objective</div>
-    <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim \pi_\theta}[R(\tau)] $$</div>
-  </div>
-  <div class="callout formula">
-    <div class="head">Log-derivative trick (Monte Carlo estimator)</div>
-    <div class="eq">$$ \nabla_\theta J(\theta)\approx \tfrac{1}{n}\sum_i R(\tau_i)\sum_t \nabla_\theta\log \pi_\theta(a_t\mid s_t) $$</div>
-  </div>
-  <ul>
-    <li><b>On-policy</b>: gradient uses fresh trajectories from the current $\pi_\theta$.</li>
-    <li>Works for continuous actions and complex policies (e.g. robotics).</li>
-  </ul>
+  <h2>Policy Gradient</h2>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧠 Why log-prob?</div>
-    <p>Increasing $\log \pi_\theta(a\mid s)$ for high-return $(s, a)$ shifts probability mass toward those actions.</p>
+    <div class="head">Directly optimize a parameterized policy</div>
+    <p><b>Policy gradient</b> maximizes expected trajectory reward by differentiating the policy parameters $\theta$ of $\pi_\theta(a\mid s)$. Instead of first learning an optimal Q-table, it asks: how should we change the policy so high-reward actions become more likely?</p>
+    <p>Lecture 25 derives vanilla policy gradient / REINFORCE. Lecture 27 then extends the same idea to actor-critic, PPO, and LLM reinforcement learning. These practical algorithms are marked in the PPT as not covered in exam, but they explain how modern RL systems are trained.</p>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Reward good sampled behavior</div>
+    <p>If a sampled trajectory gets high reward, increase the log-probability of the actions that produced it. If it performs poorly, do not reinforce those actions as much.</p>
+    <p>Actor-critic adds a coach: the critic estimates whether an action was better than expected, so the actor does not overreact to noisy total rewards.</p>
+  </div>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why log-probability appears</div>
+    <p>The environment sampling process is not directly differentiable. The log-derivative trick uses $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$, so the gradient can be written in terms of $\nabla\log\pi_\theta(a_t\mid s_t)$, which is differentiable.</p>
+    <p>PPO keeps policy-gradient updates from changing the policy too violently. GRPO, in Lecture 27, removes the learned value model and estimates advantages by comparing multiple completions for the same prompt.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Policy-gradient objective</div>
+      <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim P^{\pi_\theta}}[R(\tau)] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Monte-Carlo estimator</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Advantage version</div>
+      <div class="eq">$$ \nabla J\approx \mathbb{E}[A^\pi(s_t,a_t)\nabla_\theta\log\pi_\theta(a_t\mid s_t)] $$</div>
+      <p>Lecture 27: advantage centers around 0 and reduces variance.</p>
+    </div>
+    <div class="callout formula"><div class="head">Advantage definition</div>
+      <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
+    </div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM policy</div>
+      <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
+      <p>Policy gradient can reinforce token choices that lead to correct final answers.</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example 1 · Log-derivative derivation (HW5 §4.1)</div>
+    <p>Write $J=\int P_\theta(\tau)R(\tau)d\tau$. Then $\nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)d\tau$. In an MDP, only policy terms depend on $\theta$, so $\nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t|s_t)$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 2 · Actor-critic advantage (Lecture 27, p. 10-11)</div>
+    <p>If $Q(s,a)=12$ and $V(s)=9$, the advantage is $3$: the action was better than average. If $Q(s,a)=7$, advantage is $-2$: discourage it relative to the state baseline.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 3 · GRPO for LLM completions (Lecture 27, p. 16-18)</div>
+    <p>For one prompt, sample several completions. Compare their rewards inside the group: completions that beat the group average get positive relative advantage; worse completions get negative relative advantage. This avoids training a separate value model.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to approach policy-gradient questions</div>
+    <ol>
+      <li>Start from $J(\theta)=\mathbb{E}_{\tau}[R(\tau)]$.</li>
+      <li>Use $\nabla P=P\nabla\log P$.</li>
+      <li>Drop environment dynamics from the gradient if they do not depend on $\theta$.</li>
+      <li>Replace full returns by $Q$, advantage, or a baseline when discussing variance reduction.</li>
+      <li>For LLM RL, map policy to next-token distribution and reward to final answer correctness.</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">Frequent traps</div>
+    <ul>
+      <li>Calling vanilla policy gradient off-policy; it needs fresh samples from the current policy.</li>
+      <li>Forgetting the log in $\nabla\log\pi$.</li>
+      <li>Differentiating the environment transition when it does not depend on $\theta$.</li>
+      <li>Using an action-dependent baseline and claiming it is automatically unbiased.</li>
+      <li>Ignoring PPO's reason for clipping: repeated updates on the same trajectories can destroy the policy.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">What matters most</div>
+    <ul>
+      <li>Core exam: policy-gradient objective, log-derivative trick, on-policy nature, baseline idea.</li>
+      <li>Lecture 27 practical context: actor-critic reduces variance with advantage; PPO limits destructive updates; LLM-as-MDP uses token actions; GRPO compares completions for the same prompt.</li>
+      <li>The PPT explicitly marks actor-critic, PPO, LLM RL, RLVR, and GRPO as not covered in exam.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>$J(\theta)=E[R(\tau)]$.</li>
+      <li>$\nabla J\approx R(\tau)\sum_t\nabla\log\pi(a_t|s_t)$.</li>
+      <li>On-policy: collect trajectories from current policy.</li>
+      <li>Advantage = $Q-V$; lowers variance.</li>
+      <li>PPO clips policy updates; GRPO uses group-relative rewards.</li>
+      <li>LLM action = next token; reward can be verifiable correctness.</li>
+    </ul>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pg">
-      <h2><span class="icon">🟪</span> 6. Policy Gradient · On-policy</h2>
-      <div class="callout formula">
-        <div class="head">Objective</div>
-        <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim P^{\pi_\theta}}[R(\tau)] $$</div>
-      </div>
-      <div class="callout formula">
-        <div class="head">Log-derivative Trick（蒙特卡洛估计）</div>
-        <div class="eq">$$ \nabla_\theta J(\theta)\approx \tfrac{1}{n}\sum_{i=1}^{n}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log \pi_\theta(a_t\mid s_t) $$</div>
-      </div>
-      <ul>
-        <li><b>On-policy</b>：通常用当前策略采样的最新轨迹更新。</li>
-        <li><b>适用</b>：连续动作、复杂策略（如机器人控制）。</li>
-      </ul>
-      <div class="callout">
-        <div class="head">🧠 Why log-prob?</div>
-        <p>提高高回报动作在给定状态下被采样到的概率。</p>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · on/off 判别</div>
-        <ul>
-          <li>Policy Gradient：on-policy（梯度期望依赖当前 $\pi_\theta$ 产生的轨迹）。</li>
-          <li>Q-learning：off-policy（目标用 $\max_{a'}$，可用任意行为策略数据）。</li>
-        </ul>
-      </div>
-    </section>
+  <h2>策略梯度</h2>
 
-    
+  <h3 class="section-blue">1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">直接优化参数化策略</div>
+    <p><b>Policy gradient</b> 通过对策略 $\pi_\theta(a\mid s)$ 的参数 $\theta$ 求梯度，最大化期望轨迹奖励。它不一定先学最优 Q 表，而是直接问：怎样改变策略，让高回报动作更容易被采样？</p>
+    <p>Lecture 25 推导 vanilla policy gradient / REINFORCE；Lecture 27 继续把这个想法扩展到 actor-critic、PPO 和 LLM 强化学习。PPT 标注这些 practical algorithms 不在考试范围，但它们解释了现代 RL 系统怎么训练。</p>
+  </div>
+
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">奖励好的采样行为</div>
+    <p>如果某条采样轨迹回报高，就提高这条轨迹上动作的 log-probability；如果表现差，就少强化这些动作。</p>
+    <p>Actor-critic 多了一个“教练”：critic 估计某个动作是否比预期更好，避免 actor 被噪声很大的总回报带偏。</p>
+  </div>
+
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">为什么会出现 log-probability</div>
+    <p>环境采样过程通常不能直接对策略参数求导。Log-derivative trick 用 $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$，把梯度写到可微的 $\nabla\log\pi_\theta(a_t\mid s_t)$ 上。</p>
+    <p>PPO 的作用是限制 policy-gradient 更新不要太暴力。Lecture 27 中 GRPO 则去掉 learned value model，通过比较同一个 prompt 的多个 completions 来估计 advantages。</p>
+  </div>
+
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Policy-gradient 目标</div>
+      <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim P^{\pi_\theta}}[R(\tau)] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Monte-Carlo 估计</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Advantage 版本</div>
+      <div class="eq">$$ \nabla J\approx \mathbb{E}[A^\pi(s_t,a_t)\nabla_\theta\log\pi_\theta(a_t\mid s_t)] $$</div>
+      <p>Lecture 27：advantage 围绕 0 中心化，可降低方差。</p>
+    </div>
+    <div class="callout formula"><div class="head">Advantage 定义</div>
+      <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
+    </div>
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM 策略</div>
+      <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
+      <p>Policy gradient 可以强化能导向正确最终答案的 token 选择。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+  <div class="callout example">
+    <div class="head">例 1 · Log-derivative 推导（HW5 §4.1）</div>
+    <p>写 $J=\int P_\theta(\tau)R(\tau)d\tau$。则 $\nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)d\tau$。在 MDP 中，只有策略项依赖 $\theta$，所以 $\nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t|s_t)$。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 2 · Actor-critic advantage（Lecture 27, p. 10-11）</div>
+    <p>若 $Q(s,a)=12$、$V(s)=9$，advantage 为 $3$：动作比平均表现好。若 $Q(s,a)=7$，advantage 为 $-2$：应减少选择该动作的倾向。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 3 · LLM completions 的 GRPO（Lecture 27, p. 16-18）</div>
+    <p>对同一个 prompt 采样多个 completions，在组内比较奖励：高于组平均的 completion 得正 relative advantage，低于组平均的得负 relative advantage。这样可以不用单独训练 value model。</p>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">Policy-gradient 题怎么下手</div>
+    <ol>
+      <li>从 $J(\theta)=\mathbb{E}_{\tau}[R(\tau)]$ 出发。</li>
+      <li>使用 $\nabla P=P\nabla\log P$。</li>
+      <li>若环境 dynamics 不依赖 $\theta$，梯度里把它去掉。</li>
+      <li>讨论降方差时，把总 return 替换成 $Q$、advantage 或 baseline。</li>
+      <li>LLM RL 题把策略映射成 next-token distribution，把奖励映射成最终答案正确性。</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>把 vanilla policy gradient 说成 off-policy；它需要当前策略采样的新轨迹。</li>
+      <li>漏掉 $\nabla\log\pi$ 中的 log。</li>
+      <li>对不依赖 $\theta$ 的环境转移求导。</li>
+      <li>baseline 依赖 action 还声称自动无偏。</li>
+      <li>忽略 PPO clipping 的动机：重复使用同一批 trajectories 更新太多会破坏策略。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">最重要的内容</div>
+    <ul>
+      <li>核心考试点：policy-gradient 目标、log-derivative trick、on-policy 性质、baseline 思想。</li>
+      <li>Lecture 27 practical context：actor-critic 用 advantage 降方差；PPO 限制破坏性更新；LLM-as-MDP 以 token 为动作；GRPO 比较同 prompt 的多个 completions。</li>
+      <li>PPT 明确 actor-critic、PPO、LLM RL、RLVR、GRPO 不在考试范围。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>$J(\theta)=E[R(\tau)]$。</li>
+      <li>$\nabla J\approx R(\tau)\sum_t\nabla\log\pi(a_t|s_t)$。</li>
+      <li>On-policy：用当前策略采样轨迹。</li>
+      <li>Advantage = $Q-V$；降低方差。</li>
+      <li>PPO clip policy update；GRPO 用组内相对奖励。</li>
+      <li>LLM action = next token；reward 可为可验证正确性。</li>
+    </ul>
+  </div>
+</section>
 </div><!--/cn-only-->
+
+
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="q-learning.html">← Q-learning</a>
-      <a class="btn btn-primary" href="../cheatsheet.html">⚡ Cheatsheet →</a>
+      <a class="btn btn-primary" href="../cheatsheet.html"><span class="en-only">⚡ Equations →</span><span class="cn-only">⚡ 公式大全 →</span></a>
     </div>
   </main>
 </div>
@@ -124,10 +296,7 @@
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        seenSection.add(sect.id);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

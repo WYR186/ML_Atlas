@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="kernel-methods.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,8 +36,8 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Kernel Methods</div>
       <h1>🧮 <span class="en-only">Kernel Methods</span><span class="cn-only">核方法</span></h1>
-      <div class="subtitle"><span class="en-only">Polynomial · RBF</span><span class="cn-only">Polynomial · RBF</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
+      <div class="subtitle"><span class="en-only">Feature maps · Polynomial · RBF</span><span class="cn-only">Feature map · Polynomial · RBF</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_7.pdf" target="_blank">📄 Lecture 7</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
         <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
@@ -44,52 +45,198 @@
 <div class="en-only">
 <section class="topic" id="kernel-en">
   <h2>🪄 Kernel Methods</h2>
-  <p>Compute inner products in a high-dimensional feature space without ever materializing the feature map $\varphi$.</p>
+  <p class="topic-lede">Kernel methods extend the SVM dual from Lecture 7: instead of explicitly mapping data into a larger feature space, compute the inner product in that space through a kernel function.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A feature map $\phi(x)$ can make a nonlinear pattern linearly separable in a lifted space. Kernel methods use a function $k(x,x')$ that equals $\phi(x)^\top\phi(x')$ without explicitly building $\phi(x)$.</p>
+  <p>This solves a practical problem: the useful feature space may be huge or even infinite-dimensional, but the SVM dual only needs pairwise inner products.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of a kernel as a shortcut for comparing two objects after a secret transformation. You never draw the transformed objects; you only ask, “How similar would they look after that transformation?”</p>
+  <p>For XOR, the original 2D picture is not linearly separable. After adding the interaction feature $x_1x_2$, the pattern becomes separable by a simple plane.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The SVM dual depends on data only through $x_i^\top x_j$. If we replace $x$ by $\phi(x)$, every dot product becomes $\phi(x_i)^\top\phi(x_j)$. Kernel trick says: compute that number directly as $k(x_i,x_j)$.</p>
+  <p>Polynomial kernels add interaction features. RBF kernels measure local similarity: nearby points have large kernel values, far points have values near zero. Smaller bandwidth makes the classifier more local and more flexible.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Kernel trick</div>
-      <div class="eq">$$ k(x,x')=\varphi(x)^\top\varphi(x') $$</div></div>
-    <div class="callout formula"><div class="head">XOR feature map</div>
-      <div class="eq">$$ \varphi(x_1,x_2)=(x_1,\,x_2,\,x_1 x_2) $$</div></div>
-    <div class="callout formula"><div class="head">Polynomial kernel</div>
-      <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div></div>
-    <div class="callout formula"><div class="head">RBF / Gaussian kernel</div>
-      <div class="eq">$$ k(x,x')=\exp(-\gamma\|x-x'\|^2) $$</div>
-      <div style="font-size:13px;">$\gamma\uparrow$ → narrower kernel → curvier boundary → easier overfit.</div></div>
+    <div class="callout formula">
+      <div class="head">Kernel definition</div>
+      <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
+      <p>The kernel must behave like an inner product in some feature space.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Kernelized SVM prediction</div>
+      <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
+      <p>Only support vectors contribute because the other $\alpha_i$ are zero.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Polynomial kernel</div>
+      <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
+      <p>Degree $d$ controls the highest-order interactions.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">RBF / Gaussian kernel</div>
+      <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
+      <p>Small $\sigma$ means narrow, local influence; large $\sigma$ means smoother, broader influence.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">XOR lifting from Lecture 7</div>
+      <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
+      <p>The new interaction coordinate separates the diagonal XOR classes.</p>
+    </div>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Write the RBF formula and explain the role of $\gamma$.</li>
-      <li>Explain why the SVM dual works directly with kernels — it only sees inner products.</li>
-    </ul>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · XOR becomes linear after lifting</div>
+    <div class="example-source">Source: Lecture 7, XOR feature-map slides.</div>
+    <p>Map $(x_1,x_2)$ to $(x_1,x_2,x_1x_2)$. The two points with equal signs have $x_1x_2=+1$, and the two points with opposite signs have $x_1x_2=-1$. A classifier using only the third coordinate can separate them.</p>
   </div>
+  <div class="callout example">
+    <div class="head">Example B · Explicit quadratic feature map</div>
+    <div class="example-source">Source: HW2 Problem 3.4, paraphrased.</div>
+    <p>For $k(x,x')=(1+x^\top x')^2$, expand the square. The feature vector contains a constant term, scaled linear terms $\sqrt2 x_i$, square terms $x_i^2$, and scaled cross terms $\sqrt2 x_i x_j$ for $i&lt;j$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · RBF as nearest-support-vector behavior</div>
+    <div class="example-source">Source: HW2 Problem 3.3, paraphrased.</div>
+    <p>As $\sigma\to0$, the RBF term for the closest support vectors decays slowest. After factoring out the closest-distance term, all farther support-vector contributions vanish, so the prediction behaves like a weighted nearest-neighbor rule over support vectors.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>When you see an SVM dual,</b> scan for inner products; those are exactly the slots kernels replace.</div>
+    <div><b>For polynomial kernels,</b> expand small degrees by hand and match terms to coordinates of $\phi(x)$.</div>
+    <div><b>For RBF questions,</b> compare distances. The smallest distance dominates when $\sigma$ is small.</div>
+    <div><b>For intuition questions,</b> say “linear in feature space, nonlinear in original input space.”</div>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Thinking a kernel always requires explicitly writing $\phi(x)$. The whole point is often to avoid it.</li>
+    <li>Mixing the two RBF parameterizations: $\exp(-\|x-x'\|^2/(2\sigma^2))$ versus $\exp(-\gamma\|x-x'\|^2)$.</li>
+    <li>Forgetting that not every similarity function is a valid kernel; it must correspond to a positive semidefinite Gram matrix.</li>
+    <li>Saying kernel SVM is linear in the original input space. It is linear only after the feature map.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Explain the kernel trick from the SVM dual.</li>
+    <li>Write polynomial and RBF kernel formulas.</li>
+    <li>Construct small explicit feature maps, especially quadratic kernels.</li>
+    <li>Explain the role of $\sigma$ or $\gamma$ in RBF kernels.</li>
+    <li>Connect small-bandwidth RBF behavior to nearest-neighbor intuition.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can say what $k(x,x')$ represents.</li>
+    <li>I can kernelize $f(x)=\sum_i\alpha_i y_i x_i^\top x+b$.</li>
+    <li>I know the XOR feature map from Lecture 7.</li>
+    <li>I can expand $(1+x^\top x')^2$ into feature coordinates.</li>
+    <li>I can explain why small $\sigma$ makes RBF more local.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="kernel">
-      <h2><span class="icon">🪄</span> 4. Kernel Methods · 核方法</h2>
-      <p>用 kernel 计算高维特征映射的内积，避免显式构造 $\phi(x)$。</p>
+      <h2><span class="icon">🪄</span> Kernel Methods · 核方法</h2>
+      <p class="topic-lede">Kernel methods 是 Lecture 7 接在 SVM dual 后面的自然升级：不显式构造高维 feature map，只用 kernel function 直接算那个高维空间里的 inner product。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>Feature map $\phi(x)$ 可以把原本 nonlinear 的图形 lift 到更高维，让它在 feature space 里 linear separable。Kernel method 用 $k(x,x')$ 表示 $\phi(x)^\top\phi(x')$，但不用真的写出 $\phi(x)$。</p>
+      <p>它解决的问题是：有用的 feature space 可能非常大，甚至 infinite-dimensional；但 SVM dual 只需要 pairwise inner products。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>Kernel 就像一个“秘密变身后的相似度计算器”。你不用把点真的变身到高维，只问：如果变身之后，这两个点有多像？</p>
+      <p>对 XOR 来说，原始二维图怎么画直线都分不开；加上 $x_1x_2$ 这个 interaction feature 后，对角关系立刻变成一刀能切开的结构。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>SVM dual 中数据只通过 $x_i^\top x_j$ 出现。若把 $x$ 换成 $\phi(x)$，所有 dot product 都变成 $\phi(x_i)^\top\phi(x_j)$。Kernel trick 就是直接用 $k(x_i,x_j)$ 代替这个数。</p>
+      <p>Polynomial kernel 会加入 interaction features；RBF kernel 更像 local similarity：距离近 kernel 大，距离远 kernel 接近 0。Bandwidth 越小，边界越局部、越灵活。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Kernel Trick</div>
-          <div class="eq">$$ k(x,x')=\phi(x)^\top \phi(x') $$</div></div>
-        <div class="callout formula"><div class="head">XOR feature map</div>
-          <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div></div>
-        <div class="callout formula"><div class="head">Polynomial Kernel</div>
-          <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div></div>
-        <div class="callout formula"><div class="head">RBF / Gaussian Kernel</div>
-          <div class="eq">$$ k(x,x')=\exp\!\big(-\gamma\|x-x'\|^2\big) $$</div>
-          <div style="font-size:13px;">$\gamma\uparrow$ ⇒ 核更窄 ⇒ 边界更弯曲 ⇒ 更易过拟合。</div></div>
+        <div class="callout formula">
+          <div class="head">Kernel definition</div>
+          <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
+          <p>Kernel 必须像某个 feature space 里的 inner product。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Kernelized SVM prediction</div>
+          <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
+          <p>因为其他 $\alpha_i=0$，实际只剩 support vectors。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Polynomial kernel</div>
+          <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
+          <p>Degree $d$ 控制最高阶 interactions。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">RBF / Gaussian kernel</div>
+          <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
+          <p>$\sigma$ 小：影响范围窄、边界更局部；$\sigma$ 大：更平滑、更全局。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">XOR lifting from Lecture 7</div>
+          <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
+          <p>新增的 interaction coordinate 能把 XOR 的对角类别分开。</p>
+        </div>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>写出 RBF 公式并解释 $\gamma$ 含义（题目频繁出现）。</li>
-          <li>解释 SVM 对偶为什么能直接套 kernel（只看内积）。</li>
-        </ul>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · XOR lift 后变线性</div>
+        <div class="example-source">来源：Lecture 7，XOR feature-map slides。</div>
+        <p>把 $(x_1,x_2)$ 映射成 $(x_1,x_2,x_1x_2)$。同号点的 $x_1x_2=+1$，异号点的 $x_1x_2=-1$。只看第三个坐标就能线性分开。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example B · Quadratic kernel 的显式 feature map</div>
+        <div class="example-source">来源：HW2 Problem 3.4，题意转述。</div>
+        <p>对 $k(x,x')=(1+x^\top x')^2$ 展开。$\phi(x)$ 包含常数项、$\sqrt2 x_i$ 线性项、$x_i^2$ 平方项，以及 $i&lt;j$ 的 $\sqrt2 x_i x_j$ cross terms。</p>
+      </div>
+      <div class="callout example">
+        <div class="head">Example C · RBF 小 bandwidth 像 nearest support vector</div>
+        <div class="example-source">来源：HW2 Problem 3.3，题意转述。</div>
+        <p>当 $\sigma\to0$，离测试点最近的 support vectors 衰减最慢。把最近距离那一项提出后，更远的 support vectors 都趋近 0，所以 prediction 近似只看最近 support vectors 的加权标签。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>看到 SVM dual：</b> 先找 inner products，它们就是可以替换成 kernel 的位置。</div>
+        <div><b>Polynomial kernel：</b> 小 degree 直接展开，逐项对应 $\phi(x)$ 的坐标。</div>
+        <div><b>RBF 题：</b> 比较 distances；$\sigma$ 很小时最近距离 dominates。</div>
+        <div><b>直觉解释：</b> 记住一句话：feature space 里 linear，original input space 里 nonlinear。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>以为 kernel 一定要显式写出 $\phi(x)$；很多时候它就是为了避免显式写。</li>
+        <li>混淆 RBF 两种参数：$\exp(-\|x-x'\|^2/(2\sigma^2))$ 和 $\exp(-\gamma\|x-x'\|^2)$。</li>
+        <li>忘记不是所有 similarity function 都是 valid kernel；对应的 Gram matrix 要 positive semidefinite。</li>
+        <li>说 kernel SVM 在原空间是 linear；它只是在 feature space 里 linear。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>能从 SVM dual 解释 kernel trick。</li>
+        <li>会写 polynomial kernel 和 RBF kernel。</li>
+        <li>会构造小型 explicit feature map，尤其 quadratic kernel。</li>
+        <li>能解释 RBF 里 $\sigma$ 或 $\gamma$ 的作用。</li>
+        <li>能把 small-bandwidth RBF 和 nearest-neighbor intuition 连起来。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我知道 $k(x,x')$ 代表什么。</li>
+        <li>我能把 $f(x)=\sum_i\alpha_i y_i x_i^\top x+b$ kernelize。</li>
+        <li>我记得 Lecture 7 的 XOR feature map。</li>
+        <li>我能展开 $(1+x^\top x')^2$ 找 feature coordinates。</li>
+        <li>我能解释为什么 $\sigma$ 小会让 RBF 更 local。</li>
+      </ul>
     </section>
 
     

@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="decision-trees.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,85 +37,204 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌳 决策树 · 集成</span><span class="en-only">🌳 Trees & Ensemble</span> / Decision Trees</div>
       <h1>🌳 <span class="en-only">Decision Trees</span><span class="cn-only">决策树</span></h1>
       <div class="subtitle"><span class="en-only">Entropy · IG · Gini</span><span class="cn-only">Entropy · IG · Gini</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_8.pdf" target="_blank">📄 Lecture 8</a>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="dt-en">
   <h2>🌳 Decision Trees</h2>
-  <p>Recursively partition the input space along axis-aligned splits. Internal nodes use $g(x)=\operatorname{sign}(x_i-\tau)$.</p>
+  <p class="topic-lede">Decision trees from Lecture 8 classify by asking a sequence of simple questions. Training greedily chooses splits that reduce label uncertainty, most often using information gain.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A decision tree represents a function by a binary tree. Each internal node has a split rule $g:X\to\{0,1\}$, and each leaf stores a prediction such as a majority class.</p>
+  <p>For continuous features, this course uses axis-aligned threshold rules such as $x_j\ge\tau$. The learning problem is to choose both the split rules and the tree structure.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>A tree is a flowchart. Start at the root, answer a yes/no question, move left or right, and repeat until a leaf tells you the label.</p>
+  <p>The training algorithm asks: which question makes the children less mixed than the parent? A perfect question sends each class into its own branch.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Entropy, Gini, and classification error are all impurity measures. They are low when a node is pure and high when labels are mixed.</p>
+  <p>Information gain is uncertainty reduction: parent impurity minus weighted child impurity. Because finding the globally smallest tree is NP-complete, practical tree learning uses a greedy split-by-split heuristic.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Entropy</div>
-      <div class="eq">$$ I(D)=-\sum_{c=1}^{C} p(c\mid D)\log_2 p(c\mid D) $$</div>
-      <div style="font-size:13px;">Pure node ⇒ 0; balanced classes ⇒ maximum.</div></div>
-    <div class="callout formula"><div class="head">Information gain</div>
-      <div class="eq">$$ IG(D,f)=I(D)-\sum_j \tfrac{|D_j|}{|D|}\,I(D_j) $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">Gini impurity</div>
-      <div class="eq">$$ \text{Gini}=1-\sum_c p_c^2 $$</div></div>
+    <div class="callout formula">
+      <div class="head">Entropy</div>
+      <div class="eq">$$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $$</div>
+      <p>Pure node gives 0; balanced binary node gives 1 bit.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Information gain</div>
+      <div class="eq">$$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $$</div>
+      <p>Choose the split with the largest gain.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Gini impurity</div>
+      <div class="eq">$$ G(D)=1-\sum_c p_c^2 $$</div>
+      <p>Common CART-style alternative to entropy.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Classification error</div>
+      <div class="eq">$$ E(D)=1-\max_c p(c\mid D) $$</div>
+      <p>Simple but less sensitive than entropy or Gini.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Continuous split rule</div>
+      <div class="eq">$$ f(x)=\mathbf{1}\{x_j\ge\tau\} $$</div>
+      <p>HW2 asks for rules in this exact threshold style.</p>
+    </div>
   </div>
 
-  <div class="callout">
-    <div class="head">🧠 Concept check</div>
-    <ul>
-      <li>IG = parent impurity − weighted child impurity.</li>
-      <li>Finding the smallest tree is NP-complete; ID3 / CART are greedy.</li>
-    </ul>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · Perfect Gini split</div>
+    <div class="example-source">Source: Lecture 8, information-gain examples.</div>
+    <p>If a parent has 10 examples of each class, its binary Gini impurity is $1-0.5^2-0.5^2=0.5$. If a split creates two pure children, both child impurities are 0, so the gain is 0.5.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example B · No-information split</div>
+    <div class="example-source">Source: Lecture 8, information-gain examples.</div>
+    <p>If both children still have a 50/50 class mix, each child has the same impurity as the parent. The weighted child impurity equals the parent impurity, so information gain is 0.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · HW2 continuous split</div>
+    <div class="example-source">Source: HW2 Problem 4, paraphrased.</div>
+    <p>For a six-point 2D dataset, start by computing the parent entropy from class counts. Then enumerate integer-threshold rules like $x_1\ge5$ and compute $IG=I(D)-\sum_j |D_j|I(D_j)/|D|$. The best root split is the rule with maximum gain.</p>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Overfitting</div>
-    <p>Growing until every leaf is pure drives training error to 0 but increases variance, often hurting test error.</p>
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>For hand calculations,</b> make a tiny table: split rule, left counts, right counts, child entropies, weighted average, gain.</div>
+    <div><b>For continuous features,</b> sort candidate thresholds and obey the threshold convention stated in the problem.</div>
+    <div><b>For prediction,</b> trace one example from root to leaf; do not average across branches.</div>
+    <div><b>For theory questions,</b> mention greedy learning because globally smallest tree search is hard.</div>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Hand-compute entropy / IG / Gini on a small dataset.</li>
-      <li>Explain the bias-variance trade-off for deep trees.</li>
-    </ul>
-  </div>
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Using unweighted average child impurity instead of weighting by child size.</li>
+    <li>Forgetting that $\log 0$ terms are treated as 0 through the limit $p\log p\to0$.</li>
+    <li>Assuming deeper is always better. Deep trees often memorize noise and overfit.</li>
+    <li>Using the wrong inequality direction when reporting a split rule.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Compute entropy, Gini, and information gain by hand.</li>
+    <li>Choose a root split for a small continuous dataset.</li>
+    <li>Explain greedy tree induction and why exact smallest-tree learning is hard.</li>
+    <li>Explain why unrestricted trees overfit.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can compute impurity from class counts.</li>
+    <li>I can compute weighted child impurity.</li>
+    <li>I can choose the max-IG split.</li>
+    <li>I can explain tree inference as if/then/else.</li>
+    <li>I know why trees are flexible but high variance.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="dt">
-      <h2><span class="icon">🌳</span> 1. Decision Trees</h2>
-      <p>通过坐标轴对齐的划分把输入空间切成不重叠的区域。内部节点用 $g(x)=\operatorname{sign}(x_i-\tau)$ 选择 $(x_i,\tau)$ 进行分裂。</p>
+      <h2><span class="icon">🌳</span> Decision Trees · 决策树</h2>
+      <p class="topic-lede">Lecture 8 的 decision tree 是一种用一连串简单问题做分类的模型。训练时每一步贪心选择最能降低 label uncertainty 的 split，最常用的指标是 information gain。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>Decision tree 用 binary tree 表示一个函数。每个 internal node 有一个 split rule $g:X\to\{0,1\}$，每个 leaf 存一个 prediction，例如 majority class。</p>
+      <p>对 continuous features，本课常用 axis-aligned threshold rule，比如 $x_j\ge\tau$。学习问题就是选择好的 split rules 和 tree structure。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>树就是 flowchart。你从 root 开始，回答一个 yes/no 问题，往左或往右走，直到 leaf 给出 label。</p>
+      <p>训练时最关键的问题是：哪个问题能让孩子节点“不那么混”？如果一个问题能把不同类别干净分开，它就是好 split。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>Entropy、Gini、classification error 都是在量化 impurity：节点越纯，impurity 越低；类别越混，impurity 越高。</p>
+      <p>Information gain 就是 uncertainty reduction：父节点 impurity 减去子节点 weighted impurity。因为找全局最小树是 NP-complete，实际 tree learning 用逐层 greedy heuristic。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Entropy 不纯度</div>
-          <div class="eq">$$ I(D)=-\sum_{c=1}^{C} p(c\mid D)\log_2 p(c\mid D) $$</div>
-          <div style="font-size:13px;">纯节点 ⇒ 0；类别越均匀 ⇒ 越大。</div></div>
-        <div class="callout formula"><div class="head">Information Gain</div>
-          <div class="eq">$$ IG(D,f)=I(D)-\sum_{j=1}^{N}\frac{|D_j|}{|D|}\,I(D_j) $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">Gini Impurity (alternative)</div>
-          <div class="eq">$$ \text{Gini}=1-\sum_{c}p_c^2 $$</div></div>
+        <div class="callout formula">
+          <div class="head">Entropy</div>
+          <div class="eq">$$ I(D)=-\sum_{c=1}^{C}p(c\mid D)\log_2 p(c\mid D) $$</div>
+          <p>纯节点是 0；二分类 50/50 是 1 bit。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Information gain</div>
+          <div class="eq">$$ IG(D,f)=I(D)-\sum_j\frac{|D_j|}{|D|}I(D_j) $$</div>
+          <p>选择 gain 最大的 split。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Gini impurity</div>
+          <div class="eq">$$ G(D)=1-\sum_c p_c^2 $$</div>
+          <p>CART 常用的 entropy 替代指标。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Classification error</div>
+          <div class="eq">$$ E(D)=1-\max_c p(c\mid D) $$</div>
+          <p>更简单，但对分布变化不如 entropy / Gini 敏感。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Continuous split rule</div>
+          <div class="eq">$$ f(x)=\mathbf{1}\{x_j\ge\tau\} $$</div>
+          <p>HW2 要求用这种 threshold style 写 rule。</p>
+        </div>
       </div>
-      <div class="callout">
-        <div class="head">🧠 Concept check</div>
-        <ul>
-          <li>IG = 父节点不纯度 − 子节点加权不纯度。</li>
-          <li>找最小规模决策树是 NP-complete → 实用算法（ID3 / CART）逐层贪心。</li>
-        </ul>
-      </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfall · Overfitting</div>
-        <p>长到叶子全纯：训练误差 → 0，但方差 ↑，测试误差常变差。</p>
-      </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>会手算小数据集的 entropy / IG / Gini。</li>
-          <li>能解释深树的偏差–方差权衡。</li>
-        </ul>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · Perfect Gini split</div>
+        <div class="example-source">来源：Lecture 8，information-gain examples。</div>
+        <p>父节点有 10 个 class 0 和 10 个 class 1，binary Gini 是 $1-0.5^2-0.5^2=0.5$。如果 split 后两个子节点都 pure，child impurity 都是 0，所以 gain 是 0.5。</p>
       </div>
       <div class="callout example">
-        <div class="head">🧩 Example · IG</div>
-        <p>$D$ 含 6 点，3 蓝 3 绿 ⇒ $I(D)=1$。按 $x_1$ 在 $\tau=5$ 分裂为 $D_1,D_2$：</p>
-        <div class="eq">$$ IG(D,f)=I(D)-\sum_{j=1}^{2}\frac{|D_j|}{|D|}\,I(D_j) $$</div>
+        <div class="head">Example B · 没有信息量的 split</div>
+        <div class="example-source">来源：Lecture 8，information-gain examples。</div>
+        <p>如果两个孩子仍然都是 50/50 class mix，那它们的 impurity 和父节点一样。Weighted child impurity 等于 parent impurity，所以 information gain 是 0。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example C · HW2 continuous split</div>
+        <div class="example-source">来源：HW2 Problem 4，题意转述。</div>
+        <p>六个二维点的题，先从 class counts 算 parent entropy。然后枚举整数阈值规则，如 $x_1\ge5$，计算 $IG=I(D)-\sum_j |D_j|I(D_j)/|D|$。Gain 最大的 rule 就是 root split。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>手算题：</b> 建一个小表：split rule、left counts、right counts、child entropies、weighted average、gain。</div>
+        <div><b>Continuous features：</b> 按题目规定的 threshold convention，别自己改成 $&gt;$ 或小数阈值。</div>
+        <div><b>Prediction：</b> 一个样本只沿一条 root-to-leaf path 走，不要跨分支平均。</div>
+        <div><b>Theory 题：</b> 提到 exact smallest tree 很难，所以用 greedy induction。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>算 child impurity 时忘记按 child size 加权。</li>
+        <li>遇到 $\log 0$ 慌了；$p\log p$ 在 $p\to0$ 时按 0 处理。</li>
+        <li>以为树越深一定越好；deep tree 很容易 memorize noise。</li>
+        <li>报告 split rule 时把 inequality direction 写反。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>会手算 entropy、Gini、information gain。</li>
+        <li>会给小型 continuous dataset 选 root split。</li>
+        <li>能解释 greedy tree induction，以及为什么 exact smallest-tree learning 很难。</li>
+        <li>能解释 unrestricted tree 为什么 overfit。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我能从 class counts 算 impurity。</li>
+        <li>我能算 weighted child impurity。</li>
+        <li>我能选择 max-IG split。</li>
+        <li>我能把 tree inference 讲成 if/then/else。</li>
+        <li>我知道 trees 很 flexible，但 variance 高。</li>
+      </ul>
     </section>
 
     

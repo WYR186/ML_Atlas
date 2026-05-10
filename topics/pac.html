@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="pac.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,47 +37,207 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / PAC Learnability</div>
       <h1>🎓 <span class="en-only">PAC Learnability</span><span class="cn-only">PAC 可学习</span></h1>
       <div class="subtitle"><span class="en-only">n ≥ (1/ε)(ln|F|+ln(1/δ))</span><span class="cn-only">n ≥ (1/ε)(ln|F|+ln(1/δ))</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
-        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
         <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="pac-en">
-  <h2>📐 PAC Learnability &amp; ERM</h2>
-  <p>A class is <b>PAC-learnable</b> if for any target $\epsilon, \delta$ there is a learning algorithm whose output achieves true error $\le \epsilon$ with probability $\ge 1-\delta$, using polynomially many samples.</p>
-  <p><b>ERM</b> picks $f \in \mathcal{F}$ minimizing the empirical risk on the training set.</p>
+  <h2>PAC Learnability and ERM</h2>
+  <p class="topic-lede">Lecture 22 introduces the PAC framework: a way to say, mathematically, that learning from samples should work with high probability and small error, without assuming a friendly data distribution.</p>
 
-  <div class="callout formula">
-    <div class="head">Finite hypothesis class · sample complexity</div>
-    <div class="eq">$$ n \ge \tfrac{1}{\epsilon}\!\Big(\ln|\mathcal{F}|+\ln\tfrac{1}{\delta}\Big) $$</div>
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p><b>PAC</b> stands for Probably Approximately Correct. "Probably" means confidence at least $1-\delta$ over the random training set. "Approximately correct" means test error at most $\epsilon$ or within $\epsilon$ of the best-in-class predictor.</p>
+  <p><b>ERM</b>, empirical risk minimization, chooses a predictor with the smallest training error inside the hypothesis class.</p>
+  <ul>
+    <li>In the realizable case, the target concept is assumed to belong to $\mathcal{F}$.</li>
+    <li>In the agnostic case, no perfect concept is assumed; the goal is to compete with the best function in $\mathcal{H}$.</li>
+    <li>Sample complexity is the number of examples needed as a function of $\epsilon$, $\delta$, and model complexity.</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>PAC is a promise with two knobs. Turn $\epsilon$ down and you demand a more accurate learner. Turn $\delta$ down and you demand more confidence. Both demands cost more samples.</p>
+  <p>ERM is the natural student strategy: among all allowed explanations, pick the one that makes the fewest mistakes on the homework. PAC theory asks when that homework performance actually predicts exam performance.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>For one fixed classifier, training error concentrates around true error. The hard part is that the learner chooses a classifier after seeing data. We therefore need a uniform guarantee over the whole class, usually paid for by a complexity term such as $\log|\mathcal{F}|$ or VC dimension.</p>
+  <p>This is why finite classes are easier: a union bound can control all hypotheses at once.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div>
+      <h4>Training error</h4>
+      <div class="eq">$$ \hat\epsilon_{\mathcal{D}}(f)=\frac1n\sum_{i=1}^n\mathbf{1}\{f(x^{(i)})\ne y^{(i)}\} $$</div>
+    </div>
+    <div>
+      <h4>Test error</h4>
+      <div class="eq">$$ \epsilon_\mu(f)=\Pr_\mu(f(X)\ne Y) $$</div>
+    </div>
+    <div>
+      <h4>Finite realizable ERM bound</h4>
+      <div class="eq">$$ n\ge \frac1\epsilon\left(\log|\mathcal{F}|+\log\frac1\delta\right) $$</div>
+      <p>Then ERM has true error at most $\epsilon$ with probability at least $1-\delta$.</p>
+    </div>
+    <div>
+      <h4>Agnostic PAC target</h4>
+      <div class="eq">$$ \Pr\left(\epsilon_\mu(f)\le \min_{g\in\mathcal{H}}\epsilon_\mu(g)+\epsilon\right)\ge 1-\delta $$</div>
+      <p>Compete with the best available hypothesis, not necessarily Bayes.</p>
+    </div>
   </div>
 
-  <div class="callout example">
-    <div class="head">🧩 Plug-in example</div>
-    <p>$|\mathcal{F}|=1000,\,\epsilon=0.05,\,\delta=0.01$:</p>
-    <div class="eq">$$ n\ge \tfrac{1}{0.05}(\ln 1000+\ln 100)\approx 230.26 $$</div>
-    <p>Round up to $n \ge 231$.</p>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · initial-segment learner</h4>
+      <p class="example-source">Source: Lecture 22, pp. 12-16.</p>
+      <p>The target labels points in $(0,1)$ by whether they lie before a threshold. If the learned threshold is wrong by at least $\epsilon$, an interval of length $\epsilon$ near the true threshold must contain no samples. That probability is at most $\exp(-n\epsilon)$ on one side, then a union bound handles both sides.</p>
+    </div>
+    <div>
+      <h4>Example 2 · finite-class ERM</h4>
+      <p class="example-source">Source: Lecture 22, pp. 17-19.</p>
+      <p>A bad classifier with true error above $\epsilon$ has probability at most $(1-\epsilon)^n$ of making zero training mistakes. There are $|\mathcal{F}|$ possible classifiers, so the probability that any bad one fools ERM is at most $|\mathcal{F}|e^{-n\epsilon}$.</p>
+    </div>
+    <div>
+      <h4>Example 3 · uniform convergence implies good ERM</h4>
+      <p class="example-source">Source: HW5, Section 1.1.</p>
+      <p>If every empirical risk is within $\epsilon$ of its true risk, then ERM's true risk is within $2\epsilon$ of the best true risk in the class: one $\epsilon$ for the learned model, one $\epsilon$ for the best-in-class model.</p>
+    </div>
   </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>Identify whether the question is realizable or agnostic.</li>
+    <li>For finite $\mathcal{F}$, expect a union bound over hypotheses.</li>
+    <li>For fixed $f$, Hoeffding is enough; for data-chosen $\hat f$, use uniform convergence.</li>
+    <li>When solving for sample size, set the failure probability bound $\le\delta$ and isolate $n$.</li>
+    <li>Remember that smaller $\epsilon$ and smaller $\delta$ both increase sample complexity.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Applying a fixed-hypothesis Hoeffding bound directly to $\hat f$ chosen from the same data.</li>
+    <li>Forgetting the union bound factor $|\mathcal{F}|$.</li>
+    <li>Mixing up $\epsilon$ and $\delta$: $\epsilon$ is accuracy, $\delta$ is failure probability.</li>
+    <li>Saying PAC learnability includes runtime by definition; Lecture 22's definition focuses on sample complexity.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Define PAC learnability in words using $\epsilon$ and $\delta$.</li>
+    <li>Write ERM and explain empirical risk versus true risk.</li>
+    <li>Derive or recognize the finite-class sample complexity.</li>
+    <li>Explain why a data-dependent hypothesis needs uniform convergence.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>PAC = high probability plus low error.</li>
+    <li>$\epsilon$ controls accuracy.</li>
+    <li>$\delta$ controls confidence.</li>
+    <li>ERM minimizes training error.</li>
+    <li>Finite class penalty is $\log|\mathcal{F}|$.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="pac">
-      <h2><span class="icon">📐</span> 4. PAC / ERM / 样本复杂度</h2>
-      <p><b>PAC 可学习</b>：对任意 $\epsilon,\delta$，存在算法在概率 $\ge 1-\delta$ 下输出测试误差 $\le\epsilon$ 的假设，且样本量随参数多项式增长。</p>
-      <p><b>ERM</b>：在训练集上选使 $\hat{\epsilon}_D(f)$ 最小的 $f\in\mathcal{F}$。</p>
-      <div class="callout formula">
-        <div class="head">有限假设空间样本复杂度（必背）</div>
-        <div class="eq">$$ n \ge \tfrac{1}{\epsilon}\!\Big(\ln|\mathcal{F}|+\ln\tfrac{1}{\delta}\Big) $$</div>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · 代入计算</div>
-        <p>$|\mathcal{F}|=1000,\ \epsilon=0.05,\ \delta=0.01$：</p>
-        <div class="eq">$$ n\ge \tfrac{1}{0.05}\!(\ln 1000+\ln 100)=20\times(6.9078+4.6052)\approx 230.26 $$</div>
-        <p>取 $n\ge 231$。</p>
-      </div>
-    </section>
+  <h2>PAC Learnability 与 ERM</h2>
+  <p class="topic-lede">Lecture 22 引入 PAC framework：我们希望用样本学出来的 predictor，在高概率下测试误差小，而且不依赖某个特别友好的数据分布。</p>
+
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p><b>PAC</b> 是 Probably Approximately Correct。“Probably” 指训练集随机性下成功概率至少 $1-\delta$；“Approximately correct” 指 test error 至多 $\epsilon$，或比 class 内最优多不超过 $\epsilon$。</p>
+  <p><b>ERM</b> 是 empirical risk minimization：在 hypothesis class 里选 training error 最小的 predictor。</p>
+  <ul>
+    <li><b>realizable case</b>：目标 concept 假设真的属于 $\mathcal{F}$。</li>
+    <li><b>agnostic case</b>：不假设完美函数存在，只要求接近 $\mathcal{H}$ 内最优。</li>
+    <li><b>sample complexity</b>：为了达到 $\epsilon,\delta$ 需要多少样本。</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>PAC 像一个带两个旋钮的承诺：$\epsilon$ 越小，你要求答案越准；$\delta$ 越小，你要求翻车概率越低。两个旋钮拧紧都会增加样本需求。</p>
+  <p>ERM 就像学生在允许的所有解释里，选一个最能解释作业题的答案。PAC theory 问的是：作业做得好，什么时候能说明考试也会好？</p>
+
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>对固定 classifier，training error 会集中到 true error 附近。难点是 learner 会看完数据再挑 $\hat f$，所以需要对整个 class 同时成立的 uniform guarantee。</p>
+  <p>有限 hypothesis class 比较好处理，因为可以用 union bound，把每个 hypothesis 的坏事件加起来。</p>
+
+  <h3 class="section-purple">4. Key Equations · 关键公式</h3>
+  <div class="cols2">
+    <div>
+      <h4>Training error</h4>
+      <div class="eq">$$ \hat\epsilon_{\mathcal{D}}(f)=\frac1n\sum_{i=1}^n\mathbf{1}\{f(x^{(i)})\ne y^{(i)}\} $$</div>
+    </div>
+    <div>
+      <h4>Test error</h4>
+      <div class="eq">$$ \epsilon_\mu(f)=\Pr_\mu(f(X)\ne Y) $$</div>
+    </div>
+    <div>
+      <h4>有限 realizable ERM bound</h4>
+      <div class="eq">$$ n\ge \frac1\epsilon\left(\log|\mathcal{F}|+\log\frac1\delta\right) $$</div>
+      <p>满足时，ERM 以至少 $1-\delta$ 概率得到 true error $\le\epsilon$。</p>
+    </div>
+    <div>
+      <h4>Agnostic PAC 目标</h4>
+      <div class="eq">$$ \Pr\left(\epsilon_\mu(f)\le \min_{g\in\mathcal{H}}\epsilon_\mu(g)+\epsilon\right)\ge 1-\delta $$</div>
+      <p>不是和 Bayes 比，而是和 class 内最优比。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · initial-segment learner</h4>
+      <p class="example-source">出处：Lecture 22, pp. 12-16。</p>
+      <p>目标是在 $(0,1)$ 上按 threshold 标记。若学到的 threshold 偏差至少 $\epsilon$，真 threshold 附近长度为 $\epsilon$ 的区间必须没有 sample。一侧概率至多 $\exp(-n\epsilon)$，两侧再用 union bound。</p>
+    </div>
+    <div>
+      <h4>例 2 · finite-class ERM</h4>
+      <p class="example-source">出处：Lecture 22, pp. 17-19。</p>
+      <p>真实错误率超过 $\epsilon$ 的坏 classifier，在 $n$ 个样本上零训练错误的概率最多是 $(1-\epsilon)^n$。一共有 $|\mathcal{F}|$ 个 classifier，所以任意坏 classifier 骗过 ERM 的概率最多 $|\mathcal{F}|e^{-n\epsilon}$。</p>
+    </div>
+    <div>
+      <h4>例 3 · uniform convergence 推 ERM</h4>
+      <p class="example-source">出处：HW5, Section 1.1。</p>
+      <p>如果每个 empirical risk 和 true risk 都相差不超过 $\epsilon$，那么 ERM 的 true risk 距离 class 内最优 true risk 不超过 $2\epsilon$：一个 $\epsilon$ 控制学出的模型，一个 $\epsilon$ 控制 class 内最优模型。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <ol>
+    <li>先判断是 realizable 还是 agnostic。</li>
+    <li>有限 $\mathcal{F}$ 通常要对 hypotheses 做 union bound。</li>
+    <li>固定 $f$ 用 Hoeffding；数据选出的 $\hat f$ 要用 uniform convergence。</li>
+    <li>求 sample size 时，把 failure probability bound 设成 $\le\delta$ 再解 $n$。</li>
+    <li>$\epsilon$ 越小、$\delta$ 越小，sample complexity 都会上升。</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul>
+    <li>把 fixed-hypothesis Hoeffding bound 直接套到同一数据选出的 $\hat f$。</li>
+    <li>忘记 union bound 带来的 $|\mathcal{F}|$ 因子。</li>
+    <li>混淆 $\epsilon$ 和 $\delta$：$\epsilon$ 是 accuracy，$\delta$ 是失败概率。</li>
+    <li>说 PAC learnability 定义里一定包含运行时间；Lecture 22 重点是 sample complexity。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul>
+    <li>会用 $\epsilon,\delta$ 口头定义 PAC learnability。</li>
+    <li>会写 ERM，并区分 empirical risk 与 true risk。</li>
+    <li>会推或识别 finite-class sample complexity。</li>
+    <li>会解释为什么 data-dependent hypothesis 需要 uniform convergence。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul>
+    <li>PAC = high probability + low error。</li>
+    <li>$\epsilon$ 控制 accuracy。</li>
+    <li>$\delta$ 控制 confidence / failure probability。</li>
+    <li>ERM 最小化 training error。</li>
+    <li>有限类复杂度惩罚是 $\log|\mathcal{F}|$。</li>
+  </ul>
+</section>
 
     
 </div><!--/cn-only-->
@@ -106,17 +267,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

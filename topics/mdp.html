@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="mdp.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,52 +37,223 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / MDP</div>
       <h1>🎮 <span class="en-only">MDP</span><span class="cn-only">马尔可夫决策过程</span></h1>
       <div class="subtitle"><span class="en-only">(S, A, P, R, γ) · Markov property</span><span class="cn-only">(S, A, P, R, γ) · Markov 性</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="mdp-en">
-  <h2>🟦 Markov Decision Process</h2>
-  <div class="callout formula">
-    <div class="head">5-tuple</div>
-    <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
-  </div>
+  <h2>Markov Decision Process</h2>
+  <p class="topic-lede">Lecture 23 introduces reinforcement learning as decision making with delayed feedback. A Markov Decision Process is the formal language for an agent that interacts with an environment over time.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>An <b>MDP</b> models sequential decisions. At each time step, the agent observes a state, chooses an action, receives a scalar reward, and moves to the next state.</p>
+  <p>The formal object is</p>
+  <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
   <ul>
-    <li><b>States</b> $s \in \mathcal{S}$ — abstraction of the world.</li>
-    <li><b>Actions</b> $a \in \mathcal{A}$ — what the agent can choose.</li>
-    <li><b>Transitions</b> $P(s'\mid s,a)$ — environment dynamics.</li>
-    <li><b>Reward</b> $R(s,a)$ — immediate scalar feedback.</li>
-    <li><b>Discount</b> $\gamma \in [0,1)$ — preference for sooner rewards.</li>
+    <li>$\mathcal{S}$: possible states.</li>
+    <li>$\mathcal{A}$: possible actions.</li>
+    <li>$P(s'\mid s,a)$: transition distribution.</li>
+    <li>$R(s,a)$: immediate reward.</li>
+    <li>$\gamma\in[0,1)$: discount factor for future rewards.</li>
   </ul>
-  <div class="callout">
-    <div class="head">🧠 Markov property</div>
-    <p>Given the current $(s, a)$, the future is independent of the past.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of a game. The screen is the state. The button you press is the action. The score change is the reward. The game engine decides the next screen.</p>
+  <p>Supervised learning gives immediate labels. Reinforcement learning often gives delayed feedback: you may only learn many moves later whether earlier choices were good.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The Markov property says the current state contains enough information for predicting the next state distribution once the action is chosen. The past can matter only through how it is summarized in the current state.</p>
+  <p>This matters because Bellman equations and dynamic programming rely on breaking a long decision problem into one-step pieces: immediate reward plus value of the next state.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div>
+      <h4>Markov property</h4>
+      <div class="eq">$$ \Pr(S_{t+1}=s'\mid S_t=s,A_t=a,\text{history})=\Pr(S_{t+1}=s'\mid S_t=s,A_t=a) $$</div>
+    </div>
+    <div>
+      <h4>Trajectory</h4>
+      <div class="eq">$$ \tau=(s_0,a_0,r_1,s_1,a_1,r_2,\ldots,s_H) $$</div>
+      <p>A sampled interaction sequence.</p>
+    </div>
+    <div>
+      <h4>Deterministic policy</h4>
+      <div class="eq">$$ \pi:\mathcal{S}\to\mathcal{A},\qquad a_t=\pi(s_t) $$</div>
+    </div>
+    <div>
+      <h4>Stochastic policy</h4>
+      <div class="eq">$$ \pi:\mathcal{S}\to\Delta(\mathcal{A}),\qquad a_t\sim\pi(\cdot\mid s_t) $$</div>
+    </div>
+    <div class="wide">
+      <h4>Discounted return objective</h4>
+      <div class="eq">$$ \mathbb{E}_{\pi,P}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid S_0=s_0\right] $$</div>
+      <p>The policy should maximize long-run discounted reward, not just the next reward.</p>
+    </div>
   </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · training a dog to fetch</h4>
+      <p class="example-source">Source: Lecture 23, p. 7.</p>
+      <p>The state may include where the dog and ball are, the action is the command or movement, and the reward is praise or success. The agent learns actions that lead to future reward, not just immediate movement.</p>
+    </div>
+    <div>
+      <h4>Example 2 · GridWorld or Pacman</h4>
+      <p class="example-source">Source: Lecture 23, p. 12.</p>
+      <p>States are grid positions or game configurations. Actions are moves. Rewards may be goal points, food, penalties, or losing states. The transition can be deterministic or stochastic depending on the environment.</p>
+    </div>
+    <div>
+      <h4>Example 3 · stochastic transition</h4>
+      <p class="example-source">Source: Lecture 23, p. 13.</p>
+      <p>If an action can slip or fail, the transition is not a single next state but a distribution $P(\cdot\mid s,a)$. The value equations then average over possible next states.</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>Start every MDP word problem by listing $\mathcal{S},\mathcal{A},P,R,\gamma$.</li>
+    <li>Check whether the proposed state is truly Markov; add history if needed.</li>
+    <li>Separate agent behavior $\pi(a\mid s)$ from environment dynamics $P(s'\mid s,a)$.</li>
+    <li>Look for delayed reward; that is the main reason we need RL rather than ordinary supervised learning.</li>
+    <li>If $P$ and $R$ are known, think planning or dynamic programming. If only samples are available, think model-free learning.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Confusing policy with transition probability.</li>
+    <li>Using an observation that does not contain enough information to be Markov.</li>
+    <li>Ignoring discount factor $\gamma$ when computing long-term reward.</li>
+    <li>Treating a trajectory as just states; actions and rewards are part of the sample.</li>
+    <li>Assuming feedback is immediate like supervised labels.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Define an MDP tuple and each component.</li>
+    <li>State the first-order Markov property.</li>
+    <li>Define trajectory and policy, including deterministic and stochastic versions.</li>
+    <li>Explain why RL differs from supervised learning: delayed feedback and policy-dependent state distributions.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>MDP = $(\mathcal{S},\mathcal{A},P,R,\gamma)$.</li>
+    <li>Markov = current state/action is enough for the next-state distribution.</li>
+    <li>Policy chooses actions; transition belongs to the environment.</li>
+    <li>Trajectory includes states, actions, and rewards.</li>
+    <li>Goal = maximize expected discounted return.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="mdp">
-      <h2><span class="icon">🟦</span> 1. MDP · Markov Decision Process</h2>
-      <div class="callout formula">
-        <div class="head">五元组</div>
-        <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
-      </div>
-      <ul>
-        <li><b>States</b> $s\in\mathcal{S}$：对世界的抽象描述。</li>
-        <li><b>Actions</b> $a\in\mathcal{A}$：智能体可选行为。</li>
-        <li><b>Transition</b> $P(s'\mid s,a)$：dynamics。</li>
-        <li><b>Reward</b> $R(s,a)$：即时标量反馈。</li>
-        <li><b>Discount</b> $\gamma\in[0,1)$：未来回报折扣。</li>
-      </ul>
-      <div class="callout">
-        <div class="head">🧠 Markov Property（高频考点）</div>
-        <p>给定当前状态与动作，未来与过去无关。</p>
-      </div>
-      <p>轨迹：$\tau=(s_0,a_0,r_0,s_1,a_1,r_1,\ldots,s_H)$。</p>
-    </section>
+  <h2>Markov Decision Process · 马尔可夫决策过程</h2>
+  <p class="topic-lede">Lecture 23 把 reinforcement learning 引入为“带 delayed feedback 的序列决策”。MDP 是描述 agent 与 environment 长期交互的正式语言。</p>
 
-    
+  <h3 class="section-blue">1. 概念理解</h3>
+  <p><b>MDP</b> 描述一连串决策：每一步 agent 观察 state，选择 action，得到 scalar reward，然后 environment 转移到 next state。</p>
+  <p>正式写成：</p>
+  <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
+  <ul>
+    <li>$\mathcal{S}$：状态集合。</li>
+    <li>$\mathcal{A}$：动作集合。</li>
+    <li>$P(s'\mid s,a)$：transition distribution。</li>
+    <li>$R(s,a)$：immediate reward。</li>
+    <li>$\gamma\in[0,1)$：future reward 的 discount factor。</li>
+  </ul>
+
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <p>想象一个游戏：屏幕画面是 state，按哪个键是 action，分数变化是 reward，游戏引擎决定 next state。</p>
+  <p>supervised learning 通常马上给 label；RL 经常是 delayed feedback：你走了很多步之后，才知道前面某个选择到底好不好。</p>
+
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <p>Markov property 说：只要给定当前 state 和 action，预测下一步不需要再看完整 history。过去当然可能重要，但它必须已经被总结进当前 state 里。</p>
+  <p>这个性质让 Bellman equation 和 dynamic programming 成立：长问题可以拆成“一步 reward + next state value”。</p>
+
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div>
+      <h4>Markov property</h4>
+      <div class="eq">$$ \Pr(S_{t+1}=s'\mid S_t=s,A_t=a,\text{history})=\Pr(S_{t+1}=s'\mid S_t=s,A_t=a) $$</div>
+    </div>
+    <div>
+      <h4>Trajectory</h4>
+      <div class="eq">$$ \tau=(s_0,a_0,r_1,s_1,a_1,r_2,\ldots,s_H) $$</div>
+      <p>一次交互采样序列。</p>
+    </div>
+    <div>
+      <h4>Deterministic policy</h4>
+      <div class="eq">$$ \pi:\mathcal{S}\to\mathcal{A},\qquad a_t=\pi(s_t) $$</div>
+    </div>
+    <div>
+      <h4>Stochastic policy</h4>
+      <div class="eq">$$ \pi:\mathcal{S}\to\Delta(\mathcal{A}),\qquad a_t\sim\pi(\cdot\mid s_t) $$</div>
+    </div>
+    <div class="wide">
+      <h4>Discounted return objective</h4>
+      <div class="eq">$$ \mathbb{E}_{\pi,P}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid S_0=s_0\right] $$</div>
+      <p>策略要最大化长期 discounted reward，而不是只贪下一步 reward。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · 训练狗捡球</h4>
+      <p class="example-source">出处：Lecture 23, p. 7。</p>
+      <p>state 可以包含狗和球的位置，action 是命令或移动，reward 是奖励或完成任务。agent 学的是哪些 action 会带来未来 reward，不只是眼前动作。</p>
+    </div>
+    <div>
+      <h4>例 2 · GridWorld / Pacman</h4>
+      <p class="example-source">出处：Lecture 23, p. 12。</p>
+      <p>state 是格子位置或游戏配置，action 是移动，reward 可以是到达目标、吃到食物、惩罚或失败。transition 可能 deterministic，也可能 stochastic。</p>
+    </div>
+    <div>
+      <h4>例 3 · stochastic transition</h4>
+      <p class="example-source">出处：Lecture 23, p. 13。</p>
+      <p>如果动作可能打滑或失败，next state 就不是一个确定状态，而是 distribution $P(\cdot\mid s,a)$。value equation 里就要对可能的 next states 取 expectation。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <ol>
+    <li>MDP 文字题先列 $\mathcal{S},\mathcal{A},P,R,\gamma$。</li>
+    <li>检查 state 是否真的 Markov；不够就把 history 加进去。</li>
+    <li>区分 agent 的 $\pi(a\mid s)$ 和 environment 的 $P(s'\mid s,a)$。</li>
+    <li>看到 delayed reward，就想到 RL 而不是普通 supervised learning。</li>
+    <li>已知 $P,R$ 用 planning / DP；只有 samples 用 model-free learning。</li>
+  </ol>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <ul>
+    <li>混淆 policy 和 transition probability。</li>
+    <li>state 信息不够，却默认它满足 Markov property。</li>
+    <li>算长期 reward 时忘记 discount factor $\gamma$。</li>
+    <li>把 trajectory 只写成 states；actions 和 rewards 也是样本的一部分。</li>
+    <li>把 RL feedback 当成 supervised label 那样立即出现。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <ul>
+    <li>会定义 MDP tuple，并解释每个 component。</li>
+    <li>会写 first-order Markov property。</li>
+    <li>会定义 trajectory 和 policy，包括 deterministic / stochastic 两种。</li>
+    <li>会解释 RL 与 supervised learning 的差别：delayed feedback 和 policy-dependent state distribution。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <ul>
+    <li>MDP = $(\mathcal{S},\mathcal{A},P,R,\gamma)$。</li>
+    <li>Markov = 当前 state/action 足够决定 next-state distribution。</li>
+    <li>Policy 选动作；transition 属于 environment。</li>
+    <li>Trajectory 包含 states、actions、rewards。</li>
+    <li>目标 = maximize expected discounted return。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -97,8 +269,6 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
-  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
     const toc  = document.getElementById('topicToc');
@@ -109,17 +279,11 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
-        // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
@@ -133,7 +297,6 @@
       toc.appendChild(ul);
     }
     build();
-    // Rebuild whenever the lang slider changes.
     document.addEventListener('click', (e) => {
       if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });

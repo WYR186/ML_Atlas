@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="vae.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,93 +37,218 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎭 表示学习</span><span class="en-only">🎭 Representation Learning</span> / VAE</div>
       <h1>🎭 <span class="en-only">VAE</span><span class="cn-only">变分自编码器</span></h1>
       <div class="subtitle"><span class="en-only">ELBO · Reparameterization · KL</span><span class="cn-only">ELBO · 重参数化 · KL</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_20.pdf" target="_blank">📄 Lecture 20</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_13.pdf" target="_blank">📄 Lecture 13</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="vae-en">
-  <h2>🎲 Variational Auto-encoder</h2>
-  <p>Unlike an AE, a VAE outputs a distribution $q_\phi(z\mid x)$ over latents instead of a single point.</p>
+  <h2>Variational Auto-encoders</h2>
+  <p class="topic-lede">A VAE is a generative model with a latent variable. Lecture 13 moves from discriminative modeling, $p(y\mid x)$, to modeling data itself, $p(x)$, then introduces an encoder and decoder that can be trained by backpropagation.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>The goal is to learn a distribution that can generate realistic samples. Instead of modeling every pixel interaction directly, a VAE assumes data comes from a simpler hidden code $z$ sampled from a prior, then decoded into an observation $x$.</p>
+  <ul>
+    <li><b>Prior:</b> $p(z)$ is usually a simple Gaussian such as $\mathcal{N}(0,I)$.</li>
+    <li><b>Decoder:</b> $p_\theta(x\mid z)$ maps latent codes to data space.</li>
+    <li><b>Encoder:</b> $q_\phi(z\mid x)$ approximates the hard posterior over latents for a given input.</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of $z$ as a short recipe card: “a digit with this slant, this thickness, this style.” The decoder turns the recipe into an image. The encoder looks at a real image and guesses which recipe could have produced it.</p>
+  <p>The “variational” part means we do not guess one exact recipe. We guess a distribution of plausible recipes, usually a Gaussian with mean and variance predicted by the encoder.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>VAEs work because real data often lives near a lower-dimensional manifold. The KL term keeps the latent space organized and sampleable; the reconstruction term keeps the decoder faithful to the input. Together, they create a latent space where nearby points tend to decode to similar samples.</p>
+  <div class="callout intuition">
+    <div class="head">The key tradeoff</div>
+    <p>If the KL term is too weak, the latent space becomes messy and hard to sample. If it is too strong, reconstructions become blurry or overly generic. The ELBO balances both forces.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Prior</div>
-      <div class="eq">$$ p(z)=\mathcal{N}(0,I) $$</div></div>
-    <div class="callout formula"><div class="head">Approximate posterior</div>
-      <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}(\mu(x),\sigma^2(x)\,I) $$</div></div>
+    <div class="callout formula">
+      <div class="head">Latent-variable likelihood</div>
+      <div class="eq">$$ p_\theta(x)=\int p_\theta(x\mid z)p(z)\,dz $$</div>
+      <p>This integral is usually intractable for neural decoders.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Approximate posterior</div>
+      <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}\!\big(\mu_\phi(x),\operatorname{diag}(\sigma_\phi^2(x))\big) $$</div>
+      <p>The encoder predicts mean and variance, not a single vector.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">ELBO to maximize</div>
+      <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
+      <p>First term: reconstruction. Second term: regularize the posterior toward the prior.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Reparameterization</div>
+      <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
+    </div>
+    <div class="callout formula">
+      <div class="head">Gaussian KL</div>
+      <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j\left(\mu_j^2+\sigma_j^2-\log\sigma_j^2-1\right) $$</div>
+    </div>
   </div>
 
-  <div class="callout formula">
-    <div class="head">🌟 ELBO (memorize)</div>
-    <div class="eq">$$ \mathrm{ELBO}(x)=\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x\mid z)]\;-\;D_{KL}(q_\phi(z\mid x)\,\|\,p(z)) $$</div>
-    <ul style="margin:8px 0 0;font-size:13.5px;">
-      <li>First term: reconstruction quality.</li>
-      <li>Second term: KL regularization, pulls posterior toward the prior so the latent space is samplable.</li>
-    </ul>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example A · Lecture 13 latent variable picture</h4>
+      <p class="example-source">Source: Lecture 13, generative modeling motivation. Paraphrased.</p>
+      <p>A single Gaussian may not fit a complicated data distribution. Introduce a latent $z$ from a simple distribution, then let a nonlinear decoder map $z$ to the data space. A simple latent distribution can produce complex visible samples after the decoder transformation.</p>
+    </div>
+    <div>
+      <h4>Example B · HW3 §4.1 approximation sources</h4>
+      <p class="example-source">Source: HW3 §4.1. Paraphrased.</p>
+      <p>Training a VAE involves several approximations: using $q_\phi(z\mid x)$ instead of the true posterior, restricting $q_\phi$ to a Gaussian family, estimating the reconstruction expectation with samples, optimizing the ELBO instead of exact log-likelihood, and using SGD on a nonconvex objective.</p>
+    </div>
+    <div>
+      <h4>Example C · HW3 §4.2 Gaussian KL</h4>
+      <p class="example-source">Source: HW3 §4.2. Paraphrased.</p>
+      <p>For $q=\mathcal{N}(\mu,\sigma^2)$ and $p=\mathcal{N}(0,1)$, plug the two Gaussian log densities into $E_q[\log q-\log p]$. The result is $\tfrac12(\mu^2+\sigma^2-\log\sigma^2-1)$; diagonal multivariate Gaussians sum this over dimensions.</p>
+    </div>
   </div>
 
-  <div class="callout formula">
-    <div class="head">🪄 Reparameterization trick</div>
-    <p>Sampling $z$ directly from $q_\phi$ is non-differentiable. Push the randomness into $\epsilon$:</p>
-    <div class="eq">$$ z=\mu+\sigma\odot\epsilon,\;\epsilon\sim\mathcal{N}(0,I) $$</div>
-  </div>
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ul>
+    <li>Start every VAE derivation by naming $p(z)$, $p_\theta(x\mid z)$, and $q_\phi(z\mid x)$.</li>
+    <li>When asked for the loss, write negative ELBO if the problem is in minimization form.</li>
+    <li>For the KL term, check whether the model uses $\sigma$, $\sigma^2$, or <code>logvar</code>.</li>
+    <li>For reparameterization, separate the random noise $\epsilon$ from learnable $\mu$ and $\sigma$.</li>
+  </ul>
 
-  <div class="callout formula">
-    <div class="head">✅ Closed-form Gaussian KL (must-know)</div>
-    <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j (\mu_j^2+\sigma_j^2-\ln\sigma_j^2-1) $$</div>
-  </div>
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Calling $q_\phi(z\mid x)$ the true posterior. It is an approximation.</li>
+    <li>Dropping the KL term and turning the model into a plain autoencoder.</li>
+    <li>Sampling $z$ directly in a way that blocks gradients through $\mu$ and $\sigma$.</li>
+    <li>Using $\log\sigma$ where the formula expects $\log\sigma^2$.</li>
+  </ul>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ol>
-      <li>Write the ELBO and explain both terms.</li>
-      <li>Write the reparameterization trick.</li>
-      <li>Derive / recall the Gaussian KL closed form.</li>
-    </ol>
-  </div>
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Explain discriminative vs generative modeling.</li>
+    <li>Write and interpret the ELBO.</li>
+    <li>Write the reparameterization trick.</li>
+    <li>Derive or recall the closed-form Gaussian KL.</li>
+    <li>Explain why VAE latent interpolation tends to be smooth.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can name the prior, encoder, and decoder distributions.</li>
+    <li>I can explain reconstruction term vs KL term.</li>
+    <li>I can write $z=\mu+\sigma\odot\epsilon$ from memory.</li>
+    <li>I can compute the diagonal Gaussian KL term.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vae">
-      <h2><span class="icon">🎲</span> 2. VAE · Variational Auto-encoder</h2>
-      <p>AE 输出一个点 $z$；<b>VAE 输出后验分布 $q_\phi(z|x)$</b>。</p>
+      <h2>VAE · Variational Auto-encoder</h2>
+      <p class="topic-lede">VAE 是带 latent variable 的 generative model。Lecture 13 从 discriminative modeling 的 $p(y\mid x)$ 转到建模数据本身的 $p(x)$，再引入 encoder / decoder，让整个模型可以用 backpropagation 训练。</p>
+
+      <h3 class="section-blue">1. Concept Understanding</h3>
+      <p>目标是学到一个能生成真实样本的 distribution。VAE 不直接硬拟合所有像素关系，而是假设数据由一个更简单的隐藏变量 $z$ 生成：先从 prior 抽 $z$，再通过 decoder 生成 $x$。</p>
+      <ul>
+        <li><b>Prior</b>：$p(z)$，通常是简单高斯 $\mathcal{N}(0,I)$。</li>
+        <li><b>Decoder</b>：$p_\theta(x\mid z)$，把 latent code 映射到 data space。</li>
+        <li><b>Encoder</b>：$q_\phi(z\mid x)$，近似给定输入 $x$ 后的 posterior。</li>
+      </ul>
+
+      <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
+      <p>可以把 $z$ 想成一张很短的“生成配方”：这个数字往左斜一点，笔画粗一点，风格圆一点。Decoder 根据配方画出图片。Encoder 看一张真实图片，反推它可能来自哪些配方。</p>
+      <p>Variational 的意思是：我们不是猜一个精确配方，而是猜一团可能的配方分布。课堂里通常用 Gaussian，由 encoder 输出 mean 和 variance。</p>
+
+      <h3 class="section-orange">3. Core Intuition</h3>
+      <p>VAE 有效，是因为真实数据常集中在低维 manifold 附近。KL term 让 latent space 有秩序、能从 prior 采样；reconstruction term 让 decoder 不能乱画。两者结合后，latent space 里相近的点通常会 decode 成相近样本。</p>
+      <div class="callout intuition">
+        <div class="head">核心 tradeoff</div>
+        <p>KL 太弱，latent space 会乱，采样质量差；KL 太强，reconstruction 可能变模糊、过于平均。ELBO 就是在平衡“像原图”和“潜空间规整”。</p>
+      </div>
+
+      <h3 class="section-purple">4. Key Equations</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Prior</div>
-          <div class="eq">$$ p(z)=\mathcal{N}(0,I) $$</div></div>
-        <div class="callout formula"><div class="head">Approx. Posterior</div>
-          <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}\!\big(\mu(x),\sigma^2(x)\,I\big) $$</div></div>
+        <div class="callout formula">
+          <div class="head">Latent-variable likelihood</div>
+          <div class="eq">$$ p_\theta(x)=\int p_\theta(x\mid z)p(z)\,dz $$</div>
+          <p>神经网络 decoder 下，这个积分通常 intractable。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Approximate posterior</div>
+          <div class="eq">$$ q_\phi(z\mid x)=\mathcal{N}\!\big(\mu_\phi(x),\operatorname{diag}(\sigma_\phi^2(x))\big) $$</div>
+          <p>Encoder 输出的是 mean 和 variance，不是单个点。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">ELBO（最大化）</div>
+          <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
+          <p>第一项是 reconstruction，第二项把 posterior 拉向 prior。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Reparameterization trick</div>
+          <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
+        </div>
+        <div class="callout formula">
+          <div class="head">Gaussian KL</div>
+          <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_j\left(\mu_j^2+\sigma_j^2-\log\sigma_j^2-1\right) $$</div>
+        </div>
       </div>
 
-      <div class="callout formula">
-        <div class="head">🌟 ELBO（高频考点 · 必背）</div>
-        <div class="eq">$$ \mathrm{ELBO}(x)=\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x\mid z)]\;-\;D_{KL}\!\big(q_\phi(z\mid x)\,\|\,p(z)\big) $$</div>
-        <ul style="margin:8px 0 0;font-size:13.5px;">
-          <li>第一项：<b>重建项</b>（保证从 $z$ 重建 $x$）。</li>
-          <li>第二项：<b>KL 正则</b>（让后验贴近先验，潜空间更可采样）。</li>
-        </ul>
+      <h3 class="section-gray">5. Worked Examples</h3>
+      <div class="mini-list">
+        <div>
+          <h4>Example A · Lecture 13 latent variable 图景</h4>
+          <p class="example-source">来源：Lecture 13 generative modeling 动机，已转述。</p>
+          <p>一个 Gaussian 可能无法拟合复杂数据分布。引入 latent $z$ 后，可以先从简单分布采样 $z$，再让 nonlinear decoder 把它映射到 data space。简单 latent distribution 经过 decoder 后，就能生成复杂可见样本。</p>
+        </div>
+        <div>
+          <h4>Example B · HW3 §4.1 VAE 的近似来源</h4>
+          <p class="example-source">来源：HW3 §4.1，已转述。</p>
+          <p>VAE 训练里有几类近似：用 $q_\phi(z\mid x)$ 近似真实 posterior，把 $q_\phi$ 限制成 Gaussian family，用采样估计 reconstruction expectation，优化 ELBO 而不是 exact log-likelihood，以及用 SGD 处理非凸目标。</p>
+        </div>
+        <div>
+          <h4>Example C · HW3 §4.2 Gaussian KL</h4>
+          <p class="example-source">来源：HW3 §4.2，已转述。</p>
+          <p>当 $q=\mathcal{N}(\mu,\sigma^2)$、$p=\mathcal{N}(0,1)$，把两个 Gaussian 的 log density 代入 $E_q[\log q-\log p]$，得到 $\tfrac12(\mu^2+\sigma^2-\log\sigma^2-1)$；多维 diagonal Gaussian 就对每一维求和。</p>
+        </div>
       </div>
 
-      <div class="callout formula">
-        <div class="head">🪄 Reparameterization Trick</div>
-        <p>直接从 $q_\phi(z|x)$ 采样不可导，把随机性转移到 $\epsilon$：</p>
-        <div class="eq">$$ z=\mu+\sigma\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
-      </div>
+      <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+      <ul>
+        <li>VAE 题一开始先写清楚 $p(z)$、$p_\theta(x\mid z)$、$q_\phi(z\mid x)$。</li>
+        <li>如果题目说 minimize loss，就写 negative ELBO。</li>
+        <li>KL term 要看清代码/题目用的是 $\sigma$、$\sigma^2$，还是 <code>logvar</code>。</li>
+        <li>Reparameterization 要把随机性 $\epsilon$ 和可学习的 $\mu,\sigma$ 分开。</li>
+      </ul>
 
-      <div class="callout formula">
-        <div class="head">✅ Closed-form Gaussian KL（必背 / 必推）</div>
-        <p>当 $q=\mathcal{N}(\mu,\sigma^2 I)$，$p=\mathcal{N}(0,I)$：</p>
-        <div class="eq">$$ D_{KL}(q\|p)=\tfrac{1}{2}\sum_{j=1}^{M}\!\big(\mu_j^2+\sigma_j^2-\ln\sigma_j^2-1\big) $$</div>
-      </div>
+      <h3 class="section-red">7. Common Mistakes</h3>
+      <ul>
+        <li>把 $q_\phi(z\mid x)$ 叫成 true posterior；它只是 approximation。</li>
+        <li>漏掉 KL term，把模型退化成普通 autoencoder。</li>
+        <li>直接 sample $z$ 导致梯度不能传回 $\mu,\sigma$。</li>
+        <li>公式需要 $\log\sigma^2$，却误用成 $\log\sigma$。</li>
+      </ul>
 
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ol>
-          <li>写出 ELBO 两项含义。</li>
-          <li>写出重参数化。</li>
-          <li>推导 / 默写 Gaussian KL。</li>
-        </ol>
-      </div>
+      <h3 class="section-yellow">8. Exam Focus</h3>
+      <ul>
+        <li>解释 discriminative vs generative modeling。</li>
+        <li>写出并解释 ELBO。</li>
+        <li>写出 reparameterization trick。</li>
+        <li>推导或默写 Gaussian KL closed form。</li>
+        <li>解释为什么 VAE latent interpolation 通常比较平滑。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist</h3>
+      <ul>
+        <li>我能说出 prior、encoder、decoder 分别是什么。</li>
+        <li>我能解释 reconstruction term 和 KL term。</li>
+        <li>我能默写 $z=\mu+\sigma\odot\epsilon$。</li>
+        <li>我能计算 diagonal Gaussian KL。</li>
+      </ul>
     </section>
 
     

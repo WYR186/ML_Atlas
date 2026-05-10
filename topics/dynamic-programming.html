@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="dynamic-programming.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,47 +37,225 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Value & Policy Iteration</div>
       <h1>🎮 <span class="en-only">Value & Policy Iteration</span><span class="cn-only">值 / 策略迭代</span></h1>
       <div class="subtitle"><span class="en-only">Model-known DP</span><span class="cn-only">model-known DP</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="dp-en">
-  <h2>🔁 Value &amp; Policy Iteration</h2>
-  <h3>Value iteration</h3>
-  <p>Repeatedly apply the Bellman optimality operator:</p>
-  <div class="callout formula">
-    <div class="eq">$$ Q^{(t)}(s,a)=R(s,a)+\gamma\,\mathbb{E}_{s'}\!\left[\max_{a'}Q^{(t-1)}(s',a')\right] $$</div>
+  <h2>Value Iteration &amp; Policy Iteration</h2>
+  <p class="topic-lede">Dynamic programming solves an MDP when the model is known: you can query $P(s'|s,a)$ and $R(s,a)$, so you can compute Bellman backups exactly instead of estimating them from sampled trajectories.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <div class="callout">
+    <div class="head">Planning with a known environment model</div>
+    <p><b>Value iteration</b> repeatedly applies the Bellman optimality backup until values stabilize. <b>Policy iteration</b> alternates between evaluating the current policy and improving it greedily.</p>
+    <p>Lecture 24 frames both algorithms as ways to avoid brute-force enumeration over all deterministic policies, which would be exponential in the number of states.</p>
   </div>
-  <h3>Policy iteration (alternating)</h3>
-  <ol>
-    <li>Policy evaluation: solve for $V^\pi$ (linear system or iterative).</li>
-    <li>Policy improvement: make $\pi$ greedy with respect to $V^\pi$.</li>
-  </ol>
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <p>DP requires knowing $P$ and $R$. Common follow-up: "Why hard in practice?" → unknown dynamics or huge state space.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Two ways to plan a route</div>
+    <p>Value iteration is like repeatedly updating a map: every location asks, “if I take the best first move, what is my new estimated total score?”</p>
+    <p>Policy iteration is like choosing a full route plan, grading that plan, then editing the plan wherever another first move looks better.</p>
+  </div>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why the algorithms improve</div>
+    <p>Bellman optimality gives a fixed point for the best possible values. Value iteration approaches that fixed point directly through repeated contraction.</p>
+    <p>Policy iteration takes a different path: evaluation tells you exactly how good the current policy is, and improvement makes the policy greedy with respect to that evaluation. If the policy stops changing, it is optimal.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Finite-horizon DP backup</div>
+      <div class="eq">$$ Q_t(s,a)=R(s,a)+\mathbb{E}_{s_{t+1}\sim P(\cdot|s,a)}\!\left[\max_{a'}Q_{t+1}(s_{t+1},a')\right] $$</div>
+      <p>Lecture 24 uses $Q_H(s,a)=R(s,a)$ as the boundary condition.</p>
+    </div>
+    <div class="callout formula"><div class="head">Value iteration</div>
+      <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy evaluation</div>
+      <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
+      <div class="eq">$$ V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy improvement</div>
+      <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
+    </div>
+    <div class="callout formula wide"><div class="head">Geometric convergence idea</div>
+      <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example 1 · One value-iteration backup</div>
+    <p>If $R(s,a)=2$, $\gamma=0.9$, and the expected next-state best value is $5$, then the new backup is $2+0.9\cdot 5=6.5$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 2 · Policy iteration step from Lecture 24</div>
+    <p>Evaluate the current policy by solving $V^\pi=(I-\gamma P^\pi)^{-1}R^\pi$. Then, for each state, compare all actions using $R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')$ and choose the best one.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 3 · HW5 §2.5 connection</div>
+    <p>The contraction proof for the Bellman operator justifies value iteration: each backup shrinks the worst-case value error by at least a factor of $\gamma$.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to choose the method</div>
+    <ol>
+      <li>If $P$ and $R$ are known, dynamic programming is available.</li>
+      <li>If the problem asks for repeated Bellman backups, use value iteration.</li>
+      <li>If the problem asks for evaluate-then-improve, use policy iteration.</li>
+      <li>If only sampled transitions are available, switch to model-free methods such as Q-learning.</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">High-frequency traps</div>
+    <ul>
+      <li>Applying DP when $P$ is unknown. DP is model-known planning.</li>
+      <li>Confusing policy evaluation with policy improvement.</li>
+      <li>Using $V^{(k)}$ from the new iteration on some states and the old iteration on others without stating an asynchronous update scheme.</li>
+      <li>Forgetting the terminal / horizon boundary condition in finite-horizon DP.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">Must know</div>
+    <ul>
+      <li>Value iteration backup formula.</li>
+      <li>Policy iteration = policy evaluation + policy improvement.</li>
+      <li>Both require known transition and reward models.</li>
+      <li>Bellman contraction explains convergence.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h4>Last-minute recall</h4>
+    <ul>
+      <li>Known model → DP.</li>
+      <li>Value iteration updates values directly.</li>
+      <li>Policy iteration alternates evaluate and improve.</li>
+      <li>Greedy improvement uses one-step lookahead.</li>
+      <li>Unknown model → Q-learning / policy gradient.</li>
+    </ul>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="dp">
-      <h2><span class="icon">🔁</span> 4. DP · Value / Policy Iteration（model-known）</h2>
-      <h3>Value Iteration</h3>
-      <p>反复套用 Bellman 最优算子：</p>
-      <div class="callout formula">
-        <div class="eq">$$ Q^{(t)}(s,a)=R(s,a)+\gamma\,\mathbb{E}_{s'}\!\left[\max_{a'}Q^{(t-1)}(s',a')\right] $$</div>
-      </div>
-      <h3>Policy Iteration（两步交替）</h3>
-      <ol>
-        <li>策略评估：求 $V^\pi$（解线性方程或迭代近似）。</li>
-        <li>策略改进：令策略对 $V$ 贪婪。</li>
-      </ol>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <p>DP 需要已知 $P$ 和 $R$。常考“为什么现实中难用？” → 模型未知 / 状态空间巨大。</p>
-      </div>
-    </section>
+  <h2>Value Iteration 与 Policy Iteration</h2>
+  <p class="topic-lede">Dynamic programming 是在已知环境模型时求解 MDP 的方法：你能直接使用 $P(s'|s,a)$ 和 $R(s,a)$，所以可以精确算 Bellman backup，而不是靠 trajectory sample 估计。</p>
+
+  <h3 class="section-blue">1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">Model-known planning</div>
+    <p><b>Value iteration</b> 反复套 Bellman optimality backup，直到 value 稳定。<b>Policy iteration</b> 则是“先评估当前策略，再把策略改得更贪心”，不断交替。</p>
+    <p>Lecture 24 的动机是：枚举所有 deterministic policies 太贵，所以我们用 Bellman 结构系统性地找最优策略。</p>
+  </div>
+
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">两种做路线规划的方式</div>
+    <p>Value iteration 像不停更新地图：每个位置都问“如果我现在走最好的第一步，总分会是多少？”</p>
+    <p>Policy iteration 像先定一套路线方案，给它打分，然后在每个路口看有没有更好的第一步；如果没有地方想改，这套方案就是最优。</p>
+  </div>
+
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">为什么会越来越好</div>
+    <p>Bellman optimality 给出最优 value 的 fixed point。Value iteration 直接靠 contraction 往这个 fixed point 靠近。</p>
+    <p>Policy iteration 则把问题拆开：evaluation 精确知道当前 policy 有多好；improvement 用这个评价去做 greedy 更新。策略不再变化时，就已经满足 optimality。</p>
+  </div>
+
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">有限时域 DP backup</div>
+      <div class="eq">$$ Q_t(s,a)=R(s,a)+\mathbb{E}_{s_{t+1}\sim P(\cdot|s,a)}\!\left[\max_{a'}Q_{t+1}(s_{t+1},a')\right] $$</div>
+      <p>Lecture 24 中边界条件是 $Q_H(s,a)=R(s,a)$。</p>
+    </div>
+    <div class="callout formula"><div class="head">Value iteration</div>
+      <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy evaluation</div>
+      <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
+      <div class="eq">$$ V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy improvement</div>
+      <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
+    </div>
+    <div class="callout formula wide"><div class="head">几何收敛口径</div>
+      <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+  <div class="callout example">
+    <div class="head">例 1 · 一次 value-iteration backup</div>
+    <p>若 $R(s,a)=2$、$\gamma=0.9$、下一状态的最大 value 期望是 $5$，则新 backup 为 $2+0.9\cdot5=6.5$。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 2 · Policy iteration 一轮（Lecture 24）</div>
+    <p>先解 $V^\pi=(I-\gamma P^\pi)^{-1}R^\pi$ 得到当前 policy 的价值；再对每个 state 比较所有 action 的 $R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')$，选最大的动作作为新策略。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 3 · 和 HW5 §2.5 的联系</div>
+    <p>HW5 要证 Bellman operator 是 contraction。这个结果就是 value iteration 的收敛理由：每次 backup 最坏误差至多乘 $\gamma$。</p>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">如何选方法</div>
+    <ol>
+      <li>题目给了 $P$ 和 $R$，可以用 DP。</li>
+      <li>题目说 repeated Bellman backups，多半是 value iteration。</li>
+      <li>题目说 evaluate then improve，多半是 policy iteration。</li>
+      <li>如果只有 sampled transitions，没有完整模型，就转向 model-free：Q-learning 或 policy gradient。</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>在不知道 $P$ 的情况下硬用 DP；DP 是 model-known planning。</li>
+      <li>混淆 policy evaluation 和 policy improvement。</li>
+      <li>同步更新时一半用旧 $V$、一半用新 $V$，但没有说明 asynchronous update。</li>
+      <li>有限时域 DP 忘记 terminal / horizon 边界条件。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须会</div>
+    <ul>
+      <li>默写 value iteration backup。</li>
+      <li>知道 policy iteration = policy evaluation + policy improvement。</li>
+      <li>说明两者都需要已知 transition / reward model。</li>
+      <li>用 Bellman contraction 解释 convergence。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h4>最后一刻能默</h4>
+    <ul>
+      <li>Known model → DP。</li>
+      <li>Value iteration 直接更新 value。</li>
+      <li>Policy iteration 交替 evaluation / improvement。</li>
+      <li>Greedy improvement 用 one-step lookahead。</li>
+      <li>Unknown model → Q-learning / policy gradient。</li>
+    </ul>
+  </div>
+</section>
 
     
 </div><!--/cn-only-->
@@ -113,10 +292,7 @@
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        seenSection.add(sect.id);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

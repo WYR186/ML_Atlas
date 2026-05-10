@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="rnn.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,39 +36,168 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔄 序列模型</span><span class="en-only">🔄 Sequential Models</span> / RNN</div>
       <h1>🔄 <span class="en-only">RNN</span><span class="cn-only">循环神经网络</span></h1>
-      <div class="subtitle"><span class="en-only">BPTT · Shared params</span><span class="cn-only">BPTT · 共享参数</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_18.pdf" target="_blank">📄 Lecture 18</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+      <div class="subtitle"><span class="en-only">Sequential state · Parameter sharing · BPTT</span><span class="cn-only">序列状态 · 参数共享 · BPTT</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_14.pdf" target="_blank">📄 Lecture 14</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="rnn-en">
-  <h2>🔄 Recurrent Neural Networks</h2>
+  <h2>Recurrent Neural Networks</h2>
+  <p class="topic-lede">RNNs are the first deep-learning tool in this course that treats order as part of the data: speech frames, words, videos, weather, and financial traces all arrive one step at a time.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A recurrent neural network models a sequence $x^{(1)}, x^{(2)}, \ldots, x^{(T)}$ by carrying a hidden state $h^{(t)}$ forward through time. The state is a learned summary of what the model has seen so far.</p>
+  <div class="mini-list">
+    <div><b>Problem background.</b> A plain feed-forward network expects a fixed-size input. Sequences can be long, short, or streaming, and later predictions often depend on earlier observations.</div>
+    <div><b>What RNNs solve.</b> They reuse one transition function at every time step, so the model can process sequences of different lengths without creating a separate network for each length.</div>
+    <div><b>Key lecture idea.</b> The same $f$ and $g$ are reused for all $t$: the hidden state changes with time, but the parameters do not.</div>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Imagine reading a sentence while keeping a sticky note beside you. After each word, you update the sticky note with the important bits. You do not reread the whole sentence from scratch; you use the note plus the next word.</p>
+  <p>That sticky note is $h^{(t)}$. The update rule is the same every time, like the same reading habit applied word after word.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The hidden state creates a path for information to flow from earlier inputs to later outputs. Parameter sharing is what makes the model scalable: the recurrence learned from one position can be reused at every other position.</p>
+  <p>The downside is also visible from the unrolled graph. A long sequence becomes a very deep computation graph, and the same recurrent Jacobian appears repeatedly in gradients. Repeated multiplication is the source of vanishing and exploding gradients.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">Generic recurrence</div>
+    <div class="eq">$$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \qquad y^{(t)} = g(h^{(t)}) $$</div>
+    <p>$x^{(t)}$ is the input at step $t$; $h^{(t)}$ is the memory state; $y^{(t)}$ is an optional output at that step.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Elman RNN form from Lecture 14</div>
+    <div class="eq">$$ h^{(t)}=\sigma_h(W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h) $$</div>
+    <div class="eq">$$ y^{(t)}=\sigma_y(W_{yh}h^{(t)}+b_y) $$</div>
+    <p>$W_{hx}$ reads the current input, $W_{hh}$ carries previous state information, and $W_{yh}$ maps state to prediction.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Why gradients vanish or explode</div>
+    <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=\prod_{t=2}^{T}\frac{\partial h^{(t)}}{\partial h^{(t-1)}} $$</div>
+    <p>If the factors tend to have norm below 1, the product shrinks; if above 1, it grows. This is the mechanism behind the long-term dependency problem.</p>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div><b>Lecture 14 sequence applications.</b> Weather, language, speech, video, and finance are all sequences because the order of observations changes the meaning of the task.</div>
+    <div><b>HW3 2.2 BPTT toy recurrence.</b> For $h_t=w(x_t+h_{t-1})$, unroll three steps, compute $h_1,h_2,h_3$, then backpropagate from $h_3$ through each reused $w$ contribution.</div>
+    <div><b>Lecture 14 quiz style.</b> Prediction runs forward through time; training unrolls the graph and applies chain rule backward through the repeated transition.</div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <ul>
-    <li>Same parameters processed at every time step.</li>
-    <li>Hidden state $h^{(t)}$ summarizes information up to time $t$.</li>
-    <li>BPTT: unroll over time, then run standard backprop on the resulting deep graph.</li>
+    <li>First identify whether the problem is one-to-one, one-to-many, many-to-one, or many-to-many.</li>
+    <li>Draw the unrolled graph before differentiating. Put one copy of the state update at each time step.</li>
+    <li>Mark shared parameters with the same symbol at every step; their gradients add across time.</li>
+    <li>For BPTT, compute local derivatives, then multiply along paths and sum over every path that reaches the shared parameter.</li>
   </ul>
 
-  <div class="callout warn">
-    <div class="head">💥 Core challenge</div>
-    <p>Long sequences repeatedly multiply by the same recurrent weight, so gradients either vanish or explode.</p>
-  </div>
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Treating $W_{hh}$ at different time steps as different parameters.</li>
+    <li>Forgetting that $h^{(t)}$ depends on all earlier inputs through $h^{(t-1)}$.</li>
+    <li>Explaining vanishing gradients only as "sigmoid is small"; the repeated product through time is the deeper reason.</li>
+    <li>Dropping one gradient path when a parameter is reused multiple times.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Write the generic RNN equations and explain parameter sharing.</li>
+    <li>Unroll a short RNN and compute a BPTT derivative by hand.</li>
+    <li>Explain why classical RNNs struggle with long-term dependencies.</li>
+    <li>Connect RNN weaknesses to the motivation for LSTM/GRU and later self-attention.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>State $h_t$ is memory; weights are shared across $t$.</li>
+    <li>BPTT = ordinary backprop on the unrolled graph.</li>
+    <li>Shared-parameter gradients are summed over time.</li>
+    <li>Long products of Jacobians cause vanishing/exploding gradients.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="rnn">
-      <h2><span class="icon">🔄</span> 4. RNN · 循环神经网络</h2>
-      <ul>
-        <li><b>参数共享</b>：同一组参数处理每个时间步。</li>
-        <li><b>隐藏状态</b> $h^{(t)}$ 作为“记忆”，汇总到时间 $t$ 的信息。</li>
-        <li><b>BPTT</b>：把 RNN 在时间上 unroll 成深网络再做标准 backprop。</li>
-      </ul>
-      <div class="callout warn">
-        <div class="head">💥 核心挑战</div>
-        <p>长序列中反复乘同一权重矩阵 → <b>梯度消失 / 爆炸</b>（vanishing / exploding gradients）。</p>
+      <h2>循环神经网络 · RNN</h2>
+      <p class="topic-lede">RNN 是课程里第一个真正把“顺序”放进模型结构里的 deep learning 工具：文本、语音、视频、天气、金融序列都不是一堆互相独立的点。</p>
+
+      <h3 class="section-blue">1. 概念理解 / Concept Understanding</h3>
+      <p>RNN 用隐藏状态 $h^{(t)}$ 处理序列 $x^{(1)},x^{(2)},\ldots,x^{(T)}$。$h^{(t)}$ 可以理解为“到第 $t$ 步为止，模型记住了什么”。</p>
+      <div class="mini-list">
+        <div><b>问题背景</b>：普通 feed-forward network 要固定长度输入；但 sequence data 长度可变，而且后面的预测常常依赖前面的内容。</div>
+        <div><b>解决什么</b>：RNN 在每个时间步复用同一个 transition function，不需要为每个长度重新造一个网络。</div>
+        <div><b>Lecture 14 核心</b>：$f$ 和 $g$ 不随时间变；随时间变的是 hidden state，不是参数。</div>
       </div>
+
+      <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
+      <p>把 RNN 想成读一句话时旁边放一张便利贴。每读一个词，你就更新一下便利贴：哪些信息重要，哪些可以忘掉。</p>
+      <p>这张便利贴就是 $h^{(t)}$。更新便利贴的方法每一步都一样，这就是 parameter sharing。</p>
+
+      <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
+      <p>hidden state 给早期输入到后期输出开了一条信息通道。参数共享让模型能处理任意长度序列：在位置 3 学到的“如何更新记忆”，位置 30 也能用。</p>
+      <p>麻烦也来自这里。把 RNN 在时间上 unroll 之后，长序列就是很深的计算图；梯度会反复乘相似的 Jacobian，于是容易 vanishing / exploding。</p>
+
+      <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
+      <div class="callout formula">
+        <div class="head">通用 recurrence</div>
+        <div class="eq">$$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \qquad y^{(t)} = g(h^{(t)}) $$</div>
+        <p>$x^{(t)}$ 是第 $t$ 步输入；$h^{(t)}$ 是 memory state；$y^{(t)}$ 是这一步的预测。</p>
+      </div>
+      <div class="callout formula">
+        <div class="head">Lecture 14 的 Elman RNN</div>
+        <div class="eq">$$ h^{(t)}=\sigma_h(W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h) $$</div>
+        <div class="eq">$$ y^{(t)}=\sigma_y(W_{yh}h^{(t)}+b_y) $$</div>
+        <p>$W_{hx}$ 读当前输入，$W_{hh}$ 传递上一时刻状态，$W_{yh}$ 把状态映射成输出。</p>
+      </div>
+      <div class="callout formula">
+        <div class="head">梯度为什么会消失 / 爆炸</div>
+        <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=\prod_{t=2}^{T}\frac{\partial h^{(t)}}{\partial h^{(t-1)}} $$</div>
+        <p>这些因子如果多数小于 1，乘积会缩到接近 0；如果多数大于 1，乘积会变很大。</p>
+      </div>
+
+      <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
+      <div class="mini-list">
+        <div><b>Lecture 14 应用题</b>：天气、自然语言、语音、视频、金融预测都属于 sequence data，因为顺序本身影响含义。</div>
+        <div><b>HW3 2.2 BPTT</b>：对 $h_t=w(x_t+h_{t-1})$，先 unroll 三步算 forward，再从 $h_3$ 反向传播；同一个 $w$ 在多处出现，所以梯度要相加。</div>
+        <div><b>Lecture 14 quiz 型</b>：prediction 是按时间正向跑；training 是把时间展开后做 chain rule。</div>
+      </div>
+
+      <h3 class="section-yellow">6. 解题技巧 / Problem-Solving Tips</h3>
+      <ul>
+        <li>先判断任务类型：one-to-one、one-to-many、many-to-one、many-to-many。</li>
+        <li>求导前先画 unrolled graph，每个时间步一份状态更新。</li>
+        <li>共享参数要用同一个符号标出来；它在多个时间步的梯度要累加。</li>
+        <li>做 BPTT 时，先写 local derivative，再沿路径相乘、对路径求和。</li>
+      </ul>
+
+      <h3 class="section-red">7. 常见错误 / Common Mistakes</h3>
+      <ul>
+        <li>把不同时间步的 $W_{hh}$ 当成不同参数。</li>
+        <li>忘记 $h^{(t)}$ 通过 $h^{(t-1)}$ 依赖所有更早输入。</li>
+        <li>只说“sigmoid 导致梯度小”，却没说明 repeated product 才是核心机制。</li>
+        <li>参数复用时少算一条 gradient path。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. 考试重点 / Exam Focus</h3>
+      <ul>
+        <li>能写 RNN 通用公式，并解释 parameter sharing。</li>
+        <li>能 unroll 短 RNN，手算一个 BPTT derivative。</li>
+        <li>能解释 long-term dependency 为什么难学。</li>
+        <li>能把 RNN 的弱点连接到 LSTM/GRU 和 self-attention 的动机。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. 速记清单 / Quick Checklist</h3>
+      <ul>
+        <li>$h_t$ 是 memory；参数跨时间共享。</li>
+        <li>BPTT = 在 unrolled graph 上做普通 backprop。</li>
+        <li>共享参数的梯度要 across time 相加。</li>
+        <li>长 Jacobian 乘积导致 vanishing / exploding gradients。</li>
+      </ul>
     </section>
 
     

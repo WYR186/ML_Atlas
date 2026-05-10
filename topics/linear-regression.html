@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="linear-regression.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,63 +36,201 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Linear Regression</div>
       <h1>🧮 <span class="en-only">Linear Regression</span><span class="cn-only">线性回归</span></h1>
-      <div class="subtitle"><span class="en-only">MSE · Closed-form</span><span class="cn-only">MSE 闭式解</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_6.pdf" target="_blank">📄 Lecture 6</a>
-        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a></div>
+      <div class="subtitle"><span class="en-only">MSE · Closed-form · Ridge</span><span class="cn-only">MSE · 闭式解 · Ridge</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="linreg-en">
   <h2>📈 Linear Regression</h2>
-  <p>Predict a continuous target $y\in\mathbb{R}$. Model $\hat y = w^\top x + b$, minimize squared loss.</p>
+  <p class="topic-lede">Linear regression predicts a continuous value by fitting a linear score to data. Lecture 4 frames it as a three-part machine learning recipe: choose a model, choose a loss, then optimize the loss.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>In regression, each training example has features $x^{(i)}$ and a real-valued target $y^{(i)}\in\mathbb{R}$. Linear regression assumes the prediction is a weighted combination of features:</p>
+  <div class="eq">$$ \hat y^{(i)} = w^\top \phi(x^{(i)}) $$</div>
+  <p>The feature map $\phi(x)$ may be the raw input, the input plus a bias feature, or a polynomial expansion. The problem it solves is: find parameters $w$ that make predicted values close to observed values.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Imagine placing a straight ruler through scattered points. For each point, measure the vertical miss between the ruler and the point. Linear regression chooses the ruler position that makes the total squared miss as small as possible.</p>
+  <p>The square matters: one very bad miss is punished more than several tiny misses. That is useful for smooth optimization, but it also makes the method sensitive to outliers.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The squared-loss objective is a bowl-shaped quadratic whenever the design matrix has enough rank. The bottom of that bowl is where the gradient is zero, which gives the normal equation.</p>
+  <p>Feature engineering does not change the core method. A quadratic curve is still “linear regression” after replacing $x$ by $\phi(x)=(x^2,x,1)$. The model is linear in $w$, even if it is nonlinear in the original input.</p>
+  <p>Lecture 4 also shows why this is not the right loss for classification: MSE keeps penalizing examples that are already confidently correct.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">MSE objective</div>
-      <div class="eq">$$ \min_{w,b}\ \tfrac{1}{2}\sum_i (y_i-(w^\top x_i+b))^2 $$</div></div>
-    <div class="callout formula"><div class="head">Closed form (normal equation)</div>
-      <div class="eq">$$ w^*=(X^\top X)^{-1}X^\top y $$</div>
-      <div style="font-size:13px;">Requires $X^\top X$ to be invertible.</div></div>
+    <div class="callout formula">
+      <div class="head">Design-matrix objective</div>
+      <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
+      <p>$X$ stores one example per row, $Y$ stores targets, and $w$ stores coefficients.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Gradient</div>
+      <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
+      <p>Set this to zero to derive the closed form.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Normal equation</div>
+      <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
+      <p>The inverse form requires $X^\top X$ to be invertible.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Ridge regularization</div>
+      <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
+      <p>Regularization keeps weights small and stabilizes inversion.</p>
+    </div>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfalls</div>
-    <ul>
-      <li>Sensitive to outliers (squared loss amplifies large errors).</li>
-      <li>Using it for binary classification with $y\in\{-1,1\}$ + threshold works mechanically but isn't optimal.</li>
-      <li>Multicollinearity ⇒ $X^\top X$ is ill-conditioned or singular.</li>
-    </ul>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · Building the matrix form</div>
+    <div class="example-source">Source: Lecture 4, linear model with bias.</div>
+    <p>For a one-dimensional model $\hat y=w_1x+w_2$, each example becomes a row $[x^{(i)},1]$. The parameter vector is $[w_1,w_2]^\top$. This turns many scalar equations into one matrix product $Xw$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example B · One-parameter least squares</div>
+    <div class="example-source">Source: HW1 Problem 3(e), paraphrased.</div>
+    <p>For two points that both lie on the line $y=2x$, the loss for $\hat y=wx$ is $(2-w)^2+(4-2w)^2$. Differentiating gives $10w-20=0$, so $w=2$. A quick sanity check: both residuals become zero.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · Many exact fits, one minimum-norm fit</div>
+    <div class="example-source">Source: HW1 Problem 3(a-d), paraphrased.</div>
+    <p>When $X\in\mathbb{R}^{n\times d}$ has full row rank and $d\ge n$, every target $Y$ can be fit exactly. There may be infinitely many $w$ values, differing by null-space vectors. Gradient descent from $w_0=0$ stays in the row space of $X$ and converges to the exact solution with the smallest Euclidean norm.</p>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <p>Translate model + MSE into the optimization objective; state when the closed form exists; handle collinearity.</p>
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>Translate first.</b> Identify whether the problem uses $Xw$ or $X^\top w$ notation, then write dimensions next to every matrix.</div>
+    <div><b>For a closed form,</b> write the objective, compute the gradient, set it to zero, then solve the normal equation.</div>
+    <div><b>For polynomial regression,</b> build $\phi(x)$ first. After that, the algebra is identical to ordinary linear regression.</div>
+    <div><b>For rank questions,</b> ask whether $X^\top X$ is invertible, whether $Xw=Y$ is solvable, and whether the solution is unique.</div>
   </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Forgetting the bias column of ones when the model includes an intercept.</li>
+    <li>Writing $(X^\top X)^{-1}$ when the matrix may be singular or ill-conditioned.</li>
+    <li>Confusing linear in features with linear in parameters. Polynomial features can still use linear regression.</li>
+    <li>Using MSE classification as if it were logistic regression. MSE is not calibrated for binary class probabilities.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Derive the normal equation from the MSE objective.</li>
+    <li>Explain when the closed form exists and why ridge helps.</li>
+    <li>Construct the design matrix for a bias term or polynomial features.</li>
+    <li>Explain the overparameterized case: exact interpolation, null space, and minimum-norm solution.</li>
+    <li>State why linear regression is awkward for classification.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can write the model $\hat y=w^\top\phi(x)$.</li>
+    <li>I can derive $X^\top Xw=X^\top Y$ from squared loss.</li>
+    <li>I know what breaks when $X^\top X$ is not invertible.</li>
+    <li>I can add ridge regularization and write its solution.</li>
+    <li>I can explain why MSE over-penalizes easy classification examples.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="linreg">
-      <h2><span class="icon">📈</span> 1. Linear Regression · 线性回归</h2>
-      <p>预测连续值 $y\in\mathbb{R}$。模型 $\hat y = w^\top x + b$，目标平方损失。</p>
+      <h2><span class="icon">📈</span> Linear Regression · 线性回归</h2>
+      <p class="topic-lede">Linear Regression 用线性打分预测连续值。Lecture 4 的主线很清楚：先选 model，再选 loss，最后把 optimization 解出来。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>回归任务里，每个样本有 feature $x^{(i)}$ 和连续标签 $y^{(i)}\in\mathbb{R}$。线性回归假设预测值是 feature 的加权和：</p>
+      <div class="eq">$$ \hat y^{(i)} = w^\top \phi(x^{(i)}) $$</div>
+      <p>$\phi(x)$ 可以是原始输入、带 bias 的输入，也可以是 polynomial features。它解决的问题是：找到一组参数 $w$，让预测值尽量贴近真实 $y$。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>可以把它想成拿一把尺子去贴散点图。每个点到尺子的竖直距离就是 error。Linear Regression 选择那条“总体最贴”的线，让所有 error 的平方和最小。</p>
+      <p>为什么平方？小误差影响小，大误差会被放大。这样数学上很顺滑，但也意味着 outlier 会特别有影响力。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>MSE objective 通常是一个 bowl-shaped quadratic。找最优点就是走到碗底；在碗底 gradient = 0，于是得到 normal equation。</p>
+      <p>Polynomial regression 本质也没变：把 $x$ 换成 $\phi(x)=(x^2,x,1)$ 后，模型对参数 $w$ 仍然是 linear 的。</p>
+      <p>Lecture 4 还强调：用 linear regression 做 classification 会出问题，因为 MSE 会继续惩罚已经分得很对的 easy examples。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">MSE Objective</div>
-          <div class="eq">$$ \min_{w,b}\ \tfrac{1}{2}\sum_{i=1}^{n}\big(y_i-(w^\top x_i+b)\big)^2 $$</div></div>
-        <div class="callout formula"><div class="head">Closed-form (Normal Eqn.)</div>
-          <div class="eq">$$ w^*=(X^\top X)^{-1}X^\top y $$</div>
-          <div style="font-size:13px;">需要 $X^\top X$ 可逆。</div></div>
+        <div class="callout formula">
+          <div class="head">MSE objective</div>
+          <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
+          <p>$X$ 是 design matrix，$Y$ 是 target vector，$w$ 是参数。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Gradient</div>
+          <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
+          <p>闭式解就是从 gradient = 0 来的。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Normal equation</div>
+          <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
+          <p>只有 $X^\top X$ 可逆时才能直接写 inverse。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Ridge regularization</div>
+          <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
+          <p>Ridge 让权重更小，也让矩阵更容易 invert。</p>
+        </div>
       </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfalls</div>
-        <ul>
-          <li>对离群点敏感（平方损失放大异常）。</li>
-          <li>用于二分类（$y\in\{-1,1\}$ + 阈值）虽可，但不是为分类设计。</li>
-          <li>多重共线性 → $X^\top X$ 病态 / 不可逆。</li>
-        </ul>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · 写成矩阵形式</div>
+        <div class="example-source">来源：Lecture 4，带 bias 的一维线性模型。</div>
+        <p>如果模型是 $\hat y=w_1x+w_2$，每个样本对应一行 $[x^{(i)},1]$，参数是 $[w_1,w_2]^\top$。这样一堆标量方程就合成一个 $Xw$。</p>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <p>会写模型 + MSE 目标；闭式解的存在条件 + 共线性问题。</p>
+      <div class="callout example">
+        <div class="head">Example B · 单参数 least squares</div>
+        <div class="example-source">来源：HW1 Problem 3(e)，题意转述。</div>
+        <p>两个点都落在 $y=2x$ 上，模型是 $\hat y=wx$。loss 是 $(2-w)^2+(4-2w)^2$。求导得到 $10w-20=0$，所以 $w=2$。检查一下：两个 residual 都是 0。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example C · 多个 exact fit，GD 选 minimum-norm</div>
+        <div class="example-source">来源：HW1 Problem 3(a-d)，题意转述。</div>
+        <p>当 $X\in\mathbb{R}^{n\times d}$ 满行秩且 $d\ge n$ 时，任意 $Y$ 都能被 exact fit。解可能有无穷多个，它们相差一个 null-space vector。从 $w_0=0$ 开始的 gradient descent 会留在 row space 里，最后选出 Euclidean norm 最小的那个解。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>先看 notation。</b> 题里是 $Xw$ 还是 $X^\top w$？先把 shape 写在旁边。</div>
+        <div><b>闭式解题型：</b> 写 objective → 求 gradient → 令 0 → 解 normal equation。</div>
+        <div><b>Polynomial features：</b> 先构造 $\phi(x)$，之后就是普通 linear regression。</div>
+        <div><b>Rank / invertibility：</b> 问自己 $X^\top X$ 是否可逆、$Xw=Y$ 是否有解、解是否唯一。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>模型有 intercept 却忘记加一列全 1 的 bias feature。</li>
+        <li>不检查 invertibility 就直接写 $(X^\top X)^{-1}$。</li>
+        <li>把 “linear in features” 和 “linear in parameters” 混掉；polynomial features 仍然可以是 linear regression。</li>
+        <li>把 MSE classification 当成 logistic regression 用；MSE 不是为概率分类设计的。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>会从 MSE objective 推 normal equation。</li>
+        <li>会解释闭式解什么时候存在，以及 ridge 为什么能稳定 inversion。</li>
+        <li>会给 bias / polynomial features 写 design matrix。</li>
+        <li>会讲 overparameterized case：exact interpolation、null space、minimum-norm solution。</li>
+        <li>会说明 linear regression 用于 classification 的问题。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我能写出 $\hat y=w^\top\phi(x)$。</li>
+        <li>我能从 squared loss 推出 $X^\top Xw=X^\top Y$。</li>
+        <li>我知道 $X^\top X$ 不可逆时哪里会断。</li>
+        <li>我能写 ridge objective 和 ridge solution。</li>
+        <li>我能解释为什么 MSE 会过度惩罚 easy classification examples。</li>
+      </ul>
     </section>
 
     
@@ -122,20 +261,16 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
-      items.forEach((el) => {
+      items.forEach((el, idx) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        if (!el.id) el.id = `${sect.id}-h${idx}`;
         const li = document.createElement('li');
         const a  = document.createElement('a');
-        a.href = '#' + sect.id;
+        a.href = '#' + el.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';

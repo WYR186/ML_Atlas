@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="transformer.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,60 +37,196 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔮 现代序列模型</span><span class="en-only">🔮 Modern Models</span> / Transformer</div>
       <h1>🔮 <span class="en-only">Transformer</span><span class="cn-only">Transformer</span></h1>
       <div class="subtitle"><span class="en-only">LN + MHA + FFN + Residual</span><span class="cn-only">LN + MHA + FFN + Residual</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
-<section class="topic" id="transformer-en">
-  <h2>🔮 Transformer Architecture</h2>
-  <h3>Block components</h3>
-  <ul>
-    <li>LayerNorm.</li>
-    <li>Multi-head attention.</li>
-    <li>Feed-forward network (2-layer MLP).</li>
-    <li>Residual connections.</li>
+<section class="topic lesson-section concept" id="transformer-concept-en">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">A Transformer block is the repeated computation unit behind modern sequence models. Lecture 16 introduces it as self-attention plus per-token MLP computation, normalization, and residual connections; HW4 then asks you to count parameters in a decoder-only version.</p>
+  <ul class="mini-list">
+    <li><b>Masked MHA</b> lets each token read earlier tokens.</li>
+    <li><b>FFN / MLP</b> transforms each token representation independently after attention mixes context.</li>
+    <li><b>Residual connections</b> keep gradients and information flowing through many layers.</li>
+    <li><b>LayerNorm</b> stabilizes activation scale during training.</li>
   </ul>
-  <div class="callout formula">
-    <div class="head">🔧 Mnemonic</div>
-    <p style="margin:0;font-family:ui-monospace,Menlo;background:#fff;padding:8px 12px;border-radius:6px;">LN → MHA → Add → LN → FFN → Add</p>
-    <p style="font-size:13px;margin-top:6px;">Implementations may use Pre-LN or Post-LN.</p>
-  </div>
+</section>
 
-  <h3>Multi-head attention</h3>
-  <p>Multiple heads operate in parallel on different representation subspaces (syntax, semantics, coreference, …); their outputs are concatenated and projected back.</p>
+<section class="topic lesson-section plain" id="transformer-plain-en">
+  <h2>2. Plain-English Explanation</h2>
+  <p>A Transformer layer is like a study group followed by private thinking time. During attention, every token consults useful previous tokens. During the FFN, each token processes what it learned on its own. Residual connections keep the original notes around so the layer does not accidentally overwrite everything.</p>
+</section>
+
+<section class="topic lesson-section intuition-section" id="transformer-intuition-en">
+  <h2>3. Core Intuition</h2>
+  <p>The architecture alternates between <b>mixing across positions</b> and <b>transforming within positions</b>. Attention is the across-token communication step. The MLP is the per-token computation step. Stacking many blocks lets shallow layers learn local patterns and deeper layers learn more abstract language features.</p>
+  <div class="study-box">
+    <p>For exam-style reasoning, the important split is simple: attention projections mix information across tokens, while feed-forward matrices do most of the per-token nonlinear computation.</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="transformer-equations-en">
+  <h2>4. Key Equations</h2>
+  <h3>Block skeleton</h3>
+  <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
+  <p>This is the common Pre-LN form. Some diagrams use Post-LN, but the conceptual parts are the same.</p>
+  <h3>Multi-head attention projections</h3>
+  <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
+  <h3>Parameter count from HW4 §2.4</h3>
+  <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
+  <div class="eq">$$ \text{full model}=L(4D^2+2DF)+2VD $$</div>
+  <p>$D$ is model width, $L$ layers, $F$ MLP hidden width, and $V$ vocabulary size. The $2VD$ term counts untied input embeddings and output LM head.</p>
+</section>
+
+<section class="topic lesson-section examples" id="transformer-examples-en">
+  <h2>5. Worked Examples</h2>
+  <h3>HW4 §2.4.1: attention block parameters</h3>
+  <p class="source-note">Source: HW4 §2.4, paraphrased.</p>
+  <p>Standard multi-head attention has $W_Q,W_K,W_V,W_O$. Even though there are $N$ heads, their head dimensions sum to $D$, so each projection is $D\times D$. Total: $4D^2$.</p>
+  <h3>HW4 §2.4.2: MLP block parameters</h3>
+  <p>The two-layer MLP uses $W_{up}\in\mathbb{R}^{D\times F}$ and $W_{down}\in\mathbb{R}^{F\times D}$. Total: $DF+FD=2DF$.</p>
+  <h3>HW4 §2.4.3: OLMo-style total</h3>
+  <p>For $D=4096$, $L=32$, $F=11008$, $V=50304$:</p>
+  <div class="eq">$$ 4D^2+2DF=157{,}286{,}400\quad\text{parameters per layer} $$</div>
+  <div class="eq">$$ 32(157{,}286{,}400)+2(50304)(4096)=5{,}445{,}255{,}168 $$</div>
+  <p>So this simplified count is about 5.45B parameters.</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="transformer-tips-en">
+  <h2>6. Problem-Solving Tips</h2>
+  <ol>
+    <li>For architecture questions, name the path: token embedding plus position, repeated decoder blocks, LM head.</li>
+    <li>For parameter counts, write matrix shapes first. Most mistakes disappear once shapes are explicit.</li>
+    <li>The number of heads $N$ often cancels in standard MHA parameter counting because all heads concatenate back to width $D$.</li>
+    <li>Separate attention parameters, MLP parameters, and vocabulary matrices before adding them.</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="transformer-mistakes-en">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>Multiplying MHA parameters by $N$ after already using full $D\times D$ projection matrices.</li>
+    <li>Counting positional encoding as trainable when the problem says sinusoidal or "no learned positional embeddings."</li>
+    <li>Forgetting the output LM head when embeddings are untied.</li>
+    <li>Confusing the FFN hidden width $F$ with vocabulary size $V$.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="transformer-exam-en">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>Know the decoder block parts: LN, masked MHA, FFN, residual connections.</li>
+    <li>Know why residuals and LayerNorm make deep stacks trainable.</li>
+    <li>Be able to derive $4D^2+2DF$ per layer.</li>
+    <li>Be able to compute the full formula $L(4D^2+2DF)+2VD$.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="transformer-checklist-en">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Attention mixes across tokens.</li>
+    <li>FFN transforms each token independently.</li>
+    <li>Residuals preserve information and gradients.</li>
+    <li>LayerNorm stabilizes scale.</li>
+    <li>Per-layer simplified parameter count: $4D^2+2DF$.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
-<section class="topic" id="transformer">
-      <h2><span class="icon">🔮</span> 3. Transformer 架构</h2>
-      <h3>标准 Block 组件</h3>
-      <ul>
-        <li>LayerNorm（层归一化）</li>
-        <li>Multi-Head Attention（多头注意力 MHA）</li>
-        <li>Feed-Forward Network（FFN / MLP）</li>
-        <li>Residual Connections（残差）</li>
-      </ul>
-      <div class="callout formula">
-        <div class="head">🔧 Mnemonic</div>
-        <p style="margin:0;font-family:ui-monospace,Menlo;background:#fff;padding:8px 12px;border-radius:6px;">LN → (MHA) → Add → LN → (FFN) → Add</p>
-        <p style="font-size:13px;margin-top:6px;">实现可能是 Pre-LN 或 Post-LN 变体。</p>
-      </div>
-      <h3>Multi-Head Attention</h3>
-      <p>多个 head 并行在不同表示子空间学习关系（语法 / 语义 / 指代等），最后拼接 + 投影。</p>
-      <div class="callout exam">
-        <div class="head">✅ Exam checklist</div>
-        <ul>
-          <li>能写注意力公式（含 scaling）。</li>
-          <li>说明为什么需要 PE。</li>
-          <li>说清 Transformer block 的组成。</li>
-        </ul>
-      </div>
-    </section>
+<section class="topic lesson-section concept" id="transformer-concept-cn">
+  <h2>1. 概念理解 / Concept Understanding</h2>
+  <p class="topic-lede">Transformer block 是现代序列模型背后的基本重复单元。Lecture 16 把它介绍成 self-attention + per-token MLP computation + normalization + residual connections；HW4 则进一步让你数 decoder-only 版本的参数量。</p>
+  <ul class="mini-list">
+    <li><b>Masked MHA</b>：让每个 token 读取前面的 token。</li>
+    <li><b>FFN / MLP</b>：attention 混合上下文后，对每个 token 单独做非线性变换。</li>
+    <li><b>Residual connections</b>：让信息和梯度穿过很多层时不容易断。</li>
+    <li><b>LayerNorm</b>：稳定 activation scale，让训练更稳。</li>
+  </ul>
+</section>
 
-    
+<section class="topic lesson-section plain" id="transformer-plain-cn">
+  <h2>2. 大白话理解 / Plain-English Explanation</h2>
+  <p>一个 Transformer layer 像“先小组讨论，再个人消化”。Attention 阶段，每个 token 去问前面哪些 token 有用；FFN 阶段，每个 token 把自己读到的信息单独加工一下。Residual 就是保留原笔记，避免这一层一不小心把重要信息覆盖掉。</p>
+</section>
+
+<section class="topic lesson-section intuition-section" id="transformer-intuition-cn">
+  <h2>3. 核心直觉 / Core Intuition</h2>
+  <p>Transformer 的本质节奏是：先 <b>across positions 混合信息</b>，再 <b>within position 做变换</b>。Attention 负责 token 之间通信，MLP 负责每个 token 内部计算。层数叠深以后，浅层学局部 pattern，深层学更抽象的语言结构。</p>
+  <div class="study-box">
+    <p>考试里最重要的拆分很简单：attention projections 负责跨 token 混合信息，feed-forward matrices 负责每个 token 内部的非线性计算。</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="transformer-equations-cn">
+  <h2>4. 核心公式 / Key Equations</h2>
+  <h3>Block skeleton</h3>
+  <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
+  <p>这是常见 Pre-LN 写法。不同实现可能是 Post-LN，但核心组件一样。</p>
+  <h3>Multi-head attention projections</h3>
+  <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
+  <h3>HW4 §2.4 参数量公式</h3>
+  <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
+  <div class="eq">$$ \text{full model}=L(4D^2+2DF)+2VD $$</div>
+  <p>$D$ 是 model width，$L$ 是层数，$F$ 是 MLP hidden width，$V$ 是 vocabulary size。$2VD$ 是 untied input embedding 和 output LM head。</p>
+</section>
+
+<section class="topic lesson-section examples" id="transformer-examples-cn">
+  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h3>HW4 §2.4.1：attention block 参数量</h3>
+  <p class="source-note">出处：HW4 §2.4，题意转述。</p>
+  <p>标准 multi-head attention 有 $W_Q,W_K,W_V,W_O$。虽然有 $N$ 个 heads，但所有 head 维度加起来还是 $D$，所以每个 projection 都是 $D\times D$。总量：$4D^2$。</p>
+  <h3>HW4 §2.4.2：MLP block 参数量</h3>
+  <p>两层 MLP 有 $W_{up}\in\mathbb{R}^{D\times F}$ 和 $W_{down}\in\mathbb{R}^{F\times D}$。总量：$DF+FD=2DF$。</p>
+  <h3>HW4 §2.4.3：代入 OLMo-style 配置</h3>
+  <p>当 $D=4096$，$L=32$，$F=11008$，$V=50304$：</p>
+  <div class="eq">$$ 4D^2+2DF=157{,}286{,}400\quad\text{parameters per layer} $$</div>
+  <div class="eq">$$ 32(157{,}286{,}400)+2(50304)(4096)=5{,}445{,}255{,}168 $$</div>
+  <p>所以这个简化估算约为 5.45B parameters。</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="transformer-tips-cn">
+  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <ol>
+    <li>架构题先按路径说：token embedding + position，然后重复 decoder blocks，最后 LM head。</li>
+    <li>参数量题先写矩阵 shape，shape 写对基本就不乱。</li>
+    <li>标准 MHA 的参数量里，head 数 $N$ 往往会 cancel，因为所有 heads 拼回宽度 $D$。</li>
+    <li>最后相加时分三块：attention、MLP、vocabulary matrices。</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="transformer-mistakes-cn">
+  <h2>7. 常见错误 / Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>已经用 $D\times D$ projection 之后，又额外乘 head 数 $N$。</li>
+    <li>题目说 sinusoidal / no learned positional embeddings 时，还把 PE 当 trainable parameters。</li>
+    <li>embedding 和 LM head untied 时，忘记 output LM head。</li>
+    <li>把 FFN hidden width $F$ 和 vocabulary size $V$ 搞混。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="transformer-exam-cn">
+  <h2>8. 考试重点 / Exam Focus</h2>
+  <ul class="mini-list">
+    <li>知道 decoder block 组成：LN、masked MHA、FFN、residual connections。</li>
+    <li>能解释 residual 和 LayerNorm 为什么让深层网络更好训练。</li>
+    <li>会推一层参数量 $4D^2+2DF$。</li>
+    <li>会算整模型公式 $L(4D^2+2DF)+2VD$。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="transformer-checklist-cn">
+  <h2>9. 速记清单 / Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Attention 负责跨 token 混合。</li>
+    <li>FFN 负责每个 token 自己加工。</li>
+    <li>Residual 保信息、保梯度。</li>
+    <li>LayerNorm 稳定尺度。</li>
+    <li>简化一层参数量：$4D^2+2DF$。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -105,7 +242,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Auto-build TOC from the 9 section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
@@ -114,20 +251,15 @@
 
     function build() {
       const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
-      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const items = main.querySelectorAll('section.topic > h2');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

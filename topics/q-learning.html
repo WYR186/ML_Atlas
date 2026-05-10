@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="q-learning.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,66 +37,230 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Q-learning</div>
       <h1>🎮 <span class="en-only">Q-learning</span><span class="cn-only">Q-learning</span></h1>
       <div class="subtitle"><span class="en-only">Model-free · off-policy</span><span class="cn-only">model-free · off-policy</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_25.pdf" target="_blank">📄 Lecture 25</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
+        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="qlearn-en">
-  <h2>🟩 Q-learning · Model-free, Off-policy</h2>
-  <div class="callout formula">
-    <div class="head">Update rule</div>
-    <div class="eq">$$ Q(s,a)\leftarrow (1-\alpha)Q(s,a)+\alpha\!\big(r+\gamma\max_{a'}Q(s',a')\big) $$</div>
+  <h2>Q-learning</h2>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <div class="callout">
+    <div class="head">Model-free, off-policy value learning</div>
+    <p><b>Q-learning</b> learns an estimate of the optimal action-value function from sampled transitions $(s,a,r,s')$. It is <b>model-free</b> because it does not need the transition dynamics $P(s'\mid s,a)$ or reward function table $R(s,a)$.</p>
+    <p>Lecture 25 emphasizes the trajectory viewpoint: a trajectory is a sample, and each observed transition can update the current Q estimate through a Monte-Carlo / temporal-difference style moving average. Lecture 27 briefly recaps this before moving to practical LLM RL.</p>
   </div>
-  <ul>
-    <li><b>Off-policy</b>: target uses $\max_{a'}$, so the data can come from any behavior policy.</li>
-    <li><b>Convergence</b>: every $(s, a)$ visited infinitely often + a Robbins-Monro learning rate schedule.</li>
-  </ul>
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfalls</div>
-    <ul>
-      <li>Calling Q-learning on-policy. It is off-policy.</li>
-      <li>Forgetting that $\max_{a'}$ takes the best <b>next-step</b> action.</li>
-      <li>Insufficient exploration → wrong $Q$.</li>
-    </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">A scoreboard that learns from experience</div>
+    <p>Keep a scoreboard $Q(s,a)$ for every action in every state. After trying an action, compare your old score with “reward now + best possible next score.” Then move the old score a little toward that target.</p>
+    <p>It is off-policy because the target assumes you will act greedily in the next state, even if the data was collected by a messy exploratory policy.</p>
+  </div>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why the update has this shape</div>
+    <p>The target $r+\gamma\max_{a'}Q(s',a')$ is a one-step Bellman guess: immediate reward plus discounted best future value. The learning rate $\alpha$ makes the update an exponential moving average, giving newer samples more influence.</p>
+    <p>The phrase “does not depend on current Q” in Lecture 25 refers to the target: the target uses the next-state maximum, while the old $Q(s,a)$ only decides how far we move toward it.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">TD target</div>
+      <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
+      <p>Best value available after landing in $s'$.</p>
+    </div>
+    <div class="callout formula"><div class="head">Incremental update</div>
+      <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
+      <p>Old value plus learning-rate times TD error.</p>
+    </div>
+    <div class="callout formula"><div class="head">Moving-average form</div>
+      <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Greedy policy from Q</div>
+      <div class="eq">$$ \pi(s)=\arg\max_a Q(s,a) $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example 1 · One Q-learning update (Lecture 25)</div>
+    <p>Suppose $Q(s,a)=2$, $r=1$, $\gamma=0.9$, $\max_{a'}Q(s',a')=4$, and $\alpha=0.5$.</p>
+    <div class="eq">$$ y=1+0.9\cdot4=4.6 $$</div>
+    <div class="eq">$$ Q(s,a)\leftarrow 2+0.5(4.6-2)=3.3 $$</div>
   </div>
   <div class="callout example">
-    <div class="head">🧩 One update</div>
-    <p>$Q(s,a)=2,\,\alpha=0.5,\,r=1,\,\gamma=0.9,\,\max Q'=4$.</p>
-    <div class="eq">$$ \text{TD target}=1+0.9\times 4 = 4.6 $$</div>
-    <div class="eq">$$ Q\leftarrow 0.5\cdot 2 + 0.5\cdot 4.6 = 3.3 $$</div>
+    <div class="head">Example 2 · Off-policy recognition</div>
+    <p>If an exploratory behavior policy randomly chose the action in $s'$, Q-learning still uses $\max_{a'}Q(s',a')$ in the target. The target is greedy, so the method is off-policy.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 3 · Optimistic initialization (HW5 §3)</div>
+    <p>In the combination-lock style HW problem, initializing all Q-values high makes untried actions look attractive. Failed actions get revised downward, pushing the agent toward unexplored actions and improving exploration.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">Update recipe</div>
+    <ol>
+      <li>Read off old $Q(s,a)$, reward $r$, discount $\gamma$, and next-state Q-values.</li>
+      <li>Take the maximum over <b>next-state</b> actions.</li>
+      <li>Compute target $y=r+\gamma\max Q(s',\cdot)$.</li>
+      <li>Update old + $\alpha$(target - old).</li>
+      <li>For conceptual questions, say model-free + off-policy + needs exploration.</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">High-frequency traps</div>
+    <ul>
+      <li>Calling Q-learning on-policy. It is off-policy because of the max target.</li>
+      <li>Taking the max over current-state actions instead of next-state actions.</li>
+      <li>Forgetting the learning rate and replacing the old Q entirely.</li>
+      <li>Assuming unvisited state-action pairs can be learned. Exploration is required.</li>
+      <li>Confusing model-free learning with not needing data; model-free still needs trajectories.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">Must be able to do</div>
+    <ul>
+      <li>Write both Q-learning update forms from memory.</li>
+      <li>Explain why it is model-free and off-policy.</li>
+      <li>Hand-compute one update with numbers.</li>
+      <li>Explain why optimistic initialization encourages exploration.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>Sample: $(s,a,r,s')$.</li>
+      <li>Target: $r+\gamma\max_{a'}Q(s',a')$.</li>
+      <li>Update: $Q\leftarrow Q+\alpha(\text{target}-Q)$.</li>
+      <li>Off-policy: greedy target, arbitrary behavior data.</li>
+      <li>Model-free: no known $P$ or $R$ table.</li>
+    </ul>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="qlearn">
-      <h2><span class="icon">🟩</span> 5. Q-learning · Model-free, Off-policy</h2>
-      <div class="callout formula">
-        <div class="head">Update Rule</div>
-        <div class="eq">$$ Q(s,a)\leftarrow (1-\alpha)Q(s,a)+\alpha\!\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
-      </div>
-      <ul>
-        <li><b>Off-policy</b>：学习目标用 $\max_{a'}Q(s',a')$，数据可来自其他行为策略。</li>
-        <li><b>收敛条件</b>：所有 $(s,a)$ 被充分探索 + 合适学习率。</li>
-      </ul>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfalls</div>
-        <ul>
-          <li>把 Q-learning 误认为 on-policy（其实 off-policy）。</li>
-          <li>忘记 $\max_{a'}$ 是“对下一步最优动作取最大”。</li>
-          <li>探索不足 → 学到错误 Q。</li>
-        </ul>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · 一次更新</div>
-        <p>$Q(s,a)=2,\ \alpha=0.5,\ r=1,\ \gamma=0.9,\ \max_{a'}Q(s',a')=4$：</p>
-        <div class="eq">$$ \text{TD target}=1+0.9\times 4=4.6 $$</div>
-        <div class="eq">$$ Q\leftarrow 0.5\times 2+0.5\times 4.6=3.3 $$</div>
-      </div>
-    </section>
+  <h2>Q-learning</h2>
 
-    
+  <h3 class="section-blue">1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">Model-free、off-policy 的价值学习</div>
+    <p><b>Q-learning</b> 从采样 transition $(s,a,r,s')$ 中学习最优动作价值函数。它是 <b>model-free</b>，因为不需要已知转移概率 $P(s'\mid s,a)$ 或奖励函数表 $R(s,a)$。</p>
+    <p>Lecture 25 强调 trajectory 视角：trajectory 是样本，每个观察到的 transition 都可以用 Monte-Carlo / temporal-difference 风格的 moving average 更新当前 Q 估计。Lecture 27 会快速 recap 这点，再进入 LLM RL 的 practical algorithms。</p>
+  </div>
+
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">从经验里更新记分牌</div>
+    <p>给每个状态-动作对维护一个分数 $Q(s,a)$。试完一个动作后，把旧分数和“现在奖励 + 下一状态最好分数”比较，然后把旧分数往目标挪一点。</p>
+    <p>它是 off-policy，因为目标假设下一状态会选 greedy 动作，即使数据本身来自一个乱探索的行为策略。</p>
+  </div>
+
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">为什么更新式长这样</div>
+    <p>目标 $r+\gamma\max_{a'}Q(s',a')$ 是一步 Bellman 估计：即时奖励 + 折扣后的最佳未来价值。学习率 $\alpha$ 让更新成为指数滑动平均，新样本权重更大。</p>
+    <p>Lecture 25 说 target “does not depend on current Q”，意思是 target 用下一状态最大值；旧的 $Q(s,a)$ 只决定我们离 target 还有多远。</p>
+  </div>
+
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">TD target</div>
+      <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
+      <p>落到 $s'$ 后能拿到的最好未来价值。</p>
+    </div>
+    <div class="callout formula"><div class="head">增量更新</div>
+      <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
+      <p>旧值 + 学习率 × TD error。</p>
+    </div>
+    <div class="callout formula"><div class="head">滑动平均形式</div>
+      <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
+    </div>
+    <div class="callout formula"><div class="head">由 Q 得 greedy 策略</div>
+      <div class="eq">$$ \pi(s)=\arg\max_a Q(s,a) $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+  <div class="callout example">
+    <div class="head">例 1 · 一次 Q-learning 更新（Lecture 25）</div>
+    <p>设 $Q(s,a)=2$，$r=1$，$\gamma=0.9$，$\max_{a'}Q(s',a')=4$，$\alpha=0.5$。</p>
+    <div class="eq">$$ y=1+0.9\cdot4=4.6 $$</div>
+    <div class="eq">$$ Q(s,a)\leftarrow 2+0.5(4.6-2)=3.3 $$</div>
+  </div>
+  <div class="callout example">
+    <div class="head">例 2 · 判断 off-policy</div>
+    <p>即使探索策略在 $s'$ 随机选动作，Q-learning 的 target 仍然用 $\max_{a'}Q(s',a')$。目标是 greedy 的，所以是 off-policy。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 3 · 乐观初始化（HW5 §3）</div>
+    <p>Combination-lock 类题中，把所有 Q 初始得很高，会让未尝试动作看起来诱人。失败动作被下调后，agent 会被推向其他未探索动作，从而改善探索。</p>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">更新配方</div>
+    <ol>
+      <li>读出旧 $Q(s,a)$、奖励 $r$、折扣 $\gamma$、下一状态的 Q 值。</li>
+      <li>对<b>下一状态</b>动作取最大。</li>
+      <li>算 target：$y=r+\gamma\max Q(s',\cdot)$。</li>
+      <li>用 old + $\alpha$(target - old) 更新。</li>
+      <li>概念题回答：model-free + off-policy + 需要 exploration。</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>把 Q-learning 说成 on-policy；它因 max target 而 off-policy。</li>
+      <li>max 取在当前状态动作上，而不是下一状态动作上。</li>
+      <li>忘记学习率，直接用 target 覆盖旧 Q。</li>
+      <li>以为没访问过的 state-action pair 也能学到；必须探索。</li>
+      <li>混淆 model-free 与不需要数据；model-free 仍然需要 trajectories。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须会做</div>
+    <ul>
+      <li>默写 Q-learning 两种更新形式。</li>
+      <li>解释 model-free 和 off-policy。</li>
+      <li>手算一次带数字的更新。</li>
+      <li>解释 optimistic initialization 为什么促进探索。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>样本：$(s,a,r,s')$。</li>
+      <li>Target：$r+\gamma\max_{a'}Q(s',a')$。</li>
+      <li>Update：$Q\leftarrow Q+\alpha(\text{target}-Q)$。</li>
+      <li>Off-policy：greedy target，可用任意 behavior data。</li>
+      <li>Model-free：不需要已知 $P$ 或 $R$ 表。</li>
+    </ul>
+  </div>
+</section>
 </div><!--/cn-only-->
+
+
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
       <a class="btn" href="dynamic-programming.html">← Value & Policy Iteration</a>
@@ -129,10 +294,7 @@
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        seenSection.add(sect.id);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

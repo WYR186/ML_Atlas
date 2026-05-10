@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="backpropagation.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,58 +36,201 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧠 神经网络</span><span class="en-only">🧠 Neural Networks</span> / Backpropagation</div>
       <h1>🧠 <span class="en-only">Backpropagation</span><span class="cn-only">反向传播</span></h1>
-      <div class="subtitle"><span class="en-only">Chain rule · Shape check</span><span class="cn-only">chain rule · shape check</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_15.pdf" target="_blank">📄 Lecture 15</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
-        <a class="ref-chip hw" href="../HW/hw4_sol.pdf" target="_blank">📝 hw4_sol</a></div>
+      <div class="subtitle"><span class="en-only">Chain rule · Computation graph</span><span class="cn-only">Chain rule · 计算图</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="backprop-en">
   <h2>🔁 Backpropagation</h2>
-  <p>The chain rule realized efficiently on the computational graph.</p>
+  <p class="topic-lede">Backpropagation is the chain rule turned into an efficient algorithm. Lecture 10 presents it as forward pass plus backward pass on a computation graph, with HW3 supplying the small two-layer network you should be able to work by hand.</p>
 
-  <div class="callout formula">
-    <div class="head">Mantra</div>
-    <p style="margin:0;font-family:ui-monospace,Menlo;background:#fff;padding:8px 12px;border-radius:6px;">downstream gradient = local gradient × upstream gradient</p>
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A neural network is trained by minimizing a loss. The hard part is not the update rule itself; gradient descent only says $w_{t+1}=w_t-\alpha\nabla_w L(w_t)$. The hard part is computing the gradient for every parameter in a large graph.</p>
+  <ul>
+    <li><b>Computational graph:</b> a directed acyclic graph whose nodes are inputs, parameters, intermediate tensors, and operations.</li>
+    <li><b>Forward pass:</b> compute predictions and cache whatever each operation needs for its derivative.</li>
+    <li><b>Backward pass:</b> start at the loss with upstream gradient $1$, then apply local derivative rules in reverse order.</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Imagine every operation leaves a tiny receipt during the forward pass: “I multiplied these two numbers,” or “I summed this vector.” Backprop walks backward through those receipts and asks: if the final loss changed a little, how much blame should this earlier value get?</p>
+  <p>The important habit is mechanical: cache forward values, start from the loss, and move backward one local derivative at a time.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Backprop is efficient because it reuses partial derivatives. A parameter can influence the loss through many downstream paths; reverse-mode autodiff accumulates all those contributions into one gradient field.</p>
+  <div class="callout intuition">
+    <div class="head">Why reverse mode fits neural nets</div>
+    <p>Neural networks usually have one scalar loss and many parameters. Reverse mode computes gradients of that one scalar with respect to all parameters in roughly one backward sweep.</p>
   </div>
 
-  <div class="callout formula">
-    <div class="head">Shape check (must-pass exam tool)</div>
-    <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
-    <p style="font-size:13px;">If you can't derive a gradient cleanly, write down all tensor shapes and back-solve from the matmul rules.</p>
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula">
+      <div class="head">Chain rule at one node</div>
+      <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
+      <p>$\bar{y}$ is the upstream gradient; $\partial y/\partial x$ is the local gradient.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Gradient accumulation</div>
+      <div class="eq">$$ \frac{\partial L}{\partial x}=\sum_{j:\,x\to y_j}\frac{\partial L}{\partial y_j}\frac{\partial y_j}{\partial x} $$</div>
+      <p>If a value feeds multiple later nodes, add the incoming gradient contributions.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Shape check</div>
+      <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
+      <p>For a layer $z=Wx+b$, typical single-example shapes are $x\in\mathbb{R}^{d}$, $W\in\mathbb{R}^{h\times d}$, $z,b\in\mathbb{R}^{h}$, and $\partial L/\partial W=(\partial L/\partial z)x^\top$.</p>
+    </div>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>For a two-layer net, compute gradients with respect to each $W^{(l)}, b^{(l)}$ and check shapes.</li>
-      <li>Forward caches $z^{(l)}, a^{(l)}$; backward propagates from the loss back through the graph.</li>
-    </ul>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example A · Lecture 10 computational graph</h4>
+      <p class="example-source">Source: Lecture 10, computation-graph backprop slides. Paraphrased.</p>
+      <p>Let $c=a+b$, $d=b+1$, and $e=cd$. At $a=3,b=2$, forward gives $c=5$, $d=3$, $e=15$. Backward gives $\partial e/\partial c=d=3$ and $\partial e/\partial d=c=5$. Then $\partial e/\partial a=3$, while $b$ receives two paths: from $c$ and from $d$, so $\partial e/\partial b=3+5=8$.</p>
+    </div>
+    <div>
+      <h4>Example B · HW3 §2.1 shape audit</h4>
+      <p class="example-source">Source: HW3 §2.1. The problem asks for dimensions in a small two-layer network.</p>
+      <p>If $x\in\mathbb{R}^{3}$, hidden width is $4$, and the output is scalar, then $W^{(1)}$ is $4\times3$, $b^{(1)}$ is length $4$, $W^{(2)}$ is $1\times4$, and every gradient with respect to a weight has the same shape as that weight.</p>
+    </div>
+    <div>
+      <h4>Example C · HW3 §2.1 numerical backprop</h4>
+      <p class="example-source">Source: HW3 §2.1. The problem asks for forward values and gradients in a two-layer network.</p>
+      <p>Compute $z^{(1)}$, apply the ReLU mask to get $a^{(1)}$, then compute the scalar logit and binary cross-entropy gradient. The key matrix forms are $\partial L/\partial W^{(2)}=(\partial L/\partial z^{(2)})a^{(1)\top}$ and $\partial L/\partial W^{(1)}=(\partial L/\partial z^{(1)})x^\top$.</p>
+    </div>
   </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ul>
+    <li>Draw the graph first. Label each intermediate value, not just the final formula.</li>
+    <li>Write the forward values before differentiating; many local gradients need cached values.</li>
+    <li>Move backward one node at a time: upstream gradient times local derivative.</li>
+    <li>For matrix gradients, write shapes before writing formulas.</li>
+  </ul>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Forgetting to add gradients when a variable is reused in multiple branches.</li>
+    <li>Confusing elementwise multiplication with matrix multiplication.</li>
+    <li>Dropping a transpose in an outer product gradient.</li>
+    <li>Using the activation derivative at $a$ instead of at the pre-activation $z$.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Hand-compute gradients on a small computational graph.</li>
+    <li>Explain what information must be saved during the forward pass.</li>
+    <li>For a two-layer network, compute forward values, masks for ReLU, and gradient shapes.</li>
+    <li>Use the outer-product gradient formulas for affine layers.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can explain upstream, local, and downstream gradients.</li>
+    <li>I can handle reused variables by summing gradient contributions.</li>
+    <li>I can verify $\partial L/\partial W$ has the same shape as $W$.</li>
+    <li>I can write affine-layer gradients as outer products.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="backprop">
-      <h2><span class="icon">🔁</span> 2. Backpropagation · 反向传播</h2>
-      <p>本质：链式法则在计算图上的高效实现。</p>
-      <div class="callout formula">
-        <div class="head">核心口令</div>
-        <p style="margin:0;font-family:ui-monospace,Menlo;background:#fff;padding:8px 12px;border-radius:6px;">downstream gradient = local gradient × upstream gradient</p>
+      <h2>🔁 Backpropagation · 反向传播</h2>
+      <p class="topic-lede">Backpropagation 就是把 chain rule 做成高效算法。Lecture 10 把它讲成 computation graph 上的 forward pass + backward pass；HW3 给了你必须能手算的二层网络例题。</p>
+
+      <h3 class="section-blue">1. Concept Understanding</h3>
+      <p>训练神经网络是在最小化 loss。梯度下降公式本身很短：$w_{t+1}=w_t-\alpha\nabla_w L(w_t)$；真正麻烦的是大模型里每个 parameter 的 gradient 怎么算。</p>
+      <ul>
+        <li><b>Computational graph</b>：把变量、参数、中间 tensor、operation 连接成有向无环图。</li>
+        <li><b>Forward pass</b>：算 prediction / loss，同时缓存 backward 需要的信息。</li>
+        <li><b>Backward pass</b>：从 loss 的 upstream gradient $1$ 开始，反向应用每个节点的 local derivative。</li>
+      </ul>
+
+      <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
+      <p>可以把 forward 想成每一步操作都留了一张“小票”：这里做了乘法，那里做了 sum，这里过了 ReLU。Backward 就是从最后的 loss 倒着翻小票，问：如果 loss 变大一点点，前面这个数应该背多少锅？</p>
+      <p>关键习惯很机械：先缓存 forward values，从 loss 开始，倒着一次处理一个 local derivative。</p>
+
+      <h3 class="section-orange">3. Core Intuition</h3>
+      <p>Backprop 高效，是因为它复用中间梯度。一个参数可能通过很多路径影响 loss；reverse-mode autodiff 会把这些路径上的贡献全部累加到同一个 <code>.grad</code> 里。</p>
+      <div class="callout intuition">
+        <div class="head">为什么 neural network 适合 reverse mode</div>
+        <p>神经网络通常是一个 scalar loss、非常多 parameters。Reverse mode 可以用一次 backward sweep 算出这个 loss 对所有参数的梯度。</p>
       </div>
-      <div class="callout formula">
-        <div class="head">必考 · Shape Check</div>
-        <div class="eq">$$ \frac{\partial L}{\partial W}\ \text{must have the same shape as}\ W $$</div>
-        <div style="font-size:13px;">不会推导时：先写出每个张量 shape，用矩阵乘法规则倒推，常能救命。</div>
+
+      <h3 class="section-purple">4. Key Equations</h3>
+      <div class="cols2">
+        <div class="callout formula">
+          <div class="head">单个节点的 chain rule</div>
+          <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
+          <p>$\bar{y}$ 是 upstream gradient；$\partial y/\partial x$ 是 local gradient。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">梯度累加</div>
+          <div class="eq">$$ \frac{\partial L}{\partial x}=\sum_{j:\,x\to y_j}\frac{\partial L}{\partial y_j}\frac{\partial y_j}{\partial x} $$</div>
+          <p>如果一个变量被多个后续节点使用，回来的 gradient contribution 要相加。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Shape check</div>
+          <div class="eq">$$ \frac{\partial L}{\partial W}\;\text{has the same shape as}\;W $$</div>
+          <p>单样本层 $z=Wx+b$ 中，若 $x\in\mathbb{R}^{d}$、$W\in\mathbb{R}^{h\times d}$，则 $\partial L/\partial W=(\partial L/\partial z)x^\top$，shape 也是 $h\times d$。</p>
+        </div>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>给两层网络，能写出对每个 $W^{(l)}, b^{(l)}$ 的梯度（含 shape）。</li>
-          <li>知道 Forward 缓存 $z^{(l)},a^{(l)}$，Backward 从 loss 逐层回传。</li>
-        </ul>
+
+      <h3 class="section-gray">5. Worked Examples</h3>
+      <div class="mini-list">
+        <div>
+          <h4>Example A · Lecture 10 computational graph</h4>
+          <p class="example-source">来源：Lecture 10，computation-graph backprop slides，已转述。</p>
+          <p>设 $c=a+b$，$d=b+1$，$e=cd$。当 $a=3,b=2$，forward 得 $c=5,d=3,e=15$。Backward：$\partial e/\partial c=d=3$，$\partial e/\partial d=c=5$。所以 $\partial e/\partial a=3$；而 $b$ 走了两条路，来自 $c$ 的 $3$ 和来自 $d$ 的 $5$ 要相加，得到 $\partial e/\partial b=8$。</p>
+        </div>
+        <div>
+          <h4>Example B · HW3 §2.1 shape audit</h4>
+          <p class="example-source">来源：HW3 §2.1，小型二层网络维度题，已转述。</p>
+          <p>若 $x\in\mathbb{R}^{3}$，hidden width 是 $4$，输出是 scalar，那么 $W^{(1)}$ 是 $4\times3$，$b^{(1)}$ 长度是 $4$，$W^{(2)}$ 是 $1\times4$。每个 weight gradient 的 shape 必须和对应 weight 一样。</p>
+        </div>
+        <div>
+          <h4>Example C · HW3 §2.1 numerical backprop</h4>
+          <p class="example-source">来源：HW3 §2.1，二层网络 forward values 和 gradients，已转述。</p>
+          <p>先算 $z^{(1)}$，用 ReLU mask 得到 $a^{(1)}$，再算 scalar logit 和 binary cross-entropy gradient。核心矩阵形式是 $\partial L/\partial W^{(2)}=(\partial L/\partial z^{(2)})a^{(1)\top}$，以及 $\partial L/\partial W^{(1)}=(\partial L/\partial z^{(1)})x^\top$。</p>
+        </div>
       </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+      <ul>
+        <li>先画 graph，并给每个 intermediate value 命名。</li>
+        <li>先算 forward 数值；很多 local derivative 需要 forward cache。</li>
+        <li>Backward 时一次只处理一个节点：upstream gradient × local derivative。</li>
+        <li>矩阵梯度先写 shape，再写公式。</li>
+      </ul>
+
+      <h3 class="section-red">7. Common Mistakes</h3>
+      <ul>
+        <li>变量被重复使用时，忘记把多条路径的 gradient 相加。</li>
+        <li>把 elementwise multiplication 和 matrix multiplication 混起来。</li>
+        <li>Outer product gradient 里漏掉 transpose。</li>
+        <li>ReLU derivative 应该看 pre-activation $z$，不是看后面的符号猜。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus</h3>
+      <ul>
+        <li>会手算小 computational graph 的 gradient。</li>
+        <li>能说明 forward pass 为什么要保存某些 tensor / shape。</li>
+        <li>二层网络要会算 forward、ReLU mask、梯度 shape。</li>
+        <li>会用 affine layer 的 outer-product gradient formula。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist</h3>
+      <ul>
+        <li>我能解释 upstream / local / downstream gradient。</li>
+        <li>我知道 reuse variable 时梯度要 sum。</li>
+        <li>我会检查 $\partial L/\partial W$ 的 shape。</li>
+        <li>我能把 affine-layer gradients 写成 outer products。</li>
+      </ul>
     </section>
 
     

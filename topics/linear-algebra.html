@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="linear-algebra.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,65 +36,175 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">📐 基础</span><span class="en-only">📐 Foundations</span> / Linear Algebra</div>
       <h1>📐 <span class="en-only">Linear Algebra</span><span class="cn-only">线性代数</span></h1>
-      <div class="subtitle"><span class="en-only">Dot product · Norms · Eigenvectors</span><span class="cn-only">点积 · 范数 · 特征值 / 向量</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_2.pdf" target="_blank">📄 Lecture 2</a>
+      <div class="subtitle"><span class="en-only">Vectors · Norms · Rank/SVD · Eigen · Hessian · PSD</span><span class="cn-only">向量 · 范数 · 秩与 SVD · 特征值 · Hessian · 半正定</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_1.pdf" target="_blank">📄 Lecture 1</a>
         <a class="ref-chip lecture" href="../slides/Lecture_3.pdf" target="_blank">📄 Lecture 3</a>
-        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a></div>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="linalg-en">
   <h2>📐 Linear Algebra</h2>
+
+  <h3>1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧠 Core intuition</div>
-    <p>Linear algebra is the grammar of shapes — it tells you what objects look like and how to combine them, and it prevents gradient-shape mistakes in backprop.</p>
+    <div class="head">Formal definitions and the problem they solve</div>
+    <p>Linear algebra is the language for working with feature vectors, model weights, and gradients. In ML you constantly write $w^\top x$, $X^\top X$, $\nabla f$, $\nabla^2 f$ — all of those are objects this section formalizes.</p>
+    <p>The handful of definitions you really need:</p>
+    <ul>
+      <li><b>Vector / matrix</b>: $x\in\mathbb{R}^d$ is an ordered list; $A\in\mathbb{R}^{m\times n}$ is an operator $\mathbb{R}^n\to\mathbb{R}^m$.</li>
+      <li><b>Dot product</b> $x^\top y=\sum_i x_iy_i$ — the scalar measure of similarity / projection.</li>
+      <li><b>Norm</b>: $\|x\|_2=\sqrt{x^\top x}$, $\|x\|_1=\sum_i|x_i|$, $\|x\|_\infty=\max_i|x_i|$.</li>
+      <li><b>Rank, column space, null space</b>: how many independent directions $A$ has, where it sends inputs, and what it sends to zero.</li>
+      <li><b>Eigen / SVD</b>: $Au=\lambda u$ and $X=U\Sigma V^\top$ — the canonical "what does this matrix really do" decompositions.</li>
+      <li><b>Symmetric, PSD, PD</b>: $A=A^\top$, with $x^\top Ax\ge 0$ (PSD) or $>0$ (PD) — the way we test convexity of a loss.</li>
+      <li><b>Vector calculus shapes</b>: gradient $\nabla f\in\mathbb{R}^{d}$, Hessian $\nabla^2 f\in\mathbb{R}^{d\times d}$, Jacobian $J\in\mathbb{R}^{m\times n}$.</li>
+    </ul>
+    <p>Everything later — linear regression's closed form, logistic regression's Hessian, PCA, backprop — is built on these primitives.</p>
   </div>
 
-  <h3>Concepts</h3>
-  <ul>
-    <li><b>Dot product</b>: similarity / projection. The basis of linear models and kernels.</li>
-    <li><b>Norm</b>: magnitude. Drives regularization penalties.</li>
-    <li><b>Eigenvalue / eigenvector</b>: directions along which a matrix only scales. PCA picks the largest one.</li>
-  </ul>
+  <h3>2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Without formulas first</div>
+    <p>A <b>vector</b> is an arrow with a length (the norm) and a direction. A <b>matrix</b> is a function that takes one arrow and returns another; multiplying matrices is composing those functions.</p>
+    <p>The <b>dot product</b> $w^\top x$ asks "how much does $x$ point in the same direction as $w$?" That single number is exactly what a linear classifier outputs (Lecture 1, p. 22).</p>
+    <p>An <b>eigenvector</b> is a special arrow that the matrix only stretches, never rotates; the <b>eigenvalue</b> is by how much. The <b>SVD</b> says any matrix is just "rotate, stretch, rotate" — $X=U\Sigma V^\top$.</p>
+    <p>A <b>PSD Hessian</b> means the loss surface bends upward in every direction — a bowl. <b>PD</b> means a strict bowl with a unique bottom. That bowl property is why convex losses are so safe to optimize.</p>
+    <p>Why bother: backprop is matrix multiplication on autopilot, and almost every shape bug is a missing transpose. Master shapes once, debug forever.</p>
+  </div>
 
-  <h3>Core formulas</h3>
+  <h3>3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why these tools earn their keep</div>
+    <p><b>Dot product = similarity</b>: $w^\top x = \|w\|\|x\|\cos\theta$. Linear models, kernels, and attention all rank inputs by this overlap.</p>
+    <p><b>Norms power regularization</b>: $\ell_2$ shrinks weights, $\ell_1$ shrinks <i>and</i> selects (the corners of the diamond ball).</p>
+    <p><b>Rank tells you when a system has solutions</b>: if $X\in\mathbb{R}^{n\times d}$ has full row rank $n$, then $\mathrm{Col}(X)=\mathbb{R}^n$, so $Xw=y$ always has a solution (HW1 §3.1). The <b>null space</b> $\{v:Xv=0\}$ classifies all the non-uniqueness — any two solutions differ by a vector in $\mathrm{Ker}(X)$.</p>
+    <p><b>SVD reveals the geometry</b>: $\Sigma$ stretches along orthonormal axes, and $U,V$ give the axes. Pseudo-inverses, low-rank approximations, PCA, and minimum-norm regression all live here.</p>
+    <p><b>Hessian shape rule</b>: $X^\top BX\succeq 0$ whenever $B\succeq 0$. This single sandwich identity is what proves logistic loss convex (HW1 §4.1) and is reused everywhere.</p>
+    <p>These primitives reappear later as covariance matrices (PCA, GMM), Gram matrices (kernels, ridge), gradient flows in deep nets, Fisher information, and more.</p>
+  </div>
+
+  <h3>4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Dot Product</div>
-      <div class="eq">$$ x^\top y=\sum_i x_i y_i $$</div></div>
-    <div class="callout formula"><div class="head">L2 / L1 norms</div>
-      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\qquad \|x\|_1=\sum_i |x_i| $$</div></div>
-    <div class="callout formula"><div class="head">Matrix multiply shapes</div>
-      <div class="eq">$$ (m\times n)(n\times p)\rightarrow (m\times p) $$</div>
-      <div style="font-size:13px;">Inner dimensions must match.</div></div>
-    <div class="callout formula"><div class="head">Eigenvalue / Eigenvector</div>
-      <div class="eq">$$ Au=\lambda u $$</div>
-      <div style="font-size:13px;">PCA: top eigenvector of the covariance matrix.</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">The three derivative shapes</div>
-      <div class="eq">$$ \nabla f\in\mathbb{R}^{d\times 1},\quad \nabla^2 f\in\mathbb{R}^{d\times d},\quad J\in\mathbb{R}^{m\times n} $$</div></div>
+    <div class="callout formula"><div class="head">Dot Product & Cosine</div>
+      <div class="eq">$$ x^\top y=\sum_{i=1}^{d} x_i y_i = \|x\|\|y\|\cos\theta $$</div>
+    </div>
+    <div class="callout formula"><div class="head">$\ell_p$ Norms</div>
+      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Matrix-Multiply Shapes</div>
+      <div class="eq">$$ (m\times n)\cdot(n\times p)\to(m\times p) $$</div>
+      <p style="font-size:13px;">$(AB)^\top=B^\top A^\top$. Inner dim must match.</p>
+    </div>
+    <div class="callout formula"><div class="head">Rank-Nullity</div>
+      <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Eigen Equation</div>
+      <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
+      <p style="font-size:13px;">PCA: top eigenvector of covariance = max-variance direction.</p>
+    </div>
+    <div class="callout formula"><div class="head">Reduced SVD</div>
+      <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
+      <p style="font-size:13px;">$r=\mathrm{rank}(X)$. Pseudo-inverse $X^+=V\Sigma^{-1}U^\top$.</p>
+    </div>
+    <div class="callout formula"><div class="head">Quadratic Form & PSD</div>
+      <div class="eq">$$ x^\top A x=\sum_{i,j}A_{ij}x_ix_j,\quad \text{PSD}: x^\top A x\ge 0\ \forall x $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Sandwich Identity</div>
+      <div class="eq">$$ A=B^\top B \;\Rightarrow\; A\succeq 0;\quad X^\top D X \succeq 0\ \text{when}\ D\succeq 0 $$</div>
+      <p style="font-size:13px;">Used for logistic Hessian $H=X^\top B X$ (HW1 §4.1).</p>
+    </div>
+    <div class="callout formula"><div class="head">Vector-Calc Shapes</div>
+      <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Useful Derivatives</div>
+      <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
+      <p style="font-size:13px;">Symmetric $A$ ⇒ gradient $2Aw$, Hessian $2A$.</p>
+    </div>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Common pitfalls</div>
-    <ul>
-      <li>Writing the gradient as a row vector breaks chain-rule shapes.</li>
-      <li>Confusing $x^\top y$ (scalar) with $x \odot y$ (elementwise vector).</li>
-    </ul>
-  </div>
+  <h3>5. Worked Examples</h3>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Quickly infer dimensions of any expression — especially in backprop.</li>
-      <li>PCA: max-variance direction = top eigenvector of the covariance matrix.</li>
-    </ul>
+  <div class="callout example">
+    <div class="head">Example 1 · Shape sanity check</div>
+    <p>Let $A\in\mathbb{R}^{m\times n}$, $x\in\mathbb{R}^{n}$. Then $Ax\in\mathbb{R}^{m}$ (column), $x^\top A\in\mathbb{R}^{1\times m}$ (row). Quadratic form $x^\top A x$ is a scalar but requires $A$ square; $A^\top A\in\mathbb{R}^{n\times n}$ and $AA^\top\in\mathbb{R}^{m\times m}$ are both symmetric and PSD.</p>
   </div>
 
   <div class="callout example">
-    <div class="head">🧩 Shape practice</div>
-    <p>Let $A\in\mathbb{R}^{m\times n}$ and $x\in\mathbb{R}^{n\times 1}$.</p>
+    <div class="head">Example 2 · Full-row-rank ⇒ $Xw=y$ has a solution (HW1 §3.1)</div>
+    <p>If $X\in\mathbb{R}^{n\times d}$ has rank $n$, the rows span $\mathbb{R}^n$, so $\mathrm{Col}(X)=\mathbb{R}^n$ and $y\in\mathrm{Col}(X)$. Concretely, with the SVD $X=U\Sigma V^\top$, the choice $w^*=V\Sigma^{-1}U^\top y$ gives $Xw^*=UU^\top y=y$.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 3 · Hessian PSD ⇒ convex (Lecture 3, p. 13)</div>
+    <p>Let $f(w)=\tfrac12 w^\top Aw - b^\top w + c$ with $A$ symmetric. Then $\nabla f=Aw-b$ and $\nabla^2 f=A$. If $A\succeq 0$, the second-order test gives $f$ convex; if $A\succ 0$, $f$ is strictly convex with the unique minimizer $w^*=A^{-1}b$.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 4 · Logistic Hessian $H=X^\top BX$ is PSD (HW1 §4.1)</div>
+    <p>For binary cross-entropy with $\sigma(z)=\tfrac{1}{1+e^{-z}}$, the Hessian factors as $H=X^\top B X$ where $B$ is diagonal with $B_{ii}=\sigma(w^\top x_i)(1-\sigma(w^\top x_i))\in[0,\tfrac14]$.</p>
+    <p>For any $v$, $v^\top H v=(Xv)^\top B(Xv)=\sum_i B_{ii}(Xv)_i^2\ge 0$, so $H\succeq 0$. The logistic loss is therefore convex everywhere, and every local minimum is global (HW1 §4.2).</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 5 · Norm concentration in high dimensions (HW1 §1.2)</div>
+    <p>If $X,q\sim\mathrm{Unif}([0,1]^d)$ are independent, then per coordinate $\mathbb{E}(X_i-q_i)^2=\tfrac16$, so $\mathbb{E}\|X-q\|^2=d/6$. The variance is $O(d)$, so by Chebyshev the relative spread $\sqrt{\mathrm{Var}}/\mathbb{E}\to 0$ as $d\to\infty$ — every distance "looks the same," which is exactly what kills KNN in high dimensions.</p>
+  </div>
+
+  <h3>6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to attack a linear-algebra question</div>
+    <ol>
+      <li><b>Annotate shapes first.</b> Write the dimension next to every symbol — mismatched inner dims are the #1 source of errors.</li>
+      <li><b>To prove convex / PSD</b>, try to write the matrix as $B^\top B$ or $X^\top D X$ with $D\succeq 0$, then expand $v^\top(\cdot)v$ as a sum of squares.</li>
+      <li><b>For "$Xw=y$ has a solution"</b>, invoke rank: full row rank ⇒ surjective ⇒ solution exists.</li>
+      <li><b>For minimum-norm / SVD problems</b>, split any solution as $w=w_\infty+v$ with $v\in\mathrm{Ker}(X)$; orthogonality gives $\|w\|^2=\|w_\infty\|^2+\|v\|^2$.</li>
+      <li><b>Memorize $\nabla(a^\top w)=a$ and $\nabla(w^\top Aw)=(A+A^\top)w$</b>; everything else composes from chain rule.</li>
+      <li><b>Sanity check:</b> gradients are columns, losses are scalars, Hessians are symmetric squares. If shapes don't match, you transposed something.</li>
+    </ol>
+  </div>
+
+  <h3>7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">Frequent traps</div>
     <ul>
-      <li>$Ax\in\mathbb{R}^{m\times 1}$.</li>
-      <li>$x^\top \in \mathbb{R}^{1\times n}$, so $x^\top A\in\mathbb{R}^{1\times m}$ — a row vector.</li>
+      <li>Treating the gradient as a row vector — convention is $\nabla f\in\mathbb{R}^{d\times 1}$.</li>
+      <li>Confusing $x^\top y$ (scalar) with $x\odot y$ (vector).</li>
+      <li>Writing $(AB)^\top=A^\top B^\top$ — the correct order is $B^\top A^\top$.</li>
+      <li>Confusing $X^\top X$ ($d\times d$) with $XX^\top$ ($n\times n$); both are PSD but live in different spaces.</li>
+      <li>Inverting non-square or rank-deficient matrices — use the pseudo-inverse $X^+$.</li>
+      <li>Treating "PSD ⇒ PD" as automatic; PSD allows zero eigenvalues, so the optimum may be a flat valley.</li>
+      <li>Talking about PSD/PD for non-symmetric matrices — those tests only apply to symmetric (or Hermitian) matrices.</li>
+    </ul>
+  </div>
+
+  <h3>8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">What you must walk in able to do</div>
+    <ul>
+      <li>Quickly infer dimensions in any backprop / linear-regression expression.</li>
+      <li>Use $\nabla^2 f\succeq 0$ to argue convexity, and PD to argue uniqueness.</li>
+      <li>Prove $H=X^\top BX\succeq 0$ via the sandwich $v^\top H v=(Xv)^\top B(Xv)$.</li>
+      <li>Write the SVD $X=U\Sigma V^\top$ and pseudo-inverse $X^+=V\Sigma^{-1}U^\top$.</li>
+      <li>State the rank ↔ column-space ↔ solvability link for $Xw=y$.</li>
+      <li>Remember: PCA's max-variance direction = top eigenvector of the covariance matrix.</li>
+      <li>Apply $\nabla(a^\top w)=a$ and $\nabla(w^\top Aw)=(A+A^\top)w$.</li>
+    </ul>
+  </div>
+
+  <h3>9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>$A_{m\times n}B_{n\times p}\Rightarrow m\times p$; $(AB)^\top=B^\top A^\top$.</li>
+      <li>Symmetric + all $\lambda\ge 0$ ⇔ PSD; all $\lambda>0$ ⇔ PD.</li>
+      <li>$X^\top BX\succeq 0$ when $B\succeq 0$ — sandwich.</li>
+      <li>Full row rank ⇒ $Xw=y$ has a solution.</li>
+      <li>SVD $X=U\Sigma V^\top$, pseudo-inverse $V\Sigma^{-1}U^\top$.</li>
+      <li>Eigen $Au=\lambda u$; PCA picks largest $\lambda$ of covariance.</li>
+      <li>Gradients are columns; Hessians are symmetric squares.</li>
+      <li>$\nabla(a^\top w)=a$; $\nabla(w^\top Aw)=(A+A^\top)w$.</li>
     </ul>
   </div>
 </section>
@@ -101,67 +212,169 @@
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="linalg">
-      <h2><span class="icon">📐</span> Linear Algebra · 线性代数</h2>
-      <div class="callout">
-        <div class="head">🧠 Core intuition</div>
-        <div class="bi-text">
-          <span class="cn">线代告诉你“对象是什么形状、如何组合”。</span>
-          <span class="en">Linear algebra is the grammar of shapes; it prevents gradient-shape mistakes.</span>
-        </div>
-      </div>
+  <h2>📐 线性代数</h2>
 
-      <h3>🔵 概念理解</h3>
-      <ul>
-        <li><b>点积 / Dot product</b>：相似度 / 投影；线性模型与核方法的基础。</li>
-        <li><b>范数 / Norm</b>：长度 / 大小；正则化的“惩罚”。</li>
-        <li><b>特征值 / 向量</b>：矩阵沿某方向缩放；PCA 关键。</li>
-      </ul>
+  <h3>1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">正式定义与它解决的问题</div>
+    <p>线性代数是处理特征向量、模型权重和梯度的语言。在 ML 里你会反复写 $w^\top x$、$X^\top X$、$\nabla f$、$\nabla^2 f$——它们都是这一节定义的对象。</p>
+    <p>真正必须知道的几条定义：</p>
+    <ul>
+      <li><b>向量 / 矩阵</b>：$x\in\mathbb{R}^d$ 是有序数列；$A\in\mathbb{R}^{m\times n}$ 是把 $\mathbb{R}^n\to\mathbb{R}^m$ 的算子。</li>
+      <li><b>点积</b> $x^\top y=\sum_i x_iy_i$ —— 相似度 / 投影的标量度量。</li>
+      <li><b>范数</b>：$\|x\|_2=\sqrt{x^\top x}$、$\|x\|_1=\sum_i|x_i|$、$\|x\|_\infty=\max_i|x_i|$。</li>
+      <li><b>秩、列空间、零空间</b>：$A$ 有几个独立方向、把输入送到哪、把谁送到 0。</li>
+      <li><b>特征 / SVD</b>：$Au=\lambda u$ 与 $X=U\Sigma V^\top$，回答“这个矩阵到底在干什么”。</li>
+      <li><b>对称、PSD、PD</b>：$A=A^\top$，且 $x^\top Ax\ge 0$（PSD）或 $>0$（PD）—— 用来判断损失是否凸。</li>
+      <li><b>向量微积分形状</b>：梯度 $\nabla f\in\mathbb{R}^{d}$、Hessian $\nabla^2 f\in\mathbb{R}^{d\times d}$、Jacobian $J\in\mathbb{R}^{m\times n}$。</li>
+    </ul>
+    <p>后面要用的——线性回归闭式解、Logistic Hessian、PCA、反向传播——都建立在这些原语上。</p>
+  </div>
 
-      <h3>🟣 核心公式（默写）</h3>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">Dot Product</div>
-          <div class="eq">$$ x^\top y=\sum_i x_i y_i $$</div></div>
-        <div class="callout formula"><div class="head">$L_2$ / $L_1$ Norms</div>
-          <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\qquad \|x\|_1=\sum_i |x_i| $$</div></div>
-        <div class="callout formula"><div class="head">Matrix Multiply Shape</div>
-          <div class="eq">$$ (m\times n)\cdot(n\times p)\rightarrow(m\times p) $$</div>
-          <div style="font-size:13px;">肌肉记忆：中间维度必须相同。</div></div>
-        <div class="callout formula"><div class="head">Eigenvalue / Eigenvector</div>
-          <div class="eq">$$ Au=\lambda u $$</div>
-          <div style="font-size:13px;">PCA：取协方差矩阵最大 $\lambda$ 对应的 $u$。</div></div>
-        <div class="callout formula" style="grid-column:1/3;">
-          <div class="head">Three Derivative Shapes</div>
-          <div class="eq">$$ \nabla f\in\mathbb{R}^{d\times 1},\quad \nabla^2 f\in\mathbb{R}^{d\times d},\quad J\in\mathbb{R}^{m\times n} $$</div>
-        </div>
-      </div>
+  <h3>2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">不看公式先懂大概</div>
+    <p><b>向量</b>就是一根有长度（范数）和方向的箭头；<b>矩阵</b>是一个把箭头变成另一个箭头的函数；矩阵乘法 = 函数复合。</p>
+    <p><b>点积</b> $w^\top x$ 在问“$x$ 沿 $w$ 方向走了多少？”——线性分类器干的就是这件事（Lecture 1, p. 22）。</p>
+    <p><b>特征向量</b>是矩阵只伸缩、不旋转的特殊方向，<b>特征值</b>是伸缩倍数。<b>SVD</b> 说任意矩阵都是“旋转-伸缩-旋转”，$X=U\Sigma V^\top$。</p>
+    <p><b>PSD Hessian = 损失曲面在每个方向都向上弯</b>，是个碗；<b>PD</b> 是有唯一底的严格碗。这就是凸损失为什么好优化。</p>
+    <p>为什么得练熟：反向传播就是矩阵乘法的自动版本，绝大多数 bug 都是少了一个转置——一次搞懂 shape，终身受益。</p>
+  </div>
 
-      <div class="callout warn">
-        <div class="head">⚠️ Common pitfalls</div>
-        <ul>
-          <li>把梯度写成行向量 → 链式法则维度对不上。</li>
-          <li>混淆 $x^\top y$ 与 elementwise product（向量 vs 标量）。</li>
-        </ul>
-      </div>
+  <h3>3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">这些工具为何有用</div>
+    <p><b>点积 = 相似度</b>：$w^\top x = \|w\|\|x\|\cos\theta$。线性模型、核方法、注意力都按它打分。</p>
+    <p><b>范数撑起正则化</b>：$\ell_2$ 收缩，$\ell_1$ 收缩 + 选择（菱形球的角点会归零）。</p>
+    <p><b>秩告诉你方程组什么时候有解</b>：$X\in\mathbb{R}^{n\times d}$ 满行秩 ⇒ $\mathrm{Col}(X)=\mathbb{R}^n$ ⇒ $Xw=y$ 必有解（HW1 §3.1）。<b>零空间</b> $\{v:Xv=0\}$ 描述所有非唯一性——任意两解之差落在 $\mathrm{Ker}(X)$ 里。</p>
+    <p><b>SVD 揭示几何</b>：$\Sigma$ 沿正交轴伸缩，$U,V$ 给轴。伪逆、低秩近似、PCA、最小范数回归都在这里。</p>
+    <p><b>Hessian 形状定理</b>：$X^\top BX\succeq 0$（只要 $B\succeq 0$）。这一个夹心恒等式就证明了 logistic 损失凸（HW1 §4.1），后面会反复用。</p>
+    <p>这些原语后面会以协方差矩阵（PCA、GMM）、Gram 矩阵（核、岭）、深度网络的梯度流、Fisher 信息等形式不断出现。</p>
+  </div>
 
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>能快速判断任意表达式的维度（尤其反向传播）。</li>
-          <li>PCA：最大方差方向 = 最大特征值对应特征向量。</li>
-        </ul>
-      </div>
+  <h3>4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">点积与余弦</div>
+      <div class="eq">$$ x^\top y=\sum_{i=1}^{d} x_i y_i = \|x\|\|y\|\cos\theta $$</div>
+    </div>
+    <div class="callout formula"><div class="head">$\ell_p$ 范数</div>
+      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
+    </div>
+    <div class="callout formula"><div class="head">矩阵乘法形状</div>
+      <div class="eq">$$ (m\times n)\cdot(n\times p)\to(m\times p) $$</div>
+      <p style="font-size:13px;">$(AB)^\top=B^\top A^\top$；中间维必须相同。</p>
+    </div>
+    <div class="callout formula"><div class="head">秩 - 零度定理</div>
+      <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">特征方程</div>
+      <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
+      <p style="font-size:13px;">PCA：协方差最大特征值方向 = 最大方差方向。</p>
+    </div>
+    <div class="callout formula"><div class="head">紧凑 SVD</div>
+      <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
+      <p style="font-size:13px;">$r=\mathrm{rank}(X)$；伪逆 $X^+=V\Sigma^{-1}U^\top$。</p>
+    </div>
+    <div class="callout formula"><div class="head">二次型与 PSD</div>
+      <div class="eq">$$ x^\top A x=\sum_{i,j}A_{ij}x_ix_j,\quad \text{PSD}: x^\top A x\ge 0\ \forall x $$</div>
+    </div>
+    <div class="callout formula"><div class="head">夹心恒等式</div>
+      <div class="eq">$$ A=B^\top B \;\Rightarrow\; A\succeq 0;\quad X^\top D X \succeq 0\ \text{当}\ D\succeq 0 $$</div>
+      <p style="font-size:13px;">用于 logistic Hessian $H=X^\top BX$（HW1 §4.1）。</p>
+    </div>
+    <div class="callout formula"><div class="head">向量微积分形状</div>
+      <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
+    </div>
+    <div class="callout formula"><div class="head">常用导数</div>
+      <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
+      <p style="font-size:13px;">$A$ 对称时为 $2Aw$，Hessian 为 $2A$。</p>
+    </div>
+  </div>
 
-      <div class="callout example">
-        <div class="head">🧩 Example · Shape 判断</div>
-        <p>设 $A\in\mathbb{R}^{m\times n}$，$x\in\mathbb{R}^{n\times 1}$。</p>
-        <ul>
-          <li>$Ax\in\mathbb{R}^{m\times 1}$。</li>
-          <li>$x^\top\in\mathbb{R}^{1\times n}$，所以 $x^\top A$ 合法，结果在 $\mathbb{R}^{1\times m}$。</li>
-        </ul>
-      </div>
-    </section>
+  <h3>5. 例题精解</h3>
 
-    
+  <div class="callout example">
+    <div class="head">例 1 · Shape 自检</div>
+    <p>设 $A\in\mathbb{R}^{m\times n}$，$x\in\mathbb{R}^{n}$。则 $Ax\in\mathbb{R}^{m}$（列），$x^\top A\in\mathbb{R}^{1\times m}$（行）。$x^\top Ax$ 是标量但要求 $A$ 方；$A^\top A\in\mathbb{R}^{n\times n}$ 与 $AA^\top\in\mathbb{R}^{m\times m}$ 都对称且 PSD。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 2 · 满行秩 ⇒ $Xw=y$ 有解（HW1 §3.1）</div>
+    <p>$X\in\mathbb{R}^{n\times d}$ 满行秩 ⇒ 行张成 $\mathbb{R}^n$，所以 $\mathrm{Col}(X)=\mathbb{R}^n$ 且 $y\in\mathrm{Col}(X)$。具体构造：取 SVD $X=U\Sigma V^\top$，则 $w^*=V\Sigma^{-1}U^\top y$ 满足 $Xw^*=UU^\top y=y$。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 3 · Hessian PSD ⇒ 凸（Lecture 3, p. 13）</div>
+    <p>$f(w)=\tfrac12 w^\top Aw - b^\top w + c$，$A$ 对称。$\nabla f=Aw-b$，$\nabla^2 f=A$。$A\succeq 0$ 时二阶判定 $f$ 凸；$A\succ 0$ 时严格凸，唯一极小 $w^*=A^{-1}b$。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 4 · Logistic Hessian $H=X^\top BX$ 是 PSD（HW1 §4.1）</div>
+    <p>对二元交叉熵（$\sigma(z)=\tfrac{1}{1+e^{-z}}$），Hessian 写成 $H=X^\top BX$，$B$ 对角且 $B_{ii}=\sigma(w^\top x_i)(1-\sigma(w^\top x_i))\in[0,\tfrac14]$。</p>
+    <p>对任意 $v$，$v^\top H v=(Xv)^\top B(Xv)=\sum_i B_{ii}(Xv)_i^2\ge 0$，所以 $H\succeq 0$。logistic 损失处处凸，任意局部最优都是全局（HW1 §4.2）。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 5 · 高维范数集中（HW1 §1.2）</div>
+    <p>$X,q\sim\mathrm{Unif}([0,1]^d)$ 独立。逐坐标 $\mathbb{E}(X_i-q_i)^2=\tfrac16$，所以 $\mathbb{E}\|X-q\|^2=d/6$。方差 $O(d)$，由 Chebyshev 得 $\sqrt{\mathrm{Var}}/\mathbb{E}\to 0$（$d\to\infty$）—— 所有距离“看起来差不多”，KNN 在高维失效。</p>
+  </div>
+
+  <h3>6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">看到题怎么下手</div>
+    <ol>
+      <li><b>先标 shape</b>：每个符号旁标维度；中间维不匹配是 #1 错源。</li>
+      <li><b>证凸 / PSD</b>：尝试写成 $B^\top B$ 或 $X^\top D X$（$D\succeq 0$），把 $v^\top(\cdot)v$ 凑成平方和。</li>
+      <li><b>“证 $Xw=y$ 有解”</b>：诉诸秩——满行秩 ⇒ 满射 ⇒ 有解。</li>
+      <li><b>最小范数 / SVD 类</b>：把任意解写成 $w=w_\infty+v$（$v\in\mathrm{Ker}(X)$），用正交得 $\|w\|^2=\|w_\infty\|^2+\|v\|^2$。</li>
+      <li><b>背两条求导</b>：$\nabla(a^\top w)=a$，$\nabla(w^\top Aw)=(A+A^\top)w$；其他链式法则组合。</li>
+      <li><b>自检</b>：梯度是列，损失是标量，Hessian 对称方阵；对不上就是少了转置。</li>
+    </ol>
+  </div>
+
+  <h3>7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>把梯度写成行向量——约定 $\nabla f\in\mathbb{R}^{d\times 1}$。</li>
+      <li>$x^\top y$（标量）与 $x\odot y$（向量）混用。</li>
+      <li>写成 $(AB)^\top=A^\top B^\top$——正确为 $B^\top A^\top$。</li>
+      <li>$X^\top X$（$d\times d$）与 $XX^\top$（$n\times n$）混淆，都 PSD 但所在空间不同。</li>
+      <li>对非方 / 退化矩阵硬求逆——用伪逆 $X^+$。</li>
+      <li>把“PSD ⇒ PD”当成自动；PSD 允许 0 特征值，最优可能是平谷而非唯一点。</li>
+      <li>对非对称矩阵谈 PSD/PD——这些概念只对对称（或 Hermitian）矩阵有定义。</li>
+    </ul>
+  </div>
+
+  <h3>8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须能做的</div>
+    <ul>
+      <li>反向传播 / 线性回归里能一眼判形状。</li>
+      <li>用 $\nabla^2 f\succeq 0$ 论凸，用 PD 论唯一。</li>
+      <li>用夹心 $v^\top Hv=(Xv)^\top B(Xv)$ 证 $H=X^\top BX\succeq 0$。</li>
+      <li>记住 SVD $X=U\Sigma V^\top$ 与伪逆 $X^+=V\Sigma^{-1}U^\top$。</li>
+      <li>能说清秩 ↔ 列空间 ↔ $Xw=y$ 是否可解。</li>
+      <li>PCA：最大方差方向 = 协方差最大特征值对应的特征向量。</li>
+      <li>会用 $\nabla(a^\top w)=a$ 与 $\nabla(w^\top Aw)=(A+A^\top)w$。</li>
+    </ul>
+  </div>
+
+  <h3>9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>$A_{m\times n}B_{n\times p}\Rightarrow m\times p$；$(AB)^\top=B^\top A^\top$。</li>
+      <li>对称且全 $\lambda\ge 0$ ⇔ PSD；全 $\lambda>0$ ⇔ PD。</li>
+      <li>$X^\top BX\succeq 0$（$B\succeq 0$ 时）—— 夹心。</li>
+      <li>满行秩 ⇒ $Xw=y$ 有解。</li>
+      <li>SVD $X=U\Sigma V^\top$，伪逆 $V\Sigma^{-1}U^\top$。</li>
+      <li>特征 $Au=\lambda u$；PCA 取协方差最大 $\lambda$。</li>
+      <li>梯度是列，Hessian 是对称方阵。</li>
+      <li>$\nabla(a^\top w)=a$；$\nabla(w^\top Aw)=(A+A^\top)w$。</li>
+    </ul>
+  </div>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -177,8 +390,6 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
-  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
     const toc  = document.getElementById('topicToc');
@@ -191,21 +402,21 @@
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
       const seenSection = new Set();
       items.forEach((el) => {
-        // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
         const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        const isH2 = el.tagName === 'H2';
+        if (lang === 'mixed' && isH2 && seenSection.has(baseId)) return;
+        if (isH2) seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';
+        if (!isH2) { a.style.paddingLeft = '10px'; a.style.fontSize = '12px'; }
         li.appendChild(a);
         ul.appendChild(li);
       });
@@ -213,7 +424,6 @@
       toc.appendChild(ul);
     }
     build();
-    // Rebuild whenever the lang slider changes.
     document.addEventListener('click', (e) => {
       if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });

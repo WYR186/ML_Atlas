@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="diffusion.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,151 +37,212 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🌊 生成模型</span><span class="en-only">🌊 Generative</span> / Diffusion Models</div>
       <h1>🌊 <span class="en-only">Diffusion Models</span><span class="cn-only">扩散模型</span></h1>
       <div class="subtitle"><span class="en-only">Forward · Reverse · ELBO</span><span class="cn-only">Forward · Reverse · ELBO</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_25.pdf" target="_blank">📄 Lecture 25</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_20.pdf" target="_blank">📄 Lecture 20</a>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
     </div>
 
 <div class="en-only">
-<section class="topic" id="diffusion-en">
-  <h2>🌊 Diffusion Models</h2>
+<section class="topic lesson-section concept" id="diffusion-concept-en">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">A diffusion model is a generative model that learns to reverse a gradual noising process. The forward process turns clean data $x_0$ into nearly standard Gaussian noise $x_T$; the reverse process starts from noise and denoises step by step back to a sample.</p>
+  <p>Lecture 20 frames diffusion models as iterative VAEs: instead of one latent variable $z$, we introduce a chain $x_1,\ldots,x_T$ of latent noisy states.</p>
+</section>
 
+<section class="topic lesson-section plain" id="diffusion-plain-en">
+  <h2>2. Plain-English Explanation</h2>
+  <p>Imagine taking a clear photo and adding a tiny bit of static many times until it becomes pure noise. Training teaches a neural network how to undo one tiny step of static. During generation, you start with random noise and repeatedly clean it up.</p>
+  <p>That is why image diffusion often looks like coarse-to-fine refinement: early steps recover broad structure; later steps sharpen details.</p>
+</section>
+
+<section class="topic lesson-section intuition-section" id="diffusion-intuition-en">
+  <h2>3. Core Intuition</h2>
+  <p>The forward direction is easy because we choose it: add Gaussian noise according to a schedule. The reverse direction is hard because many clean images could have produced a noisy image. A neural network learns the reverse Gaussian transition, often by predicting the noise or the clean image hidden inside the noisy sample.</p>
+  <div class="study-box">
+    <p>The fixed forward process gives a tractable training signal. The learned reverse process becomes a sampler: $x_T\sim\mathcal{N}(0,I)$, then $x_T\to x_{T-1}\to\cdots\to x_0$.</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="diffusion-equations-en">
+  <h2>4. Key Equations</h2>
   <h3>Notation</h3>
-  <ul>
-    <li>$x_0$ — clean data; $x_t$ — noised sample at step $t$; $T$ — total diffusion steps.</li>
-    <li>$\alpha_t \in (0, 1)$ — per-step signal retention; $\bar{\alpha}_t = \prod_i \alpha_i$.</li>
-    <li>$\epsilon_t \sim \mathcal{N}(0, I)$ — Gaussian noise.</li>
-  </ul>
+  <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$.</p>
+  <h3>Forward noising process</h3>
+  <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
+  <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
+  <h3>Direct sample from $x_0$</h3>
+  <div class="eq">$$ q(x_t\mid x_0)=\mathcal{N}\!\left(x_t;\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div>
+  <h3>Learned reverse transition</h3>
+  <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <h3>Posterior mean used in HW4 §3.4</h3>
+  <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
+\frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}x_t+
+\frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1-\bar{\alpha}_t}x_0 $$</div>
+</section>
 
-  <h3>Forward (noising)</h3>
-  <div class="callout formula">
-    <div class="head">Single-step transition</div>
-    <div class="eq">$$ q_\phi(x_t\mid x_{t-1}) = \mathcal{N}(\sqrt{\alpha_t}\,x_{t-1},\,(1-\alpha_t)I) $$</div>
-  </div>
-  <div class="callout formula">
-    <div class="head">Direct sample from $x_0$</div>
-    <div class="eq">$$ q_\phi(x_t\mid x_0) = \mathcal{N}(\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I) $$</div>
-    <div style="font-size:13px;">As $\bar{\alpha}_T \to 0$, $x_T \approx \mathcal{N}(0, I)$.</div>
-  </div>
+<section class="topic lesson-section examples" id="diffusion-examples-en">
+  <h2>5. Worked Examples</h2>
+  <h3>HW4 §3.1: write the diffusion ELBO</h3>
+  <p class="source-note">Source: HW4 §3, paraphrased.</p>
+  <div class="eq">$$ \log p_\theta(x_0)\ge
+\mathbb{E}_{q(x_1\mid x_0)}[\log p_\theta(x_0\mid x_1)]
+-D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T))
+-\sum_{t=2}^{T}\mathbb{E}_{q(x_t\mid x_0)}
+\left[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\right] $$</div>
+  <p>The three pieces are reconstruction, prior matching, and step consistency.</p>
+  <h3>HW4 §3.3: derive $q(x_t\mid x_0)$</h3>
+  <p>Repeatedly substitute the reparameterized transition. A linear combination of independent Gaussians is Gaussian. The signal coefficient multiplies into $\sqrt{\bar{\alpha}_t}$, and the remaining variance becomes $1-\bar{\alpha}_t$.</p>
+  <h3>HW4 §3.4: posterior mean</h3>
+  <p>Use Bayes' rule:</p>
+  <div class="eq">$$ q(x_{t-1}\mid x_t,x_0)\propto q(x_t\mid x_{t-1})q(x_{t-1}\mid x_0) $$</div>
+  <p>Both factors are Gaussian in $x_{t-1}$, so their product is Gaussian. Completing the square gives $\tilde{\mu}_t(x_t,x_0)$ in the key-equations section.</p>
+</section>
 
-  <h3>Reverse (denoising)</h3>
-  <div class="callout formula">
-    <div class="head">Learned reverse transition</div>
-    <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}(\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)) $$</div>
-  </div>
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfalls</div>
-    <ul>
-      <li>The forward $q$ is fixed (set by the noise schedule); training optimizes the reverse $p_\theta$.</li>
-      <li>In practice it's more stable to predict the noise $\epsilon$ rather than the mean.</li>
-    </ul>
-  </div>
-
-  <h3>ELBO (three-term decomposition)</h3>
-  <div class="callout formula">
-    <div class="eq">$$ \text{Reconstruction:}\;\mathbb{E}_{q(x_1|x_0)}[\ln p_\theta(x_0\mid x_1)] $$</div>
-    <div class="eq">$$ \text{Prior matching:}\;D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T)) $$</div>
-    <div class="eq">$$ \text{Step consistency:}\;\sum_{t=2}^{T} \mathbb{E}_{q(x_t|x_0)}\!\big[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\big] $$</div>
-  </div>
-
-  <h3>Sampling</h3>
+<section class="topic lesson-section tips-section" id="diffusion-tips-en">
+  <h2>6. Problem-Solving Tips</h2>
   <ol>
-    <li>Sample $x_T \sim \mathcal{N}(0, I)$.</li>
-    <li>For $t = T, \ldots, 1$, draw $x_{t-1}$ from the learned reverse model.</li>
-    <li>Output $x_0$ as the generated sample.</li>
+    <li>Always define $\alpha_t=1-\beta_t$ and $\bar{\alpha}_t=\prod_i\alpha_i$ before deriving anything.</li>
+    <li>Use reparameterization to derive $q(x_t\mid x_0)$; do not expand PDF products unless asked.</li>
+    <li>For ELBO questions, name the three terms and their meanings.</li>
+    <li>For posterior questions, write Bayes' rule and remember "product of Gaussians is Gaussian."</li>
+    <li>For sampling questions, start from $x_T\sim\mathcal{N}(0,I)$ and run reverse steps down to $x_0$.</li>
   </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="diffusion-mistakes-en">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>Mixing $\alpha_t$ and $\bar{\alpha}_t$. One is per-step; one is cumulative.</li>
+    <li>Forgetting square roots in the state equation.</li>
+    <li>Thinking the forward process is learned. In the basic DDPM setup, the noising schedule is fixed.</li>
+    <li>Claiming exact density $p_\theta(x_0)$ is easy. It requires integrating out the full latent chain, so ELBO is used instead.</li>
+    <li>Confusing diffusion generation with LLM generation: diffusion refines the whole sample; LLMs generate left to right.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="diffusion-exam-en">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>Write $q(x_t\mid x_{t-1})$ and $q(x_t\mid x_0)$.</li>
+    <li>Explain why $x_T$ approaches $\mathcal{N}(0,I)$ when $\bar{\alpha}_T$ is small.</li>
+    <li>Write the ELBO three-term decomposition and explain each term.</li>
+    <li>Derive the posterior mean $\tilde{\mu}_t(x_t,x_0)$ or at least set up the Gaussian product correctly.</li>
+    <li>Describe inference: sample noise, then repeatedly denoise.</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="diffusion-checklist-en">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Forward process: add Gaussian noise.</li>
+    <li>Reverse process: learn denoising transitions.</li>
+    <li>$\alpha_t=1-\beta_t$, $\bar{\alpha}_t=\prod_i\alpha_i$.</li>
+    <li>$q(x_t\mid x_0)=\mathcal{N}(\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I)$.</li>
+    <li>ELBO = reconstruction minus prior KL minus transition KLs.</li>
+    <li>Generation runs from $T$ down to $0$.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
-<section class="topic" id="notation">
-      <h2><span class="icon">📒</span> 0. Notation Cheat Sheet</h2>
-      <ul>
-        <li>$x_0$：原始数据 / clean data</li>
-        <li>$x_t$：第 $t$ 步的带噪样本</li>
-        <li>$T$：扩散步数</li>
-        <li>$\alpha_t\in(0,1)$：每步保留信号系数</li>
-        <li>$\bar{\alpha}_t=\prod_{i=1}^{t}\alpha_i$：累计保留系数</li>
-        <li>$\epsilon_t\sim\mathcal{N}(0,I)$：高斯噪声</li>
-      </ul>
-      <div class="callout">
-        <div class="head">🟦 Concept</div>
-        <p>把“生成”转化成“逐步去噪”。只要学会每一步如何把 $x_t$ 变回 $x_{t-1}$，就能从纯噪声生成 $x_0$。</p>
-      </div>
-    </section>
-<section class="topic" id="fwd">
-      <h2><span class="icon">🔵</span> 1. Forward / Noising Process</h2>
-      <p>固定的马尔可夫链，往数据里加少量高斯噪声。</p>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">Single-step Transition</div>
-          <div class="eq">$$ q_\phi(x_t \mid x_{t-1}) = \mathcal{N}\!\left(x_t \mid \sqrt{\alpha_t}\,x_{t-1},\,(1-\alpha_t)I\right) $$</div></div>
-        <div class="callout formula"><div class="head">Reparameterization Form</div>
-          <div class="eq">$$ x_t = \sqrt{\alpha_t}\,x_{t-1} + \sqrt{1-\alpha_t}\,\epsilon_t $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">Direct Sampling from $x_0$</div>
-          <div class="eq">$$ q_\phi(x_t \mid x_0)=\mathcal{N}\!\left(x_t \mid \sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div></div>
-      </div>
-      <div class="callout">
-        <div class="head">🟠 Intuition</div>
-        <p>$t$ 增大，信号 $\sqrt{\bar{\alpha}_t}\,x_0$ 持续衰减，噪声占比增加；当 $T$ 足够大、$\bar{\alpha}_T\to 0$ 时，$x_T\approx \mathcal{N}(0,I)$。</p>
-      </div>
-    </section>
-<section class="topic" id="rev">
-      <h2><span class="icon">🟢</span> 2. Reverse / Denoising Process</h2>
-      <p>真实 $q(x_{t-1}\mid x_t)$ 难以直接求；用神经网络学一个参数化的高斯逆过程。</p>
-      <div class="callout formula">
-        <div class="head">Learned Reverse Transition</div>
-        <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\big(x_{t-1}\mid \mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\big) $$</div>
-      </div>
-      <div class="callout formula">
-        <div class="head">Full Generative Factorization</div>
-        <div class="eq">$$ p_\theta(x_{0:T})=p(x_T)\prod_{t=1}^{T} p_\theta(x_{t-1}\mid x_t),\quad p(x_T)=\mathcal{N}(0,I) $$</div>
-      </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfalls</div>
-        <ul>
-          <li>前向 $q$ 是<b>固定</b>的（由 $\alpha_t$ 决定）；训练的是<b>逆向</b> $p_\theta$。</li>
-          <li>实现中常预测<b>噪声 $\epsilon$</b>，而非直接预测 $\mu_\theta$（更稳定，与 score matching 紧密相关）。</li>
-        </ul>
-      </div>
-    </section>
-<section class="topic" id="elbo">
-      <h2><span class="icon">🟣</span> 3. Diffusion ELBO</h2>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <p>会考：ELBO 的<b>三项分解结构</b>、每项含义、以及“为什么常预测噪声”。</p>
-      </div>
-      <div class="callout formula">
-        <div class="head">三项分解</div>
-        <p>(1) 重建项 / Reconstruction</p>
-        <div class="eq">$$ \mathbb{E}_{q_\phi(x_1\mid x_0)}\!\big[\ln p_\theta(x_0\mid x_1)\big] $$</div>
-        <p>(2) 先验匹配 / Prior matching</p>
-        <div class="eq">$$ D_{KL}\!\big(q_\phi(x_T\mid x_0)\,\|\,p(x_T)\big) $$</div>
-        <p>(3) 一致性 / Consistency across steps</p>
-        <div class="eq">$$ \sum_{t=2}^{T}\mathbb{E}_{q_\phi(x_t\mid x_0)}\!\Big[ D_{KL}\!\big(q_\phi(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t)\big) \Big] $$</div>
-      </div>
-      <div class="callout">
-        <div class="head">🟠 本质</div>
-        <p>ELBO 强迫模型在每一步的逆向预测都与“已知 $x_0$ 时的真实后验”对齐 → 整条去噪链稳定可用。</p>
-      </div>
-    </section>
-<section class="topic" id="sample">
-      <h2><span class="icon">🎨</span> 4. Sampling / Inference</h2>
-      <ol>
-        <li>采样初始噪声：$x_T\sim\mathcal{N}(0,I)$。</li>
-        <li>对 $t=T,\ldots,1$，用网络从 $x_t$ 采样得到 $x_{t-1}$。</li>
-        <li>输出 $x_0$ 作为生成样本。</li>
-      </ol>
-      <div class="callout">
-        <div class="head">🧩 Guidance</div>
-        <p>条件（文本 / 类别）输入即可做 conditional diffusion（如 text-to-image）；常见技巧 classifier-free guidance。</p>
-      </div>
+<section class="topic lesson-section concept" id="diffusion-concept-cn">
+  <h2>1. Concept Understanding</h2>
+  <p class="topic-lede">Diffusion model 是一种生成模型，核心是学习反转一个逐步加噪过程。Forward process 把 clean data $x_0$ 逐步变成接近标准高斯噪声 $x_T$；reverse process 从噪声开始，一步步 denoise 回样本。</p>
+  <p>Lecture 20 把 diffusion 看成 iterative VAE：VAE 只有一个 latent variable $z$，diffusion 则有一整条 latent noisy states：$x_1,\ldots,x_T$。</p>
+</section>
 
-      <div class="callout example">
-        <div class="head">🧩 Example · 推导 $q(x_t\mid x_0)$</div>
-        <p>把 $x_t$ 递推展开成 $x_0$ + 累计噪声：均值乘 $\sqrt{\alpha_i}$ 累乘 ⇒ $\sqrt{\bar{\alpha}_t}$；噪声是独立高斯线性组合，仍为高斯，方差按系数平方相加 ⇒ $(1-\bar{\alpha}_t)$。</p>
-      </div>
-    </section>
+<section class="topic lesson-section plain" id="diffusion-plain-cn">
+  <h2>2. 大白话理解</h2>
+  <p>想象你拿一张清晰照片，每次加一点点雪花噪声，重复很多次，最后它变成纯噪声。训练时，网络学的是“怎么把一步噪声往回擦掉”。生成时，就从随机噪声开始，一步一步擦回图片。</p>
+  <p>所以图像 diffusion 常像 coarse-to-fine refinement：前面几步先恢复大轮廓，后面几步再补细节。</p>
+</section>
 
-    
+<section class="topic lesson-section intuition-section" id="diffusion-intuition-cn">
+  <h2>3. Core Intuition</h2>
+  <p>Forward 方向简单，因为是我们自己规定的：按 noise schedule 加 Gaussian noise。Reverse 方向难，因为同一个 noisy image 可能来自很多 clean images。神经网络要学一个逆向 Gaussian transition，常见实现会预测 noise $\epsilon$ 或 clean image $x_0$。</p>
+  <div class="study-box">
+    <p>固定 forward process 给了可计算的训练信号；学到的 reverse process 就变成 sampler：$x_T\sim\mathcal{N}(0,I)$，然后 $x_T\to x_{T-1}\to\cdots\to x_0$。</p>
+  </div>
+</section>
+
+<section class="topic lesson-section equations" id="diffusion-equations-cn">
+  <h2>4. Key Equations</h2>
+  <h3>Notation</h3>
+  <p>$x_0$ 是 clean data，$x_t$ 是第 $t$ 步 noisy state，$\beta_t$ 是噪声方差，$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$。</p>
+  <h3>Forward noising process</h3>
+  <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
+  <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
+  <h3>Direct sample from $x_0$</h3>
+  <div class="eq">$$ q(x_t\mid x_0)=\mathcal{N}\!\left(x_t;\sqrt{\bar{\alpha}_t}\,x_0,\,(1-\bar{\alpha}_t)I\right) $$</div>
+  <h3>Learned reverse transition</h3>
+  <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <h3>HW4 §3.4 的 posterior mean</h3>
+  <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
+\frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}x_t+
+\frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1-\bar{\alpha}_t}x_0 $$</div>
+</section>
+
+<section class="topic lesson-section examples" id="diffusion-examples-cn">
+  <h2>5. Worked Examples</h2>
+  <h3>HW4 §3.1：写 diffusion ELBO</h3>
+  <p class="source-note">出处：HW4 §3，题意转述。</p>
+  <div class="eq">$$ \log p_\theta(x_0)\ge
+\mathbb{E}_{q(x_1\mid x_0)}[\log p_\theta(x_0\mid x_1)]
+-D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T))
+-\sum_{t=2}^{T}\mathbb{E}_{q(x_t\mid x_0)}
+\left[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\right] $$</div>
+  <p>三项分别是 reconstruction、prior matching、step consistency。</p>
+  <h3>HW4 §3.3：推 $q(x_t\mid x_0)$</h3>
+  <p>反复代入 reparameterized transition。独立 Gaussian 的线性组合仍然是 Gaussian；信号系数一路相乘得到 $\sqrt{\bar{\alpha}_t}$，剩下的噪声方差合并成 $1-\bar{\alpha}_t$。</p>
+  <h3>HW4 §3.4：posterior mean</h3>
+  <p>用 Bayes' rule：</p>
+  <div class="eq">$$ q(x_{t-1}\mid x_t,x_0)\propto q(x_t\mid x_{t-1})q(x_{t-1}\mid x_0) $$</div>
+  <p>两项都是关于 $x_{t-1}$ 的 Gaussian，乘积仍然是 Gaussian；配平方后得到 Key Equations 里的 $\tilde{\mu}_t(x_t,x_0)$。</p>
+</section>
+
+<section class="topic lesson-section tips-section" id="diffusion-tips-cn">
+  <h2>6. Problem-Solving Tips</h2>
+  <ol>
+    <li>推导前先定义 $\alpha_t=1-\beta_t$ 和 $\bar{\alpha}_t=\prod_i\alpha_i$。</li>
+    <li>推 $q(x_t\mid x_0)$ 用 reparameterization，别上来就硬乘 PDF。</li>
+    <li>ELBO 题先写三项，再解释每项含义。</li>
+    <li>Posterior 题先写 Bayes' rule，并记住 product of Gaussians is Gaussian。</li>
+    <li>Sampling 题从 $x_T\sim\mathcal{N}(0,I)$ 开始，一步步 reverse 到 $x_0$。</li>
+  </ol>
+</section>
+
+<section class="topic lesson-section mistakes" id="diffusion-mistakes-cn">
+  <h2>7. Common Mistakes</h2>
+  <ul class="mini-list">
+    <li>混淆 $\alpha_t$ 和 $\bar{\alpha}_t$：一个是单步，一个是累计。</li>
+    <li>状态方程里忘记 square root。</li>
+    <li>以为 forward process 是学出来的。基础 DDPM 里 noising schedule 是固定的。</li>
+    <li>说可以轻易直接算 $p_\theta(x_0)$。它要积分掉整条 latent chain，所以通常用 ELBO。</li>
+    <li>把 diffusion generation 和 LLM generation 混起来：diffusion 是整张样本反复 refine；LLM 是 left-to-right token 生成。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section exam-section" id="diffusion-exam-cn">
+  <h2>8. Exam Focus</h2>
+  <ul class="mini-list">
+    <li>会写 $q(x_t\mid x_{t-1})$ 和 $q(x_t\mid x_0)$。</li>
+    <li>能解释 $\bar{\alpha}_T$ 很小时，$x_T$ 为什么接近 $\mathcal{N}(0,I)$。</li>
+    <li>会写 ELBO 三项分解，并解释三项。</li>
+    <li>会推 posterior mean $\tilde{\mu}_t(x_t,x_0)$，至少能正确 setup Gaussian product。</li>
+    <li>能描述 inference：sample noise，然后不断 denoise。</li>
+  </ul>
+</section>
+
+<section class="topic lesson-section checklist-section" id="diffusion-checklist-cn">
+  <h2>9. Quick Checklist</h2>
+  <ul class="mini-list">
+    <li>Forward process：加 Gaussian noise。</li>
+    <li>Reverse process：学习 denoising transitions。</li>
+    <li>$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_i\alpha_i$。</li>
+    <li>$q(x_t\mid x_0)=\mathcal{N}(\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I)$。</li>
+    <li>ELBO = reconstruction - prior KL - transition KLs。</li>
+    <li>生成从 $T$ 到 $0$。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -196,7 +258,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
+  // Auto-build TOC from the 9 section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
@@ -205,20 +267,15 @@
 
     function build() {
       const lang = localStorage.getItem('ml_review_lang_v1') || 'en';
-      const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
+      const items = main.querySelectorAll('section.topic > h2');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

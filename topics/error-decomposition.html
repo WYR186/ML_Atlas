@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="error-decomposition.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,55 +37,202 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / Error Decomposition</div>
       <h1>🎓 <span class="en-only">Error Decomposition</span><span class="cn-only">误差分解</span></h1>
       <div class="subtitle"><span class="en-only">Estimation + Approx + Bayes</span><span class="cn-only">Estimation + Approx + Bayes</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
-        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="decomp-en">
-  <h2>🧩 Error Decomposition</h2>
-  <div class="callout formula">
-    <div class="head">Three components</div>
-    <div class="eq">$$ \epsilon_\mu(f) = \underbrace{(\epsilon_\mu(f)-\inf_{f'\in\mathcal{F}}\epsilon_\mu(f'))}_{\text{Estimation}} + \underbrace{(\inf_{f'\in\mathcal{F}}\epsilon_\mu(f')-\epsilon_\mu^*)}_{\text{Approximation}} + \underbrace{\epsilon_\mu^*}_{\text{Bayes}} $$</div>
-  </div>
+  <h2>Error Decomposition</h2>
+  <p class="topic-lede">Lecture 21 uses error decomposition to explain why model choice is a trade-off. Total test error is not one blob; it has an irreducible part, a model-class part, and a finite-data part.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>Fix a hypothesis class $\mathcal{F}$, such as linear classifiers, decision trees, kernels, or neural networks. For any learned predictor $f\in\mathcal{F}$, its test error can be decomposed into three conceptual pieces.</p>
   <ul>
-    <li><b>Bayes</b> — irreducible noise.</li>
-    <li><b>Approximation</b> — $\mathcal{F}$ is too weak to express the optimal function.</li>
-    <li><b>Estimation</b> — finite samples means we don't fit the best function in $\mathcal{F}$.</li>
+    <li><b>Bayes error:</b> noise inherent in the data distribution.</li>
+    <li><b>Approximation error:</b> the best function inside $\mathcal{F}$ may still be worse than the Bayes rule.</li>
+    <li><b>Estimation error:</b> the learned $f$ may be worse than the best function in $\mathcal{F}$ because training data is finite.</li>
   </ul>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus (multiple-choice gold)</div>
-    <ul>
-      <li>"More data helps?" → reduces estimation only.</li>
-      <li>"Bigger model helps?" → reduces approximation; may inflate estimation if data is fixed.</li>
-      <li><b>Overfitting</b> = estimation / generalization gap blowing up.</li>
-    </ul>
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of trying to copy a complicated drawing. Some parts are blurry in the original picture: that is Bayes error. Your pen might be too thick to draw fine details: that is approximation error. And even with a good pen, your hand might miss the best drawing because you only got a few practice examples: that is estimation error.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>A richer model class can represent more patterns, so approximation error tends to decrease. But if the dataset size is fixed, a richer class is easier to overfit, so estimation error can increase.</p>
+  <p>This is the theory version of the bias-variance style trade-off: simple class means underfitting risk; overly rich class means generalization risk.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="eq">$$
+  \epsilon_\mu(f)=
+  \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
+  +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
+  +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
+  $$</div>
+  <p>Here $\epsilon_\mu(f)$ is test error under distribution $\mu$, and $\epsilon_\mu^*$ is the Bayes error.</p>
+  <div class="cols2">
+    <div>
+      <h4>Best-in-class predictor</h4>
+      <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
+      <p>This is the best predictor your model class could express.</p>
+    </div>
+    <div>
+      <h4>Learned predictor</h4>
+      <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
+      <p>This is what the training algorithm returns from finite data.</p>
+    </div>
   </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · Polynomial degree</h4>
+      <p class="example-source">Source: Lecture 21, pp. 19-23.</p>
+      <p>A low-degree polynomial cannot follow a wavy target, so approximation error is large. Increasing degree reduces approximation error, but with limited samples the fitted curve may chase noise, increasing estimation error.</p>
+    </div>
+    <div>
+      <h4>Example 2 · Constant classifiers</h4>
+      <p class="example-source">Source: Lecture 21, p. 14.</p>
+      <p>If $\mathcal{F}$ contains only constant binary classifiers, the best-in-class error is the minority-class probability. If features actually contain useful information, this can be much worse than Bayes error.</p>
+    </div>
+    <div>
+      <h4>Example 3 · More data with the same class</h4>
+      <p class="example-source">Source: Lecture 21, p. 23 and Lecture 22, p. 27.</p>
+      <p>With fixed $\mathcal{F}$, adding data mainly attacks estimation error. It does not change the Bayes error or make a weak model class more expressive.</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>Ask whether the issue comes from data noise, model expressiveness, or finite samples.</li>
+    <li>More data usually points to estimation error.</li>
+    <li>A larger model class usually points to approximation error going down and estimation error risk going up.</li>
+    <li>Changing the data-generating distribution can change Bayes error.</li>
+    <li>Do not call approximation error overfitting; overfitting is usually an estimation/generalization problem.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Saying Bayes error decreases when we collect more data. It does not; it is tied to $\mu$.</li>
+    <li>Saying a richer model always improves test error. It can overfit when data is limited.</li>
+    <li>Mixing up approximation error and estimation error: one is about $\mathcal{F}$, the other is about $\mathcal{D}$ and learning.</li>
+    <li>Forgetting the best-in-class term $\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ when writing the decomposition.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Be able to write the three-term decomposition.</li>
+    <li>Know which term changes when $\mathcal{F}$ becomes more expressive.</li>
+    <li>Know which term decreases with more samples for fixed $\mathcal{F}$.</li>
+    <li>Explain the approximation-estimation trade-off in words.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>Bayes error = irreducible noise.</li>
+    <li>Approximation error = model class too limited.</li>
+    <li>Estimation error = finite-data learning gap.</li>
+    <li>More expressive class: approximation down, estimation risk up.</li>
+    <li>More data: estimation down, Bayes/approximation unchanged.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="decomp">
-      <h2><span class="icon">🧩</span> 3. Error Decomposition</h2>
-      <div class="callout formula">
-        <div class="head">三部分分解</div>
-        <div class="eq">$$ \epsilon_\mu(f) = \underbrace{\big(\epsilon_\mu(f)-\inf_{f'\in\mathcal{F}}\epsilon_\mu(f')\big)}_{\text{Estimation}} + \underbrace{\big(\inf_{f'\in\mathcal{F}}\epsilon_\mu(f')-\epsilon_\mu^*\big)}_{\text{Approximation}} + \underbrace{\epsilon_\mu^*}_{\text{Bayes}} $$</div>
-      </div>
-      <ul>
-        <li><b>Bayes Error</b>：数据本身噪声（不可消除）。</li>
-        <li><b>Approximation Error</b>：$\mathcal{F}$ 太弱，表达不了最优函数。</li>
-        <li><b>Estimation Error</b>：样本有限导致学得不准。</li>
-      </ul>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus（高频选择题）</div>
-        <ul>
-          <li>“加数据是否有用？” → 只影响 Estimation。</li>
-          <li>“换更强模型是否有用？” → 主要影响 Approximation（但 Estimation 风险可能上升）。</li>
-          <li><b>过拟合本质</b>：估计误差 / 泛化间隙变大（模型复杂度过高但数据不足）。</li>
-        </ul>
-      </div>
-    </section>
+  <h2>Error Decomposition · 误差分解</h2>
+  <p class="topic-lede">Lecture 21 用 error decomposition 解释为什么“模型越复杂越好”是错的。测试误差不是一坨东西，而是可以拆成数据噪声、模型表达能力、有限样本学习误差三部分。</p>
+
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p>固定一个 hypothesis class $\mathcal{F}$，比如 linear classifier、decision tree、kernel machine 或 neural network。对任意学出来的 $f\in\mathcal{F}$，test error 可以分成三块：</p>
+  <ul>
+    <li><b>Bayes error</b>：数据分布本身的噪声，不可消除。</li>
+    <li><b>Approximation error</b>：$\mathcal{F}$ 里最好的函数仍然不够接近 Bayes rule。</li>
+    <li><b>Estimation error</b>：训练数据有限，算法没有找到 $\mathcal{F}$ 里真实最好的函数。</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>像临摹一张图：原图有些地方本来就糊，这是 Bayes error；你的笔太粗，画不出细节，这是 approximation error；你练习样本太少，手没画稳，这是 estimation error。</p>
+
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>模型类越强，能表达的函数越多，approximation error 往往更小。但训练集大小固定时，模型越灵活也越容易追着样本噪声跑，estimation error 风险会变大。</p>
+  <p>这就是 theory 版本的 underfitting / overfitting trade-off：太简单会表达不足，太复杂会泛化不稳。</p>
+
+  <h3 class="section-purple">4. Key Equations · 关键公式</h3>
+  <div class="eq">$$
+  \epsilon_\mu(f)=
+  \underbrace{\left(\epsilon_\mu(f)-\inf_{g\in\mathcal{F}}\epsilon_\mu(g)\right)}_{\text{estimation error}}
+  +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
+  +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
+  $$</div>
+  <p>$\epsilon_\mu(f)$ 是真实分布下 test error，$\epsilon_\mu^*$ 是 Bayes error。</p>
+  <div class="cols2">
+    <div>
+      <h4>Best-in-class predictor</h4>
+      <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
+      <p>这是模型类 $\mathcal{F}$ 理论上能做到的最好函数。</p>
+    </div>
+    <div>
+      <h4>Learned predictor</h4>
+      <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
+      <p>这是算法从有限训练集 $\mathcal{D}$ 中实际学出来的函数。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · polynomial degree</h4>
+      <p class="example-source">出处：Lecture 21, pp. 19-23。</p>
+      <p>低阶 polynomial 拟合不了波动很细的目标，approximation error 大。提高 degree 后表达能力变强，但样本有限时可能追着噪声走，estimation error 变大。</p>
+    </div>
+    <div>
+      <h4>例 2 · 只有 constant classifier</h4>
+      <p class="example-source">出处：Lecture 21, p. 14。</p>
+      <p>如果 $\mathcal{F}$ 只有常数二分类器，best-in-class error 就是少数类概率。如果 feature 里其实有有效信息，这个误差会明显高于 Bayes error。</p>
+    </div>
+    <div>
+      <h4>例 3 · 固定模型类时加数据</h4>
+      <p class="example-source">出处：Lecture 21, p. 23；Lecture 22, p. 27。</p>
+      <p>固定 $\mathcal{F}$ 时，更多数据主要降低 estimation error。它不会改变 Bayes error，也不会让弱模型类突然能表达更复杂函数。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <ol>
+    <li>先判断问题来自 data noise、model expressiveness，还是 finite samples。</li>
+    <li>“更多数据”通常对应 estimation error。</li>
+    <li>“更强模型类”通常让 approximation error 下降，但 estimation risk 上升。</li>
+    <li>改变数据生成分布才可能改变 Bayes error。</li>
+    <li>不要把 approximation error 叫 overfitting；overfitting 通常是 estimation / generalization 问题。</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul>
+    <li>说 Bayes error 会因为加数据而下降。它由 $\mu$ 决定，不由样本量决定。</li>
+    <li>说更复杂模型一定提高 test performance。数据不足时可能 overfit。</li>
+    <li>混淆 approximation 与 estimation：前者看 $\mathcal{F}$，后者看 $\mathcal{D}$ 和 learning。</li>
+    <li>写公式时漏掉 best-in-class 项 $\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul>
+    <li>会默写三项 error decomposition。</li>
+    <li>知道 $\mathcal{F}$ 更 expressive 时哪些项变化。</li>
+    <li>知道固定 $\mathcal{F}$ 时更多 samples 主要降低 estimation error。</li>
+    <li>能用文字解释 approximation-estimation trade-off。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul>
+    <li>Bayes error = irreducible noise。</li>
+    <li>Approximation error = 模型类太弱。</li>
+    <li>Estimation error = 有限数据导致的学习差距。</li>
+    <li>模型类更强：approximation 下降，estimation 风险上升。</li>
+    <li>数据更多：estimation 下降，Bayes / approximation 不变。</li>
+  </ul>
+</section>
 
     
 </div><!--/cn-only-->
@@ -114,17 +262,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="vc-dimension.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,54 +37,207 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / VC Dimension</div>
       <h1>🎓 <span class="en-only">VC Dimension</span><span class="cn-only">VC 维</span></h1>
       <div class="subtitle"><span class="en-only">Hoeffding · VC bound</span><span class="cn-only">Hoeffding · VC bound</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
-        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="vc-en">
-  <h2>🔢 Hoeffding &amp; VC Dimension</h2>
-  <div class="callout formula">
-    <div class="head">Hoeffding (concentration)</div>
-    <div class="eq">$$ \mathbb{P}\!\left(|\bar Z_n-\mathbb{E}[Z]|\le (b-a)\sqrt{\tfrac{\log(2/\delta)}{2n}}\right)\ge 1-\delta $$</div>
+  <h2>Hoeffding and VC Dimension</h2>
+  <p class="topic-lede">Lecture 22 moves from finite hypothesis classes to richer classes by using concentration inequalities and VC dimension. The guiding question is: how much model complexity can the data support?</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p><b>Hoeffding's inequality</b> says empirical averages of bounded independent random variables concentrate around their expectations.</p>
+  <p><b>VC dimension</b> measures how many points a binary hypothesis class can shatter. A set is shattered if the class can realize every possible binary labeling on that set.</p>
+  <ul>
+    <li>Higher VC dimension means the class can express more label patterns.</li>
+    <li>Finite VC dimension gives uniform generalization guarantees.</li>
+    <li>Infinite or very large complexity means more samples are needed to control overfitting.</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>VC dimension asks: how many points can this model label in absolutely any way I request? If it can label many arbitrary patterns, it is powerful, but also dangerous with small data.</p>
+  <p>Hoeffding is the statistical safety net for one fixed guess. VC dimension is the extra tax we pay when we search over many guesses.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>A model class that can shatter many points can also memorize many random labels. That flexibility makes training error less trustworthy. VC bounds correct for this by adding a complexity term that shrinks as $n$ grows.</p>
+  <p>The main message is not that the bound is always tight; Lecture 22 notes it can be loose. The main message is the direction: more complexity requires more data.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div>
+      <h4>Hoeffding</h4>
+      <div class="eq">$$ \Pr\left(|\bar Z_n-\mathbb{E}\bar Z_n|\ge \epsilon\right)\le 2\exp\left(-\frac{2n\epsilon^2}{(b-a)^2}\right) $$</div>
+      <p>Use this when $Z_i\in[a,b]$ are independent.</p>
+    </div>
+    <div>
+      <h4>Fixed classifier bound</h4>
+      <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\sqrt{\frac{\log(2/\delta)}{2n}} $$</div>
+      <p>For a fixed classifier with 0-1 loss.</p>
+    </div>
+    <div>
+      <h4>VC dimension definition</h4>
+      <div class="eq">$$ \operatorname{VCdim}(\mathcal{F})=\max\{|S|:\mathcal{F}\text{ shatters }S\} $$</div>
+    </div>
+    <div>
+      <h4>Typical VC-style bound</h4>
+      <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\mathcal{O}\!\left(\sqrt{\frac{\operatorname{VCdim}(\mathcal{F})+\log(1/\delta)}{n}}\right) $$</div>
+    </div>
   </div>
-  <p><b>VC dimension</b> — the maximum set size that the hypothesis class can <b>shatter</b>. Larger VC ⇒ richer class ⇒ harder to bound.</p>
-  <div class="callout formula">
-    <div class="head">Typical generalization bound</div>
-    <div class="eq">$$ \epsilon_\mu(f)\le \hat{\epsilon}_D(f)+\mathcal{O}\!\left(\sqrt{\tfrac{d+\ln(1/\delta)}{n}}\right) $$</div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · thresholds on the real line</h4>
+      <p class="example-source">Source: HW5, Section 1.3.</p>
+      <p>The class $h_c(x)=\mathbf{1}\{x\ge c\}$ can shatter one point: choose the threshold on either side. It cannot shatter two ordered points because the labeling $(1,0)$ violates the monotone shape of the threshold rule. So the VC dimension is 1.</p>
+    </div>
+    <div>
+      <h4>Example 2 · linear classifiers in $\mathbb{R}^2$</h4>
+      <p class="example-source">Source: Lecture 22, p. 26.</p>
+      <p>Some set of three points can be shattered by lines in the plane, but no arrangement of four points can realize every labeling; an XOR-style labeling blocks linear separation. Thus the VC dimension is 3.</p>
+    </div>
+    <div>
+      <h4>Example 3 · coin flipping concentration</h4>
+      <p class="example-source">Source: Lecture 22, p. 22.</p>
+      <p>If a coin is flipped 1000 times, the empirical head frequency is an average of bounded independent variables. Hoeffding converts the desired confidence level into a numerical tolerance around the true head probability.</p>
+    </div>
   </div>
-  <div class="callout">
-    <div class="head">📜 Fundamental Theorem (binary)</div>
-    <p>$\mathcal{F}$ is PAC-learnable iff its VC dimension is finite.</p>
-  </div>
-  <div class="callout example">
-    <div class="head">🧩 Doubling VC</div>
-    <p>If $d \to 2d$ at fixed $n$, the bound term scales by $\sqrt{2}$ — looser, more samples needed.</p>
-  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>To prove VC dimension is at least $d$, exhibit one set of $d$ points that can be shattered.</li>
+    <li>To prove VC dimension is at most $d$, show every set of $d+1$ points fails at least one labeling.</li>
+    <li>For thresholds, use ordering and monotonicity.</li>
+    <li>For Hoeffding, identify the bounded random variable, its empirical average, and its expectation.</li>
+    <li>For sample complexity, solve the complexity term so it is at most the target error.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Showing one set of $d+1$ points cannot be shattered and claiming an upper bound. You need all sets of size $d+1$ to fail.</li>
+    <li>Thinking shattering means fitting one labeling. It means fitting every labeling.</li>
+    <li>Applying a fixed-$f$ Hoeffding bound to a data-selected model.</li>
+    <li>Reading the VC bound as exact test error. It is an upper bound and may be loose.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>State shattering and VC dimension cleanly.</li>
+    <li>Know the two-part proof pattern: lower bound by construction, upper bound by impossible labeling.</li>
+    <li>Use Hoeffding for fixed hypotheses and VC bounds for uniform control.</li>
+    <li>Remember finite VC dimension implies PAC learnability for binary classification.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>Shatter = realize all labelings.</li>
+    <li>VC dimension = largest shatterable set size.</li>
+    <li>Thresholds on $\mathbb{R}$ have VC dimension 1.</li>
+    <li>Lines in $\mathbb{R}^2$ have VC dimension 3.</li>
+    <li>Complexity term shrinks like roughly $\sqrt{d/n}$.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vc">
-      <h2><span class="icon">🔢</span> 5. Hoeffding · VC Dimension</h2>
-      <div class="callout formula">
-        <div class="head">Hoeffding（高概率偏差界）</div>
-        <div class="eq">$$ \mathbb{P}\!\left(\big|\bar Z_n-\mathbb{E}[Z]\big|\le (b-a)\sqrt{\tfrac{\log(2/\delta)}{2n}}\right)\ge 1-\delta $$</div>
-      </div>
-      <p><b>VC 维度</b>：$\mathcal{F}$ 能<b>打散（shatter）</b>的最大点集大小。VC 越大，模型“能拟合各种标签”越强，复杂度越高。</p>
-      <div class="callout formula">
-        <div class="head">典型泛化界</div>
-        <div class="eq">$$ \epsilon_\mu(f)\le \hat{\epsilon}_D(f)+\mathcal{O}\!\left(\sqrt{\tfrac{d+\ln(1/\delta)}{n}}\right) $$</div>
-      </div>
-      <div class="callout">
-        <div class="head">📜 统计学习基本定理（必记口径）</div>
-        <p>二分类中：$\mathcal{F}$ PAC 可学习 ⇔ VC 维 $d$ 有限。</p>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example · VC 翻倍</div>
-        <p>$d\to 2d$，$n$ 不变 ⇒ 泛化项约 $\sqrt{2d/n}=\sqrt{2}\sqrt{d/n}$，<b>变为原来的 $\sqrt{2}$ 倍</b>（界更松）。</p>
-      </div>
-    </section>
+  <h2>Hoeffding 与 VC Dimension</h2>
+  <p class="topic-lede">Lecture 22 从有限 hypothesis class 推到更一般的模型类：用 concentration inequality 控制固定函数，用 VC dimension 衡量整个 class 的复杂度。</p>
+
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p><b>Hoeffding's inequality</b> 说明 bounded independent random variables 的 empirical average 会集中在 expectation 附近。</p>
+  <p><b>VC dimension</b> 衡量一个二分类 hypothesis class 能 shatter 多大的点集。shatter 的意思是：对这个点集的任意 0/1 labeling，class 里都能找到一个函数实现它。</p>
+  <ul>
+    <li>VC dimension 越大，模型能表达的 label pattern 越多。</li>
+    <li>有限 VC dimension 能给 uniform generalization guarantee。</li>
+    <li>复杂度太高时，需要更多样本来控制 overfitting。</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>VC dimension 问的是：给我几个点，我随便指定红蓝标签，你这个模型都能画出来吗？能随便画的点越多，模型越强，也越容易在小数据上乱记。</p>
+  <p>Hoeffding 是“固定一个答案时”的安全网；VC dimension 是“我从很多答案里挑一个时”额外要交的复杂度税。</p>
+
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>一个能 shatter 很多点的 class，也可能记住很多 random labels，所以 training error 更不可信。VC bound 用 complexity term 修正这种不可信度，样本数 $n$ 越大，这个 term 越小。</p>
+  <p>Lecture 22 也提醒：这个 bound 可能很松。它最重要的不是精确数值，而是方向：模型越复杂，需要越多数据。</p>
+
+  <h3 class="section-purple">4. Key Equations · 关键公式</h3>
+  <div class="cols2">
+    <div>
+      <h4>Hoeffding</h4>
+      <div class="eq">$$ \Pr\left(|\bar Z_n-\mathbb{E}\bar Z_n|\ge \epsilon\right)\le 2\exp\left(-\frac{2n\epsilon^2}{(b-a)^2}\right) $$</div>
+      <p>适用于 $Z_i\in[a,b]$ 且 independent。</p>
+    </div>
+    <div>
+      <h4>固定 classifier bound</h4>
+      <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\sqrt{\frac{\log(2/\delta)}{2n}} $$</div>
+      <p>0-1 loss 下，固定 $f$ 可以这么用。</p>
+    </div>
+    <div>
+      <h4>VC dimension 定义</h4>
+      <div class="eq">$$ \operatorname{VCdim}(\mathcal{F})=\max\{|S|:\mathcal{F}\text{ shatters }S\} $$</div>
+    </div>
+    <div>
+      <h4>典型 VC-style bound</h4>
+      <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\mathcal{O}\!\left(\sqrt{\frac{\operatorname{VCdim}(\mathcal{F})+\log(1/\delta)}{n}}\right) $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · real line 上的 threshold</h4>
+      <p class="example-source">出处：HW5, Section 1.3。</p>
+      <p>$h_c(x)=\mathbf{1}\{x\ge c\}$ 可以 shatter 一个点：threshold 放在点左边或右边即可。但不能 shatter 两个有序点，因为 labeling $(1,0)$ 违反 threshold 的 monotone 结构。所以 VC dimension 是 1。</p>
+    </div>
+    <div>
+      <h4>例 2 · $\mathbb{R}^2$ 中的 linear classifier</h4>
+      <p class="example-source">出处：Lecture 22, p. 26。</p>
+      <p>平面中的直线可以 shatter 某组三个点；但四个点总会遇到类似 XOR 的 labeling，线性分隔无法实现所有情况。因此 VC dimension 是 3。</p>
+    </div>
+    <div>
+      <h4>例 3 · coin flipping concentration</h4>
+      <p class="example-source">出处：Lecture 22, p. 22。</p>
+      <p>抛硬币 1000 次时，head frequency 是 bounded independent variables 的平均值。Hoeffding 可以把 confidence level 转成 true head probability 附近的误差范围。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <ol>
+    <li>证明 VC dimension 至少是 $d$：构造一组能被 shatter 的 $d$ 个点。</li>
+    <li>证明 VC dimension 至多是 $d$：说明任意 $d+1$ 个点都会有某种 labeling 做不到。</li>
+    <li>threshold 题常用 ordering 和 monotonicity。</li>
+    <li>Hoeffding 题先找 bounded random variable、empirical average、expectation。</li>
+    <li>sample complexity 题把 complexity term 控制到目标 error 以下。</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul>
+    <li>只展示一组 $d+1$ 个点不能 shatter 就说上界成立；上界需要所有 $d+1$ 点集都失败。</li>
+    <li>以为 shatter 是拟合一种 labeling；其实是所有 labelings 都能拟合。</li>
+    <li>把 fixed-$f$ Hoeffding bound 套到 data-selected model。</li>
+    <li>把 VC bound 当精确 test error；它只是可能很松的上界。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul>
+    <li>能清楚定义 shattering 和 VC dimension。</li>
+    <li>掌握两步证明：下界靠构造，上界靠 impossible labeling。</li>
+    <li>固定 hypothesis 用 Hoeffding；整个 class 用 VC / uniform bound。</li>
+    <li>记住二分类里 finite VC dimension implies PAC learnability。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul>
+    <li>Shatter = 实现所有 labelings。</li>
+    <li>VC dimension = 最大可 shatter 点集大小。</li>
+    <li>$\mathbb{R}$ 上 threshold 的 VC dimension 是 1。</li>
+    <li>$\mathbb{R}^2$ 中 line classifier 的 VC dimension 是 3。</li>
+    <li>复杂度项大致随 $\sqrt{d/n}$ 缩小。</li>
+  </ul>
+</section>
 
     
 </div><!--/cn-only-->
@@ -113,17 +267,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

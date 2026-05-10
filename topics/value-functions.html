@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="value-functions.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,60 +37,206 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Value & Q functions</div>
       <h1>🎮 <span class="en-only">Value & Q functions</span><span class="cn-only">价值函数</span></h1>
       <div class="subtitle"><span class="en-only">V(s) vs Q(s,a)</span><span class="cn-only">V(s) vs Q(s,a)</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="vq-en">
-  <h2>💎 Value &amp; Q-Functions</h2>
-  <ul>
-    <li>Deterministic policy: $\pi:\mathcal{S}\to\mathcal{A}$.</li>
-    <li>Stochastic policy: $\pi:\mathcal{S}\to\Delta(\mathcal{A})$.</li>
-  </ul>
+  <h2>Value and Q Functions</h2>
+  <p class="topic-lede">Lecture 23 defines value functions so we can evaluate how good a policy is before trying to improve it. Values turn delayed rewards into a state-by-state scorecard.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A <b>state value</b> $V^\pi(s)$ asks: if the agent starts in state $s$ and follows policy $\pi$, what discounted return should it expect?</p>
+  <p>An <b>action value</b> $Q^\pi(s,a)$ asks: if the agent starts in state $s$, takes action $a$ first, and then follows $\pi$, what discounted return should it expect?</p>
+  <p>Policy evaluation means computing these values for a fixed policy.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>$V(s)$ is the score of standing in a place. $Q(s,a)$ is the score of standing there and taking one specific first action.</p>
+  <p>If you are planning a route, $V$ says "how good is this location?" while $Q$ says "how good is it if I turn left from here first?"</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The difference between $V$ and $Q$ is whether the first action is already fixed. Once the first action is fixed, the rest of the future is still controlled by the policy $\pi$.</p>
+  <p>This is why value functions connect directly to Bellman equations: current value equals immediate reward plus discounted expected value of future states.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">State value</div>
-      <div class="eq">$$ V^\pi(s)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,\pi\right] $$</div></div>
-    <div class="callout formula"><div class="head">Action value</div>
-      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a,\pi\right] $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">Relation (deterministic)</div>
-      <div class="eq">$$ V^\pi(s)=Q^\pi(s,\pi(s)) $$</div></div>
+    <div>
+      <h4>State value</h4>
+      <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
+    </div>
+    <div>
+      <h4>Action value</h4>
+      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s,A_0=a\right] $$</div>
+    </div>
+    <div>
+      <h4>Relationship under a policy</h4>
+      <div class="eq">$$ V^\pi(s)=\mathbb{E}_{a\sim\pi(\cdot\mid s)}[Q^\pi(s,a)] $$</div>
+      <p>For a deterministic policy, this becomes $V^\pi(s)=Q^\pi(s,\pi(s))$.</p>
+    </div>
+    <div>
+      <h4>Bellman evaluation equation</h4>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
+    </div>
+    <div class="wide">
+      <h4>Matrix form for finite MDPs</h4>
+      <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi,\qquad V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+    </div>
   </div>
-  <div class="callout exam">
-    <div class="head">✅ Concept check</div>
-    <ul>
-      <li>$V(s)$: how good is this state?</li>
-      <li>$Q(s, a)$: how good is taking action $a$ in state $s$?</li>
-    </ul>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · deterministic policy</h4>
+      <p class="example-source">Source: Lecture 23, p. 19.</p>
+      <p>If $\pi(s)$ always selects action right, then the value of state $s$ is exactly the Q-value of first going right: $V^\pi(s)=Q^\pi(s,\text{right})$.</p>
+    </div>
+    <div>
+      <h4>Example 2 · stochastic policy average</h4>
+      <p class="example-source">Source: Lecture 24, p. 10.</p>
+      <p>If a policy chooses two actions with probabilities 0.7 and 0.3, then $V^\pi(s)=0.7Q^\pi(s,a_1)+0.3Q^\pi(s,a_2)$.</p>
+    </div>
+    <div>
+      <h4>Example 3 · Q definition from homework</h4>
+      <p class="example-source">Source: HW5, Section 2.</p>
+      <p>For infinite horizon with discount, $Q^\pi(s,a)$ fixes the first transition, then averages over stochastic next states and future actions chosen by $\pi$.</p>
+    </div>
   </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>If the question asks how good a state is, use $V^\pi(s)$.</li>
+    <li>If the question fixes the first action, use $Q^\pi(s,a)$.</li>
+    <li>If the policy is stochastic, average Q-values using action probabilities.</li>
+    <li>For Bellman evaluation, peel off the first reward and put the rest into $V^\pi(s')$.</li>
+    <li>For finite matrix form, identify $P^\pi$ and $R^\pi$ induced by the policy.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Confusing $V^\pi$ with $V^*$; the former is policy-specific.</li>
+    <li>Forgetting that $Q^\pi(s,a)$ fixes only the first action, then follows $\pi$.</li>
+    <li>Using $\max_a Q^\pi(s,a)$ during policy evaluation; max belongs to optimality, not fixed-policy evaluation.</li>
+    <li>Dropping the expectation over stochastic transitions.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Memorize definitions of $V^\pi$ and $Q^\pi$.</li>
+    <li>Know $V^\pi(s)=\mathbb{E}_{a\sim\pi}[Q^\pi(s,a)]$.</li>
+    <li>Derive the Bellman evaluation equation by splitting first reward plus future return.</li>
+    <li>Recognize the finite MDP matrix equation $V^\pi=R^\pi+\gamma P^\pi V^\pi$.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>$V$: state score under policy.</li>
+    <li>$Q$: state plus first action score under policy.</li>
+    <li>Evaluation uses fixed $\pi$.</li>
+    <li>Optimality uses max over actions.</li>
+    <li>Discounted return is the long-term target.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="vq">
-      <h2><span class="icon">💎</span> 2. Policy & Value</h2>
-      <p><b>策略 $\pi$</b>：</p>
-      <ul>
-        <li>确定性：$\pi:\mathcal{S}\rightarrow \mathcal{A}$</li>
-        <li>随机性：$\pi:\mathcal{S}\rightarrow \Delta(\mathcal{A})$</li>
-      </ul>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">State-value</div>
-          <div class="eq">$$ V^\pi(s)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t \mid s_0=s,\pi\right] $$</div></div>
-        <div class="callout formula"><div class="head">Action-value (Q)</div>
-          <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\!\left[\sum_{t=0}^{\infty}\gamma^t r_t \mid s_0=s,a_0=a,\pi\right] $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">Relation (deterministic policy)</div>
-          <div class="eq">$$ V^\pi(s)=Q^\pi(s,\pi(s)) $$</div></div>
-      </div>
-      <div class="callout exam">
-        <div class="head">✅ Concept check</div>
-        <ul>
-          <li>$V(s)$：这个状态好不好？</li>
-          <li>$Q(s,a)$：在该状态做这个动作好不好？</li>
-        </ul>
-      </div>
-    </section>
+  <h2>Value Function 与 Q Function</h2>
+  <p class="topic-lede">Lecture 23 定义 value function，是为了先评价一个 policy 到底好不好。价值函数把 delayed rewards 压缩成每个 state 或 state-action pair 的长期分数。</p>
 
-    
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p><b>State value</b> $V^\pi(s)$ 问：agent 从 state $s$ 出发并遵循 policy $\pi$，期望 discounted return 是多少？</p>
+  <p><b>Action value</b> $Q^\pi(s,a)$ 问：agent 从 $s$ 出发，第一步先做 action $a$，之后遵循 $\pi$，期望 discounted return 是多少？</p>
+  <p><b>Policy evaluation</b> 就是固定一个 policy，然后计算这些 values。</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>$V(s)$ 是“站在这个位置整体前景如何？” $Q(s,a)$ 是“站在这里，如果第一步先这么走，前景如何？”</p>
+  <p>路线规划里，$V$ 评价地点，$Q$ 评价“地点 + 第一个转弯”。</p>
+
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>$V$ 和 $Q$ 的区别只在于第一步 action 是否被固定。第一步固定之后，后面的动作仍然按 policy $\pi$ 走。</p>
+  <p>这就是它们能写成 Bellman equation 的原因：当前 value = immediate reward + discounted future value。</p>
+
+  <h3 class="section-purple">4. Key Equations · 关键公式</h3>
+  <div class="cols2">
+    <div>
+      <h4>State value</h4>
+      <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
+    </div>
+    <div>
+      <h4>Action value</h4>
+      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s,A_0=a\right] $$</div>
+    </div>
+    <div>
+      <h4>Policy 下的关系</h4>
+      <div class="eq">$$ V^\pi(s)=\mathbb{E}_{a\sim\pi(\cdot\mid s)}[Q^\pi(s,a)] $$</div>
+      <p>deterministic policy 下就是 $V^\pi(s)=Q^\pi(s,\pi(s))$。</p>
+    </div>
+    <div>
+      <h4>Bellman evaluation equation</h4>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
+    </div>
+    <div class="wide">
+      <h4>Finite MDP 的 matrix form</h4>
+      <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi,\qquad V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · deterministic policy</h4>
+      <p class="example-source">出处：Lecture 23, p. 19。</p>
+      <p>如果 $\pi(s)$ 在 state $s$ 总是选 right，那么 $V^\pi(s)$ 就等于第一步选 right 的 Q-value：$V^\pi(s)=Q^\pi(s,\text{right})$。</p>
+    </div>
+    <div>
+      <h4>例 2 · stochastic policy average</h4>
+      <p class="example-source">出处：Lecture 24, p. 10。</p>
+      <p>如果 policy 以 0.7 和 0.3 的概率选两个 actions，则 $V^\pi(s)=0.7Q^\pi(s,a_1)+0.3Q^\pi(s,a_2)$。</p>
+    </div>
+    <div>
+      <h4>例 3 · HW 中的 Q 定义</h4>
+      <p class="example-source">出处：HW5, Section 2。</p>
+      <p>infinite horizon discount setting 中，$Q^\pi(s,a)$ 固定第一步 transition，之后对 stochastic next states 和 policy 选择的 future actions 做 expectation。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <ol>
+    <li>问 state 好不好，用 $V^\pi(s)$。</li>
+    <li>固定第一步 action，用 $Q^\pi(s,a)$。</li>
+    <li>stochastic policy 下，用 action probabilities 对 Q-values 加权平均。</li>
+    <li>推 Bellman evaluation 时，把 first reward 单独拆出来，剩下写成 $V^\pi(s')$。</li>
+    <li>finite matrix form 里先找 policy-induced $P^\pi$ 和 $R^\pi$。</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul>
+    <li>混淆 $V^\pi$ 和 $V^*$；前者是固定 policy，后者是 optimal。</li>
+    <li>忘记 $Q^\pi(s,a)$ 只固定第一步 action，之后还是 follow $\pi$。</li>
+    <li>policy evaluation 时用了 $\max_a Q^\pi(s,a)$；max 是 optimality，不是 fixed-policy evaluation。</li>
+    <li>漏掉 stochastic transition 上的 expectation。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul>
+    <li>默写 $V^\pi$ 和 $Q^\pi$ 定义。</li>
+    <li>知道 $V^\pi(s)=\mathbb{E}_{a\sim\pi}[Q^\pi(s,a)]$。</li>
+    <li>能从 first reward + future return 推 Bellman evaluation equation。</li>
+    <li>认识 finite MDP matrix equation：$V^\pi=R^\pi+\gamma P^\pi V^\pi$。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul>
+    <li>$V$：policy 下的 state score。</li>
+    <li>$Q$：policy 下的 state + first action score。</li>
+    <li>Evaluation 固定 $\pi$。</li>
+    <li>Optimality 才对 action 取 max。</li>
+    <li>长期目标是 discounted return。</li>
+  </ul>
+</section>
 </div><!--/cn-only-->
 
 <div style="display:flex;justify-content:space-between;margin-top:32px;gap:12px;">
@@ -105,8 +252,6 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from h2/h3 in this topic body — language-aware.
-  // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
     const toc  = document.getElementById('topicToc');
@@ -117,17 +262,11 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
-        // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
@@ -141,7 +280,6 @@
       toc.appendChild(ul);
     }
     build();
-    // Rebuild whenever the lang slider changes.
     document.addEventListener('click', (e) => {
       if (e.target.closest('.lang-switch button')) setTimeout(build, 0);
     });

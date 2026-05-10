@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="lstm.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,44 +36,172 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🔄 序列模型</span><span class="en-only">🔄 Sequential Models</span> / LSTM</div>
       <h1>🔄 <span class="en-only">LSTM</span><span class="cn-only">长短期记忆</span></h1>
-      <div class="subtitle"><span class="en-only">Gating (incl. GRU)</span><span class="cn-only">门控（含 GRU 变体）</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_19.pdf" target="_blank">📄 Lecture 19</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+      <div class="subtitle"><span class="en-only">Gates · Cell state · Long-term dependencies</span><span class="cn-only">门控 · cell state · 长程依赖</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_14.pdf" target="_blank">📄 Lecture 14</a>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="lstm-en">
-  <h2>🚪 LSTM &amp; GRU — Gated Recurrent Cells</h2>
+  <h2>LSTM and GRU</h2>
+  <p class="topic-lede">LSTMs and GRUs are gated recurrent cells designed to make classical RNNs better at keeping useful information across long gaps.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>A standard RNN updates one hidden state directly. An LSTM adds a separate memory cell $c^{(t)}$ and gates that decide what to forget, what to write, and what to expose as the hidden state.</p>
+  <div class="mini-list">
+    <div><b>Problem background.</b> Classical RNNs repeatedly multiply gradients through time, so long-term signals can vanish or explode.</div>
+    <div><b>What gates solve.</b> Gates create controlled additive memory updates, so information can persist without being overwritten at every step.</div>
+    <div><b>GRU variant.</b> GRU keeps the gating idea but uses fewer gates and no separate output gate, making it lighter than LSTM.</div>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of an LSTM as a notebook with three small switches. One switch decides what old notes to erase, one decides what new note to write, and one decides how much of the notebook to show to the rest of the model.</p>
+  <p>A GRU is the simpler travel version of the notebook: fewer switches, easier to carry, often good enough.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>The cell state $c^{(t)}$ is the important highway. Instead of replacing memory completely, LSTM updates it additively:</p>
+  <div class="eq">$$ c^{(t)} = f^{(t)}\odot c^{(t-1)} + i^{(t)}\odot \tilde c^{(t)} $$</div>
+  <p>This structure lets the model keep old information when $f^{(t)}$ is near 1 and write new information when $i^{(t)}$ is large. The model learns the gates from data; they are not hand-coded rules.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="callout formula">
+    <div class="head">LSTM gates from Lecture 14</div>
+    <div class="eq">$$ i^{(t)}=\sigma(W_{ix}x^{(t)}+W_{ih}h^{(t-1)}+b_i) $$</div>
+    <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
+    <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
+    <div class="eq">$$ \tilde c^{(t)}=\sigma_c(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+  </div>
+  <div class="callout formula">
+    <div class="head">Cell and hidden updates</div>
+    <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
+    <p>$\odot$ is elementwise multiplication. Sigmoid gates produce numbers between 0 and 1.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">GRU summary</div>
+    <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
+    <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div><b>Lecture 14 gate interpretation.</b> Input gate asks whether the current input matters; forget gate asks whether old memory should remain; output gate asks how much memory should be exposed.</div>
+    <div><b>Lecture 14 GRU comparison.</b> Update gate controls how much previous hidden state survives; reset gate controls how much old state contributes to the candidate memory.</div>
+    <div><b>HW3 2.2 connection.</b> The BPTT problem shows why repeated products are fragile; LSTM's additive cell update is the architectural response.</div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <ul>
-    <li>Goal: control how much information flows along the cell state, mitigating long-range dependency issues.</li>
-    <li>LSTM gates: <b>Forget</b>, <b>Input</b>, <b>Output</b>.</li>
-    <li>GRU gates: <b>Update</b>, <b>Reset</b> — fewer parameters than LSTM.</li>
+    <li>When asked for intuition, name the three LSTM actions: forget old, write new, expose output.</li>
+    <li>When reading equations, separate gates from candidate memory. Gates usually use sigmoid; candidate memory often uses tanh-like activations.</li>
+    <li>For shape checks, every gate vector has the same dimension as the hidden state.</li>
+    <li>For comparisons, say GRU is simpler and parameter-lighter; LSTM has an explicit cell state and output gate.</li>
   </ul>
 
-  <div class="callout">
-    <div class="head">🧠 Intuition</div>
-    <p>Each gate is a sigmoid that decides "how much to write / keep / read". The cell state is a near-identity highway, so gradients no longer get repeatedly multiplied by a small factor.</p>
-  </div>
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Calling the forget gate a hard delete. It is continuous: values can keep part of the old memory.</li>
+    <li>Mixing up $c^{(t)}$ and $h^{(t)}$. The cell state stores memory; the hidden state is the exposed representation.</li>
+    <li>Forgetting that LSTMs are still trained with BPTT.</li>
+    <li>Assuming LSTM completely solves all long-sequence problems. It helps, but transformers are used because they parallelize better and handle very long dependencies differently.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Know what input, forget, and output gates mean.</li>
+    <li>Be able to read and explain the LSTM cell update equation.</li>
+    <li>Explain how gates mitigate vanishing gradients compared with vanilla RNNs.</li>
+    <li>Compare LSTM and GRU at the conceptual level.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>LSTM = recurrent model plus gated memory cell.</li>
+    <li>$f_t$ keeps old memory; $i_t$ writes new memory; $o_t$ exposes memory.</li>
+    <li>GRU has update and reset gates, usually fewer parameters.</li>
+    <li>Training still uses BPTT.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="lstm">
-      <h2><span class="icon">🚪</span> 5. LSTM & GRU · 门控机制</h2>
+      <h2>LSTM 与 GRU · 门控循环单元</h2>
+      <p class="topic-lede">LSTM 和 GRU 是为了解决 vanilla RNN 不擅长长程依赖而设计的 gated recurrent cells。核心不是“更玄学”，而是更会控制记忆。</p>
+
+      <h3 class="section-blue">1. 概念理解 / Concept Understanding</h3>
+      <p>普通 RNN 直接更新 hidden state。LSTM 额外引入 cell state $c^{(t)}$，并用 gates 决定旧信息保留多少、新信息写入多少、当前记忆暴露多少。</p>
+      <div class="mini-list">
+        <div><b>问题背景</b>：classical RNN 的梯度要沿时间反复相乘，长距离信号容易 vanishing / exploding。</div>
+        <div><b>解决什么</b>：门控让 memory 以 additive update 的方式流动，不必每一步都被彻底覆盖。</div>
+        <div><b>GRU 变体</b>：保留 gating 思想，但门更少、没有单独 output gate，参数量通常更小。</div>
+      </div>
+
+      <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
+      <p>把 LSTM 想成一本笔记本加三个开关：一个决定旧笔记擦多少，一个决定新笔记写多少，一个决定这页笔记给外面看多少。</p>
+      <p>GRU 就像轻量版旅行笔记本：开关少一些，背起来更轻，很多任务上也够用。</p>
+
+      <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
+      <p>最重要的是 cell state $c^{(t)}$ 这条“记忆高速路”。LSTM 不是每步都重写记忆，而是做加法式更新：</p>
+      <div class="eq">$$ c^{(t)} = f^{(t)}\odot c^{(t-1)} + i^{(t)}\odot \tilde c^{(t)} $$</div>
+      <p>当 $f^{(t)}$ 接近 1，旧记忆保留；当 $i^{(t)}$ 大，新信息写入。gate 是模型从数据里学出来的，不是人工规则。</p>
+
+      <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
+      <div class="callout formula">
+        <div class="head">Lecture 14 的 LSTM gates</div>
+        <div class="eq">$$ i^{(t)}=\sigma(W_{ix}x^{(t)}+W_{ih}h^{(t-1)}+b_i) $$</div>
+        <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
+        <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
+        <div class="eq">$$ \tilde c^{(t)}=\sigma_c(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
+      </div>
+      <div class="callout formula">
+        <div class="head">cell state 与 hidden state</div>
+        <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
+        <p>$\odot$ 是 elementwise multiplication；sigmoid gate 输出 0 到 1 之间的“开关强度”。</p>
+      </div>
+      <div class="callout formula">
+        <div class="head">GRU 速记</div>
+        <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
+        <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
+      </div>
+
+      <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
+      <div class="mini-list">
+        <div><b>Lecture 14 gate 解释</b>：input gate 问当前输入重不重要；forget gate 问旧 memory 要不要留；output gate 问多少 memory 暴露给 hidden state。</div>
+        <div><b>Lecture 14 GRU 对比</b>：update gate 控制上一 hidden state 保留多少；reset gate 控制旧状态对 candidate memory 的影响。</div>
+        <div><b>HW3 2.2 关联</b>：BPTT 题展示了 repeated product 为什么脆弱；LSTM 的 additive cell update 就是在结构上回应这个问题。</div>
+      </div>
+
+      <h3 class="section-yellow">6. 解题技巧 / Problem-Solving Tips</h3>
       <ul>
-        <li><b>目标</b>：通过门控控制信息流动，缓解长程依赖。</li>
-        <li><b>LSTM gates</b>：Forget / Input / Output。</li>
-        <li><b>GRU gates</b>：Update / Reset（参数更少）。</li>
+        <li>解释直觉时先说三件事：forget old、write new、expose output。</li>
+        <li>读公式时把 gates 和 candidate memory 分开；gate 通常是 sigmoid。</li>
+        <li>shape check：每个 gate vector 的维度都和 hidden state 一样。</li>
+        <li>比较题里说清：GRU 更轻；LSTM 有显式 cell state 和 output gate。</li>
       </ul>
-      <div class="callout">
-        <div class="head">🧠 直觉</div>
-        <p>门 = sigmoid 控制器，决定“写入多少 / 保留多少 / 输出多少”，把梯度沿 cell-state 走的“高速公路”稳定下来。</p>
-      </div>
-      <div class="callout">
-        <div class="head">👀 接 Block 7 · Attention</div>
-        <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
-        <p>相比 RNN：并行训练 + 长序列依赖更强。</p>
-      </div>
+
+      <h3 class="section-red">7. 常见错误 / Common Mistakes</h3>
+      <ul>
+        <li>把 forget gate 理解成硬删除。它是连续值，可以只忘一部分。</li>
+        <li>混淆 $c^{(t)}$ 和 $h^{(t)}$：cell state 存记忆，hidden state 是暴露出来的表示。</li>
+        <li>以为 LSTM 不需要 BPTT。它仍然是 computation graph，仍然反向传播。</li>
+        <li>说 LSTM 完全解决长序列。它是缓解，不是终结；Transformer 后面还会处理并行性和更长依赖。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. 考试重点 / Exam Focus</h3>
+      <ul>
+        <li>知道 input / forget / output gate 各自含义。</li>
+        <li>能读懂并解释 LSTM cell update。</li>
+        <li>能说明 gate 如何缓解 vanilla RNN 的 vanishing gradients。</li>
+        <li>能概念性比较 LSTM 和 GRU。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. 速记清单 / Quick Checklist</h3>
+      <ul>
+        <li>LSTM = recurrent model + gated memory cell。</li>
+        <li>$f_t$ 留旧记忆；$i_t$ 写新记忆；$o_t$ 暴露记忆。</li>
+        <li>GRU 有 update / reset gates，参数通常更少。</li>
+        <li>训练仍然用 BPTT。</li>
+      </ul>
     </section>
 
     

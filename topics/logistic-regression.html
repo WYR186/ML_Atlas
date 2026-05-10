@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="logistic-regression.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,64 +36,209 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / Logistic Regression</div>
       <h1>🧮 <span class="en-only">Logistic Regression</span><span class="cn-only">逻辑回归</span></h1>
-      <div class="subtitle"><span class="en-only">Sigmoid + NLL</span><span class="cn-only">Sigmoid + NLL</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_7.pdf" target="_blank">📄 Lecture 7</a>
-        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
-        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
+      <div class="subtitle"><span class="en-only">Sigmoid · NLL · Gradient descent</span><span class="cn-only">Sigmoid · NLL · Gradient descent</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_5.pdf" target="_blank">📄 Lecture 5</a>
+        <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="logreg-en">
   <h2>🎯 Logistic Regression</h2>
-  <p>Map a linear score into a probability with the sigmoid.</p>
+  <p class="topic-lede">Logistic regression is the linear classifier from Lecture 5 that turns a score into a probability and trains by maximum likelihood instead of squared error.</p>
 
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>For binary labels $y\in\{-1,+1\}$, logistic regression computes a linear score $s=w^\top\phi(x)$ and converts it into a class probability:</p>
+  <div class="eq">$$ p(y\mid x)=\frac{1}{1+\exp(-y\,w^\top\phi(x))} $$</div>
+  <p>The concept solves the classification weakness of linear regression: we want a loss that cares about correct signs and probability confidence, not about matching labels as numeric targets.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Think of $w^\top x$ as a confidence meter. Large positive means “class +1 looks likely,” large negative means “class -1 looks likely,” and near zero means “I am unsure.”</p>
+  <p>The sigmoid squeezes that meter into a probability between 0 and 1. The log loss then asks: did the model assign high probability to the true class?</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>Linear regression with MSE keeps pulling on easy examples even after they are classified correctly. Logistic loss mostly cares about the margin $y\,w^\top\phi(x)$: if the margin is large and positive, the loss is tiny; if it is negative, the loss grows quickly.</p>
+  <p>The model is probabilistic. Under the i.i.d. assumption, maximizing the likelihood of all labels is equivalent to minimizing negative log-likelihood. There is usually no closed form, so Lecture 5 uses gradient descent.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Probability output</div>
-      <div class="eq">$$ p(y=1\mid x)=\sigma(w^\top x+b),\;\sigma(a)=\tfrac{1}{1+e^{-a}} $$</div></div>
-    <div class="callout formula"><div class="head">Linear decision boundary</div>
-      <div class="eq">$$ w^\top x + b = 0 $$</div></div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">NLL / cross-entropy ($y_i\in\{-1,+1\}$)</div>
-      <div class="eq">$$ \min_w \sum_i \log\!\big(1+\exp(-y_i\,w^\top x_i)\big) $$</div></div>
+    <div class="callout formula">
+      <div class="head">Sigmoid</div>
+      <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
+      <p>$\sigma(0)=0.5$, so the decision boundary is where the score is zero.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Decision boundary</div>
+      <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
+      <p>The boundary is linear in feature space.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Negative log-likelihood</div>
+      <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
+      <p>This is also called log loss or cross-entropy in the binary setting.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Gradient descent update</div>
+      <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
+      <p>No analytic solution is available in general, so iterative optimization is the default.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Convexity check for $y\in\{0,1\}$ form</div>
+      <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
+      <p>Because $p_i(1-p_i)\ge 0$, this Hessian is positive semidefinite.</p>
+    </div>
   </div>
 
-  <div class="callout">
-    <div class="head">🧠 Why logistic over linear for classification?</div>
-    <p>Probabilistic loss does not over-penalize examples that are already classified correctly with high confidence, unlike MSE.</p>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · Why the boundary is still linear</div>
+    <div class="example-source">Source: Lecture 5, probability-threshold slide.</div>
+    <p>If the classifier predicts +1 when $p(y=1\mid x)\ge 0.5$, then $\sigma(w^\top x)\ge 0.5$. Since sigmoid crosses 0.5 at input 0, this is exactly $w^\top x\ge 0$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example B · Logistic vs. linear loss</div>
+    <div class="example-source">Source: Lecture 5, comparison with quadratic loss.</div>
+    <p>For a correctly classified point with large positive margin, quadratic classification loss can still be large because it tries to make the score close to the numeric label. Logistic loss becomes close to zero because the model already assigns high probability to the correct label.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · Hessian proves convexity</div>
+    <div class="example-source">Source: HW1 Problem 4(a-b), paraphrased.</div>
+    <p>Stacking examples gives $H=X^\top B X$ with nonnegative diagonal $B$. For any vector $v$, $v^\top H v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$. Therefore logistic loss is convex, so local minima are global minima.</p>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Recognize when a problem screams logistic regression: probability output, log-odds, MLE.</li>
-      <li>"Why is the boundary linear?" — because $\sigma(a)=0.5\Leftrightarrow a=0\Leftrightarrow w^\top x+b=0$.</li>
-    </ul>
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>Identify the label convention.</b> Use $\log(1+\exp(-y s))$ for $y\in\{-1,+1\}$ and binary cross-entropy for $y\in\{0,1\}$.</div>
+    <div><b>For probability questions,</b> write the sigmoid first, then threshold at 0.5 if classification is required.</div>
+    <div><b>For convexity questions,</b> show the Hessian is $X^\top B X$ and test $v^\top H v$.</div>
+    <div><b>For optimization questions,</b> say “no closed form in general; use gradient descent.”</div>
   </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Calling logistic regression nonlinear because sigmoid is nonlinear. The decision boundary is still linear in $\phi(x)$.</li>
+    <li>Mixing $y\in\{0,1\}$ and $y\in\{-1,+1\}$ formulas without converting.</li>
+    <li>Expecting a normal-equation closed form like linear regression.</li>
+    <li>Forgetting the i.i.d. assumption when multiplying likelihoods over the dataset.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Write the sigmoid probability model and NLL objective.</li>
+    <li>Explain why logistic loss fixes the MSE-for-classification issue.</li>
+    <li>Derive or recognize the gradient form used by gradient descent.</li>
+    <li>Use $H=X^\top B X$ to prove convexity.</li>
+    <li>Explain why the decision boundary is $w^\top\phi(x)=0$.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I can move between score, probability, and label prediction.</li>
+    <li>I can write $\log(1+\exp(-ys))$ without looking it up.</li>
+    <li>I know logistic regression usually needs iterative optimization.</li>
+    <li>I can explain convexity using the PSD Hessian.</li>
+    <li>I know the decision boundary remains linear in feature space.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="logreg">
-      <h2><span class="icon">🎯</span> 2. Logistic Regression · 逻辑回归</h2>
-      <p>把线性打分映射到 $(0,1)$ 概率。</p>
+      <h2><span class="icon">🎯</span> Logistic Regression · 逻辑回归</h2>
+      <p class="topic-lede">Logistic Regression 是 Lecture 5 的核心：把 linear score 变成 probability，用 maximum likelihood / NLL 来训练，而不是用 squared error 硬拟合分类标签。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>对二分类 $y\in\{-1,+1\}$，模型先算 score $s=w^\top\phi(x)$，再把它变成真实类别的概率：</p>
+      <div class="eq">$$ p(y\mid x)=\frac{1}{1+\exp(-y\,w^\top\phi(x))} $$</div>
+      <p>它解决的是 linear regression 做 classification 的问题：分类更关心 sign 和 confidence，而不是把标签当普通数字去拟合。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>把 $w^\top x$ 想成一个“信心条”。很正表示更像 +1，很负表示更像 -1，接近 0 表示不确定。</p>
+      <p>Sigmoid 把这个信心条压到 0 到 1 之间，变成 probability。Log loss 问的是：你有没有给真实类别足够高的概率？</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>MSE 会一直拉扯 easy examples，即使它们已经分类正确。Logistic loss 主要看 margin $y\,w^\top\phi(x)$：margin 很大且为正时 loss 很小；margin 为负时 loss 快速变大。</p>
+      <p>从概率角度看，样本 i.i.d. 时，最大化整份 dataset 的 likelihood 等价于最小化 negative log-likelihood。一般没有 closed form，所以用 gradient descent。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Probability output</div>
-          <div class="eq">$$ p(y=1\mid x)=\sigma(w^\top x+b),\ \sigma(a)=\tfrac{1}{1+e^{-a}} $$</div></div>
-        <div class="callout formula"><div class="head">Decision boundary (still linear)</div>
-          <div class="eq">$$ w^\top x + b = 0 $$</div></div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">NLL / Cross-entropy ($y_i\in\{-1,+1\}$ form)</div>
-          <div class="eq">$$ \min_w\ \sum_{i=1}^{n}\log\!\big(1+\exp(-y_i\,w^\top x_i)\big) $$</div></div>
+        <div class="callout formula">
+          <div class="head">Sigmoid</div>
+          <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
+          <p>$\sigma(0)=0.5$，所以边界发生在 score = 0。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Decision boundary</div>
+          <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
+          <p>在 feature space 里仍然是 linear boundary。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">NLL / log loss</div>
+          <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
+          <p>二分类里常叫 cross-entropy / log loss。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Gradient descent</div>
+          <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
+          <p>没有一般的 analytic solution，所以用 iterative optimization。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Convexity check ($y\in\{0,1\}$ form)</div>
+          <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
+          <p>因为 $p_i(1-p_i)\ge 0$，Hessian 是 positive semidefinite。</p>
+        </div>
       </div>
-      <div class="callout">
-        <div class="head">🧠 Why logistic over linear for classification?</div>
-        <p>概率建模更适合分类；对“分得很对”的点不会过度惩罚（不像 MSE 把对的点拽回来）。</p>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · 为什么边界仍然线性</div>
+        <div class="example-source">来源：Lecture 5，概率阈值部分。</div>
+        <p>如果规定 $p(y=1\mid x)\ge 0.5$ 就预测 +1，那么 $\sigma(w^\top x)\ge 0.5$。Sigmoid 在输入 0 时等于 0.5，所以边界就是 $w^\top x=0$。</p>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>看到“概率输出 / log-odds / MLE” → Logistic。</li>
-          <li>“为什么边界线性？”因为 $\sigma(a)=0.5\Leftrightarrow a=0\Leftrightarrow w^\top x+b=0$。</li>
-        </ul>
+      <div class="callout example">
+        <div class="head">Example B · Logistic loss vs. quadratic loss</div>
+        <div class="example-source">来源：Lecture 5，和 linear regression 的 loss 对比。</div>
+        <p>对一个已经正确且 margin 很大的点，quadratic loss 还可能很大，因为它想把 score 拉到某个数字标签附近；logistic loss 会接近 0，因为模型已经给真实类别高概率。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example C · Hessian 证明 convexity</div>
+        <div class="example-source">来源：HW1 Problem 4(a-b)，题意转述。</div>
+        <p>把样本堆叠后 $H=X^\top B X$，其中 $B$ 的对角元非负。对任意 $v$，$v^\top H v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$。所以 logistic loss 是 convex，local minimum 就是 global minimum。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>先看 label convention。</b> $y\in\{-1,+1\}$ 用 $\log(1+\exp(-ys))$；$y\in\{0,1\}$ 用 binary cross-entropy。</div>
+        <div><b>概率题：</b> 先写 sigmoid，再根据 0.5 threshold 做分类。</div>
+        <div><b>凸性题：</b> 写出 Hessian = $X^\top B X$，再看 $v^\top H v$。</div>
+        <div><b>优化题：</b> 说清楚一般没有 closed form，需要 gradient descent。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>因为 sigmoid 非线性就说 logistic regression 的边界非线性；其实 boundary 在 $\phi(x)$ 空间仍是 linear。</li>
+        <li>把 $y\in\{0,1\}$ 和 $y\in\{-1,+1\}$ 的公式混着用。</li>
+        <li>期待像 linear regression 一样有 normal equation closed form。</li>
+        <li>写 dataset likelihood 时忘记 i.i.d. assumption。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>会写 sigmoid probability model 和 NLL objective。</li>
+        <li>会解释 logistic loss 如何修复 MSE classification 的问题。</li>
+        <li>会识别 / 推导 gradient descent 用到的 gradient。</li>
+        <li>会用 $H=X^\top B X$ 证明 convexity。</li>
+        <li>会说明 decision boundary 为什么是 $w^\top\phi(x)=0$。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我能在 score、probability、label prediction 之间转换。</li>
+        <li>我能默写 $\log(1+\exp(-ys))$。</li>
+        <li>我知道 logistic regression 通常需要 iterative optimization。</li>
+        <li>我能用 PSD Hessian 解释 convexity。</li>
+        <li>我知道 decision boundary 在 feature space 里仍然 linear。</li>
+      </ul>
     </section>
 
     
@@ -123,20 +269,16 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
-      items.forEach((el) => {
+      items.forEach((el, idx) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        if (!el.id) el.id = `${sect.id}-h${idx}`;
         const li = document.createElement('li');
         const a  = document.createElement('a');
-        a.href = '#' + sect.id;
+        a.href = '#' + el.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';

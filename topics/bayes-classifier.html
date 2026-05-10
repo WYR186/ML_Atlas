@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="bayes-classifier.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,55 +37,222 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎓 学习理论</span><span class="en-only">🎓 Learning Theory</span> / Bayes Classifier</div>
       <h1>🎓 <span class="en-only">Bayes Classifier</span><span class="cn-only">贝叶斯分类器</span></h1>
       <div class="subtitle"><span class="en-only">0.5 threshold · Irreducible bound</span><span class="cn-only">0.5 阈值 · 不可突破下界</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
-        <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
         <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="bayes-en">
-  <h2>🧭 Bayes Classifier &amp; Bayes Error</h2>
+  <h2>Bayes Classifier and Bayes Error</h2>
+  <p class="topic-lede">Lecture 21 starts learning theory by asking what error is unavoidable even before we choose KNN, SVM, trees, or neural networks. The answer is the Bayes error: the best possible test error allowed by the data distribution itself.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>The <b>Bayes classifier</b> is the decision rule that minimizes population 0-1 classification error. It knows the true conditional probability $\eta(x)=\Pr(Y=1\mid X=x)$, so at each $x$ it simply predicts the more likely label.</p>
+  <p>The <b>Bayes error</b> $\epsilon_\mu^*$ is the error achieved by that ideal classifier. It depends only on the unknown distribution $\mu$, not on the learning algorithm or sample size.</p>
   <ul>
-    <li><b>Bayes error</b> $\epsilon_\mu^*$ — the minimum achievable test error, set by the data's intrinsic noise.</li>
-    <li><b>Bayes classifier</b> — the classifier that achieves it.</li>
+    <li>If labels are deterministic given $x$, the Bayes error can be 0.</li>
+    <li>If labels are pure coin flips at every $x$, the Bayes error is 0.5 in binary classification.</li>
+    <li>In practice we do not know $\mu$, so Bayes error is a theoretical benchmark, not a directly computable training objective.</li>
   </ul>
 
-  <div class="callout formula">
-    <div class="head">Binary 0–1 loss · $\eta(x)=\mathbb{P}(Y=1\mid X=x)$</div>
-    <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \tfrac{1}{2}\\ 0,&\eta(x)<\tfrac{1}{2}\end{cases} $$</div>
-  </div>
-  <div class="callout formula">
-    <div class="head">Regression · squared loss</div>
-    <div class="eq">$$ f_{\text{Bayes}}(x)=\mathbb{E}[Y\mid X=x] $$</div>
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Imagine asking the universe for the answer key. Even with the answer key, some examples are genuinely ambiguous: the same feature value may sometimes produce label 0 and sometimes label 1.</p>
+  <p>Bayes error is the price of that ambiguity. It is not the model being lazy; it is the data refusing to be perfectly predictable.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>For a fixed $x$, the best classifier should make the cheaper local mistake. If $\Pr(Y=1\mid X=x)=0.8$, predicting 1 makes error 0.2, while predicting 0 makes error 0.8. So the local optimal rule is majority vote under the true conditional distribution.</p>
+  <p>This separates two questions:</p>
+  <ul>
+    <li><b>Distribution noise:</b> even the Bayes classifier may make errors.</li>
+    <li><b>Learning error:</b> our actual algorithm may fail to approach the Bayes classifier.</li>
+  </ul>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div>
+      <h4>Binary Bayes rule</h4>
+      <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
+      <p>Predict the class with larger posterior probability.</p>
+    </div>
+    <div>
+      <h4>Bayes error</h4>
+      <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
+      <p>At each $x$, the unavoidable local error is the smaller posterior mass.</p>
+    </div>
+    <div>
+      <h4>Equivalent binary form</h4>
+      <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
+      <p>More confidence in the label means larger $|2\eta-1|$ and lower error.</p>
+    </div>
+    <div>
+      <h4>Squared-loss regression</h4>
+      <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
+      <p>The best prediction is the conditional mean; leftover conditional variance is irreducible noise.</p>
+    </div>
   </div>
 
-  <div class="callout example">
-    <div class="head">🧩 Sanity check</div>
-    <p>If $\eta(x) = 0.3 &lt; 0.5$, the Bayes classifier predicts 0.</p>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="mini-list">
+    <div>
+      <h4>Example 1 · Label flipping noise</h4>
+      <p class="example-source">Source: Lecture 21, p. 11.</p>
+      <p>Suppose a true linear separator gives a correct label, then the label is flipped with probability $p&lt;0.5$. At every $x$, the true label has probability $1-p$ and the flipped label has probability $p$. The Bayes classifier uses the original separator, and the Bayes error is $p$.</p>
+    </div>
+    <div>
+      <h4>Example 2 · Regression with additive Gaussian noise</h4>
+      <p class="example-source">Source: Lecture 21, p. 13.</p>
+      <p>If $Y=w^{*\top}X+\epsilon$ with $\epsilon\sim\mathcal{N}(0,\delta^2)$ independent of $X$, then $\mathbb{E}[Y\mid X]=w^{*\top}X$ and $\operatorname{Var}(Y\mid X)=\delta^2$. The Bayes error under squared loss is therefore $\delta^2$.</p>
+    </div>
+    <div>
+      <h4>Example 3 · Two Gaussian classes</h4>
+      <p class="example-source">Source: HW5, Section 1.2.</p>
+      <p>With $X\mid Y=0\sim\mathcal{N}(-\mu,\sigma^2)$ and $X\mid Y=1\sim\mathcal{N}(\mu,\sigma^2)$, compare the posterior-weighted densities. The decision boundary is a threshold; class imbalance shifts that threshold toward the less frequent class.</p>
+    </div>
   </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <ol>
+    <li>For classification, compute or reason about $\Pr(Y=y\mid X=x)$.</li>
+    <li>Choose the class with the largest posterior probability.</li>
+    <li>For Bayes error, integrate or average the probability of the wrong label under the Bayes decision.</li>
+    <li>For Gaussian class-conditionals, compare log posterior odds and solve for the threshold.</li>
+    <li>For regression with squared loss, look for $\mathbb{E}[Y\mid X]$ and $\operatorname{Var}(Y\mid X)$.</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Confusing Bayes classifier with Naive Bayes. Bayes classifier is the ideal optimal rule; Naive Bayes is a modeling algorithm with an independence assumption.</li>
+    <li>Trying to estimate Bayes error from training error directly. Bayes error is defined using the true distribution.</li>
+    <li>Forgetting priors in the Gaussian example; posterior comparison uses likelihood times prior.</li>
+    <li>Thinking Bayes error can exceed 0.5 in binary classification under the optimal rule.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>State the binary Bayes classifier using $\eta(x)$ and the 0.5 threshold.</li>
+    <li>Write $\epsilon_\mu^*=\mathbb{E}\min\{\eta(X),1-\eta(X)\}$.</li>
+    <li>Explain why Bayes error measures irreducible noise.</li>
+    <li>Derive the Gaussian threshold from log posterior odds.</li>
+    <li>For regression, know $f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X]$ and Bayes error $\mathbb{E}\operatorname{Var}(Y\mid X)$.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>Posterior above 0.5 predicts class 1.</li>
+    <li>Local Bayes error is the smaller posterior probability.</li>
+    <li>Deterministic labels give Bayes error 0.</li>
+    <li>Pure random binary labels give Bayes error 0.5.</li>
+    <li>Bayes error is a lower bound, not a training algorithm.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="bayes">
-      <h2><span class="icon">🧭</span> 2. Bayes Error / Bayes Classifier</h2>
-      <ul>
-        <li><b>Bayes Error $\epsilon_\mu^*$</b>：任何分类器都无法突破的最小测试误差下界（数据固有噪声）。</li>
-        <li><b>Bayes Classifier</b>：达到该下界的最优分类器。</li>
-      </ul>
-      <div class="callout formula">
-        <div class="head">二分类 0-1 loss 下的 Bayes 决策（$\eta(x)=\mathbb{P}(Y=1\mid X=x)$）</div>
-        <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \tfrac{1}{2}\\ 0,&\eta(x)<\tfrac{1}{2}\end{cases} $$</div>
-      </div>
-      <div class="callout formula">
-        <div class="head">回归（平方损失）下</div>
-        <div class="eq">$$ f_{\text{Bayes}}(x)=\mathbb{E}[Y\mid X=x] $$</div>
-      </div>
-      <div class="callout example">
-        <div class="head">🧩 Example</div>
-        <p>$\eta(x)=0.3<0.5$ ⇒ Bayes 分类器预测 $0$。</p>
-      </div>
-    </section>
+  <h2>Bayes Classifier 与 Bayes Error</h2>
+  <p class="topic-lede">Lecture 21 先问一个很底层的问题：在讨论 KNN、SVM、tree、neural network 谁更好之前，数据本身允许的最低错误率是多少？这个最低理论下界就是 Bayes error。</p>
+
+  <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+  <p><b>Bayes classifier</b> 是在真实分布下最小化 0-1 分类错误的理想规则。它知道 $\eta(x)=\Pr(Y=1\mid X=x)$，所以每个 $x$ 上都预测 posterior probability 更大的类别。</p>
+  <p><b>Bayes error</b> $\epsilon_\mu^*$ 是这个理想分类器仍然会犯的错误。它只由数据分布 $\mu$ 决定，不由算法、模型大小、训练集大小决定。</p>
+  <ul>
+    <li>如果 $x$ 完全决定 label，Bayes error 可以是 0。</li>
+    <li>如果每个 $x$ 上 label 都像抛硬币，二分类 Bayes error 是 0.5。</li>
+    <li>实际中我们不知道 $\mu$，所以 Bayes error 是 benchmark，不是可以直接训练的 objective。</li>
+  </ul>
+
+  <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+  <p>可以把 Bayes classifier 想成“上帝视角分类器”：它知道某个 $x$ 下 0 和 1 各有多大概率。</p>
+  <p>但即使有上帝视角，有些样本也是真的模糊：同一个特征位置可能 80% 是 1、20% 是 0。你预测 1 已经最合理，但那 20% 还是会错。这 20% 就是数据本身的噪声。</p>
+
+  <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+  <p>在固定 $x$ 上，最优策略就是选“局部犯错概率更小”的类别。如果 $\Pr(Y=1\mid X=x)=0.8$，预测 1 的错率是 0.2，预测 0 的错率是 0.8。</p>
+  <p>所以 Bayes error 把问题拆开：</p>
+  <ul>
+    <li><b>distribution noise</b>：数据本身不可预测的部分。</li>
+    <li><b>learning error</b>：我们的模型没有学到理想规则的部分。</li>
+  </ul>
+
+  <h3 class="section-purple">4. Key Equations · 关键公式</h3>
+  <div class="cols2">
+    <div>
+      <h4>二分类 Bayes rule</h4>
+      <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
+      <p>posterior probability 哪个大就选哪个。</p>
+    </div>
+    <div>
+      <h4>Bayes error</h4>
+      <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
+      <p>每个 $x$ 上不可避免的局部错误，就是较小的 posterior mass。</p>
+    </div>
+    <div>
+      <h4>等价形式</h4>
+      <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
+      <p>$|2\eta-1|$ 越大，label 越确定，错误率越低。</p>
+    </div>
+    <div>
+      <h4>平方损失回归</h4>
+      <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
+      <p>最优预测是 conditional mean；剩下的 conditional variance 是 irreducible noise。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+  <div class="mini-list">
+    <div>
+      <h4>例 1 · label flipping noise</h4>
+      <p class="example-source">出处：Lecture 21, p. 11。</p>
+      <p>真实线性分隔器先给出正确 label，然后以概率 $p&lt;0.5$ 翻转。每个 $x$ 上正确 label 概率是 $1-p$，错误 label 概率是 $p$。Bayes classifier 仍然用原来的分隔器，Bayes error 是 $p$。</p>
+    </div>
+    <div>
+      <h4>例 2 · 回归中的 Gaussian noise</h4>
+      <p class="example-source">出处：Lecture 21, p. 13。</p>
+      <p>若 $Y=w^{*\top}X+\epsilon$，且 $\epsilon\sim\mathcal{N}(0,\delta^2)$ 与 $X$ 独立，则 $\mathbb{E}[Y\mid X]=w^{*\top}X$，$\operatorname{Var}(Y\mid X)=\delta^2$。平方损失下 Bayes error 就是 $\delta^2$。</p>
+    </div>
+    <div>
+      <h4>例 3 · 两个 Gaussian class</h4>
+      <p class="example-source">出处：HW5, Section 1.2。</p>
+      <p>$X\mid Y=0$ 和 $X\mid Y=1$ 是均值相反、方差相同的 Gaussian。做法是比较 posterior-weighted density，也就是 likelihood × prior。取 log 后会得到一个关于 $x$ 的 threshold；class imbalance 会把 threshold 推向较少见的类别。</p>
+    </div>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+  <ol>
+    <li>分类题先找 $\Pr(Y=y\mid X=x)$，不要只看 likelihood。</li>
+    <li>二分类用 $\eta(x)$ 与 0.5 比较。</li>
+    <li>求 Bayes error 时，对 Bayes decision 下的错误概率做 expectation。</li>
+    <li>Gaussian class-conditionals 通常取 log posterior odds，再解 threshold。</li>
+    <li>平方损失回归先找 conditional mean，再找 conditional variance。</li>
+  </ol>
+
+  <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+  <ul>
+    <li>把 Bayes classifier 和 Naive Bayes 混在一起。前者是理想最优规则，后者是带 independence assumption 的具体算法。</li>
+    <li>用 training error 直接当 Bayes error。Bayes error 是真实分布下的理论量。</li>
+    <li>Gaussian 例题忘记 prior，导致 class imbalance 下 threshold 错位。</li>
+    <li>以为二分类 Bayes error 可以大于 0.5；最优规则至少可以选多数类。</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+  <ul>
+    <li>会用 $\eta(x)$ 和 0.5 threshold 写 Bayes classifier。</li>
+    <li>会写 $\epsilon_\mu^*=\mathbb{E}\min\{\eta(X),1-\eta(X)\}$。</li>
+    <li>会解释 Bayes error 是 irreducible noise。</li>
+    <li>会从 log posterior odds 推 Gaussian threshold。</li>
+    <li>回归题记住 $f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X]$ 与 $\mathbb{E}\operatorname{Var}(Y\mid X)$。</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+  <ul>
+    <li>posterior 超过 0.5 预测 class 1。</li>
+    <li>局部 Bayes error = 较小 posterior probability。</li>
+    <li>deterministic label ⇒ Bayes error 0。</li>
+    <li>纯随机二分类 label ⇒ Bayes error 0.5。</li>
+    <li>Bayes error 是 lower bound，不是算法。</li>
+  </ul>
+</section>
 
     
 </div><!--/cn-only-->
@@ -114,17 +282,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

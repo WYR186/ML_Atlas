@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="kmeans.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -35,59 +36,197 @@
     <div class="block-header">
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎯 无监督</span><span class="en-only">🎯 Unsupervised</span> / K-means</div>
       <h1>🎯 <span class="en-only">K-means</span><span class="cn-only">K-均值</span></h1>
-      <div class="subtitle"><span class="en-only">WCSS · E / M alternation</span><span class="cn-only">WCSS · E / M 交替</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_13.pdf" target="_blank">📄 Lecture 13</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+      <div class="subtitle"><span class="en-only">WCSS · Lloyd iterations</span><span class="cn-only">WCSS · Lloyd 迭代</span></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="kmeans-en">
   <h2>🎯 K-means Clustering</h2>
+  <p class="topic-lede">K-means is the clustering algorithm from Lecture 9. It alternates between assigning points to the closest center and updating each center to the mean of its assigned points.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
+  <p>K-means partitions unlabeled data into $K$ clusters. It assumes each point belongs to exactly one cluster and each cluster is represented by a center $\mu_k$.</p>
+  <p>The objective is the within-cluster sum of squared distances. The algorithm is simple, but the problem is non-convex, so initialization matters.</p>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <p>Drop $K$ magnets onto the scatter plot. Each point runs to its closest magnet. Then each magnet moves to the average location of the points that chose it. Repeat until nothing changes.</p>
+  <p>The magnets usually settle down, but where they settle can depend heavily on where you dropped them first.</p>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <p>With centers fixed, the best assignment is obvious: choose the nearest center. With assignments fixed, the best center is also obvious: the arithmetic mean of the assigned points.</p>
+  <p>Alternating these two easy subproblems monotonically decreases the objective and converges in finitely many assignment changes, but only to a local optimum.</p>
+
+  <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">Within-cluster sum of squares</div>
-      <div class="eq">$$ J=\sum_i\sum_k r_{ik}\|x^{(i)}-\mu_k\|^2,\;r_{ik}\in\{0,1\} $$</div></div>
-    <div class="callout formula"><div class="head">Two-step iteration</div>
-      <div class="eq">$$ k^*(i)=\arg\min_k \|x^{(i)}-\mu_k\|^2 $$</div>
-      <div class="eq">$$ \mu_k=\tfrac{1}{N_k}\sum_{i:k^*(i)=k} x^{(i)} $$</div></div>
+    <div class="callout formula">
+      <div class="head">Objective</div>
+      <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
+      <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
+    </div>
+    <div class="callout formula">
+      <div class="head">Assignment step</div>
+      <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
+      <p>Nearest center wins.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Update step</div>
+      <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
+      <p>Center becomes the cluster mean.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Per-iteration cost</div>
+      <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
+      <p>$N$ points, dimension $d$, $K$ clusters.</p>
+    </div>
   </div>
 
-  <div class="callout warn">
-    <div class="head">⚠️ Local minima</div>
-    <p>K-means is not guaranteed to find the global optimum. Initialization matters; k-means++ is the usual fix.</p>
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example A · One Lloyd iteration</div>
+    <div class="example-source">Source: Lecture 9, k-means / Lloyd algorithm.</div>
+    <p>Given initial centers, first compute each point's squared distance to every center and assign it to the closest one. Then average the points inside each cluster to obtain the next centers. That is one iteration.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example B · Pixel segmentation</div>
+    <div class="example-source">Source: Lecture 9, k-means applications.</div>
+    <p>Pixels can be treated as points in grayscale or color space. Running k-means with $K=2$ or $K=3$ groups pixels into intensity or color clusters, producing a simple segmentation.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example C · Soft assignment relaxation</div>
+    <div class="example-source">Source: HW2 Problem 7, paraphrased.</div>
+    <p>Relaxing assignment variables from one-hot values to $[0,1]$ does not improve the optimum. For fixed centers, a weighted average of distances is at least the minimum distance, so an optimal soft solution can be chosen as a hard nearest-center assignment.</p>
   </div>
 
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
-    <ul>
-      <li>Run one or two iterations by hand on a small dataset.</li>
-      <li>Distinguish E-step (assignment) from M-step (mean update).</li>
-    </ul>
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="mini-list">
+    <div><b>For hand iteration,</b> draw a distance table: points by centers.</div>
+    <div><b>For the M-step,</b> average only points assigned to that cluster.</div>
+    <div><b>For proof questions,</b> use “fix one block, optimize the other block” logic.</div>
+    <div><b>For limitations,</b> mention local minima, outliers, choice of $K$, and spherical-cluster bias.</div>
   </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <ul>
+    <li>Forgetting every point must be assigned to exactly one cluster in hard k-means.</li>
+    <li>Updating centers before recomputing all assignments for the current iteration.</li>
+    <li>Claiming k-means finds the global optimum.</li>
+    <li>Ignoring empty clusters; implementations need a rule for them.</li>
+  </ul>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <ul>
+    <li>Run one or two Lloyd iterations by hand.</li>
+    <li>Write the WCSS objective with assignment variables.</li>
+    <li>Derive the mean update from fixed assignments.</li>
+    <li>Explain convergence to local optimum and sensitivity to initialization.</li>
+    <li>Prove the HW2 hard-vs-soft assignment equivalence.</li>
+  </ul>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <ul>
+    <li>I know the assignment step.</li>
+    <li>I know the mean update step.</li>
+    <li>I can write the objective and constraints.</li>
+    <li>I remember k-means is non-convex and initialization-sensitive.</li>
+    <li>I can explain why squared Euclidean distance favors spherical clusters.</li>
+  </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="kmeans">
-      <h2><span class="icon">🎯</span> 5. K-means · 聚类</h2>
+      <h2><span class="icon">🎯</span> K-means · 聚类</h2>
+      <p class="topic-lede">K-means 是 Lecture 9 的 clustering algorithm：在“把点分给最近中心”和“把中心更新成簇均值”之间交替，也叫 Lloyd iterations。</p>
+
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
+      <p>K-means 把 unlabeled data 分成 $K$ 个 clusters。每个点只属于一个 cluster，每个 cluster 用 center $\mu_k$ 表示。</p>
+      <p>目标是最小化 within-cluster sum of squared distances。算法很简单，但 objective non-convex，所以 initialization 很重要。</p>
+
+      <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
+      <p>把 $K$ 块磁铁丢到散点图上。每个点跑向最近的磁铁；然后磁铁移动到选择它的点的平均位置。不断重复，直到没人想换队。</p>
+      <p>磁铁通常会稳定下来，但稳定在哪，很依赖最开始扔在哪里。</p>
+
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
+      <p>如果 centers 固定，最优 assignment 很明显：选最近中心。如果 assignments 固定，最优 center 也很明显：取 assigned points 的 arithmetic mean。</p>
+      <p>交替优化这两个简单子问题会让 objective 单调下降，并在有限次 assignment changes 后收敛；但一般只保证 local optimum。</p>
+
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">Objective (WCSS)</div>
-          <div class="eq">$$ J=\sum_i\sum_k r_{ik}\|x^{(i)}-\mu_k\|^2,\ r_{ik}\in\{0,1\} $$</div></div>
-        <div class="callout formula"><div class="head">Two-Step Iteration</div>
-          <div class="eq">$$ k^*(i)=\arg\min_k\|x^{(i)}-\mu_k\|^2 $$</div>
-          <div class="eq">$$ \mu_k=\tfrac{1}{N_k}\sum_{i:k^*(i)=k}x^{(i)} $$</div></div>
+        <div class="callout formula">
+          <div class="head">Objective</div>
+          <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
+          <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
+        </div>
+        <div class="callout formula">
+          <div class="head">Assignment step</div>
+          <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
+          <p>最近中心获胜。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Update step</div>
+          <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
+          <p>中心变成 cluster mean。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Per-iteration cost</div>
+          <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
+          <p>$N$ 个点，dimension $d$，$K$ 个 clusters。</p>
+        </div>
       </div>
-      <div class="callout warn">
-        <div class="head">⚠️ Pitfall · Local Minima</div>
-        <p>K-means 不保证全局最优；对初始化敏感（k-means++ 是常见缓解）。</p>
+
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <div class="callout example">
+        <div class="head">Example A · 一轮 Lloyd iteration</div>
+        <div class="example-source">来源：Lecture 9，k-means / Lloyd algorithm。</div>
+        <p>给定初始 centers，先计算每个点到每个 center 的 squared distance，并分给最近中心；再对每个 cluster 内的点求平均，得到新的 centers。这就是一轮 iteration。</p>
       </div>
-      <div class="callout exam">
-        <div class="head">✅ Exam focus</div>
-        <ul>
-          <li>会手跑 1–2 次迭代。</li>
-          <li>能区分 E-step（分配）vs M-step（更新中心）。</li>
-        </ul>
+      <div class="callout example">
+        <div class="head">Example B · Pixel segmentation</div>
+        <div class="example-source">来源：Lecture 9，k-means applications。</div>
+        <p>把 pixels 看成 grayscale 或 color space 里的 points。用 $K=2$ 或 $K=3$ 运行 k-means，就能把图像分成几个 intensity / color clusters，得到简单 segmentation。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example C · Soft assignment relaxation</div>
+        <div class="example-source">来源：HW2 Problem 7，题意转述。</div>
+        <p>把 assignment variables 从 one-hot 放宽到 $[0,1]$ 不会让 optimum 更好。固定 centers 时，距离的 weighted average 至少是最小距离，所以最优 soft solution 可以取成 nearest-center hard assignment。</p>
+      </div>
+
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <div class="mini-list">
+        <div><b>手跑 iteration：</b> 画 distance table，行是 points，列是 centers。</div>
+        <div><b>M-step：</b> 只平均分给该 cluster 的点。</div>
+        <div><b>证明题：</b> 用“固定一组变量，优化另一组变量”的 alternate optimization 逻辑。</div>
+        <div><b>局限性：</b> local minima、outliers、选择 $K$、spherical-cluster bias。</div>
+      </div>
+
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <ul>
+        <li>忘记 hard k-means 中每个点必须 exactly one cluster。</li>
+        <li>在同一轮中还没算完所有 assignments 就先更新 centers。</li>
+        <li>声称 k-means 保证 global optimum。</li>
+        <li>忽略 empty clusters；实际实现需要处理规则。</li>
+      </ul>
+
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <ul>
+        <li>会手跑一两轮 Lloyd iterations。</li>
+        <li>会用 assignment variables 写 WCSS objective。</li>
+        <li>会从 fixed assignments 推 mean update。</li>
+        <li>能解释 local optimum 和 initialization sensitivity。</li>
+        <li>会证明 HW2 的 hard-vs-soft assignment equivalence。</li>
+      </ul>
+
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <ul>
+        <li>我知道 assignment step。</li>
+        <li>我知道 mean update step。</li>
+        <li>我能写 objective 和 constraints。</li>
+        <li>我记得 k-means non-convex 且依赖 initialization。</li>
+        <li>我能解释 squared Euclidean distance 为什么偏向 spherical clusters。</li>
+      </ul>
     </section>
 
     

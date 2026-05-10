@@ -15,7 +15,8 @@
     <nav class="nav-links">
       <a href="../index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
       <a href="bellman.html" class="active" data-i18n="nav.notes">📘 速查</a>
-      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 速记</a>
+      <a href="../algorithms.html" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="../cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
       <a href="../resources.html" data-i18n="nav.resources">📂 资料</a>
     </nav>
     <div class="spacer"></div>
@@ -36,37 +37,228 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🎮 强化学习</span><span class="en-only">🎮 Reinforcement Learning</span> / Bellman Optimality</div>
       <h1>🎮 <span class="en-only">Bellman Optimality</span><span class="cn-only">贝尔曼最优</span></h1>
       <div class="subtitle"><span class="en-only">V*(s)=max_a Q*(s,a)</span><span class="cn-only">V*(s)=max_a Q*(s,a)</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a></div>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="bellman-en">
-  <h2>🟧 Bellman Optimality</h2>
-  <div class="callout formula">
-    <div class="eq">$$ V^*(s)=\max_a Q^*(s,a) $$</div>
-    <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\,\mathbb{E}_{s'\sim P}[V^*(s')] $$</div>
-    <div class="eq">$$ \pi^*(s)=\arg\max_a Q^*(s,a) $$</div>
-  </div>
+  <h2>Bellman Equations &amp; Optimality</h2>
+  <p class="topic-lede">Bellman equations are the recursion that makes reinforcement learning computable: they turn a long-horizon decision problem into a one-step reward plus a value of the next state.</p>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧩 Intuition</div>
-    <p>Optimal value = immediate reward + discounted best future value. The Bellman operator is a $\gamma$-contraction in $\ell_\infty$, guaranteeing a unique fixed point.</p>
+    <div class="head">Dynamic consistency for value functions</div>
+    <p>A value function is not just a table of scores. It must be consistent with the environment dynamics, the reward function, and the policy. The Bellman equation states this consistency condition.</p>
+    <p>Lecture 24 develops policy evaluation, Bellman optimality, value iteration, and policy iteration. HW5 Section 2 asks you to derive the same recursion from the definition of discounted return.</p>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">One step now, the rest later</div>
+    <p>Standing in a state is like standing at an intersection. The value is: what do I get immediately if I take this action, plus how good is the place I land afterward?</p>
+    <p>The optimal version adds one extra question: among all possible first actions, which one gives the best immediate-plus-future score?</p>
+  </div>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why the recursion works</div>
+    <p>Discounting makes the future smaller by a factor $\gamma &lt; 1$, so repeated Bellman backups cannot amplify errors forever. Each backup pulls value estimates closer to a fixed point.</p>
+    <p>This is why value iteration can converge and why Q-learning uses the same one-step target even when $P$ and $R$ are not explicitly known.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">Policy Q-value</div>
+      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy Bellman equation</div>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Optimality equations</div>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Greedy optimal policy</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+    </div>
+    <div class="callout formula wide"><div class="head">Bellman optimality operator contraction</div>
+      <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
+      <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
+      <p>The operator has a unique fixed point when $\gamma&lt;1$.</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+  <div class="callout example">
+    <div class="head">Example 1 · Derive $Q^\pi$ from HW5 §2.1-2.2</div>
+    <p>Start with the discounted return definition. Pull out the first reward $R(s,a)$, then condition on the next state $s'$ and next action $a'$. The remaining tail of the return is exactly $Q^\pi(s',a')$, giving the Bellman equation.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 2 · Maximum possible $Q^*$ from HW5 §2.4</div>
+    <p>If every reward is at most $R_{\max}$, the largest possible discounted sum is the geometric series $R_{\max}+ \gamma R_{\max}+\gamma^2R_{\max}+\cdots = R_{\max}/(1-\gamma)$.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 3 · Contraction proof sketch from HW5 §2.5</div>
+    <p>For each state, compare the two maximized one-step backups. The immediate rewards cancel, the transition probabilities sum to 1, and the remaining difference is bounded by $\gamma\lVert V-U\rVert_\infty$.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to start Bellman questions</div>
+    <ol>
+      <li>Identify whether the question is policy-specific ($\pi$) or optimal ($*$).</li>
+      <li>Write immediate reward first, then add discounted expected next value.</li>
+      <li>Use $\sum_{a'}\pi(a'|s')$ for policy evaluation; use $\max_{a'}$ for optimality or Q-learning.</li>
+      <li>For contraction proofs, take absolute values, use max-difference inequality, then use $\sum_{s'}P(s'|s,a)=1$.</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">High-frequency traps</div>
+    <ul>
+      <li>Using $\max$ inside a policy-evaluation equation. Evaluation follows the given policy.</li>
+      <li>Forgetting the expectation over stochastic next states.</li>
+      <li>Dropping $\gamma$ in the contraction proof.</li>
+      <li>Writing $V^*(s)=Q^*(s,a)$ for every action; it only equals the maximum over actions.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">Must be able to do</div>
+    <ul>
+      <li>Write $Q^\pi$ and $V^\pi$ definitions from memory.</li>
+      <li>Derive the Bellman equation by splitting off the first reward.</li>
+      <li>Write Bellman optimality equations and the greedy policy rule.</li>
+      <li>Explain why Bellman backup is a $\gamma$-contraction in $\ell_\infty$.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h4>Last-minute recall</h4>
+    <ul>
+      <li>Policy evaluation: average over $\pi$.</li>
+      <li>Optimality: maximize over actions.</li>
+      <li>Bellman target = reward now + discounted future value.</li>
+      <li>Contraction factor is $\gamma$.</li>
+      <li>Greedy policy comes from $\arg\max_a Q^*(s,a)$.</li>
+    </ul>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="bellman">
-      <h2><span class="icon">🟧</span> 3. Bellman Optimality</h2>
-      <div class="callout formula">
-        <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}} Q^*(s,a) $$</div>
-        <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\,\mathbb{E}_{s'\sim P(\cdot\mid s,a)}\!\left[V^*(s')\right] $$</div>
-        <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}} Q^*(s,a) $$</div>
-      </div>
-      <div class="callout">
-        <div class="head">🧩 直觉</div>
-        <p>“最优价值 = 立即奖励 + 折扣后的未来最优价值”。</p>
-      </div>
-    </section>
+  <h2>Bellman 方程与最优性</h2>
+  <p class="topic-lede">Bellman equations 是 RL 里把“长期决策”拆成“当前一步 + 后面价值”的递归工具。Lecture 24 系统讲 policy evaluation、Bellman optimality、value iteration 和 policy iteration，HW5 Section 2 也围绕它出题。</p>
+
+  <h3 class="section-blue">1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">Value function 的一致性条件</div>
+    <p>一个 value function 不能只是随便填的分数表；它必须和环境转移 $P$、奖励 $R$、策略 $\pi$ 一致。Bellman equation 就是在说：当前价值 = 当前奖励 + 折扣后的下一步价值。</p>
+    <p>如果是给定策略，就按策略平均；如果是最优控制，就对动作取最大。</p>
+  </div>
+
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">先走一步，再看余下路线</div>
+    <p>把一个状态想成路口。你先选一个方向，马上拿到一点 reward，然后到达下一个路口。这个选择到底好不好，不只看眼前 reward，还看下一个路口未来有多值钱。</p>
+    <p>Bellman 的大白话就是：不要一次想完整条路，先想一步，然后把剩下的路交给 value function。</p>
+  </div>
+
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">为什么这个递归会收敛</div>
+    <p>折扣因子 $\gamma&lt;1$ 会让未来影响变小，所以每做一次 Bellman backup，旧误差最多被乘上 $\gamma$。反复 backup 就像把估计往唯一 fixed point 拉近。</p>
+    <p>这也是 Q-learning 能工作的底层原因：即使不知道完整 $P$ 和 $R$，它也在用采样版的一步 Bellman target。</p>
+  </div>
+
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">策略下的 Q-value</div>
+      <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Policy Bellman equation</div>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+    </div>
+    <div class="callout formula"><div class="head">Bellman optimality</div>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
+    </div>
+    <div class="callout formula"><div class="head">最优策略</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+    </div>
+    <div class="callout formula wide"><div class="head">Bellman operator 是 $\gamma$-contraction</div>
+      <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
+      <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
+      <p>因为 $\gamma&lt;1$，fixed point 唯一，反复迭代会靠近它。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+  <div class="callout example">
+    <div class="head">例 1 · 从定义推出 Bellman（HW5 §2.1-2.2）</div>
+    <p>从 $Q^\pi(s,a)$ 的 discounted return 定义出发，先把第一步奖励 $R(s,a)$ 拿出来。后面的尾巴从 $s'$ 开始、动作按 $\pi$ 抽样，所以就是 $\sum_{a'}\pi(a'|s')Q^\pi(s',a')$。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 2 · 最大 $Q^*$ 上界（HW5 §2.4）</div>
+    <p>如果每步 reward 最多是 $R_{\max}$，最乐观情况就是每一步都拿 $R_{\max}$：$R_{\max}+\gamma R_{\max}+\gamma^2R_{\max}+\cdots=R_{\max}/(1-\gamma)$。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 3 · contraction 证明框架（HW5 §2.5）</div>
+    <p>比较 $TV$ 和 $TU$ 时，reward 项抵消；剩下 $\gamma\sum P(s'|s,a)(V(s')-U(s'))$。绝对值后用 $\|V-U\|_\infty$ 卡住每一项，再用概率和为 1，得到 $\gamma\|V-U\|_\infty$。</p>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">看到 Bellman 题怎么下手</div>
+    <ol>
+      <li>先判断是 policy evaluation 还是 optimality。</li>
+      <li>公式永远从 immediate reward 写起，再加 discounted future value。</li>
+      <li>给定策略用 $\sum_{a'}\pi(a'|s')$；最优或 Q-learning 用 $\max_{a'}$。</li>
+      <li>证明 contraction 时先写 $TV-TU$，再用 max 差值不等式和 $\sum P=1$。</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">高频陷阱</div>
+    <ul>
+      <li>把 policy evaluation 写成 $\max$；给定策略时必须按 $\pi$ 平均。</li>
+      <li>忘记 stochastic transition 需要对 $s'$ 求期望。</li>
+      <li>contraction 证明漏掉 $\gamma$。</li>
+      <li>误以为 $V^*(s)$ 等于所有动作的 $Q^*(s,a)$；它只等于最大的那个。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">考试必须会</div>
+    <ul>
+      <li>默写 $V^\pi$、$Q^\pi$ 定义。</li>
+      <li>从 discounted return 推出 Bellman equation。</li>
+      <li>写出 Bellman optimality equations 和 greedy policy。</li>
+      <li>解释 Bellman backup 为什么是 $\gamma$-contraction。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h4>最后一刻能默</h4>
+    <ul>
+      <li>Policy evaluation：按 $\pi$ 平均。</li>
+      <li>Optimality：对动作取 max。</li>
+      <li>Bellman target = 当前 reward + 折扣未来。</li>
+      <li>Contraction factor 是 $\gamma$。</li>
+      <li>最优策略来自 $\arg\max_a Q^*(s,a)$。</li>
+    </ul>
+  </div>
+</section>
 
     
 </div><!--/cn-only-->
@@ -103,10 +295,7 @@
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        seenSection.add(sect.id);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
