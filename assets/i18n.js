@@ -22,9 +22,9 @@ const I18N = {
 
   // ── home page ──
   "home.progress":          { cn: "📊 复习进度", en: "📊 Progress" },
-  "home.legend.found":      { cn: "Foundations / 基础", en: "Foundations" },
-  "home.legend.dl":         { cn: "Modern DL / 现代深度", en: "Modern Deep Learning" },
-  "home.legend.theory":     { cn: "Theory / RL", en: "Theory & RL" },
+  "home.legend.found":      { cn: "简单", en: "Easy" },
+  "home.legend.dl":         { cn: "中等", en: "Medium" },
+  "home.legend.theory":     { cn: "困难", en: "Hard" },
   "home.btn.cheatsheet":    { cn: "⚡ 1 小时速记", en: "⚡ 1-hour Cheatsheet" },
   "home.btn.start":         { cn: "📖 从头开始", en: "📖 Start from Block 1" },
   "home.btn.resources":     { cn: "📂 课件 & 作业", en: "📂 Slides & Homework" },
@@ -102,12 +102,27 @@ function escHtml(s) {
   }[c]));
 }
 
+function alignSliderThumb(sw) {
+  // Position the thumb pixel-precisely to the active button — independent
+  // of paddings, borders and per-button content widths.
+  const active = sw.querySelector(`button[data-lang="${sw.dataset.active}"]`)
+              || sw.querySelector("button.active")
+              || sw.querySelector("button");
+  const thumb = sw.querySelector(".lang-thumb");
+  if (!active || !thumb) return;
+  const swRect = sw.getBoundingClientRect();
+  const btnRect = active.getBoundingClientRect();
+  thumb.style.width = btnRect.width + "px";
+  thumb.style.transform = `translateX(${btnRect.left - swRect.left}px)`;
+}
+
 function applyLang(lang) {
   document.documentElement.setAttribute("data-lang", lang);
 
-  // Slide the segmented switch thumb to the active position.
+  // Update the segmented switch thumb position.
   document.querySelectorAll(".lang-switch").forEach(sw => {
     sw.setAttribute("data-active", lang);
+    requestAnimationFrame(() => alignSliderThumb(sw));
   });
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -185,4 +200,10 @@ function injectLangSwitch() {
 document.addEventListener("DOMContentLoaded", () => {
   injectLangSwitch();
   applyLang(getLang());
+});
+
+// Re-align the slider thumb on viewport changes — button widths can shift
+// when the topbar wraps or the nav grows.
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".lang-switch").forEach(alignSliderThumb);
 });

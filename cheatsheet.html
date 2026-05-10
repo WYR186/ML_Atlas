@@ -39,11 +39,11 @@
       </tr></thead>
       <tbody>
         <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">Bayes</td><td style="padding:10px 8px;">$P(A\mid B)=\frac{P(B\mid A)P(A)}{P(B)}$</td><td style="padding:10px 8px;">Posterior ∝ Likelihood × Prior</td></tr>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">条件独立</td><td style="padding:10px 8px;">$P(A,B\mid C)=P(A\mid C)P(B\mid C)$</td><td style="padding:10px 8px;">Naive Bayes 因子分解</td></tr>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">PCA 直觉</td><td style="padding:10px 8px;">$Au=\lambda u$</td><td style="padding:10px 8px;">先中心化 → 最大特征值方向</td></tr>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">凸性</td><td style="padding:10px 8px;">$\nabla^2 f\succeq 0$</td><td style="padding:10px 8px;">PSD ⇒ 凸；PD ⇒ 严格凸唯一最优</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;"><span class="en-only">Conditional Indep.</span><span class="cn-only">条件独立</span></td><td style="padding:10px 8px;">$P(A,B\mid C)=P(A\mid C)P(B\mid C)$</td><td style="padding:10px 8px;">Naive Bayes 因子分解</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;"><span class="en-only">PCA Intuition</span><span class="cn-only">PCA 直觉</span></td><td style="padding:10px 8px;">$Au=\lambda u$</td><td style="padding:10px 8px;">先中心化 → 最大特征值方向</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;"><span class="en-only">Convexity</span><span class="cn-only">凸性</span></td><td style="padding:10px 8px;">$\nabla^2 f\succeq 0$</td><td style="padding:10px 8px;">PSD ⇒ 凸；PD ⇒ 严格凸唯一最优</td></tr>
         <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">GD</td><td style="padding:10px 8px;">$w_{t+1}=w_t-\eta\nabla f(w_t)$</td><td style="padding:10px 8px;">$\eta$ 太大发散 / 太小慢</td></tr>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">SVM 对偶</td><td style="padding:10px 8px;">$L=f_0+\sum\lambda_i f_i$</td><td style="padding:10px 8px;">对偶仅依赖 $x_i^\top x_j$ → 核技巧</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;"><span class="en-only">SVM Dual</span><span class="cn-only">SVM 对偶</span></td><td style="padding:10px 8px;">$L=f_0+\sum\lambda_i f_i$</td><td style="padding:10px 8px;">对偶仅依赖 $x_i^\top x_j$ → 核技巧</td></tr>
       </tbody>
     </table>
   </section>
@@ -53,8 +53,8 @@
     <h2>🧮 Block 2 · KNN · Naive Bayes</h2>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       <tbody>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;">KNN 分类</td><td style="padding:10px 8px;width:34%;">$\hat y(x)=\mathrm{mode}\{y_i:x_i\in\mathcal{N}_k(x)\}$</td><td style="padding:10px 8px;">特征缩放；高维 distance concentration</td></tr>
-        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;">NB 分解</td><td style="padding:10px 8px;">$P(X\mid Y)=\prod_j P(X_j\mid Y)$</td><td style="padding:10px 8px;">log-space MAP；GNB 共享方差 ⇒ 线性边界</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;width:18%;"><span class="en-only">KNN Classification</span><span class="cn-only">KNN 分类</span></td><td style="padding:10px 8px;width:34%;">$\hat y(x)=\mathrm{mode}\{y_i:x_i\in\mathcal{N}_k(x)\}$</td><td style="padding:10px 8px;">特征缩放；高维 distance concentration</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td style="padding:10px 8px;font-weight:600;"><span class="en-only">NB Factorization</span><span class="cn-only">NB 分解</span></td><td style="padding:10px 8px;">$P(X\mid Y)=\prod_j P(X_j\mid Y)$</td><td style="padding:10px 8px;">log-space MAP；GNB 共享方差 ⇒ 线性边界</td></tr>
       </tbody>
     </table>
   </section>

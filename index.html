@@ -527,14 +527,16 @@
         <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;">
           <h3 style="margin:0 0 8px; font-size:16px;">
             <span data-cn="${g.name_cn}" data-en="${g.name_en}">${g.name_cn}</span>
-            <span style="color:var(--text-muted); font-size:13px; font-weight:500; margin-left:8px;">${g.sub}</span>
+            <span style="color:var(--text-muted); font-size:13px; font-weight:500; margin-left:8px;"
+                  data-cn="${g.sub_cn || ''}" data-en="${g.sub_en || ''}">${g.sub_cn || ''}</span>
           </h3>
           <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:6px;">
             ${items.map(t => `
               <a href="topics/${t.slug}.html" style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:6px; color:var(--text); text-decoration:none; font-size:13.5px;">
                 <span style="width:6px; height:6px; border-radius:50%; background:${({green:'var(--accent)',yellow:'var(--warn)',red:'var(--danger)'})[t.diff]};"></span>
                 <span data-cn="${t.name_cn}" data-en="${t.name_en}">${t.name_cn}</span>
-                <span style="color:var(--text-muted); font-size:12px; margin-left:auto;">${t.sub}</span>
+                <span style="color:var(--text-muted); font-size:12px; margin-left:auto;"
+                      data-cn="${t.sub_cn || ''}" data-en="${t.sub_en || ''}">${t.sub_cn || ''}</span>
               </a>
             `).join("")}
           </div>
