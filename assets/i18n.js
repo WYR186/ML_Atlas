@@ -1,11 +1,10 @@
-// === i18n: EN / Mixed / CN switch ===
-// Three language modes:
+// === i18n: EN / CN switch ===
+// Two language modes:
 //   "en"     — English only (default for first-time visitors)
-//   "mixed"  — both languages stacked (great for studying)
-//   "cn"     — Chinese only
+//   "cn"     — Chinese-dominant, with English technical keywords kept inline
 // HTML elements use data-i18n="key" (textContent) or
 // data-i18n-attr="placeholder" data-i18n="key" (attribute).
-// Block content uses .cn-only / .en-only wrappers; mixed mode shows both.
+// Block content uses .cn-only / .en-only wrappers.
 
 const I18N_KEY = "ml_review_lang_v1";
 
@@ -15,7 +14,8 @@ const I18N = {
   "brand.short":            { cn: "ECE 449 / CS 446", en: "ECE 449 / CS 446" },
   "nav.roadmap":            { cn: "🗺️ 路线图", en: "🗺️ Roadmap" },
   "nav.notes":              { cn: "📘 速查", en: "📘 Notes" },
-  "nav.cheatsheet":         { cn: "⚡ 速记", en: "⚡ Cheatsheet" },
+  "nav.algorithms":         { cn: "📚 算法表", en: "📚 Algorithms" },
+  "nav.cheatsheet":         { cn: "⚡ 公式大全", en: "⚡ Equations" },
   "nav.resources":          { cn: "📂 资料", en: "📂 Resources" },
   "search.placeholder":     { cn: "搜索算法…", en: "Search algorithms…" },
   "search.formula":         { cn: "搜索公式…", en: "Search formulas…" },
@@ -25,7 +25,7 @@ const I18N = {
   "home.legend.found":      { cn: "简单", en: "Easy" },
   "home.legend.dl":         { cn: "中等", en: "Medium" },
   "home.legend.theory":     { cn: "困难", en: "Hard" },
-  "home.btn.cheatsheet":    { cn: "⚡ 1 小时速记", en: "⚡ 1-hour Cheatsheet" },
+  "home.btn.cheatsheet":    { cn: "⚡ 公式大全", en: "⚡ Equations" },
   "home.btn.start":         { cn: "📖 从头开始", en: "📖 Start from Block 1" },
   "home.btn.resources":     { cn: "📂 课件 & 作业", en: "📂 Slides & Homework" },
   "home.btn.reset":         { cn: "🔄 重置进度", en: "🔄 Reset progress" },
@@ -49,7 +49,7 @@ const I18N = {
   "group.diff":             { cn: "🌊 Diffusion · 扩散模型", en: "🌊 Diffusion" },
   "group.theory":           { cn: "🎓 Learning Theory · 学习理论", en: "🎓 Learning Theory" },
   "group.rl":               { cn: "🎮 Reinforcement Learning · 强化学习", en: "🎮 Reinforcement Learning" },
-  "node.practice":          { cn: "⚡ 速记 + 练习", en: "⚡ Cheatsheet + Practice" },
+  "node.practice":          { cn: "⚡ 公式大全 + 练习", en: "⚡ Equations + Practice" },
   "node.practice.sub":      { cn: "10 min · 闭卷自测", en: "10 min · Closed-book self-test" },
 
   // ── block page chrome ──
@@ -59,7 +59,7 @@ const I18N = {
   "btn.next":               { cn: "下一章 →", en: "Next →" },
   "btn.prev":               { cn: "← 上一章", en: "← Prev" },
   "btn.back":               { cn: "← 返回路线图", en: "← Back to Roadmap" },
-  "btn.cheatsheetGo":       { cn: "⚡ 速记 Cheatsheet", en: "⚡ Cheatsheet" },
+  "btn.cheatsheetGo":       { cn: "⚡ 公式大全", en: "⚡ Equations" },
   "crumbs.roadmap":         { cn: "路线图", en: "Roadmap" },
 
   // common labels used across blocks
@@ -84,12 +84,19 @@ const I18N = {
 
 function getLang() {
   const v = localStorage.getItem(I18N_KEY);
-  if (v === "en" || v === "cn" || v === "mixed") return v;
+  if (v === "en" || v === "cn") return v;
+  if (v === "mixed") {
+    localStorage.setItem(I18N_KEY, "en");
+    return "en";
+  }
   return "en";  // default for first-time visitors
 }
 function setLang(lang) {
-  localStorage.setItem(I18N_KEY, lang);
-  applyLang(lang);
+  const next = lang === "cn" ? "cn" : "en";
+  const snap = captureLangScrollPosition();
+  localStorage.setItem(I18N_KEY, next);
+  applyLang(next);
+  restoreLangScrollPosition(snap);
 }
 // Strip a leading emoji + spaces from a string. Returns { emoji, rest }.
 function stripLeadEmoji(s) {
@@ -118,7 +125,92 @@ function alignSliderThumb(sw) {
   thumb.style.transform = `translateX(${btnRect.left - swRect.left}px)`;
 }
 
+function langTopOffset() {
+  const topbar = document.querySelector(".topbar");
+  return (topbar ? topbar.getBoundingClientRect().height : 0) + 16;
+}
+
+function langIsVisible(el) {
+  if (!el || !el.isConnected || !el.getClientRects().length) return false;
+  const style = window.getComputedStyle(el);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+function visibleTopicSection() {
+  const top = langTopOffset();
+  const sections = Array.from(document.querySelectorAll("section.topic")).filter(langIsVisible);
+  return sections.find(sec => {
+    const r = sec.getBoundingClientRect();
+    return r.bottom > top && r.top < window.innerHeight;
+  }) || sections[0] || null;
+}
+
+function captureLangScrollPosition() {
+  const top = langTopOffset();
+  const section = visibleTopicSection();
+  if (section) {
+    const heads = Array.from(section.querySelectorAll(":scope > h2, :scope > h3"));
+    let index = 0;
+    for (let i = 0; i < heads.length; i++) {
+      if (heads[i].getBoundingClientRect().top <= top + 1) index = i;
+      else break;
+    }
+    const anchor = heads[index] || section;
+    return {
+      kind: "topic",
+      index,
+      offset: anchor.getBoundingClientRect().top - top,
+      scrollY: window.scrollY
+    };
+  }
+
+  const x = Math.max(1, Math.min(window.innerWidth / 2, window.innerWidth - 2));
+  const y = Math.max(top + 1, Math.min(window.innerHeight * 0.35, window.innerHeight - 2));
+  const el = document.elementsFromPoint(x, y).find(node => {
+    return node instanceof Element
+      && !node.closest(".topbar")
+      && !node.closest(".toc")
+      && langIsVisible(node);
+  });
+  if (!el) return { kind: "scroll", scrollY: window.scrollY };
+  return { kind: "element", el, y, offset: el.getBoundingClientRect().top - y, scrollY: window.scrollY };
+}
+
+function restoreLangScrollPosition(snap) {
+  if (!snap) return;
+  document.documentElement.classList.add("lang-preserve-scroll");
+
+  let attempts = 0;
+  const restore = () => {
+    attempts += 1;
+    const top = langTopOffset();
+
+    if (snap.kind === "topic") {
+      const section = visibleTopicSection();
+      const heads = section ? Array.from(section.querySelectorAll(":scope > h2, :scope > h3")) : [];
+      const anchor = heads[Math.min(snap.index, Math.max(heads.length - 1, 0))] || section;
+      if (anchor && langIsVisible(anchor)) {
+        const wantedTop = top + snap.offset;
+        window.scrollBy({ top: anchor.getBoundingClientRect().top - wantedTop, left: 0, behavior: "auto" });
+      } else {
+        window.scrollTo({ top: snap.scrollY, left: window.scrollX, behavior: "auto" });
+      }
+    } else if (snap.kind === "element" && langIsVisible(snap.el)) {
+      const wantedTop = snap.y + snap.offset;
+      window.scrollBy({ top: snap.el.getBoundingClientRect().top - wantedTop, left: 0, behavior: "auto" });
+    } else {
+      window.scrollTo({ top: snap.scrollY, left: window.scrollX, behavior: "auto" });
+    }
+
+    if (attempts < 4) requestAnimationFrame(restore);
+    else document.documentElement.classList.remove("lang-preserve-scroll");
+  };
+
+  requestAnimationFrame(restore);
+}
+
 function applyLang(lang) {
+  if (lang !== "cn" && lang !== "en") lang = "en";
   document.documentElement.setAttribute("data-lang", lang);
 
   // Update the segmented switch thumb position.
@@ -141,27 +233,9 @@ function applyLang(lang) {
       return;
     }
 
-    // Mixed mode. For attributes (placeholder, title, etc.) keep an inline
-    // string. For text content, stack EN above CN and deduplicate any
-    // shared leading emoji.
-    if (attr) {
-      const fallback = (dict.en && dict.cn && dict.en !== dict.cn)
-        ? `${dict.en} · ${dict.cn}` : (dict.en || dict.cn);
-      el.setAttribute(attr, fallback);
-      return;
-    }
-
-    if (!dict.en || !dict.cn || dict.en === dict.cn) {
-      el.textContent = dict.en || dict.cn;
-      return;
-    }
-
-    const en = stripLeadEmoji(dict.en);
-    const cn = stripLeadEmoji(dict.cn);
-    const sharedEmoji = en.emoji && en.emoji === cn.emoji;
-    const enLine = sharedEmoji ? `${en.emoji} ${en.rest}` : dict.en;
-    const cnLine = sharedEmoji ? cn.rest : dict.cn;
-    el.innerHTML = `<span class="lbl-en">${escHtml(enLine)}</span><span class="lbl-cn">${escHtml(cnLine)}</span>`;
+    const value = dict.en || dict.cn;
+    if (attr) el.setAttribute(attr, value);
+    else el.textContent = value;
   });
 
   // Toggle button "active" state for accessibility / focus styling.
@@ -171,8 +245,8 @@ function applyLang(lang) {
 }
 
 function injectLangSwitch() {
-  // Adds a segmented EN / EN+中 / 中 slider next to the search box.
-  // The order is fixed: EN (left), EN+中 (middle), 中 (right) — the
+  // Adds a segmented EN / CN slider next to the search box.
+  // The order is fixed: EN (left), CN (right) — the
   // CSS thumb position is keyed off [data-active] so it must match.
   const topbarInner = document.querySelector(".topbar-inner");
   if (!topbarInner || document.querySelector(".lang-switch")) return;
@@ -183,8 +257,7 @@ function injectLangSwitch() {
   wrap.innerHTML = `
     <span class="lang-thumb" aria-hidden="true"></span>
     <button data-lang="en"    type="button" role="tab" title="English only">EN</button>
-    <button data-lang="mixed" type="button" role="tab" title="Both languages">EN+中</button>
-    <button data-lang="cn"    type="button" role="tab" title="Chinese only">中</button>
+    <button data-lang="cn"    type="button" role="tab" title="Chinese with English keywords">中</button>
   `;
   const search = topbarInner.querySelector(".search-box");
   if (search) topbarInner.insertBefore(wrap, search);

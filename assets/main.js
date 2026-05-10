@@ -74,19 +74,419 @@ function renderIndexTable() {
 }
 
 // === Search across topics ===
+// Filters both the legacy .node / .section-node cards (used on the
+// Block detail pages) AND the React Flow .rf-topic cards on the
+// homepage. For React Flow cards we look up the slug in window.TOPICS
+// so we can match name_en / name_cn / sub_en / sub_cn / slug — the
+// rendered text alone hides whichever language is hidden by i18n.
 function setupSearch() {
   const input = document.getElementById("searchInput");
   if (!input) return;
-  input.addEventListener("input", () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) {
-      document.querySelectorAll(".node, .section-node").forEach(n => n.style.opacity = "1");
-      return;
-    }
+
+  const haystack = (slug) => {
+    const t = (window.TOPICS || []).find(x => x.slug === slug);
+    if (!t) return slug;
+    return [
+      slug, t.name_en, t.name_cn, t.sub_en, t.sub_cn,
+    ].filter(Boolean).join(" ").toLowerCase();
+  };
+
+  const apply = (q) => {
+    // Legacy cards (Block detail pages).
     document.querySelectorAll(".node, .section-node").forEach(n => {
-      const t = n.textContent.toLowerCase();
-      n.style.opacity = t.includes(q) ? "1" : "0.25";
+      if (!q) { n.style.opacity = "1"; return; }
+      n.style.opacity = n.textContent.toLowerCase().includes(q) ? "1" : "0.25";
     });
+    // React Flow topic cards on the homepage.
+    document.querySelectorAll(".rf-topic[data-slug]").forEach(n => {
+      n.classList.remove("search-hit", "search-miss");
+      if (!q) return;
+      const hit = haystack(n.dataset.slug).includes(q);
+      n.classList.add(hit ? "search-hit" : "search-miss");
+    });
+  };
+
+  input.addEventListener("input", () => apply(input.value.trim().toLowerCase()));
+  // Re-apply once after React Flow mounts (DOM nodes might not exist
+  // when setupSearch first runs).
+  document.addEventListener("ml-progress-loaded", () => apply(input.value.trim().toLowerCase()));
+}
+
+// === Collapsible homepage Progress panel ===
+const PROGRESS_PANEL_KEY = "ml_review_progress_panel_collapsed_v1";
+function setupProgressPanelCollapse() {
+  const shell = document.querySelector(".home-shell");
+  const panel = document.getElementById("progressPanel");
+  const body = document.getElementById("progressPanelBody");
+  const toggle = document.getElementById("progressPanelToggle");
+  if (!shell || !panel || !body || !toggle) return;
+
+  const currentLang = () => {
+    if (typeof getLang === "function") return getLang();
+    return localStorage.getItem("ml_review_lang_v1") === "cn" ? "cn" : "en";
+  };
+
+  function updateToggleLabel(collapsed) {
+    const lang = currentLang();
+    const label = collapsed
+      ? (lang === "cn" ? "展开进度面板" : "Expand progress panel")
+      : (lang === "cn" ? "收起进度面板" : "Collapse progress panel");
+    toggle.setAttribute("aria-label", label);
+    toggle.setAttribute("title", label);
+  }
+
+  function setCollapsed(collapsed, persist = true) {
+    shell.classList.toggle("progress-panel-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    body.setAttribute("aria-hidden", String(collapsed));
+    if (collapsed) body.setAttribute("inert", "");
+    else body.removeAttribute("inert");
+    updateToggleLabel(collapsed);
+    if (persist) localStorage.setItem(PROGRESS_PANEL_KEY, collapsed ? "1" : "0");
+  }
+
+  setCollapsed(localStorage.getItem(PROGRESS_PANEL_KEY) === "1", false);
+  toggle.addEventListener("click", () => {
+    setCollapsed(!shell.classList.contains("progress-panel-collapsed"));
+  });
+  document.addEventListener("click", e => {
+    if (e.target.closest(".lang-switch button")) {
+      setTimeout(() => updateToggleLabel(shell.classList.contains("progress-panel-collapsed")), 0);
+    }
+  });
+}
+setupProgressPanelCollapse();
+
+// === Topic-page equation source anchors ===
+function equationSourceSlug(text) {
+  return String(text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\\[a-z]+/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "formula";
+}
+
+function setupEquationSourceAnchors() {
+  const file = (location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+  if (!file || file === "index" || file === "cheatsheet") return;
+
+  const seen = new Map();
+  const isChineseOnly = el => !!el.closest(".cn-only");
+  const cleanTitle = el => (el && el.textContent || "").replace(/\s+/g, " ").trim();
+
+  function assign(el, title) {
+    if (!el || isChineseOnly(el)) return;
+    const label = String(title || "").replace(/\s+/g, " ").trim();
+    if (!label) return;
+    const base = equationSourceSlug(label);
+    seen.set(base, (seen.get(base) || 0) + 1);
+    const suffix = seen.get(base) === 1 ? "" : `-${seen.get(base)}`;
+    el.id = `eq-${file}-${base}${suffix}`;
+    el.classList.add("eq-source-anchor");
+  }
+
+  document.querySelectorAll(".callout.formula").forEach(callout => {
+    assign(callout, cleanTitle(callout.querySelector(".head")));
+  });
+
+  document.querySelectorAll("section.topic.lesson-section.equations h3, section.topic.lesson-section.equations h4").forEach(heading => {
+    assign(heading, cleanTitle(heading));
+  });
+
+  document.querySelectorAll("section.topic.lesson-section.equations .cols2 > div").forEach(card => {
+    assign(card, cleanTitle(card.querySelector("h3, h4, .head")));
+  });
+
+  document.querySelectorAll("section.topic .cols2 > div").forEach(card => {
+    if (card.matches(".callout.formula")) return;
+    if (!card.querySelector(".eq")) return;
+    assign(card, cleanTitle(card.querySelector("h3, h4, .head")));
+  });
+
+  document.querySelectorAll("section.topic > h3 + .eq").forEach(eq => {
+    const heading = eq.previousElementSibling;
+    if (heading && /key equations/i.test(cleanTitle(heading))) assign(eq, "Core equation");
+  });
+
+  document.querySelectorAll("section.topic.examples h3, section.topic.examples h4, section.topic.tips h3, section.topic.tips h4").forEach(heading => {
+    assign(heading, cleanTitle(heading));
+  });
+
+  document.querySelectorAll("section.topic .mini-list h4").forEach(heading => {
+    assign(heading, cleanTitle(heading));
+  });
+
+  document.querySelectorAll(".callout.example .head").forEach(head => {
+    assign(head.closest(".callout") || head, cleanTitle(head));
+  });
+
+  if (location.hash && location.hash.slice(1).startsWith("eq-")) {
+    requestAnimationFrame(() => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const target = document.getElementById(id);
+      if (target) target.scrollIntoView({ block: "start" });
+    });
+  }
+}
+
+// === Collapsible topic-page table of contents ===
+const TOPIC_TOC_KEY = "ml_review_topic_toc_collapsed_v1";
+function reviewLang() {
+  if (typeof getLang === "function") return getLang();
+  const v = localStorage.getItem("ml_review_lang_v1");
+  return v === "cn" ? "cn" : "en";
+}
+
+function labelForLang(en, cn, lang = reviewLang()) {
+  if (lang === "cn") return cn || en;
+  return en || cn;
+}
+
+function topicName(topic, lang = reviewLang()) {
+  if (!topic) return "";
+  return labelForLang(topic.name_en, topic.name_cn, lang);
+}
+
+function groupName(groupId, lang = reviewLang()) {
+  const group = (window.GROUPS || []).find(g => g.id === groupId);
+  if (!group) return "";
+  return labelForLang(group.name_en, group.name_cn, lang);
+}
+
+function slugPart(text) {
+  const s = String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return s || "section";
+}
+
+function elementIsVisible(el) {
+  if (!el || !el.isConnected || !el.getClientRects().length) return false;
+  const style = window.getComputedStyle(el);
+  return style.display !== "none" && style.visibility !== "hidden";
+}
+
+function setupTopicPageToc() {
+  const aside = document.querySelector(".toc");
+  const main = document.querySelector(".block-main");
+  const toc = document.getElementById("topicToc");
+  const markBtn = document.getElementById("markRead");
+  if (!aside || !main || !toc || !markBtn) return;
+
+  const page = aside.closest(".block-page");
+  const slug = markBtn.dataset.block;
+  const currentTopic = (window.TOPICS || []).find(t => t.slug === slug);
+  const topAnchor = main.querySelector(".block-header") || main;
+  topAnchor.id = topAnchor.id || "topic-top";
+  topAnchor.style.scrollMarginTop = topAnchor.style.scrollMarginTop || "86px";
+
+  function ensurePanelChrome() {
+    let body = aside.querySelector(".toc-panel-body");
+    if (!body) {
+      body = document.createElement("div");
+      body.className = "toc-panel-body";
+      body.id = "topicTocPanelBody";
+
+      while (aside.firstChild) body.appendChild(aside.firstChild);
+
+      const toggle = document.createElement("button");
+      toggle.className = "toc-panel-handle";
+      toggle.id = "topicTocToggle";
+      toggle.type = "button";
+      toggle.setAttribute("aria-controls", body.id);
+      toggle.innerHTML = '<span class="toc-panel-handle-icon" aria-hidden="true"></span>';
+
+      const collapsedLabel = document.createElement("div");
+      collapsedLabel.className = "toc-collapsed-label";
+      collapsedLabel.setAttribute("aria-hidden", "true");
+
+      aside.appendChild(toggle);
+      aside.appendChild(collapsedLabel);
+      aside.appendChild(body);
+    }
+    return body;
+  }
+
+  const body = ensurePanelChrome();
+  const toggle = aside.querySelector(".toc-panel-handle");
+  const collapsedLabel = aside.querySelector(".toc-collapsed-label");
+
+  function updateCollapseCopy(collapsed) {
+    const lang = reviewLang();
+    const label = collapsed
+      ? labelForLang("Expand table of contents", "展开目录", lang)
+      : labelForLang("Collapse table of contents", "收起目录", lang);
+    toggle.setAttribute("aria-label", label);
+    toggle.setAttribute("title", label);
+    collapsedLabel.textContent = lang === "cn" ? "目录" : "TOC";
+  }
+
+  function setCollapsed(collapsed, persist = true) {
+    aside.classList.toggle("is-collapsed", collapsed);
+    if (page) page.classList.toggle("toc-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    body.setAttribute("aria-hidden", String(collapsed));
+    if (collapsed) body.setAttribute("inert", "");
+    else body.removeAttribute("inert");
+    updateCollapseCopy(collapsed);
+    if (persist) localStorage.setItem(TOPIC_TOC_KEY, collapsed ? "1" : "0");
+  }
+
+  setCollapsed(localStorage.getItem(TOPIC_TOC_KEY) === "1", false);
+  toggle.addEventListener("click", () => setCollapsed(!aside.classList.contains("is-collapsed")));
+
+  function headingAllowed(el, lang) {
+    if (!elementIsVisible(el)) return false;
+    if (lang === "en") return !el.closest(".cn-only");
+    if (lang === "cn") return !el.closest(".en-only");
+    return !el.closest(".cn-only");
+  }
+
+  function textForToc(el, lang) {
+    const clone = el.cloneNode(true);
+    if (lang === "en") clone.querySelectorAll(".cn-only").forEach(n => n.remove());
+    if (lang === "cn") clone.querySelectorAll(".en-only").forEach(n => n.remove());
+    return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  function headingAnchor(el, index, text) {
+    const section = el.closest("section.topic");
+    if (el.tagName === "H2" && section?.id) return section.id;
+    if (!el.id) {
+      const base = section?.id || slug || "topic";
+      el.id = `${base}-toc-${index + 1}-${slugPart(text)}`;
+    }
+    return el.id;
+  }
+
+  function buildRoadmap(lang) {
+    const topics = window.TOPICS || [];
+    const idx = topics.findIndex(t => t.slug === slug);
+    if (idx < 0) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "toc-roadmap";
+
+    const head = document.createElement("div");
+    head.className = "toc-section-head";
+    const title = document.createElement("span");
+    title.textContent = labelForLang("Roadmap Position", "路线位置", lang);
+    const count = document.createElement("span");
+    count.className = "toc-position-count";
+    count.textContent = `${idx + 1}/${topics.length}`;
+    head.append(title, count);
+
+    const group = document.createElement("div");
+    group.className = "toc-roadmap-group";
+    group.textContent = groupName(currentTopic?.group, lang);
+
+    const list = document.createElement("ol");
+    list.className = "toc-roadmap-list";
+    const start = Math.max(0, idx - 2);
+    const end = Math.min(topics.length - 1, idx + 2);
+    for (let i = start; i <= end; i += 1) {
+      const topic = topics[i];
+      const li = document.createElement("li");
+      li.className = i === idx ? "current" : "";
+      const a = document.createElement("a");
+      a.href = i === idx ? "#topic-top" : `${topic.slug}.html`;
+      const pos = document.createElement("span");
+      pos.className = "toc-roadmap-num";
+      pos.textContent = String(i + 1).padStart(2, "0");
+      const name = document.createElement("span");
+      name.className = "toc-roadmap-name";
+      name.textContent = topicName(topic, lang);
+      a.append(pos, name);
+      li.appendChild(a);
+      list.appendChild(li);
+    }
+
+    wrap.append(head, group, list);
+    return wrap;
+  }
+
+  let activeHeadings = [];
+  let activeLinks = [];
+
+  function updateActiveTocLink() {
+    if (!activeHeadings.length) return;
+    const topbar = document.querySelector(".topbar");
+    const top = (topbar ? topbar.getBoundingClientRect().height : 0) + 24;
+    let active = activeHeadings[0];
+    for (const item of activeHeadings) {
+      if (item.el.getBoundingClientRect().top <= top) active = item;
+      else break;
+    }
+    activeLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${active.id}`));
+  }
+
+  function smoothScrollToHash(hash) {
+    if (!hash || hash === "#") return false;
+    const id = decodeURIComponent(hash.slice(1));
+    const target = document.getElementById(id);
+    if (!target) return false;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    target.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+    if (history.pushState) history.pushState(null, "", hash);
+    else location.hash = hash;
+    setTimeout(updateActiveTocLink, reduceMotion ? 0 : 180);
+    return true;
+  }
+
+  function render() {
+    const lang = reviewLang();
+    const headings = Array.from(main.querySelectorAll("section.topic > h2, section.topic > h3"))
+      .filter(el => headingAllowed(el, lang));
+
+    toc.innerHTML = "";
+
+    const roadmap = buildRoadmap(lang);
+    if (roadmap) toc.appendChild(roadmap);
+
+    const section = document.createElement("div");
+    section.className = "toc-page-section";
+    const sectionHead = document.createElement("div");
+    sectionHead.className = "toc-section-head";
+    sectionHead.textContent = labelForLang("On This Page", "本页内容", lang);
+    const ul = document.createElement("ul");
+    ul.className = "toc-page-list";
+
+    activeHeadings = [];
+    activeLinks = [];
+    headings.forEach((el, index) => {
+      const text = textForToc(el, lang);
+      const id = headingAnchor(el, index, text);
+      const li = document.createElement("li");
+      li.className = el.tagName === "H2" ? "toc-depth-1" : "toc-depth-2";
+      const a = document.createElement("a");
+      a.href = `#${id}`;
+      a.textContent = text;
+      li.appendChild(a);
+      ul.appendChild(li);
+      activeHeadings.push({ el, id });
+      activeLinks.push(a);
+    });
+
+    section.append(sectionHead, ul);
+    toc.appendChild(section);
+    updateCollapseCopy(aside.classList.contains("is-collapsed"));
+    requestAnimationFrame(updateActiveTocLink);
+  }
+
+  render();
+  toc.addEventListener("click", e => {
+    const link = e.target.closest("a[href^='#']");
+    if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (smoothScrollToHash(link.getAttribute("href"))) e.preventDefault();
+  });
+  window.addEventListener("scroll", updateActiveTocLink, { passive: true });
+  window.addEventListener("hashchange", () => requestAnimationFrame(updateActiveTocLink));
+  document.addEventListener("click", e => {
+    if (e.target.closest(".lang-switch button")) {
+      setTimeout(render, 30);
+    }
   });
 }
 
@@ -158,6 +558,7 @@ function drawLines() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupEquationSourceAnchors();
   paintProgressOnHome();
   renderIndexTable();
   setupSearch();
@@ -218,21 +619,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Block page: highlight TOC active section while scrolling
-  const tocLinks = document.querySelectorAll(".toc a[href^='#']");
-  if (tocLinks.length) {
-    const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute("href"))).filter(Boolean);
-    const onScroll = () => {
-      let active = sections[0];
-      for (const s of sections) {
-        if (s.getBoundingClientRect().top < 120) active = s;
-      }
-      tocLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + active.id));
-    };
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-  }
-
   // === Topic page: inject "Python implementation" section from POPUP_DATA ===
   // The popup used to show code inline; we link to topics/<slug>.html#code
   // instead. This builds that section from popup-data.js at load time so we
@@ -246,21 +632,72 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!data || !data.code || !data.code.length) return;
     if (document.getElementById("code")) return;  // idempotent
 
-    const lang = localStorage.getItem("ml_review_lang_v1") || "en";
-    const tr = (cn, en) => lang === "cn" ? cn : (lang === "en" ? en : `${en} · ${cn}`);
-    const pickL = (o) => o ? (lang === "cn" ? (o.cn || o.en) : (o.en || o.cn)) : "";
-
     const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[c]));
+    const langSpans = (en, cn) => {
+      const safeEn = escHtml(en || cn || "");
+      const safeCn = escHtml(cn || en || "");
+      if (safeEn === safeCn) return safeEn;
+      return `<span class="en-only">${safeEn}</span><span class="cn-only">${safeCn}</span>`;
+    };
+    const titleHtml = (o) => {
+      if (!o) return "Python";
+      if (typeof o === "string") return escHtml(o);
+      return langSpans(o.en || o.cn || "Python", o.cn || o.en || "Python");
+    };
+    const commentTranslations = {
+      "离散期望与方差": "Discrete expectation and variance",
+      "协方差矩阵 + 最大特征向量（PCA 直觉）": "Covariance matrix + top eigenvector (PCA intuition)",
+      "线性 soft-margin SVM": "Linear soft-margin SVM",
+      "Hinge loss 手算": "Manual hinge-loss check",
+      "升序": "ascending order",
+      "前 k 个最大特征向量": "top-k eigenvectors",
+      "自动得到正确 shape": "autograd returns the correct shapes",
+      "OLMo-style 配置": "OLMo-style configuration",
+      "广播到图像形状": "broadcast to image shape"
+    };
+    const translateComment = (text) => {
+      const clean = String(text || "").trim();
+      return commentTranslations[clean] || clean.replace(/[\u4e00-\u9fff]+/g, "").replace(/\s+/g, " ").trim() || "note";
+    };
+    const englishCode = (code) => String(code || "").split("\n").map(line => {
+      const hash = line.indexOf("#");
+      if (hash < 0) return line;
+      const before = line.slice(0, hash);
+      const comment = line.slice(hash + 1);
+      if (!/[\u4e00-\u9fff]/.test(comment)) return line;
+      return `${before}# ${translateComment(comment)}`;
+    }).join("\n");
+    const highlightPython = (line) => {
+      const hash = line.indexOf("#");
+      const before = hash >= 0 ? line.slice(0, hash) : line;
+      const comment = hash >= 0 ? line.slice(hash) : "";
+      let html = escHtml(before);
+      html = html.replace(/(&quot;.*?&quot;|'[^']*?')/g, '<span class="py-string">$1</span>');
+      html = html.replace(/\b(def|return|import|from|as|for|if|else|elif|break|continue|class|with|in|assert|lambda)\b/g, '<span class="py-keyword">$1</span>');
+      html = html.replace(/\b(np|torch|nn|math|gym)\b/g, '<span class="py-module">$1</span>');
+      html = html.replace(/\b(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\b/gi, '<span class="py-number">$1</span>');
+      if (comment) html += `<span class="py-comment">${escHtml(comment)}</span>`;
+      return html || " ";
+    };
+    const codeEditor = (code, idx) => {
+      const lines = String(code || "").replace(/\s+$/g, "").split("\n");
+      return `
+        <div class="python-code-editor">
+          <ol class="python-code-lines">
+            ${lines.map(line => `<li><code>${highlightPython(line)}</code></li>`).join("")}
+          </ol>
+        </div>`;
+    };
 
     const blocks = data.code.map((c, i) => `
-      <details class="callout" ${i === 0 ? "open" : ""}
-               style="border-left-color: var(--info); background: var(--info-soft);">
-        <summary style="font-weight:700; cursor:pointer; color: var(--info); list-style: none;">
-          ${escHtml(pickL(c.title) || "Python")}
+      <details class="python-code-card" ${i === 0 ? "open" : ""}>
+        <summary class="python-code-summary">
+          ${titleHtml(c.title)}
         </summary>
-        <pre style="background:#fff; padding:14px 16px; border-radius:8px; overflow-x:auto; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; line-height:1.55; color: var(--text); margin:10px 0 0;"><code>${escHtml(c.code)}</code></pre>
+        <div class="en-only">${codeEditor(c.code_en || englishCode(c.code), i)}</div>
+        <div class="cn-only">${codeEditor(c.code_cn || c.code, i)}</div>
       </details>
     `).join("");
 
@@ -268,10 +705,11 @@ document.addEventListener("DOMContentLoaded", () => {
     section.className = "topic";
     section.id = "code";
     section.style.scrollMarginTop = "80px";
+    section.classList.add("python-section");
     section.innerHTML = `
-      <h2>${tr("🐍 Python 实现", "🐍 Python Implementation")}</h2>
-      <p style="font-size:13.5px; color: var(--text-soft);">
-        ${tr("参考实现，不是课程重点。", "Reference implementation — not the focus of this course.")}
+      <h2>${langSpans("🐍 Python Implementation", "🐍 Python 实现")}</h2>
+      <p class="python-section-note">
+        ${langSpans("Reference implementation.", "参考实现。")}
       </p>
       ${blocks}
     `;
@@ -287,7 +725,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const li = document.createElement("li");
       const a = document.createElement("a");
       a.href = "#code";
-      a.textContent = tr("🐍 Python 实现", "🐍 Python Implementation");
+      a.innerHTML = langSpans("🐍 Python Implementation", "🐍 Python 实现");
       a.style.color = "var(--text-soft)";
       a.style.fontSize = "13px";
       li.appendChild(a);
@@ -313,4 +751,6 @@ document.addEventListener("DOMContentLoaded", () => {
       refresh();
     });
   }
+
+  setupTopicPageToc();
 });
