@@ -2,7 +2,7 @@
 
 Final-exam roadmap for **ECE 449 / CS 446 — Introduction to Machine Learning**. From foundations through classical ML, deep learning, modern sequence models, learning theory and reinforcement learning, every core algorithm gets its own page with key formulas, exam pitfalls and a worked example.
 
-The whole site is bilingual. Use the **EN / EN+中 / 中** switch in the top right to flip between English-only, dual-language and Chinese-only modes. **English is the default.**
+The whole site is bilingual. Use the **EN / 中** switch in the top right to flip between English-only and Chinese modes. **English is the default.**
 
 🌐 **Live site:** [wyr186.github.io/ML_Atlas](https://wyr186.github.io/ML_Atlas/) — auto-deployed on every push to `main` via GitHub Actions.
 

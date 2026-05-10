@@ -6,7 +6,7 @@ A working memo for any Claude session that touches this repo. Read it before mak
 
 ## What this repo is
 
-`ML Atlas` is the user's personal final-exam review site for **ECE 449 / CS 446 — Introduction to Machine Learning** (Spring 2026, UIUC). Static HTML/CSS/vanilla JS, labuladong-style tree roadmap on the homepage, click-anchored popups for each algorithm, three-mode language switch, and an optional Python server that persists learning progress to a local JSON file.
+`ML Atlas` is the user's personal final-exam review site for **ECE 449 / CS 446 — Introduction to Machine Learning** (Spring 2026, UIUC). Static HTML/CSS/vanilla JS plus one ES-module that mounts a **React Flow** node-graph on the homepage. Each cell is an algorithm card; clicking a card pops a viewport-aware popover anchored to the cell. The site has a two-mode language switch (EN / CN) and an optional Python server that persists learning progress to a local JSON file.
 
 - GitHub remote: `git@github.com:WYR186/ML_Atlas.git` (branch `main`, default branch deploys to Pages)
 - Live site: `https://wyr186.github.io/ML_Atlas/` (auto-deployed by `.github/workflows/deploy.yml`)
@@ -32,7 +32,7 @@ ECE 449/
 
 ```
 ML Review/
-├── index.html                  homepage: Atlas + Mermaid + algorithm index
+├── index.html                  homepage: full-viewport React Flow Atlas + Mermaid + algorithm index
 ├── cheatsheet.html             one-page cram sheet (fully bilingual)
 ├── resources.html              slides / HW / textbook map
 ├── README.md                   pure English; deploy + run instructions
@@ -43,14 +43,33 @@ ML Review/
 │   └── deploy.yml              push-to-main → GitHub Pages
 ├── topics/                     37 algorithm pages, one per topic
 └── assets/
-    ├── style.css               visuals + i18n visibility + popup + slider thumb
+    ├── style.css               visuals + i18n visibility + popup + slider thumb + .home-shell + .rf-* nodes
     ├── progress-sync.js        ⚠ MUST load first; patches localStorage to /api/progress
-    ├── i18n.js                 EN / EN+中 / 中 + slider thumb alignment
+    ├── i18n.js                 EN / 中 + thumb alignment + scroll-preserving switches
     ├── topics-data.js          GROUPS + TOPICS metadata for cards
     ├── popup-data.js           tutorial / Python templates / HW problem entries
-    ├── popup.js                click-anchored popup component
-    └── main.js                 progress + search + connector lines + topic-page code injector
+    ├── popup.js                click-anchored popup; exposes window.openTopicPopup(slug, anchor)
+    ├── main.js                 progress + search (also targets .rf-topic) + topic-page code injector
+    └── atlas-rf.js             ES module — mounts React Flow Atlas in #rfMount
 ```
+
+`index.html` `<head>` loads the React stack via an import map + esm.sh:
+
+```html
+<link rel="stylesheet" href="https://esm.sh/@xyflow/react@12.3.5/dist/style.css" />
+<script type="importmap">{
+  "imports": {
+    "react":         "https://esm.sh/react@18.3.1",
+    "react/":        "https://esm.sh/react@18.3.1/",
+    "react-dom":     "https://esm.sh/react-dom@18.3.1",
+    "react-dom/":    "https://esm.sh/react-dom@18.3.1/",
+    "@xyflow/react": "https://esm.sh/@xyflow/react@12.3.5?external=react,react-dom"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+```
+
+The trailing-slash `react/` and `react-dom/` mappings are load-bearing — `@xyflow/react` internally imports `react/jsx-runtime`, which only resolves with the `/` mapping. Don't drop them.
 
 37 algorithm slugs (in homepage / table order):
 `probability, linear-algebra, optimization, knn, naive-bayes, linear-regression, logistic-regression, svm, kernel-methods, decision-trees, bagging, boosting, pca, kmeans, mlp, backpropagation, cnn, rnn, lstm, autoencoder, vae, contrastive, attention, positional-encoding, transformer, llm, diffusion, bayes-classifier, error-decomposition, pac, vc-dimension, mdp, value-functions, bellman, dynamic-programming, q-learning, policy-gradient`.
@@ -67,24 +86,44 @@ ML Review/
 3. **Every change pushes.** After committing, `git push` immediately. Standing rule.
 4. **Course PDFs never committed.** They live in the parent dir; symlinks are `.gitignore`d.
 5. **HW problems are paraphrased, not reproduced.** Problem labels are 1-line summaries of what each problem tests; answer sketches are my own conceptual reasoning. Always link to the source PDF for the full text. Never paste verbatim from `hw*_sol.pdf`.
-6. **English is the default language.** First-time visitors see English. `localStorage` key `ml_review_lang_v1` accepts `en` (default), `mixed`, `cn`. Static HTML markup uses `<html lang="en" data-lang="en">`.
+6. **English is the default language.** First-time visitors see English. `localStorage` key `ml_review_lang_v1` accepts only `en` (default) and `cn`. If legacy `mixed` is found, normalize it to `en`. Static HTML markup uses `<html lang="en" data-lang="en">`.
 7. **No Chinese in pure-EN mode anywhere visible.** This is enforced by an HTMLParser-based scan (every `data` event with CJK must have an `.en-only` / `.cn-only` / `data-i18n` ancestor). Run the scan after any content change — see "EN-leak audit" below.
 8. **One algorithm per cell, one page per topic.** No "Linear / Logistic" combo cards. The 37 slugs above are canonical.
 9. **No README/AGENT generation unless asked.** Don't proactively create planning docs.
 
 ---
 
-## Language modes (3-mode i18n)
+## Language modes (2-mode i18n)
 
-| Mode    | Behavior |
-| ------- | -------- |
-| `en`    | EN-only. `.cn-only` hidden via CSS; `.bi-text .cn` hidden. Default for new users. |
-| `cn`    | CN-only. `.en-only` hidden; `.bi-text .en` hidden. |
-| `mixed` | Both visible. Stacked labels (EN line above CN), shared leading emoji deduped. |
+The site has two language modes. The old `mixed` / EN+中 mode is discarded. Do not reintroduce an EN+中 button or a mixed-mode reading surface.
 
-**Slider component:** segmented `EN | EN+中 | 中` in the topbar (left → right). Thumb is positioned **with JS** via `getBoundingClientRect()` — no fragile percentage math. CSS rules `[data-active="..."]` give a fallback before JS runs. See `assets/i18n.js` `alignSliderThumb()`.
+| Mode | Behavior |
+| ---- | -------- |
+| `en` | **Pure English.** `.cn-only` and any legacy `.mixed-only` hidden via CSS; `.bi-text .cn` hidden. No CJK characters appear in visible EN-mode prose or controls. Default for new users. |
+| `cn` | **Chinese-dominant, English keywords inline.** Body prose is in Chinese, but technical terms that originated in English stay in English the first time they appear, often paired as `中文 / English`. `.en-only` and `.mixed-only` hidden; `.bi-text .en` hidden. |
 
-**Bilingual content patterns:**
+### What "Chinese-dominant + English keywords" actually means
+
+The CN body is a real Chinese explanation, not a literal translation of the English page. But ML jargon that students will see in papers, slides, and code stays in its English form rather than being translated into awkward Chinese. Examples of acceptable inline English in CN mode:
+
+- Technical terms on first mention: `条件独立 / Conditional independence`, `半正定 (PSD)`, `特征值 / eigenvalue`.
+- Terms with no clean Chinese equivalent: `Hessian`, `Lagrangian`, `Jacobian`, `softmax`, `posterior`, `prior`, `kernel trick`, `Slater`.
+- Code identifiers, variable names, math symbols, and slogans: `posterior $\propto$ likelihood × prior`.
+- Library / framework / model names: `PyTorch`, `Transformer`, `ReLU`.
+
+What is NOT acceptable in CN mode:
+
+- A whole English sentence sitting in CN body prose.
+- Translating Chinese back into English when there is a perfectly natural Chinese phrasing (e.g., write "梯度下降" not "梯度下降 (gradient descent)" everywhere — keep the EN keyword for first mention only).
+- Pasting the EN paragraph as a "翻译" alongside.
+
+### Toggle component
+
+A two-button switch in the topbar (segmented control with a sliding thumb), order **fixed**: `EN | CN` left → right. Thumb is positioned with JS via `getBoundingClientRect()` of the active button — no fragile percentage math. CSS `[data-active="..."]` rules give a fallback before JS runs. See `assets/i18n.js` `alignSliderThumb()`.
+
+Language switching must preserve the user's viewport position. `assets/i18n.js` captures the visible topic heading / anchor before changing `data-lang`, then restores the corresponding heading to the same screen position after the DOM visibility changes. Do not remove this behavior or replace it with a raw `applyLang()` call from the language buttons; switching EN / CN should feel stationary, not like the page jumped.
+
+### Bilingual content patterns
 
 ```html
 <!-- UI chrome via dictionary lookup -->
@@ -97,19 +136,14 @@ ML Review/
 <!-- Inline data attribute pattern (atlas cards, index table) -->
 <span data-cn="概率论" data-en="Probability">概率论</span>
 
-<!-- Source-note style (already in the RTF) -->
+<!-- Source-note style (kept for legacy callouts; new pages should prefer .en-only / .cn-only) -->
 <div class="bi-text">
   <span class="en">English summary.</span>
   <span class="cn">中文摘要。</span>
 </div>
 ```
 
-**Mixed mode rendering:**
-- For `data-i18n` elements: stacked `<span class="lbl-en">…</span><span class="lbl-cn">…</span>` with shared emoji deduped.
-- For `data-cn / data-en` elements: same stacking pattern in the inline scripts.
-- For `.en-only` / `.cn-only` blocks: both shown with a thin colored left border.
-
-**Topic pages** ship parallel structure:
+### Topic pages — parallel structure
 
 ```html
 <h1><span class="en-only">Probability</span><span class="cn-only">概率论</span></h1>
@@ -119,16 +153,22 @@ ML Review/
 </div>
 
 <div class="en-only">
-  <section class="topic" id="probability-en">…full English body…</section>
+  <section class="topic" id="probability-en">…full English body, all 9 sections…</section>
 </div>
 <div class="cn-only">
-  <section class="topic" id="probability-cn">…平行的中文原文…</section>
+  <section class="topic" id="probability-cn">…平行的中文版本，9 节齐全，技术名词保留英文…</section>
 </div>
 
 <!-- Python code injected at runtime by main.js, language-agnostic -->
 ```
 
+The CN section ships every one of the 9 sections present in EN; the CN reader gets the same teaching depth. A page with 9 EN sections and only 6 CN sections is incomplete.
+
 `topics-data.js` groups + topics carry **both** `name_en` / `name_cn` and `sub_en` / `sub_cn`. No single-language fields.
+
+### Legacy mixed-mode hooks
+
+`.mixed-only`, `.mixed-hide`, and `lbl-en` / `lbl-cn` stacking are legacy. Do not introduce new mixed-mode bodies. If legacy mixed-only content exists, it should remain hidden in both active modes until it is cleaned up.
 
 ---
 
@@ -192,16 +232,46 @@ On boot and on tab `focus`, `progress-sync.js` does `GET /api/progress` and merg
 Every page loads scripts in this order:
 
 ```html
-<script src="assets/progress-sync.js"></script>   <!-- patches localStorage; must be FIRST -->
-<script src="assets/i18n.js"></script>            <!-- reads localStorage immediately -->
-<script src="assets/topics-data.js"></script>     <!-- GROUPS + TOPICS -->
-<script src="assets/popup-data.js"></script>      <!-- POPUP_DATA (tutorials, code, problems) -->
-<script src="assets/popup.js"></script>           <!-- click handler -->
-<script src="assets/main.js"></script>            <!-- progress, search, code-section injector -->
-<script>…page-specific inline code…</script>
+<script src="assets/progress-sync.js"></script>      <!-- patches localStorage; must be FIRST -->
+<script src="assets/i18n.js"></script>               <!-- reads localStorage immediately -->
+<script src="assets/topics-data.js"></script>        <!-- GROUPS + TOPICS -->
+<script src="assets/popup-data.js"></script>         <!-- POPUP_DATA (tutorials, code, problems) -->
+<script src="assets/popup.js"></script>              <!-- exposes window.openTopicPopup -->
+<script src="assets/main.js"></script>               <!-- progress, search (.rf-topic + .node), code-section injector -->
+<script type="module" src="assets/atlas-rf.js"></script>  <!-- mounts React Flow Atlas; only on index.html -->
+<script>…page-specific inline code (Mermaid IIFE, index table)…</script>
 ```
 
+`atlas-rf.js` is a `type="module"` script (deferred by spec), so it runs after the synchronous scripts above — by then `window.GROUPS` / `TOPICS` / `POPUP_DATA` are populated.
+
 If you ever introduce a script that touches localStorage, make sure `progress-sync.js` still loads before it.
+
+---
+
+## Atlas (React Flow) homepage
+
+The Atlas view (default) and the Mermaid view share the same `<section class="home-shell">` shell — full-viewport (`calc(100vh - 65px)`) and **outside `.page`**, so it's not constrained by the `max-width: 1400px` page wrapper. The shell holds, in z-order:
+
+```
+.home-shell
+├── .roadmap.atlas-rf#roadmap        — React Flow canvas (background, full-bleed)
+├── .mermaid-view#mermaidView         — alt view, display:none by default
+├── .side-card.floating               — top-left progress / legend / actions overlay
+└── .view-switch.floating#viewSwitch  — top-right Atlas / Mermaid tab pill
+```
+
+`atlas-rf.js` mounts a React Flow tree into `#rfMount` (a child of `.roadmap.atlas-rf`):
+
+- Layout coordinates are **hand-placed** in `GROUP_LAYOUT` (top-left of each group + column count). Card width / height / per-group dimensions are computed from `CARD_W` / `CARD_H` / `CARD_GAP` / `PAD_X` / `PAD_TOP` / `PAD_BOTTOM` constants. Re-tune coordinates here when groups change — don't go back to auto-flow.
+- Topic cards are React Flow children of their group node (`parentId: "g-<gid>"` + `extent: "parent"`), so they move and clip with the parent.
+- Each node carries 4 invisible Handles (`tt / tb / tl / tr` for target, `st / sb / sl / sr` for source) so edges can pick a specific exit / entry direction. Edge specs are object form: `{ from, to, sh, th, dashed? }`.
+- Edges are `smoothstep`, default stroke `#aeb4c0` / 2.6px; **animated** + green (`#10b981` / 3.0px) when the source group is fully complete and the target group isn't (the user's "next thing to study" frontier). `dashed: true` flags analytical / cross-cutting links (currently `g-foundations → g-theory`).
+- Click → React Flow's `onNodeClick` → `window.openTopicPopup(node.id, eventTarget)`. **Don't replace this with a custom drawer.** popup.js already handles viewport-aware flipping (above/below + left clamp + capped maxHeight).
+- Cmd/Ctrl/Shift-click → `window.open("topics/<slug>.html", "_blank")`.
+- `fitView` runs on mount and on every `ResizeObserver` tick of `#roadmap` (padding `0.16`, duration `120`). View-switching to Mermaid hides the Atlas via `display:none`; switching back fires the observer and re-fits. **Container is `width:100% / height:100%`** — never style it with a graph-derived pixel height.
+- Reaching 100% across all topics fires `window.confetti(...)` once (re-arms when the user uncompletes anything).
+
+`popup.js` listens for clicks on `.node[data-slug]`. The React Flow cards use class `.rf-topic` (not `.node`), so popup.js's auto-listener does NOT intercept them — that's intentional, the click goes through `onNodeClick` instead. Don't add `.node` to the React Flow cards.
 
 ---
 
@@ -296,7 +366,13 @@ When the user asks to "update content" without naming a section, infer from this
 - **Inserting a script before `progress-sync.js`** — breaks the localStorage patch. Always put `progress-sync.js` first in `<script>` tags.
 - **Adding `data-i18n` without entries in `assets/i18n.js`** — element keeps its placeholder text in all modes. Always add the dictionary entry.
 - **Forgetting `sub_en` on a new topic / group** — the home index table will show empty cells in EN mode. Always add both `sub_en` and `sub_cn`.
-- **Bilingual `data-cn`/`data-en` rendered with `textContent` in mixed mode** — collapses to one language. Use the stacked-span pattern.
+- **Writing a CN body that is just a literal translation of the EN one** — the CN reader expects natural Chinese with English keywords inline (`Hessian`, `PSD`, `Lagrangian`, `softmax`), not a word-for-word render. See "Language modes" above.
 - **Reading TOC from `h2.textContent` without filtering** — picks up both EN and CN headings. Filter by `closest('.en-only' / '.cn-only')` ancestor.
 - **Spinning up another http.server on a different port for testing** — kills cross-session progress. Stick to one port (or use `serve.py` which makes it irrelevant).
 - **Committing `progress.json`** — git-ignored already, but double-check on big patches.
+- **Dropping the `react/` / `react-dom/` trailing-slash entries from the import map** — `@xyflow/react` imports `react/jsx-runtime` and the canvas renders blank with no console error if those mappings are missing.
+- **Replacing `window.openTopicPopup` with a custom drawer / direct navigation** — the user has stated multiple times they want the click-anchored popover. Click stays wired to `onNodeClick → window.openTopicPopup(node.id, anchor)`.
+- **Setting the React Flow container height from `buildLayout().height`** — that turns the page into a long-image scroll. The shell is `calc(100vh - 65px)`; the canvas is `width:100% / height:100%`; `fitView` handles scaling.
+- **Adding `.node` class to React Flow cards** — popup.js's auto-listener would then double-fire alongside `onNodeClick`. React Flow cards use `.rf-topic` only.
+- **Tuning edges with `sourceHandle: "sb" / targetHandle: "tt"` everywhere** — every fork collapses onto the same vector. Use the directional handles (`sl / sr / sb / sb` etc.) per-edge in the object-form `CONNS`.
+- **Detail topic page that just rephrases the slide bullet.** The 9-section template (Concept Understanding → Quick Checklist) is the bar — see [class-material-to-website](~/.claude/skills/class-material-to-website/SKILL.md#topic-detail-page--9-section-template). Each section must be present in both EN and CN parallel bodies (CN is Chinese-dominant with English keywords inline, not a literal translation).
