@@ -244,10 +244,69 @@
       return String(s).replace(/"/g, "'").replace(/[\[\]()<>]/g, " ");
     }
 
+    // ────────────────────────────────────────────────────────────────
+    // Per-group palette + node shape — Material-style soft fill /
+    // saturated stroke / dark text, so each "block" of the roadmap
+    // reads as a coherent zone instead of a uniform gray grid.
+    // Two palettes (light + dark) so the chart stays high-contrast
+    // when the page theme flips. Shape varies a little by group
+    // "kind": theory is analytical (hexagon), generative is
+    // pipeline-y (cylinder), RL is agent-loop (trapezoid), the rest
+    // are standard stadium rounded-rect.
+    // ────────────────────────────────────────────────────────────────
+    const GROUP_STYLES_LIGHT = {
+      foundations:    { sub: { fill: "#E8F5E9", stroke: "#2E7D32", text: "#1B5E20" }, node: { fill: "#F1F8F2", stroke: "#43A047", text: "#1B5E20" } },
+      supervised:     { sub: { fill: "#E3F2FD", stroke: "#1976D2", text: "#0D47A1" }, node: { fill: "#EFF7FE", stroke: "#42A5F5", text: "#0D47A1" } },
+      trees:          { sub: { fill: "#FFF3E0", stroke: "#EF6C00", text: "#E65100" }, node: { fill: "#FFF8EE", stroke: "#FB8C00", text: "#E65100" } },
+      unsupervised:   { sub: { fill: "#FCE4EC", stroke: "#C2185B", text: "#880E4F" }, node: { fill: "#FDEEF3", stroke: "#EC407A", text: "#880E4F" } },
+      neural:         { sub: { fill: "#F3E5F5", stroke: "#7B1FA2", text: "#4A148C" }, node: { fill: "#F8EEFA", stroke: "#AB47BC", text: "#4A148C" } },
+      sequential:     { sub: { fill: "#E0F7FA", stroke: "#00838F", text: "#006064" }, node: { fill: "#EBFBFD", stroke: "#26C6DA", text: "#006064" } },
+      representation: { sub: { fill: "#FFF8E1", stroke: "#F9A825", text: "#F57F17" }, node: { fill: "#FFFBEC", stroke: "#FFCA28", text: "#F57F17" } },
+      modern:         { sub: { fill: "#EDE7F6", stroke: "#512DA8", text: "#311B92" }, node: { fill: "#F3EEF9", stroke: "#7E57C2", text: "#311B92" } },
+      generative:     { sub: { fill: "#FFEBEE", stroke: "#C62828", text: "#B71C1C" }, node: { fill: "#FDEFF1", stroke: "#EF5350", text: "#B71C1C" } },
+      theory:         { sub: { fill: "#ECEFF1", stroke: "#455A64", text: "#263238" }, node: { fill: "#F4F6F7", stroke: "#78909C", text: "#263238" } },
+      rl:             { sub: { fill: "#E8EAF6", stroke: "#303F9F", text: "#1A237E" }, node: { fill: "#EEF0FA", stroke: "#5C6BC0", text: "#1A237E" } },
+    };
+    const GROUP_STYLES_DARK = {
+      foundations:    { sub: { fill: "#11241A", stroke: "#34D399", text: "#A7F3D0" }, node: { fill: "#152D22", stroke: "#34D399", text: "#D1FAE5" } },
+      supervised:     { sub: { fill: "#0F1F33", stroke: "#60A5FA", text: "#BFDBFE" }, node: { fill: "#13263D", stroke: "#60A5FA", text: "#DBEAFE" } },
+      trees:          { sub: { fill: "#2E1808", stroke: "#FB923C", text: "#FED7AA" }, node: { fill: "#371E0D", stroke: "#FB923C", text: "#FFEDD5" } },
+      unsupervised:   { sub: { fill: "#2A101D", stroke: "#F472B6", text: "#FBCFE8" }, node: { fill: "#321324", stroke: "#F472B6", text: "#FCE7F3" } },
+      neural:         { sub: { fill: "#22132F", stroke: "#C084FC", text: "#E9D5FF" }, node: { fill: "#291739", stroke: "#C084FC", text: "#EDE9FE" } },
+      sequential:     { sub: { fill: "#0D2229", stroke: "#22D3EE", text: "#A5F3FC" }, node: { fill: "#102B33", stroke: "#22D3EE", text: "#CFFAFE" } },
+      representation: { sub: { fill: "#2D2009", stroke: "#FBBF24", text: "#FDE68A" }, node: { fill: "#36270C", stroke: "#FBBF24", text: "#FEF3C7" } },
+      modern:         { sub: { fill: "#1B153A", stroke: "#A78BFA", text: "#DDD6FE" }, node: { fill: "#211946", stroke: "#A78BFA", text: "#E0E7FF" } },
+      generative:     { sub: { fill: "#2A0F0F", stroke: "#F87171", text: "#FECACA" }, node: { fill: "#321414", stroke: "#F87171", text: "#FEE2E2" } },
+      theory:         { sub: { fill: "#1B232B", stroke: "#94A3B8", text: "#E2E8F0" }, node: { fill: "#212B36", stroke: "#94A3B8", text: "#F1F5F9" } },
+      rl:             { sub: { fill: "#171E47", stroke: "#818CF8", text: "#C7D2FE" }, node: { fill: "#1B2353", stroke: "#818CF8", text: "#E0E7FF" } },
+    };
+
+    // Map group → node shape. `stadium` is the default rounded pill.
+    // Special-cased: theory (analytical → hexagon),
+    //                generative (process → cylinder),
+    //                rl (agent-loop → trapezoid).
+    const SHAPE_BY_GROUP = {
+      theory: "hex",
+      generative: "cyl",
+      rl: "trap",
+    };
+    function wrapShape(slug, label, shape) {
+      switch (shape) {
+        case "hex":  return `${slug}{{"${label}"}}`;
+        case "cyl":  return `${slug}[("${label}")]`;
+        case "trap": return `${slug}[/"${label}"\\]`;
+        case "rect": return `${slug}["${label}"]`;
+        default:     return `${slug}(["${label}"])`;
+      }
+    }
+
     function buildGraph() {
       const lang = (typeof getLang === "function") ? getLang() : (localStorage.getItem("ml_review_lang_v1") || "en");
       const pickName = (o) => lang === "cn" ? (o.name_cn || o.name_en) : (o.name_en || o.name_cn);
       const rootSub  = lang === "cn" ? "机器学习 · 期末复习" : "Machine Learning · Final Review";
+      const isDark   = document.documentElement.getAttribute("data-theme") === "dark";
+      const PAL      = isDark ? GROUP_STYLES_DARK : GROUP_STYLES_LIGHT;
+      const edgeLine = isDark ? "#94A3B8" : "#94A3B8";
       const lines = [];
 
       lines.push("flowchart TB");
@@ -259,10 +318,11 @@
         const g = (window.GROUPS || []).find(x => x.id === gid);
         if (!g) continue;
         const topics = (window.TOPICS || []).filter(t => t.group === gid);
+        const shape  = SHAPE_BY_GROUP[gid] || "stadium";
         lines.push(`  subgraph ${gid}["${escMer(pickName(g))}"]`);
         lines.push("    direction TB");
         for (const t of topics) {
-          lines.push(`    ${t.slug}(["${escMer(pickName(t))}"])`);
+          lines.push(`    ${wrapShape(t.slug, escMer(pickName(t)), shape)}`);
         }
         for (const [a, b] of (INTRA_EDGES[gid] || [])) {
           lines.push(`    ${a} --> ${b}`);
@@ -278,29 +338,42 @@
       // Inter-subgraph edges (knowledge tree).
       for (const [a, b] of EDGES) lines.push(`  ${a} --> ${b}`);
 
-      // Dotted edges last so we can target their indices via linkStyle.
-      for (const [a, b] of DOTTED_EDGES) lines.push(`  ${a} -.-> ${b}`);
-
-      // Difficulty: border color only, white fill, dark text.
-      lines.push("");
-      lines.push("  classDef green  fill:#ffffff,stroke:#10b981,stroke-width:2px,color:#1f2937;");
-      lines.push("  classDef yellow fill:#ffffff,stroke:#f59e0b,stroke-width:2px,color:#1f2937;");
-      lines.push("  classDef red    fill:#ffffff,stroke:#ef4444,stroke-width:2px,color:#1f2937;");
-      for (const t of (window.TOPICS || [])) {
-        lines.push(`  class ${t.slug} ${t.diff || "yellow"};`);
+      // Dotted edges — analytical / cross-cutting links. Add a small
+      // edge label so the relationship type is self-explanatory.
+      const dashedLabel = lang === "cn" ? "分析" : "analysis";
+      for (const [a, b] of DOTTED_EDGES) {
+        lines.push(`  ${a} -. "${dashedLabel}" .-> ${b}`);
       }
 
-      // Subgraphs: unified white background, light gray thicker border.
+      // Per-group node styling — every topic in `gid` inherits the
+      // group's pastel `node` fill + saturated stroke + dark text via a
+      // classDef named after the group id.
       lines.push("");
       for (const gid of ORDER) {
-        lines.push(`  style ${gid} fill:#ffffff,stroke:#cbd5e1,stroke-width:2px,color:#475569;`);
+        const n = PAL[gid].node;
+        lines.push(`  classDef ${gid}-node fill:${n.fill},stroke:${n.stroke},stroke-width:1.8px,color:${n.text};`);
       }
-      // Root: white fill, thick green border.
-      lines.push("  style root fill:#ffffff,stroke:#10b981,stroke-width:3px,color:#1f2937;");
+      for (const t of (window.TOPICS || [])) {
+        lines.push(`  class ${t.slug} ${t.group}-node;`);
+      }
 
-      // Default edge style — gray stroke, 2.4px. Dashed pattern for the
-      // theory → supervised analytical edge is applied via index below.
-      lines.push("  linkStyle default stroke:#9ca3af,stroke-width:2.4px;");
+      // Per-group subgraph styling — richer fill / stroke / label color
+      // than the previous uniform gray.
+      lines.push("");
+      for (const gid of ORDER) {
+        const s = PAL[gid].sub;
+        lines.push(`  style ${gid} fill:${s.fill},stroke:${s.stroke},stroke-width:2.4px,color:${s.text},rx:14,ry:14;`);
+      }
+      // Root: slightly stronger frame so it reads as the entry point.
+      const rootFill   = isDark ? "#131c2e" : "#FFFFFF";
+      const rootStroke = isDark ? "#34D399" : "#10b981";
+      const rootText   = isDark ? "#F1F5F9" : "#1f2937";
+      lines.push(`  style root fill:${rootFill},stroke:${rootStroke},stroke-width:3px,color:${rootText};`);
+
+      // Edges: default soft slate stroke, slightly thicker so the lines
+      // read at the new contrast level. The dashed cross-cutting edge
+      // is restyled by index below.
+      lines.push(`  linkStyle default stroke:${edgeLine},stroke-width:2.4px;`);
 
       // Edges are globally indexed in source order:
       //   intra-subgraph edges → inter-subgraph edges → dotted edges
@@ -309,7 +382,7 @@
       const dottedStart = intraTotal + EDGES.length;
       DOTTED_EDGES.forEach((_, i) => {
         const idx = dottedStart + i;
-        lines.push(`  linkStyle ${idx} stroke:#9ca3af,stroke-width:2.4px,stroke-dasharray:6 4;`);
+        lines.push(`  linkStyle ${idx} stroke:${edgeLine},stroke-width:2.4px,stroke-dasharray:6 4;`);
       });
 
       return lines.join("\n");
