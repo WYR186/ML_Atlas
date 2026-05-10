@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>📚 Algorithm Index · ECE 449 / CS 446</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo">ML</span><span data-i18n="brand.short">ECE 449 / CS 446</span></a>
+    <nav class="nav-links">
+      <a href="index.html" data-i18n="nav.roadmap">🗺️ 路线图</a>
+      <a href="topics/probability.html" data-i18n="nav.notes">📘 速查</a>
+      <a href="algorithms.html" class="active" data-i18n="nav.algorithms">📚 算法表</a>
+      <a href="cheatsheet.html" data-i18n="nav.cheatsheet">⚡ 公式大全</a>
+      <a href="resources.html" data-i18n="nav.resources">📂 资料</a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="搜索算法…" data-i18n="search.placeholder" data-i18n-attr="placeholder" />
+    </div>
+  </div>
+</header>
+
+<div class="page algo-index-page">
+  <div class="block-header" style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:18px;">
+    <div class="crumbs">
+      <a href="index.html" data-i18n="crumbs.roadmap">Roadmap</a> /
+      <span class="en-only">Algorithm Index</span><span class="cn-only">完整算法表</span>
+    </div>
+    <h1 style="margin:0;font-size:28px;">
+      <span class="en-only">📚 Complete Algorithm Index</span>
+      <span class="cn-only">📚 完整核心算法表</span>
+    </h1>
+    <div class="subtitle" style="color:var(--text-soft);margin-top:6px;">
+      <span class="en-only">Every algorithm in the course on one page. Use the filters below to slice by paradigm, task, model family, block, or difficulty.</span>
+      <span class="cn-only">本课所有算法集中索引；可按学习范式 / 任务 / 模型族 / Block / 难度组合筛选。</span>
+    </div>
+  </div>
+
+  <!-- Filter panel -->
+  <section class="algo-filter" id="algoFilter">
+    <div class="algo-filter-bar">
+      <div class="algo-filter-summary">
+        <span class="en-only">Showing <strong id="algoVisibleCount">0</strong> / <strong id="algoTotalCount">0</strong> algorithms</span>
+        <span class="cn-only">显示 <strong id="algoVisibleCountCn">0</strong> / <strong id="algoTotalCountCn">0</strong> 个算法</span>
+      </div>
+      <div class="algo-filter-actions">
+        <button class="btn btn-small" id="algoFilterToggle" type="button" aria-expanded="false">
+          <span class="en-only">🔍 Filters</span><span class="cn-only">🔍 筛选</span>
+        </button>
+        <button class="btn btn-small" id="algoSelectAll" type="button" hidden>
+          <span class="en-only">✅ Select all</span><span class="cn-only">✅ 全选</span>
+        </button>
+        <button class="btn btn-small" id="algoClearAll" type="button" hidden>
+          <span class="en-only">🗑️ Clear all</span><span class="cn-only">🗑️ 全不选</span>
+        </button>
+        <button class="btn btn-small" id="algoResetFilters" type="button" hidden>
+          <span class="en-only">↺ Reset</span><span class="cn-only">↺ 重置</span>
+        </button>
+      </div>
+    </div>
+    <div class="algo-filter-body" id="algoFilterBody" hidden></div>
+  </section>
+
+  <div id="algoIndexBody" class="algo-index-body"></div>
+
+  <p class="algo-empty" id="algoEmpty" hidden>
+    <span class="en-only">No algorithm matches the current filters. Try clicking <strong>↺ Reset</strong> or selecting more chips.</span>
+    <span class="cn-only">没有算法匹配当前筛选条件。点击 <strong>↺ 重置</strong> 或勾选更多分类。</span>
+  </p>
+</div>
+
+<footer>
+  <span class="en-only">37 algorithms · grouped by Block · filterable by paradigm, task, model family, difficulty</span>
+  <span class="cn-only">37 个算法 · 按 Block 分组 · 支持范式 / 任务 / 模型族 / 难度多维筛选</span>
+</footer>
+
+<script src="assets/progress-sync.js"></script>
+<script src="assets/i18n.js"></script>
+<script src="assets/topics-data.js"></script>
+<script src="assets/algorithm-tags.js"></script>
+<script src="assets/popup-data.js"></script>
+<script src="assets/popup.js"></script>
+<script src="assets/main.js"></script>
+<script src="assets/algorithm-index.js"></script>
+</body>
+</html>
