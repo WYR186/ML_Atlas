@@ -4,6 +4,8 @@ Final-exam roadmap for **ECE 449 / CS 446 — Introduction to Machine Learning**
 
 The whole site is bilingual. Use the **EN / EN+中 / 中** switch in the top right to flip between English-only, dual-language and Chinese-only modes. **English is the default.**
 
+🌐 **Live site:** [wyr186.github.io/ML_Atlas](https://wyr186.github.io/ML_Atlas/) — auto-deployed on every push to `main` via GitHub Actions.
+
 ## Layout
 
 ```
