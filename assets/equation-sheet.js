@@ -8,41 +8,116 @@
     {
       "title": "Continuous expectation",
       "eq": "$$ \\mathbb{E}[X]=\\int x\\,p(x)\\,dx $$",
+      "symbols": [
+        { "sym": "$\\mathbb{E}[X]$", "en": "expected value (mean) of random variable $X$",         "cn": "随机变量 $X$ 的期望（均值）" },
+        { "sym": "$X$",              "en": "continuous random variable",                              "cn": "连续随机变量" },
+        { "sym": "$p(x)$",           "en": "probability density function (PDF) of $X$",               "cn": "$X$ 的概率密度函数 (PDF)" },
+        { "sym": "$\\int \\cdot\\, dx$", "en": "integral over the entire support of $X$",             "cn": "在 $X$ 整个取值范围上积分" }
+      ],
+      "usage_en": "Use whenever you need the average of a continuous quantity. For discrete variables replace $\\int p(x)\\,dx$ with $\\sum P(x)$. Linearity holds: $\\mathbb{E}[aX+bY]=a\\mathbb{E}[X]+b\\mathbb{E}[Y]$ even when $X,Y$ aren't independent.",
+      "usage_cn": "需要连续量的平均值时使用。离散情况把 $\\int p(x)\\,dx$ 换成 $\\sum P(x)$ 即可。线性性始终成立：$\\mathbb{E}[aX+bY]=a\\mathbb{E}[X]+b\\mathbb{E}[Y]$，即使 $X,Y$ 不独立。",
+      "intuition_en": "Weighted average — sum (integrate) every possible value times the probability mass / density at that value. The 'expected' value is what you'd see on average across many samples.",
+      "intuition_cn": "加权平均 —— 把每个可能取值乘以它出现的概率（密度）后加起来。\"期望\" 就是大量重复采样后看到的平均结果。",
       "source": "topics/probability.html#eq-probability-expectation-variance"
     },
     {
       "title": "Conditional Probability",
       "eq": "$$ P(A\\mid B)=\\frac{P(A,B)}{P(B)},\\qquad P(B)>0 $$",
+      "symbols": [
+        { "sym": "$P(A\\mid B)$", "en": "probability of $A$ given that $B$ has occurred", "cn": "已知 $B$ 发生时 $A$ 的概率" },
+        { "sym": "$P(A,B)$",     "en": "joint probability — both $A$ and $B$ happen",     "cn": "联合概率 —— $A$ 与 $B$ 同时发生" },
+        { "sym": "$P(B)>0$",     "en": "non-zero divisor required — can't condition on impossible events", "cn": "分母非零 —— 不能在不可能事件上做条件" }
+      ],
+      "usage_en": "Reduce a joint distribution to a conditional. Rearranging gives the chain rule: $P(A,B)=P(A\\mid B)P(B)=P(B\\mid A)P(A)$. Backbone of every probabilistic model that updates beliefs from data.",
+      "usage_cn": "把联合分布转成条件分布。变形得链式法则：$P(A,B)=P(A\\mid B)P(B)=P(B\\mid A)P(A)$。所有 \"用数据更新信念\" 的概率模型的基础。",
+      "intuition_en": "'After learning $B$, restrict the sample space to $B$.' You normalize the joint mass on $A\\cap B$ by the total mass on $B$ to get the new fractional weight of $A$.",
+      "intuition_cn": "\"知道了 $B$ 之后，把样本空间收缩到 $B$ 之内。\" 把交集 $A\\cap B$ 的概率除以 $B$ 的概率，就是 $A$ 在新样本空间下的占比。",
       "source": "topics/probability.html#eq-probability-conditional-probability"
     },
     {
       "title": "Bayes' Rule",
       "eq": "$$ P(A\\mid B)=\\frac{P(B\\mid A)\\,P(A)}{P(B)} $$",
+      "symbols": [
+        { "sym": "$P(A\\mid B)$", "en": "**posterior** — what you want: belief in $A$ after seeing $B$", "cn": "**posterior** —— 想要的量：观察到 $B$ 后对 $A$ 的信念" },
+        { "sym": "$P(B\\mid A)$", "en": "**likelihood** — how well $A$ explains the observation",          "cn": "**likelihood** —— $A$ 对观测的解释程度" },
+        { "sym": "$P(A)$",       "en": "**prior** — belief in $A$ before seeing any evidence",            "cn": "**prior** —— 看到证据之前对 $A$ 的信念" },
+        { "sym": "$P(B)$",       "en": "**evidence** — normalizing constant via $\\sum_a P(B\\mid a)P(a)$", "cn": "**evidence** —— 归一化常数，用 $\\sum_a P(B\\mid a)P(a)$ 算" }
+      ],
+      "usage_en": "Use to flip conditional direction: you have $P(B\\mid A)$ and $P(A)$, want $P(A\\mid B)$. The denominator is often dropped (write $P(A\\mid B)\\propto P(B\\mid A)P(A)$) because it doesn't depend on $A$ — fine for argmax (MAP) but needed for actual probabilities.",
+      "usage_cn": "需要 \"翻转条件方向\" 时用：手上有 $P(B\\mid A)$ 和 $P(A)$，想要 $P(A\\mid B)$。分母经常省掉（写成 $P(A\\mid B)\\propto P(B\\mid A)P(A)$）—— 因为它与 $A$ 无关，做 argmax (MAP) 没影响；要真实概率才需要。",
+      "intuition_en": "'Posterior $\\propto$ prior $\\times$ likelihood.' Update what you believed before by how well each hypothesis explains what you saw. The whole framework of probabilistic ML is one application of this formula.",
+      "intuition_cn": "\"posterior $\\propto$ prior $\\times$ likelihood\"。用 \"每个假设对观测的解释程度\" 去更新你之前的信念。整个概率 ML 框架都是这个公式的应用。",
       "source": "topics/probability.html#eq-probability-bayes-rule"
     },
     {
       "title": "Independence",
       "eq": "$$ P(A,B)=P(A)P(B)\\;\\Leftrightarrow\\;P(A\\mid B)=P(A) $$",
+      "symbols": [
+        { "sym": "$A,B$",     "en": "two events / random variables",                                cn: "两个事件 / 随机变量" },
+        { "sym": "$P(A,B)$",  "en": "joint probability",                                            cn: "联合概率" },
+        { "sym": "$\\Leftrightarrow$", "en": "if-and-only-if — the two definitions are equivalent", cn: "充要条件 —— 两个定义等价" }
+      ],
+      "usage_en": "Test whether two variables share information. If independent, the joint factorizes into marginals — that simplifies modeling, parameter counts, and computation enormously. Use sample frequencies / chi-square tests to check empirically.",
+      "usage_cn": "判断两个变量是否共享信息。独立 → 联合分布可以分解为各自的 marginal —— 极大简化建模、参数量和计算。实证检验用样本频率或 chi-square test。",
+      "intuition_en": "'Knowing $B$ tells you nothing new about $A$.' The probability of $A$ doesn't budge when you condition on $B$. Independence is rare in real data; conditional independence (Naive Bayes) is more common.",
+      "intuition_cn": "\"知道 $B$ 对 $A$ 没有任何新信息。\" 在 $B$ 上做条件后 $A$ 的概率不变。真实数据里独立很罕见，条件独立（Naive Bayes）更常见。",
       "source": "topics/probability.html#eq-probability-independence"
     },
     {
       "title": "Conditional Independence",
       "eq": "$$ P(A,B\\mid C)=P(A\\mid C)\\,P(B\\mid C) $$",
+      "symbols": [
+        { "sym": "$A,B$",          "en": "two random variables (often features)",            cn: "两个随机变量（常为特征）" },
+        { "sym": "$C$",            "en": "the conditioning variable (often class label $Y$)", cn: "条件变量（常为类别标签 $Y$）" },
+        { "sym": "$P(A\\mid C)$",  "en": "marginal-like factor for $A$ within the slice $C=c$", cn: "在 $C=c$ 切片内 $A$ 的边缘式因子" }
+      ],
+      "usage_en": "Backbone of Naive Bayes: assume features are independent **given the class**, even though they may be correlated marginally. Lets you fit each $P(X_j\\mid Y)$ separately instead of the joint.",
+      "usage_cn": "Naive Bayes 的核心：假设 \"给定类别下\" 各特征独立，尽管 marginally 相关。可以分别拟合每个 $P(X_j\\mid Y)$，不必估联合。",
+      "intuition_en": "'Once you know $C$, the link between $A$ and $B$ is gone.' Stronger than independence in only one direction: conditional independence does NOT imply marginal independence and vice versa.",
+      "intuition_cn": "\"知道 $C$ 之后，$A$ 与 $B$ 的关系就断了。\" 与独立性不能互相推出 —— 边缘独立不一定条件独立，反之亦然。",
       "source": "topics/probability.html#eq-probability-conditional-independence"
     },
     {
       "title": "Law of Total Probability",
       "eq": "$$ P(B)=\\sum_{a}P(B\\mid A=a)\\,P(A=a) $$",
+      "symbols": [
+        { "sym": "$P(B)$",          "en": "marginal probability of $B$",                       cn: "$B$ 的边缘概率" },
+        { "sym": "$P(B\\mid A=a)$", "en": "conditional probability of $B$ given $A=a$",         cn: "在 $A=a$ 条件下 $B$ 的概率" },
+        { "sym": "$P(A=a)$",        "en": "weight given to scenario $a$ — must sum to 1 over $a$", cn: "情形 $a$ 的权重 —— 对所有 $a$ 求和等于 1" }
+      ],
+      "usage_en": "Compute a marginal by summing/integrating over a hidden variable. This is the denominator $P(B)$ in Bayes's rule, and the way you 'eliminate' nuisance variables in any joint distribution.",
+      "usage_cn": "通过对隐变量求和（积分）算 marginal。Bayes 公式里的 $P(B)$ 就这么算的；任何联合分布想 \"消去\" 麻烦变量也都用它。",
+      "intuition_en": "'Cover all the cases for $A$, weight each by how likely $A$ took that value, and sum.' Like splitting an integral over a partition of the sample space.",
+      "intuition_cn": "\"$A$ 的所有可能情形遍历一遍，按每种情形的概率加权求和。\" 相当于把积分按样本空间的划分拆开来算。",
       "source": "topics/probability.html#eq-probability-law-of-total-probability"
     },
     {
       "title": "Expectation & Variance",
       "eq": "$$ \\mathbb{E}[X]=\\sum_x x\\,P(x),\\quad \\mathrm{Var}(X)=\\mathbb{E}[X^2]-\\mathbb{E}[X]^2 $$",
+      "symbols": [
+        { "sym": "$\\mathbb{E}[X]$",   "en": "mean (discrete form here)",                                  cn: "均值（这里是离散形式）" },
+        { "sym": "$\\mathrm{Var}(X)$", "en": "variance — average squared deviation from the mean",         cn: "方差 —— 与均值的平均平方偏差" },
+        { "sym": "$\\mathbb{E}[X^2]$", "en": "mean of the squared values (a.k.a. raw second moment)",      cn: "平方的均值（即二阶原点矩）" }
+      ],
+      "usage_en": "The right-hand identity $\\mathrm{Var}(X)=\\mathbb{E}[X^2]-\\mathbb{E}[X]^2$ is the fastest way to compute variance in code or by hand: one pass to accumulate $\\sum x_i^2$ and $\\sum x_i$, no need to revisit the mean. Standard deviation is $\\sqrt{\\mathrm{Var}(X)}$.",
+      "usage_cn": "右边的恒等式 $\\mathrm{Var}(X)=\\mathbb{E}[X^2]-\\mathbb{E}[X]^2$ 是手算或代码里算方差最快的方式：一次循环累加 $\\sum x_i^2$ 和 $\\sum x_i$ 即可，不用回头再用均值算偏差。标准差是 $\\sqrt{\\mathrm{Var}(X)}$。",
+      "intuition_en": "Mean answers 'where is the distribution centered?'; variance answers 'how spread out is it?'. The squared form magnifies large deviations more than small ones, which is why variance is sensitive to outliers.",
+      "intuition_cn": "均值回答 \"分布中心在哪\"，方差回答 \"分散程度多大\"。平方形式让大偏差被放大，所以方差对 outlier 敏感。",
       "source": "topics/probability.html#eq-probability-expectation-variance"
     },
     {
       "title": "Naive Bayes Factorization (preview)",
       "eq": "$$ P(Y\\mid X_1,\\dots,X_d) \\;\\propto\\; P(Y)\\prod_{i=1}^{d} P(X_i\\mid Y) $$",
+      "symbols": [
+        { "sym": "$Y$",                   "en": "class label (random variable to predict)",                       cn: "类别标签（要预测的随机变量）" },
+        { "sym": "$X_1,\\dots,X_d$",       "en": "$d$ observed features for one sample",                          cn: "一个样本的 $d$ 个观测特征" },
+        { "sym": "$\\propto$",             "en": "proportional to — the constant denominator $P(X_1,\\dots,X_d)$ is dropped", cn: "正比于 —— 常数分母 $P(X_1,\\dots,X_d)$ 省略" },
+        { "sym": "$\\prod_{i=1}^{d}$",     "en": "factorization across features (uses conditional independence)",  cn: "对特征连乘（用了条件独立假设）" }
+      ],
+      "usage_en": "Apply Bayes's rule, then assume conditional independence to break $P(X_1,\\dots,X_d\\mid Y)$ into a product. Pick the class $y$ that maximizes the right-hand side. This preview becomes the full Naive Bayes algorithm in Block 2.",
+      "usage_cn": "先用 Bayes 公式，再用条件独立把 $P(X_1,\\dots,X_d\\mid Y)$ 拆成连乘。选让右边最大的类别 $y$。这个 \"preview\" 在 Block 2 就是完整的 Naive Bayes 算法。",
+      "intuition_en": "'Posterior $\\propto$ prior $\\times$ each feature's likelihood under that class.' The conditional-independence shortcut sidesteps the curse of dimensionality of the joint $P(X_1,\\dots,X_d\\mid Y)$.",
+      "intuition_cn": "\"posterior $\\propto$ prior $\\times$ 该类下各特征的 likelihood\"。条件独立这条捷径避开了联合分布 $P(X_1,\\dots,X_d\\mid Y)$ 的维度灾难。",
       "source": "topics/probability.html#eq-probability-naive-bayes-factorization-preview"
     }
   ],
@@ -50,51 +125,269 @@
     {
       "title": "Dot Product & Cosine",
       "eq": "$$ x^\\top y=\\sum_{i=1}^{d} x_i y_i = \\|x\\|\\|y\\|\\cos\\theta $$",
+      "symbols": [
+        {
+          "sym": "$x, y \\in \\mathbb{R}^d$",
+          "en": "two real $d$-vectors with components $x_i, y_i$",
+          "cn": "两个 $d$ 维实向量，分量 $x_i, y_i$"
+        },
+        {
+          "sym": "$x^\\top y$",
+          "en": "dot (inner) product — a scalar",
+          "cn": "点积（内积）—— 一个标量"
+        },
+        {
+          "sym": "$\\|x\\|$",
+          "en": "L2 (Euclidean) length, i.e. $\\sqrt{x^\\top x}$",
+          "cn": "L2（欧氏）长度，即 $\\sqrt{x^\\top x}$"
+        },
+        {
+          "sym": "$\\theta$",
+          "en": "angle between $x$ and $y$",
+          "cn": "$x$ 与 $y$ 之间的夹角"
+        }
+      ],
+      "usage_en": "Use the sum form $\\sum x_i y_i$ for computation, the cosine form $\\|x\\|\\|y\\|\\cos\\theta$ to reason about angles. Cosine similarity $= x^\\top y / (\\|x\\|\\|y\\|)$ is the basis of nearest-neighbor search in embedding spaces.",
+      "usage_cn": "求和形式 $\\sum x_i y_i$ 用于代码计算，cosine 形式 $\\|x\\|\\|y\\|\\cos\\theta$ 用于推理夹角。cosine similarity $= x^\\top y / (\\|x\\|\\|y\\|)$ 是 embedding 空间近邻搜索的基础。",
+      "intuition_en": "Measures how aligned two vectors are: positive → same direction, zero → orthogonal, negative → opposite. Equals the projection of $y$ onto $x$ times $\\|x\\|$ — that's why dot products show up everywhere in linear regression and attention scores.",
+      "intuition_cn": "衡量两个向量方向有多接近：正 → 同向，零 → 正交，负 → 反向。几何上是 $y$ 在 $x$ 上的投影乘以 $\\|x\\|$ —— 这正是它在 linear regression、attention score 里反复出现的原因。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-dot-product-cosine"
     },
     {
       "title": "$\\ell_p$ Norms",
       "eq": "$$ \\|x\\|_2=\\sqrt{x^\\top x},\\ \\|x\\|_1=\\sum_i|x_i|,\\ \\|x\\|_\\infty=\\max_i|x_i| $$",
+      "symbols": [
+        { "sym": "$\\|x\\|_2$",       "en": "L2 / Euclidean norm — straight-line length",                  "cn": "L2 / 欧氏范数 —— 直线长度" },
+        { "sym": "$\\|x\\|_1$",       "en": "L1 norm — sum of absolute values (Manhattan)",                "cn": "L1 范数 —— 绝对值之和（Manhattan）" },
+        { "sym": "$\\|x\\|_\\infty$", "en": "L∞ / max norm — largest absolute component",                  "cn": "L∞ / 最大范数 —— 绝对值最大的分量" }
+      ],
+      "usage_en": "Pick the norm to match the penalty you want: L2 → smooth shrinkage (ridge); L1 → sparsity (lasso, drives weights exactly to 0); L∞ → adversarial / worst-case constraints. Each induces a different unit ball (sphere, diamond, cube).",
+      "usage_cn": "按你想要的惩罚效果选范数：L2 → 平滑收缩（ridge）；L1 → 稀疏（lasso，把权重正好压到 0）；L∞ → 对抗 / 最坏情况约束。它们的单位球形状不同（球、菱形、立方体）。",
+      "intuition_en": "Different ways to measure 'how big is this vector?'. As $p$ grows the norm focuses more on the largest entry — at $p=\\infty$ only the max matters; at $p=1$ every component contributes equally regardless of scale.",
+      "intuition_cn": "都是 \"向量有多大\" 的不同度量。$p$ 越大越聚焦最大分量 —— $p=\\infty$ 时只有最大值起作用；$p=1$ 时所有分量等权贡献。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-p-norms"
     },
     {
       "title": "Matrix-Multiply Shapes",
       "eq": "$$ (m\\times n)\\cdot(n\\times p)\\to(m\\times p) $$",
+      "symbols": [
+        {
+          "sym": "$m, n, p$",
+          "en": "rows of left, shared inner dim, cols of right",
+          "cn": "左阵行数、共享的内维度、右阵列数"
+        },
+        {
+          "sym": "inner $n$",
+          "en": "**must match** — left's columns equal right's rows",
+          "cn": "**必须相等** —— 左阵列数等于右阵行数"
+        },
+        {
+          "sym": "outer $m\\times p$",
+          "en": "shape of the product",
+          "cn": "乘积的形状"
+        }
+      ],
+      "usage_en": "First sanity check before any matrix expression: write the shapes left-to-right, the inner dimensions must match, the outer dimensions become the result shape. Catches 90% of dimension-mismatch bugs without ever running code.",
+      "usage_cn": "写任何矩阵表达式前先做这个检查：从左到右把所有形状列出来，中间维度必须相等，两端维度组合成结果形状。能在不跑代码的情况下发现 90% 的维度错误。",
+      "intuition_en": "'Cancel the inner number, keep the outer pair.' Like a domino chain: $(a\\times b)(b\\times c)(c\\times d) \\to (a\\times d)$. Order matters — matrix multiply is **not** commutative.",
+      "intuition_cn": "\"内维度抵消，外维度保留\"。像多米诺：$(a\\times b)(b\\times c)(c\\times d) \\to (a\\times d)$。顺序很重要 —— 矩阵乘法**不**满足交换律。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-matrix-multiply-shapes"
     },
     {
       "title": "Rank-Nullity",
       "eq": "$$ \\dim\\mathrm{Col}(A)+\\dim\\mathrm{Ker}(A)=n,\\ \\ A\\in\\mathbb{R}^{m\\times n} $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{Col}(A)$",
+          "en": "column space — set of all $Ax$ as $x$ varies",
+          "cn": "列空间 —— $x$ 取遍时所有 $Ax$ 的集合"
+        },
+        {
+          "sym": "$\\mathrm{Ker}(A)$",
+          "en": "null space — vectors $x$ with $Ax = 0$",
+          "cn": "零空间 —— 满足 $Ax=0$ 的向量"
+        },
+        {
+          "sym": "$\\dim$",
+          "en": "dimension of a subspace (number of basis vectors)",
+          "cn": "子空间的维度（基向量个数）"
+        },
+        {
+          "sym": "$n$",
+          "en": "number of columns of $A$ (input dimension)",
+          "cn": "$A$ 的列数（输入维度）"
+        }
+      ],
+      "usage_en": "Diagnose linear systems $Ax=b$. If $\\dim\\mathrm{Ker}(A) > 0$ the system has either no solution or infinitely many; the $X^\\top X$ matrix in OLS is singular when $X$ has dependent columns, which is exactly $\\dim\\mathrm{Ker} > 0$.",
+      "usage_cn": "诊断线性方程组 $Ax=b$。$\\dim\\mathrm{Ker}(A) > 0$ 时方程要么无解、要么无穷多解；OLS 中 $X^\\top X$ 不可逆就是因为 $X$ 列相关，正好对应 $\\dim\\mathrm{Ker} > 0$。",
+      "intuition_en": "'Every input direction either survives the matrix (lands in $\\mathrm{Col}(A)$) or gets crushed to zero ($\\mathrm{Ker}(A)$).' The $n$ input dimensions split between these two fates, and they always sum to $n$.",
+      "intuition_cn": "\"每个输入方向要么活下来（落到 $\\mathrm{Col}(A)$），要么被压到 0（$\\mathrm{Ker}(A)$）。\" $n$ 个输入维度在这两条命运之间分配，总和恒为 $n$。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-rank-nullity"
     },
     {
       "title": "Eigen Equation",
       "eq": "$$ Au=\\lambda u,\\qquad u\\ne 0 $$",
+      "symbols": [
+        {
+          "sym": "$A \\in \\mathbb{R}^{n\\times n}$",
+          "en": "square matrix",
+          "cn": "方阵"
+        },
+        {
+          "sym": "$u \\ne 0$",
+          "en": "**eigenvector** — a non-zero direction $A$ preserves",
+          "cn": "**eigenvector** —— $A$ 作用后方向不变的非零向量"
+        },
+        {
+          "sym": "$\\lambda$",
+          "en": "**eigenvalue** — how much $u$ is stretched / flipped",
+          "cn": "**eigenvalue** —— $u$ 被拉伸 / 翻转的倍数"
+        }
+      ],
+      "usage_en": "Find via $\\det(A - \\lambda I) = 0$. The eigenvalues capture how much $A$ stretches space along its principal axes. Used in PCA (cov-matrix eigenvectors = principal directions), spectral methods, and stability analysis ($\\max|\\lambda|<1$ → stable).",
+      "usage_cn": "用 $\\det(A - \\lambda I) = 0$ 求。eigenvalue 表示 $A$ 在主轴方向的拉伸程度。用于 PCA（协方差矩阵的 eigenvector = 主方向）、spectral methods、稳定性分析（$\\max|\\lambda|<1$ → 稳定）。",
+      "intuition_en": "'Special directions where $A$ acts like a simple stretch.' For most $u$, $Au$ rotates and rescales; for an eigenvector, $Au$ stays on the same line — only the length changes by factor $\\lambda$.",
+      "intuition_cn": "\"$A$ 作用后只做拉伸、不旋转的特殊方向。\" 大多数 $u$ 经 $A$ 后会旋转又拉伸；eigenvector 留在原直线上，长度按倍数 $\\lambda$ 变。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-eigen-equation"
     },
     {
       "title": "Reduced SVD",
       "eq": "$$ X=U\\Sigma V^\\top,\\ \\ U\\in\\mathbb{R}^{n\\times r},\\ \\Sigma\\in\\mathbb{R}^{r\\times r}_{>0},\\ V\\in\\mathbb{R}^{d\\times r} $$",
+      "symbols": [
+        {
+          "sym": "$X \\in \\mathbb{R}^{n\\times d}$",
+          "en": "data matrix (or any matrix)",
+          "cn": "数据矩阵（或任意矩阵）"
+        },
+        {
+          "sym": "$U$",
+          "en": "left singular vectors — orthonormal columns",
+          "cn": "左奇异向量 —— 列正交单位"
+        },
+        {
+          "sym": "$\\Sigma$",
+          "en": "diagonal of singular values $\\sigma_1\\ge\\sigma_2\\ge\\cdots>0$",
+          "cn": "奇异值对角阵 $\\sigma_1\\ge\\sigma_2\\ge\\cdots>0$"
+        },
+        {
+          "sym": "$V$",
+          "en": "right singular vectors — orthonormal columns",
+          "cn": "右奇异向量 —— 列正交单位"
+        },
+        {
+          "sym": "$r$",
+          "en": "rank of $X$ (number of non-zero singular values)",
+          "cn": "$X$ 的秩（非零奇异值个数）"
+        }
+      ],
+      "usage_en": "Universal decomposition — exists for ANY matrix (rectangular, singular, complex). Plug into PCA: $X^\\top X = V\\Sigma^2 V^\\top$, so right singular vectors are PCA components and squared singular values are eigenvalues. Truncating to top-$k$ gives the best rank-$k$ approximation.",
+      "usage_cn": "通用分解 —— 任何矩阵都存在（矩形、奇异、复值都行）。代入 PCA：$X^\\top X = V\\Sigma^2 V^\\top$，所以右奇异向量是 PCA 主成分，奇异值平方是 eigenvalue。截断到前 $k$ 个分量即得最佳秩 $k$ 近似。",
+      "intuition_en": "'Decompose $X$ into a rotation, a stretch, and another rotation.' Reading right-to-left: $V^\\top$ rotates input axes, $\\Sigma$ stretches each axis by $\\sigma_i$, $U$ rotates the result. Singular values measure how much information lives along each principal axis.",
+      "intuition_cn": "\"把 $X$ 分解成旋转 → 拉伸 → 再旋转。\" 从右往左读：$V^\\top$ 旋转输入轴，$\\Sigma$ 把每个轴按 $\\sigma_i$ 拉伸，$U$ 再做一次旋转。奇异值衡量每个主轴上承载多少信息。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-reduced-svd"
     },
     {
       "title": "Quadratic Form & PSD",
       "eq": "$$ x^\\top A x=\\sum_{i,j}A_{ij}x_ix_j,\\quad \\text{PSD}: x^\\top A x\\ge 0\\ \\forall x $$",
+      "symbols": [
+        {
+          "sym": "$x^\\top A x$",
+          "en": "scalar — a quadratic in the entries of $x$",
+          "cn": "标量 —— $x$ 各分量的二次式"
+        },
+        {
+          "sym": "$A$",
+          "en": "symmetric matrix defining the quadratic form",
+          "cn": "决定二次型的对称矩阵"
+        },
+        {
+          "sym": "PSD ($A\\succeq 0$)",
+          "en": "**positive semi-definite** — quadratic form $\\ge 0$ for every $x$",
+          "cn": "**半正定** —— 对所有 $x$ 二次型 $\\ge 0$"
+        }
+      ],
+      "usage_en": "Test convexity: $\\nabla^2 f \\succeq 0$ everywhere $\\iff$ $f$ is convex. Test whether a covariance / Gram / Hessian is valid (must be PSD). Loss like $\\frac12\\|Y-Xw\\|^2$ is quadratic in $w$ with Hessian $X^\\top X \\succeq 0$, hence convex.",
+      "usage_cn": "判断凸性：$\\nabla^2 f \\succeq 0$ 处处成立 $\\iff$ $f$ 凸。判断 covariance / Gram / Hessian 是否合法（必须 PSD）。$\\frac12\\|Y-Xw\\|^2$ 关于 $w$ 是二次型，Hessian $X^\\top X \\succeq 0$，所以凸。",
+      "intuition_en": "'Quadratic that opens upward in every direction.' For PSD $A$, the function $x \\mapsto x^\\top A x$ is a paraboloid sitting on or above zero — flat in the kernel directions, curving up in the rest.",
+      "intuition_cn": "\"在每个方向上都向上开口的二次函数\"。$A$ PSD 时，$x \\mapsto x^\\top A x$ 是底在零或以上的抛物面 —— kernel 方向上平坦，其他方向上向上弯。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-quadratic-form-psd"
     },
     {
       "title": "Sandwich Identity",
       "eq": "$$ A=B^\\top B \\;\\Rightarrow\\; A\\succeq 0;\\quad X^\\top D X \\succeq 0\\ \\text{when}\\ D\\succeq 0 $$",
+      "symbols": [
+        {
+          "sym": "$B^\\top B$",
+          "en": "Gram matrix of $B$ — always symmetric and PSD",
+          "cn": "$B$ 的 Gram 矩阵 —— 一定对称且 PSD"
+        },
+        {
+          "sym": "$X^\\top D X$",
+          "en": "PSD-preserving sandwich when $D \\succeq 0$",
+          "cn": "$D \\succeq 0$ 时保持 PSD 的 sandwich"
+        }
+      ],
+      "usage_en": "Quick way to certify PSD-ness: factor as $B^\\top B$. Used to show $X^\\top X$ in OLS is PSD (loss is convex), the logistic-regression Hessian $X^\\top B X$ with $B = \\mathrm{diag}(p_i(1-p_i))\\succeq 0$ is PSD, and covariance $\\Sigma = \\frac{1}{n}X^\\top X$ is PSD.",
+      "usage_cn": "证明 PSD 的快捷方式：把矩阵写成 $B^\\top B$。用于证明 OLS 中 $X^\\top X$ PSD（loss 凸）、logistic regression 的 Hessian $X^\\top B X$（$B = \\mathrm{diag}(p_i(1-p_i))\\succeq 0$）PSD、covariance $\\Sigma = \\frac{1}{n}X^\\top X$ PSD。",
+      "intuition_en": "$x^\\top(B^\\top B)x = \\|Bx\\|^2 \\ge 0$ — square of a real number can't be negative. The sandwich form generalizes this whenever the meat ($D$) is itself PSD.",
+      "intuition_cn": "$x^\\top(B^\\top B)x = \\|Bx\\|^2 \\ge 0$ —— 实数平方不能为负。sandwich 形式是把这个推广到 \"中间 $D$ 自己 PSD\" 的情形。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-sandwich-identity"
     },
     {
       "title": "Vector-Calc Shapes",
       "eq": "$$ \\nabla f\\in\\mathbb{R}^{d},\\ \\nabla^2 f\\in\\mathbb{R}^{d\\times d},\\ J=\\frac{\\partial f}{\\partial x}\\in\\mathbb{R}^{m\\times n} $$",
+      "symbols": [
+        {
+          "sym": "$f: \\mathbb{R}^d \\to \\mathbb{R}$",
+          "en": "scalar-valued function of a vector",
+          "cn": "把向量映到标量的函数"
+        },
+        {
+          "sym": "$\\nabla f$",
+          "en": "gradient — same shape as input ($d$-vector)",
+          "cn": "梯度 —— 与输入同形（$d$ 维向量）"
+        },
+        {
+          "sym": "$\\nabla^2 f$",
+          "en": "Hessian — square ($d \\times d$) matrix of second derivatives",
+          "cn": "Hessian —— 二阶导数构成的 ($d \\times d$) 方阵"
+        },
+        {
+          "sym": "$J = \\partial f/\\partial x$",
+          "en": "Jacobian — for $f: \\mathbb{R}^n \\to \\mathbb{R}^m$, shape ($m \\times n$)",
+          "cn": "Jacobian —— $f: \\mathbb{R}^n \\to \\mathbb{R}^m$ 时形状为 ($m \\times n$)"
+        }
+      ],
+      "usage_en": "Sanity-check shapes before any matrix calculus: gradient = input shape, Jacobian = (output × input), Hessian = (input × input) symmetric. Backprop is one big chained Jacobian product; OLS gradient $X^\\top(Xw - Y)$ is a $d$-vector because $w$ is.",
+      "usage_cn": "做矩阵微积分前先核对形状：梯度 = 输入形状，Jacobian = (输出 × 输入)，Hessian = (输入 × 输入) 对称。反向传播本质是一长串 Jacobian 连乘；OLS 梯度 $X^\\top(Xw - Y)$ 是 $d$ 维向量，正因为 $w$ 是。",
+      "intuition_en": "'Derivatives have shapes — match them before computing.' Gradient says 'how does $f$ change per input dim'; Jacobian generalizes to vector outputs; Hessian captures curvature in every input pair.",
+      "intuition_cn": "\"导数有形状 —— 计算前先对齐。\" 梯度回答 \"$f$ 沿每个输入维度的变化\"；Jacobian 推广到向量输出；Hessian 记录每对输入维度间的曲率。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-vector-calc-shapes"
     },
     {
       "title": "Useful Derivatives",
       "eq": "$$ \\nabla_w (a^\\top w)=a,\\quad \\nabla_w(w^\\top A w)=(A+A^\\top)w $$",
+      "symbols": [
+        {
+          "sym": "$a^\\top w$",
+          "en": "linear form — derivative is just the constant vector $a$",
+          "cn": "线性式 —— 导数就是常向量 $a$"
+        },
+        {
+          "sym": "$w^\\top A w$",
+          "en": "quadratic form (symmetric $A$ → derivative $2Aw$)",
+          "cn": "二次型（$A$ 对称时导数为 $2Aw$）"
+        },
+        {
+          "sym": "$(A + A^\\top)w$",
+          "en": "general formula for any $A$; symmetric case simplifies to $2Aw$",
+          "cn": "对任意 $A$ 的通用公式；$A$ 对称时简化为 $2Aw$"
+        }
+      ],
+      "usage_en": "Two derivatives to memorize. They cover most matrix calculus you'll see: linear regression ($\\nabla \\frac12 \\|Xw - Y\\|^2 = X^\\top(Xw - Y)$ uses both), logistic regression, and most quadratic objectives.",
+      "usage_cn": "必须记住的两个导数。覆盖大多数遇到的矩阵微积分：linear regression（$\\nabla \\frac12 \\|Xw - Y\\|^2 = X^\\top(Xw - Y)$ 同时用到两者）、logistic regression、绝大多数二次型目标。",
+      "intuition_en": "Generalize 'derivative of $ax$ is $a$' and 'derivative of $ax^2$ is $2ax$' to vectors / matrices. The transpose appears because $w^\\top A w$ depends on $w$ on both sides — chain rule sums two contributions.",
+      "intuition_cn": "把 \"$ax$ 的导数是 $a$\"、\"$ax^2$ 的导数是 $2ax$\" 推广到向量 / 矩阵。出现转置是因为 $w^\\top A w$ 中 $w$ 出现两次 —— 链式求和两侧的贡献。",
       "source": "topics/linear-algebra.html#eq-linear-algebra-useful-derivatives"
     }
   ],
@@ -102,51 +395,311 @@
     {
       "title": "Convexity (chord)",
       "eq": "$$ f((1-\\lambda)w_1+\\lambda w_2)\\le (1-\\lambda)f(w_1)+\\lambda f(w_2) $$",
+      "symbols": [
+        {
+          "sym": "$f$",
+          "en": "the function being tested for convexity",
+          "cn": "被检验是否凸的函数"
+        },
+        {
+          "sym": "$w_1, w_2$",
+          "en": "any two points in the domain",
+          "cn": "定义域中任意两点"
+        },
+        {
+          "sym": "$\\lambda \\in [0, 1]$",
+          "en": "interpolation parameter — slides between $w_1$ and $w_2$",
+          "cn": "插值参数 —— 在 $w_1$ 与 $w_2$ 之间滑动"
+        },
+        {
+          "sym": "$(1-\\lambda)w_1 + \\lambda w_2$",
+          "en": "the chord point — convex combination of $w_1, w_2$",
+          "cn": "弦上的点 —— $w_1, w_2$ 的凸组合"
+        }
+      ],
+      "usage_en": "Definition you can test by hand: pick any two points and any $\\lambda$, check if the function value at the chord midpoint sits below (or on) the straight line connecting $f(w_1)$ and $f(w_2)$. If it always does, $f$ is convex.",
+      "usage_cn": "可以手算检验的定义：任取两点和任意 $\\lambda$，看弦上的函数值是否始终在 $f(w_1), f(w_2)$ 连线之下（或上）。始终如此则 $f$ 凸。",
+      "intuition_en": "'The graph of $f$ stays below every chord.' A bowl-shape: lift any straight line between two points on the graph, the curve underneath never pokes through.",
+      "intuition_cn": "\"$f$ 的图像始终在所有弦下方。\" 像碗形：在图上任取两点连一条直线，函数曲线永远不会穿出这条线。",
       "source": "topics/optimization.html#eq-optimization-convexity-chord"
     },
     {
       "title": "First-order test",
       "eq": "$$ f(w_1)\\ge f(w_2)+\\nabla f(w_2)^\\top(w_1-w_2) $$",
+      "symbols": [
+        {
+          "sym": "$f(w_1)$",
+          "en": "function value at any test point",
+          "cn": "任意检验点处的函数值"
+        },
+        {
+          "sym": "$f(w_2) + \\nabla f(w_2)^\\top (w_1 - w_2)$",
+          "en": "tangent line / plane at $w_2$ evaluated at $w_1$",
+          "cn": "在 $w_2$ 的切线 / 切平面在 $w_1$ 处的值"
+        },
+        {
+          "sym": "$\\nabla f(w_2)$",
+          "en": "gradient at $w_2$ (the slope of the tangent)",
+          "cn": "$w_2$ 处的梯度（切线斜率）"
+        }
+      ],
+      "usage_en": "Convexity test using gradients (no Hessian required): the function lies above every tangent line. Practical use: if you're at $w_2$ with gradient $\\nabla f(w_2)$, the linear approximation is a global lower bound on $f$ for convex problems.",
+      "usage_cn": "用梯度检验凸性（不必计算 Hessian）：函数在每条切线之上。实用价值：在 $w_2$ 处求出梯度后，线性近似对凸问题就是 $f$ 的全局下界。",
+      "intuition_en": "'Tangent lines never overshoot.' Convex functions curve away from their tangents in only one direction — upward. This is what makes gradient descent work: walking against the gradient is a guaranteed descent direction.",
+      "intuition_cn": "\"切线永远不会超出函数值。\" 凸函数只朝一个方向偏离切线 —— 向上。这正是 gradient descent 能 work 的原因：沿负梯度方向必然下降。",
       "source": "topics/optimization.html#eq-optimization-first-order-test"
     },
     {
       "title": "Second-order test",
       "eq": "$$ \\nabla^2 f(w)\\succeq 0\\ \\forall w\\ \\Longleftrightarrow\\ f \\text{ convex} $$",
+      "symbols": [
+        {
+          "sym": "$\\nabla^2 f(w)$",
+          "en": "Hessian — matrix of second derivatives",
+          "cn": "Hessian —— 二阶导数矩阵"
+        },
+        {
+          "sym": "$\\succeq 0$",
+          "en": "PSD — eigenvalues all $\\ge 0$",
+          "cn": "PSD —— 特征值全 $\\ge 0$"
+        },
+        {
+          "sym": "$\\Longleftrightarrow$",
+          "en": "if-and-only-if (test is exact)",
+          "cn": "充要条件（检验完全等价）"
+        }
+      ],
+      "usage_en": "Easiest convexity check when you can compute the Hessian: PSD everywhere $\\iff$ convex. For OLS, Hessian is $X^\\top X$; for logistic regression, it's $X^\\top B X$ with $B = \\mathrm{diag}(p_i(1-p_i)) \\succeq 0$ — both PSD by the sandwich identity.",
+      "usage_cn": "能算 Hessian 时最方便的凸性检验：处处 PSD $\\iff$ 凸。OLS 的 Hessian 是 $X^\\top X$；logistic regression 是 $X^\\top B X$（$B = \\mathrm{diag}(p_i(1-p_i)) \\succeq 0$）—— 都因 sandwich 恒等式而 PSD。",
+      "intuition_en": "'Curvature non-negative in every direction.' The Hessian is the multivariate analog of $f''$ in 1D — convex means $f''(x) \\ge 0$ everywhere; for vectors, this generalizes to the Hessian being PSD.",
+      "intuition_cn": "\"每个方向曲率非负。\" Hessian 是 1 维 $f''$ 的多元推广 —— 凸意味着 $f''(x) \\ge 0$ 处处成立；推广到向量就是 Hessian PSD。",
       "source": "topics/optimization.html#eq-optimization-second-order-test"
     },
     {
       "title": "Optimality (convex)",
       "eq": "$$ \\nabla f(w^*)=0 \\;\\Rightarrow\\; w^* \\text{ globally optimal} $$",
+      "symbols": [
+        {
+          "sym": "$w^*$",
+          "en": "candidate optimum (where the gradient vanishes)",
+          "cn": "候选最优点（梯度为 0 处）"
+        },
+        {
+          "sym": "$\\nabla f(w^*) = 0$",
+          "en": "stationary condition",
+          "cn": "稳定点条件"
+        },
+        {
+          "sym": "globally optimal",
+          "en": "$w^*$ achieves the smallest $f(w)$ over the entire domain",
+          "cn": "$w^*$ 在整个定义域内取得最小 $f(w)$"
+        }
+      ],
+      "usage_en": "For convex problems: find any zero of the gradient and you're done. This is why OLS solves $X^\\top(Xw - Y) = 0$ and stops — no need to check if it's a local vs. global min, convexity guarantees global.",
+      "usage_cn": "对凸问题：找任意梯度为 0 的点即可。所以 OLS 解 $X^\\top(Xw - Y) = 0$ 后就停 —— 不必检查是否局部 vs. 全局最小，凸性保证全局。",
+      "intuition_en": "'In a bowl, every flat spot is the bottom.' Non-convex landscapes have hills, valleys, and saddles — many stationary points; convex ones have only one fate at $\\nabla f = 0$, and that's the global minimum.",
+      "intuition_cn": "\"碗形地形里，每个平坦处都是最低点。\" 非凸地形有山、谷、鞍点 —— 稳定点很多；凸地形里 $\\nabla f = 0$ 处只有一种结局，就是全局最小。",
       "source": "topics/optimization.html#eq-optimization-optimality-convex"
     },
     {
       "title": "Gradient Descent",
       "eq": "$$ w_{k+1}=w_k-\\alpha_k\\,\\nabla f(w_k) $$",
+      "symbols": [
+        {
+          "sym": "$w_k$",
+          "en": "current iterate",
+          "cn": "当前迭代点"
+        },
+        {
+          "sym": "$w_{k+1}$",
+          "en": "next iterate after one update",
+          "cn": "更新一步后的下一个迭代点"
+        },
+        {
+          "sym": "$\\alpha_k$",
+          "en": "step size / learning rate (may shrink with $k$)",
+          "cn": "步长 / 学习率（可随 $k$ 减小）"
+        },
+        {
+          "sym": "$\\nabla f(w_k)$",
+          "en": "gradient at the current iterate (direction of steepest ascent)",
+          "cn": "当前点的梯度（最陡上升方向）"
+        }
+      ],
+      "usage_en": "Standard workhorse. Iterate until $\\|\\nabla f(w_k)\\|$ is small or step size triggers a stopping criterion. Pick $\\alpha$ small enough to converge, big enough to actually move — too small wastes time, too large diverges. Use Armijo line search or fixed schedules.",
+      "usage_cn": "标准工具。迭代直到 $\\|\\nabla f(w_k)\\|$ 足够小或步长触发停止条件。$\\alpha$ 取得太小白费时间、太大会发散；常用 Armijo line search 或固定调度。",
+      "intuition_en": "'Walk downhill by stepping against the gradient.' On convex functions, this converges to the global minimum; on non-convex ones (deep nets) it converges to a local stationary point that's hopefully good enough.",
+      "intuition_cn": "\"沿负梯度方向往下走。\" 凸函数收敛到全局最小；非凸（深度网络）则收敛到局部稳定点，希望足够好。",
       "source": "topics/optimization.html#eq-optimization-gradient-descent"
     },
     {
       "title": "Subgradient inequality",
       "eq": "$$ f(x)\\ge f(x_0)+\\langle s, x-x_0\\rangle,\\quad s\\in\\partial f(x_0) $$",
+      "symbols": [
+        {
+          "sym": "$f$",
+          "en": "convex function (possibly non-smooth)",
+          "cn": "凸函数（可能不光滑）"
+        },
+        {
+          "sym": "$x_0$",
+          "en": "the point where we evaluate the subgradient",
+          "cn": "我们计算 subgradient 的点"
+        },
+        {
+          "sym": "$s \\in \\partial f(x_0)$",
+          "en": "**subgradient** — any direction satisfying the lower-bound inequality",
+          "cn": "**subgradient** —— 任意满足下界不等式的方向"
+        },
+        {
+          "sym": "$\\partial f(x_0)$",
+          "en": "subdifferential — the set of all subgradients at $x_0$",
+          "cn": "subdifferential —— $x_0$ 处所有 subgradient 的集合"
+        }
+      ],
+      "usage_en": "Generalizes the gradient to non-differentiable functions like $|x|$ or hinge loss. At a kink, take ANY slope between the left and right derivatives; that's a valid subgradient. Use in subgradient descent for L1 / hinge losses.",
+      "usage_cn": "把梯度推广到 $|x|$、hinge loss 等不可导函数。在拐点处可以取左右导数之间任意斜率作为 subgradient。用于 subgradient descent 处理 L1 / hinge loss。",
+      "intuition_en": "'Any tangent line that stays below the function counts as a derivative.' At smooth points it's just the usual gradient; at kinks, you have a whole fan of valid lower-bound slopes.",
+      "intuition_cn": "\"任意一条始终在函数下方的切线都算导数。\" 光滑点处就是普通梯度；拐点处有一整把扇形的合法下界斜率。",
       "source": "topics/optimization.html#eq-optimization-subgradient-inequality"
     },
     {
       "title": "Armijo line search",
       "eq": "$$ f(w_k+\\alpha d_k)-f(w_k)\\le \\sigma\\alpha\\,\\nabla f(w_k)^\\top d_k $$",
+      "symbols": [
+        {
+          "sym": "$w_k$",
+          "en": "current iterate",
+          "cn": "当前迭代点"
+        },
+        {
+          "sym": "$d_k$",
+          "en": "search direction (often $-\\nabla f(w_k)$)",
+          "cn": "搜索方向（常取 $-\\nabla f(w_k)$）"
+        },
+        {
+          "sym": "$\\alpha$",
+          "en": "candidate step size — gets shrunk until inequality holds",
+          "cn": "候选步长 —— 一直缩小直到不等式成立"
+        },
+        {
+          "sym": "$\\sigma \\in (0, 1)$",
+          "en": "sufficient-decrease constant, typically $10^{-4}$",
+          "cn": "充分下降常数，通常 $10^{-4}$"
+        }
+      ],
+      "usage_en": "Backtracking line search: start with $\\alpha = 1$, halve it until the Armijo condition holds. Guarantees you make 'enough' progress per step without manually tuning the learning rate. Standard in classical optimization solvers.",
+      "usage_cn": "回溯线搜索：从 $\\alpha = 1$ 开始减半，直到 Armijo 条件成立。保证每步获得 \"足够\" 的下降，不需手调学习率。经典优化求解器的标准做法。",
+      "intuition_en": "'Take a smaller step until the function actually drops by the amount the linear approximation predicts.' Stops you from over-shooting on steep regions and from under-stepping on flat ones.",
+      "intuition_cn": "\"步长一直减小，直到函数下降量与线性近似预测的下降量匹配为止。\" 防止陡区过冲、平坦区欠走。",
       "source": "topics/optimization.html#eq-optimization-armijo-line-search"
     },
     {
       "title": "Lagrangian",
       "eq": "$$ L(w,\\lambda,\\nu)=f_0(w)+\\sum_i\\lambda_i f_i(w)+\\sum_j\\nu_j h_j(w),\\ \\lambda_i\\ge 0 $$",
+      "symbols": [
+        {
+          "sym": "$f_0(w)$",
+          "en": "primal objective to minimize",
+          "cn": "原问题（要最小化的目标）"
+        },
+        {
+          "sym": "$f_i(w) \\le 0$",
+          "en": "inequality constraints (e.g. SVM's margin)",
+          "cn": "不等式约束（如 SVM 的 margin）"
+        },
+        {
+          "sym": "$h_j(w) = 0$",
+          "en": "equality constraints",
+          "cn": "等式约束"
+        },
+        {
+          "sym": "$\\lambda_i \\ge 0$",
+          "en": "dual variable for inequality (must be non-negative)",
+          "cn": "不等式约束的对偶变量（必须非负）"
+        },
+        {
+          "sym": "$\\nu_j$",
+          "en": "dual variable for equality (any real)",
+          "cn": "等式约束的对偶变量（任意实数）"
+        },
+        {
+          "sym": "$L$",
+          "en": "Lagrangian — penalty-augmented objective",
+          "cn": "Lagrangian —— 加了罚项的目标"
+        }
+      ],
+      "usage_en": "Convert constrained problems into 'penalize violation' form. Setting $\\partial L / \\partial w = 0$ at the optimum gives KKT conditions — used to derive SVM dual, Lasso solutions, etc.",
+      "usage_cn": "把约束问题转成 \"违反就受罚\" 的形式。在最优点处令 $\\partial L / \\partial w = 0$ 得 KKT 条件 —— 用来推导 SVM dual、Lasso 解等。",
+      "intuition_en": "'Pay a price $\\lambda_i$ per unit of violation, then optimize freely.' Strong duality means choosing the right prices makes the relaxed problem give the same answer as the constrained one.",
+      "intuition_cn": "\"每单位违反付价格 $\\lambda_i$，然后无约束优化。\" 强对偶意味着挑对价格后，松弛问题与原约束问题答案一致。",
       "source": "topics/optimization.html#eq-optimization-lagrangian"
     },
     {
       "title": "Primal vs Dual",
       "eq": "$$ \\text{Primal: }\\min_w\\max_{\\lambda\\ge 0,\\nu} L,\\quad \\text{Dual: }\\max_{\\lambda\\ge 0,\\nu}\\min_w L $$",
+      "symbols": [
+        {
+          "sym": "Primal",
+          "en": "original problem — minimize $f_0$ subject to constraints",
+          "cn": "原问题 —— 在约束下最小化 $f_0$"
+        },
+        {
+          "sym": "Dual",
+          "en": "swap min and max — gives a lower bound on the primal",
+          "cn": "对偶问题 —— 交换 min/max，给出原问题的下界"
+        },
+        {
+          "sym": "$L$",
+          "en": "Lagrangian (defined above)",
+          "cn": "上面定义的 Lagrangian"
+        },
+        {
+          "sym": "$\\min_w \\max_{\\lambda, \\nu}$",
+          "en": "primal: punish constraint violation infinitely",
+          "cn": "原：违反约束惩罚无穷大"
+        },
+        {
+          "sym": "$\\max_{\\lambda, \\nu} \\min_w$",
+          "en": "dual: best lower-bound function $g(\\lambda, \\nu)$",
+          "cn": "对偶：最佳下界函数 $g(\\lambda, \\nu)$"
+        }
+      ],
+      "usage_en": "When the dual is easier to solve than the primal, switch. SVM is the canonical example — the primal is QP in $w$ (high-dim), the dual is QP in $\\lambda$ (one per training point) and naturally introduces kernels.",
+      "usage_cn": "当对偶比原问题好解时就切换。SVM 是经典例子 —— 原问题在 $w$ 上是 QP（高维），对偶在 $\\lambda$ 上是 QP（每个训练点一个）且自然引入 kernel。",
+      "intuition_en": "'Two views of the same problem.' Primal: 'find the best $w$ that obeys constraints'; dual: 'find the highest lower bound that any pricing scheme can certify'. Strong duality says these meet.",
+      "intuition_cn": "\"同一问题的两种视角。\" 原：\"找出满足约束的最佳 $w$\"；对偶：\"找出任何定价方案能给出的最高下界\"。强对偶说两者相遇。",
       "source": "topics/optimization.html#eq-optimization-primal-vs-dual"
     },
     {
       "title": "Weak / Strong Duality",
       "eq": "$$ f_0(w^*)\\ge g(\\lambda^*,\\nu^*)\\ (\\text{always}),\\quad =\\ \\text{under strong duality} $$",
+      "symbols": [
+        {
+          "sym": "$f_0(w^*)$",
+          "en": "primal optimum",
+          "cn": "原问题最优值"
+        },
+        {
+          "sym": "$g(\\lambda^*, \\nu^*)$",
+          "en": "dual optimum",
+          "cn": "对偶问题最优值"
+        },
+        {
+          "sym": "$\\ge$",
+          "en": "weak duality — always holds, gives a lower bound",
+          "cn": "弱对偶 —— 始终成立，给出下界"
+        },
+        {
+          "sym": "$=$",
+          "en": "strong duality — duality gap is zero (needs Slater for convex problems)",
+          "cn": "强对偶 —— duality gap 为 0（凸问题需 Slater 条件）"
+        }
+      ],
+      "usage_en": "Always check weak duality (free). Try to verify strong duality (Slater's condition: convex problem with at least one strictly feasible point) — if so, the dual gives the exact answer and KKT conditions characterize optima.",
+      "usage_cn": "弱对偶始终免费可用。尽量验证强对偶（Slater 条件：凸问题且至少有一个严格可行点）—— 满足时对偶给出精确答案，KKT 条件刻画最优。",
+      "intuition_en": "'The dual ≤ the primal — always.' Strong duality is the special case where they're equal, letting you replace a hard primal by an easier dual without losing accuracy.",
+      "intuition_cn": "\"对偶 ≤ 原问题 —— 总是。\" 强对偶是相等的特例，让你能用更易解的对偶替换难解的原问题，且不损失精度。",
       "source": "topics/optimization.html#eq-optimization-weak-strong-duality"
     }
   ],
@@ -526,26 +1079,146 @@
     {
       "title": "Sigmoid",
       "eq": "$$ \\sigma(z)=\\frac{1}{1+e^{-z}} $$",
+      "symbols": [
+        {
+          "sym": "$\\sigma(z)$",
+          "en": "the logistic / sigmoid function — squashes any real $z$ into $(0,1)$",
+          "cn": "logistic / sigmoid 函数 —— 把任意实数 $z$ 压到 $(0,1)$"
+        },
+        {
+          "sym": "$z = w^\\top x$",
+          "en": "the linear score — typically $w^\\top x + b$",
+          "cn": "线性 score —— 通常是 $w^\\top x + b$"
+        },
+        {
+          "sym": "$e^{-z}$",
+          "en": "exponential — large positive $z$ → tiny denominator → output near 1",
+          "cn": "指数 —— $z$ 大的正值 → 分母极小 → 输出接近 1"
+        }
+      ],
+      "usage_en": "Use as the output activation for binary classification; interpret $\\sigma(w^\\top x)$ as $P(y=1 \\mid x)$. Threshold at 0.5 to predict the class. Derivative is $\\sigma'(z) = \\sigma(z)(1-\\sigma(z))$ — appears in every gradient computation.",
+      "usage_cn": "二分类的输出激活函数；把 $\\sigma(w^\\top x)$ 当作 $P(y=1 \\mid x)$。阈值 0.5 给出预测类别。导数 $\\sigma'(z) = \\sigma(z)(1-\\sigma(z))$ —— 在每次梯度计算中都会出现。",
+      "intuition_en": "An S-curve that interprets a linear score as a probability. Negative scores → near 0, large positives → near 1, $z=0$ → exactly 0.5. Saturates at the extremes, which is why logistic regression has 'flat' gradients for very confident predictions.",
+      "intuition_cn": "一条 S 形曲线，把线性 score 解读为概率。负 score → 接近 0，大的正 score → 接近 1，$z=0$ → 正好 0.5。两端饱和 —— 这就是为什么对 \"非常自信\" 的预测梯度会变平。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-sigmoid"
     },
     {
       "title": "Decision boundary",
       "eq": "$$ p(y=1\\mid x)=0.5 \\iff w^\\top\\phi(x)=0 $$",
+      "symbols": [
+        {
+          "sym": "$p(y=1 \\mid x) = 0.5$",
+          "en": "the cutoff probability for classifying as class 1",
+          "cn": "判为类别 1 的概率阈值"
+        },
+        {
+          "sym": "$w^\\top \\phi(x) = 0$",
+          "en": "the equivalent linear condition (sigmoid is 0.5 at $z=0$)",
+          "cn": "等价的线性条件（sigmoid 在 $z=0$ 处取 0.5）"
+        },
+        {
+          "sym": "$\\phi(x)$",
+          "en": "feature map (identity for plain logistic regression)",
+          "cn": "特征映射（普通 logistic regression 中是恒等映射）"
+        }
+      ],
+      "usage_en": "Use to plot or analyze classifier behavior. The decision surface is a hyperplane in $\\phi(x)$-space — that's what makes logistic regression a **linear classifier** despite the non-linear sigmoid output.",
+      "usage_cn": "用于画图或分析分类器行为。决策面在 $\\phi(x)$ 空间是一个超平面 —— 尽管输出经过非线性 sigmoid，logistic regression 仍是**线性分类器**。",
+      "intuition_en": "'Sigmoid is 0.5 exactly when its input is 0.' So the decision boundary lives at $w^\\top \\phi(x) = 0$ — a hyperplane through the origin (or shifted, with bias). The non-linear part is only in the output, not the boundary.",
+      "intuition_cn": "\"sigmoid 在输入为 0 时正好等于 0.5。\" 所以决策边界位于 $w^\\top \\phi(x) = 0$ —— 过原点的超平面（带 bias 时平移）。非线性只在输出部分，不在边界形状。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-decision-boundary"
     },
     {
       "title": "Negative log-likelihood",
       "eq": "$$ \\min_w \\sum_{(x_i,y_i)\\in D}\\log\\!\\left(1+\\exp(-y_i w^\\top\\phi(x_i))\\right) $$",
+      "symbols": [
+        {
+          "sym": "$D$",
+          "en": "training set $\\{(x_i, y_i)\\}$",
+          "cn": "训练集 $\\{(x_i, y_i)\\}$"
+        },
+        {
+          "sym": "$y_i \\in \\{-1, +1\\}$",
+          "en": "label in the $\\pm 1$ form (different sign convention than 0/1)",
+          "cn": "$\\pm 1$ 形式的标签（与 0/1 约定符号不同）"
+        },
+        {
+          "sym": "$w^\\top \\phi(x_i)$",
+          "en": "linear margin score",
+          "cn": "线性 margin score"
+        },
+        {
+          "sym": "$\\log(1 + e^{-z})$",
+          "en": "softplus / log-loss — smooth approximation of $\\max(0, -z)$",
+          "cn": "softplus / log-loss —— $\\max(0, -z)$ 的光滑近似"
+        }
+      ],
+      "usage_en": "Standard logistic-regression objective. Minimize via gradient descent (no closed form because of the non-linearity). Add an L2 regularizer $\\frac{\\lambda}{2}\\|w\\|^2$ for ridge-style logistic regression.",
+      "usage_cn": "logistic regression 标准目标。用 gradient descent 最小化（因非线性无闭式解）。加 L2 正则 $\\frac{\\lambda}{2}\\|w\\|^2$ 即 ridge 版 logistic regression。",
+      "intuition_en": "Penalty grows when the score has the wrong sign relative to $y_i$. Confident-and-correct → near-zero loss; confident-and-wrong → linear penalty in $|z|$. This is what makes the loss convex and well-behaved.",
+      "intuition_cn": "当 score 的符号与 $y_i$ 相反时惩罚增大。自信且对 → 损失接近 0；自信但错 → 惩罚关于 $|z|$ 线性增长。正是这种形式让 loss 凸且行为良好。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-negative-log-likelihood"
     },
     {
       "title": "Gradient descent update",
       "eq": "$$ w_{t+1}=w_t-\\alpha \\nabla f(w_t) $$",
+      "symbols": [
+        {
+          "sym": "$w_t$",
+          "en": "current weight vector at step $t$",
+          "cn": "第 $t$ 步的当前权重向量"
+        },
+        {
+          "sym": "$w_{t+1}$",
+          "en": "updated weights after one step",
+          "cn": "一步更新后的权重"
+        },
+        {
+          "sym": "$\\alpha$",
+          "en": "learning rate (positive scalar)",
+          "cn": "学习率（正标量）"
+        },
+        {
+          "sym": "$\\nabla f(w_t)$",
+          "en": "gradient of the loss at $w_t$",
+          "cn": "$w_t$ 处 loss 的梯度"
+        }
+      ],
+      "usage_en": "Generic GD update — works for any differentiable loss, not just logistic. For logistic regression specifically, $\\nabla f(w) = -\\sum_i y_i \\sigma(-y_i w^\\top x_i)\\, x_i$ (with $\\pm 1$ labels). Pick $\\alpha$ via line search or schedule.",
+      "usage_cn": "通用 GD 更新 —— 对任意可微 loss 都适用，不限 logistic。logistic regression 中 $\\nabla f(w) = -\\sum_i y_i \\sigma(-y_i w^\\top x_i)\\, x_i$（$\\pm 1$ 标签下）。$\\alpha$ 用 line search 或调度选。",
+      "intuition_en": "'Walk against the gradient by step size $\\alpha$.' On convex losses (logistic regression is convex), this finds the global minimum; learning-rate tuning is the main practical concern.",
+      "intuition_cn": "\"沿负梯度走 $\\alpha$ 步。\" 在凸 loss（logistic regression 凸）上能找到全局最小；实际中调学习率是主要工作。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-gradient-descent-update"
     },
     {
       "title": "Convexity check for $y\\in\\{0,1\\}$ form",
       "eq": "$$ \\nabla^2 L(w)=X^\\top B X,\\qquad B=\\mathrm{diag}(p_i(1-p_i)) $$",
+      "symbols": [
+        {
+          "sym": "$\\nabla^2 L(w)$",
+          "en": "Hessian of the logistic loss",
+          "cn": "logistic loss 的 Hessian"
+        },
+        {
+          "sym": "$X$",
+          "en": "design matrix (rows are feature vectors)",
+          "cn": "设计矩阵（行是特征向量）"
+        },
+        {
+          "sym": "$B = \\mathrm{diag}(p_i(1-p_i))$",
+          "en": "diagonal of variances $p_i(1-p_i)$ where $p_i = \\sigma(w^\\top x_i)$",
+          "cn": "方差对角阵，$p_i = \\sigma(w^\\top x_i)$"
+        },
+        {
+          "sym": "$p_i (1-p_i) \\ge 0$",
+          "en": "each diagonal entry non-negative ⇒ $B \\succeq 0$",
+          "cn": "每个对角项非负 ⇒ $B \\succeq 0$"
+        }
+      ],
+      "usage_en": "Use the sandwich identity: $X^\\top B X \\succeq 0$ when $B \\succeq 0$, so the Hessian is PSD everywhere → the logistic loss is convex → gradient descent converges to the global minimum.",
+      "usage_cn": "用 sandwich 恒等式：$B \\succeq 0$ 时 $X^\\top B X \\succeq 0$，所以 Hessian 处处 PSD → logistic loss 凸 → gradient descent 收敛到全局最小。",
+      "intuition_en": "'Variances $p_i(1-p_i)$ are between 0 and 0.25 — never negative.' That non-negativity is what guarantees convexity; without it, the loss could have multiple local minima and GD would be unreliable.",
+      "intuition_cn": "\"方差 $p_i(1-p_i)$ 在 0 到 0.25 之间 —— 永远非负。\" 这个非负性正是凸性的保障；没有它的话，loss 可能有多个局部最小，GD 就不可靠。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-convexity-check-for-y-0-1-form"
     }
   ],
@@ -553,26 +1226,166 @@
     {
       "title": "Signed distance / margin",
       "eq": "$$ \\gamma(w,b)=\\min_i \\frac{y_i(w^\\top x_i+b)}{\\|w\\|_2} $$",
+      "symbols": [
+        {
+          "sym": "$\\gamma(w, b)$",
+          "en": "the margin — distance from the closest point to the decision hyperplane",
+          "cn": "margin —— 最近点到决策超平面的距离"
+        },
+        {
+          "sym": "$y_i \\in \\{-1, +1\\}$",
+          "en": "true class label",
+          "cn": "真实类别标签"
+        },
+        {
+          "sym": "$w^\\top x_i + b$",
+          "en": "signed distance from $x_i$ to the hyperplane (before normalizing)",
+          "cn": "$x_i$ 到超平面的有符号距离（归一化前）"
+        },
+        {
+          "sym": "$\\|w\\|_2$",
+          "en": "L2 norm of the weight vector — divides to get geometric distance",
+          "cn": "权重向量的 L2 范数 —— 除以它得到几何距离"
+        },
+        {
+          "sym": "$\\min_i$",
+          "en": "the worst case — the closest training point to the boundary",
+          "cn": "最差情形 —— 距离边界最近的训练点"
+        }
+      ],
+      "usage_en": "Use to define what SVM is maximizing: the smallest distance from any training point to the separating hyperplane. The factor $y_i$ flips the sign so correct predictions count as positive distance.",
+      "usage_cn": "用来定义 SVM 在最大化什么：任意训练点到分离超平面的最小距离。$y_i$ 把符号翻转，让 \"正确预测\" 计为正距离。",
+      "intuition_en": "'How wide is the road between the two classes?' SVM tries to make this road as wide as possible. The closest points pinning the road are the support vectors.",
+      "intuition_cn": "\"两类之间的 '路' 有多宽？\" SVM 试图把这条路修得越宽越好。把路 \"卡住\" 的最近点就是 support vectors。",
       "source": "topics/svm.html#eq-svm-signed-distance-margin"
     },
     {
       "title": "Hard-margin SVM",
       "eq": "$$ \\min_{w,b}\\frac12\\|w\\|_2^2 \\quad \\text{s.t.}\\quad y_i(w^\\top x_i+b)\\ge 1 $$",
+      "symbols": [
+        {
+          "sym": "$w, b$",
+          "en": "hyperplane parameters being optimized",
+          "cn": "待优化的超平面参数"
+        },
+        {
+          "sym": "$\\frac{1}{2}\\|w\\|_2^2$",
+          "en": "objective — minimizing $\\|w\\|$ maximizes the margin $1/\\|w\\|$",
+          "cn": "目标 —— 最小化 $\\|w\\|$ 即最大化 margin $1/\\|w\\|$"
+        },
+        {
+          "sym": "$y_i(w^\\top x_i + b) \\ge 1$",
+          "en": "every training point lies outside the margin band, on the correct side",
+          "cn": "每个训练点都在 margin 带外、且在正确侧"
+        },
+        {
+          "sym": "s.t.",
+          "en": "subject to (the constraint must hold for every $i$)",
+          "cn": "subject to（每个 $i$ 都必须满足约束）"
+        }
+      ],
+      "usage_en": "Use only when training data is **linearly separable** — otherwise no $w, b$ satisfy all constraints. Solve as a convex QP; or take the dual (one variable per training point) to introduce kernels.",
+      "usage_cn": "仅在训练数据**线性可分**时用 —— 否则没有 $w, b$ 能满足所有约束。可以作为凸 QP 求解；或者取对偶（每个训练点一个变量）以引入 kernel。",
+      "intuition_en": "'Find the widest road that fits between the two classes — assume one exists.' The constraint forces the road to be at least 2 units wide (after the $\\|w\\|$ rescaling); minimizing $\\|w\\|^2$ makes the road as wide as possible.",
+      "intuition_cn": "\"假设两类之间能塞下一条路，找最宽的那条。\" 约束强制路至少宽 2（$\\|w\\|$ 重缩放后）；最小化 $\\|w\\|^2$ 让路尽可能宽。",
       "source": "topics/svm.html#eq-svm-hard-margin-svm"
     },
     {
       "title": "Soft-margin SVM",
       "eq": "$$ \\min_{w,b,\\xi}\\frac12\\|w\\|_2^2+C\\sum_i\\xi_i $$\n$$ y_i(w^\\top x_i+b)\\ge 1-\\xi_i,\\qquad \\xi_i\\ge 0 $$",
+      "symbols": [
+        {
+          "sym": "$\\xi_i \\ge 0$",
+          "en": "slack variable for sample $i$ — measures violation amount",
+          "cn": "样本 $i$ 的松弛变量 —— 衡量违反量"
+        },
+        {
+          "sym": "$C$",
+          "en": "regularization constant — large $C$ punishes violations harshly",
+          "cn": "正则常数 —— $C$ 大则对违反惩罚严厉"
+        },
+        {
+          "sym": "$y_i(w^\\top x_i + b) \\ge 1 - \\xi_i$",
+          "en": "relaxed margin constraint (allow $\\xi_i$ slack)",
+          "cn": "松弛后的 margin 约束（允许 $\\xi_i$ 松弛）"
+        },
+        {
+          "sym": "$C \\sum_i \\xi_i$",
+          "en": "total slack penalty added to the objective",
+          "cn": "总松弛惩罚加到目标里"
+        },
+        {
+          "sym": "$\\frac{1}{2}\\|w\\|^2$",
+          "en": "margin term (same as hard-margin)",
+          "cn": "margin 项（与 hard-margin 相同）"
+        }
+      ],
+      "usage_en": "Use when data isn't linearly separable. Tune $C$ via cross-validation: small $C$ → wider margin, more violations tolerated (more bias); large $C$ → narrower margin, few violations (more variance, may overfit).",
+      "usage_cn": "数据不线性可分时使用。$C$ 用 cross-validation 调：小 $C$ → margin 更宽、容忍更多违反（偏差大）；大 $C$ → margin 更窄、违反少（方差大、可能过拟合）。",
+      "intuition_en": "'Allow some points to misbehave, pay a price $C\\xi_i$ for each.' The price $C$ trades off road-width against how much the data is allowed to break the rules.",
+      "intuition_cn": "\"允许一些点违规，每个违规付价格 $C\\xi_i$。\" 价格 $C$ 在 \"路宽\" 与 \"允许多少违规\" 之间权衡。",
       "source": "topics/svm.html#eq-svm-soft-margin-svm"
     },
     {
       "title": "Hinge-loss form",
       "eq": "$$ \\ell_{\\text{hinge}}(t)=\\max(0,1-t),\\qquad t=y_i(w^\\top x_i+b) $$",
+      "symbols": [
+        {
+          "sym": "$\\max(0, 1 - y_i(w^\\top x_i + b))$",
+          "en": "hinge loss — zero if margin is met, linear otherwise",
+          "cn": "hinge loss —— margin 达标时为 0，否则线性"
+        },
+        {
+          "sym": "$y_i(w^\\top x_i + b)$",
+          "en": "signed margin of sample $i$",
+          "cn": "样本 $i$ 的有符号 margin"
+        },
+        {
+          "sym": "$\\frac{1}{2}\\|w\\|_2^2$",
+          "en": "L2 regularizer (same role as in soft-margin SVM)",
+          "cn": "L2 正则项（作用同 soft-margin SVM）"
+        },
+        {
+          "sym": "$C$",
+          "en": "regularization weight balancing margin vs. data fit",
+          "cn": "正则权重，平衡 margin 与数据拟合"
+        }
+      ],
+      "usage_en": "Equivalent to soft-margin SVM after eliminating $\\xi_i$. Use this form for stochastic gradient training (sub-gradient descent on hinge loss is straightforward and scales to big data).",
+      "usage_cn": "消去 $\\xi_i$ 后与 soft-margin SVM 等价。用这个形式做 stochastic gradient 训练（hinge loss 上的 sub-gradient descent 简单直接，适合大数据）。",
+      "intuition_en": "'Pay nothing if the point is past the margin; pay linearly if it's inside.' Hinge loss only cares about points that are wrong or barely right — that's why SVM solutions depend on the **support vectors** only.",
+      "intuition_cn": "\"点在 margin 外不付费；进入 margin 后线性付费。\" hinge loss 只在乎错的或勉强对的点 —— 这正是为什么 SVM 解只依赖于 **support vectors**。",
       "source": "topics/svm.html#eq-svm-hinge-loss-form"
     },
     {
       "title": "Soft-margin dual shape",
       "eq": "$$ \\max_\\alpha \\sum_i \\alpha_i-\\frac12\\sum_i\\sum_j \\alpha_i\\alpha_j y_i y_j x_i^\\top x_j $$\n$$ 0\\le \\alpha_i\\le C,\\qquad \\sum_i \\alpha_i y_i=0 $$",
+      "symbols": [
+        {
+          "sym": "$\\alpha_i$",
+          "en": "dual variable per training point — $0 \\le \\alpha_i \\le C$",
+          "cn": "每个训练点的对偶变量 —— $0 \\le \\alpha_i \\le C$"
+        },
+        {
+          "sym": "$x_i^\\top x_j$",
+          "en": "inner product between training points (replace with kernel $K(x_i, x_j)$ for non-linear)",
+          "cn": "训练点之间的内积（非线性时换成 kernel $K(x_i, x_j)$）"
+        },
+        {
+          "sym": "$\\sum_i \\alpha_i y_i = 0$",
+          "en": "equality constraint from the bias term $b$",
+          "cn": "由 bias 项 $b$ 引出的等式约束"
+        },
+        {
+          "sym": "box constraint $0 \\le \\alpha_i \\le C$",
+          "en": "$C$ caps each $\\alpha_i$ — only the soft-margin form has the upper bound",
+          "cn": "$C$ 把每个 $\\alpha_i$ 封顶 —— 上界只在 soft-margin 形式出现"
+        }
+      ],
+      "usage_en": "Solve as a QP in $\\alpha$ (one variable per training sample). After solving, $w = \\sum_i \\alpha_i y_i x_i$ and only points with $\\alpha_i > 0$ matter — those are the support vectors. The kernel trick swaps $x_i^\\top x_j$ for $K(x_i, x_j)$ without ever computing $\\phi(x)$.",
+      "usage_cn": "在 $\\alpha$ 上解 QP（每个训练样本一个变量）。解完 $w = \\sum_i \\alpha_i y_i x_i$，只有 $\\alpha_i > 0$ 的点起作用 —— 即 support vectors。kernel trick 把 $x_i^\\top x_j$ 换成 $K(x_i, x_j)$，根本不必算 $\\phi(x)$。",
+      "intuition_en": "'In the dual, the model is built from training points themselves, weighted by $\\alpha_i y_i$.' Most $\\alpha_i$ end up zero (sparsity); only support vectors contribute. The kernel function just defines an inner product on $\\phi(x)$ space implicitly.",
+      "intuition_cn": "\"对偶里模型直接由训练点（按 $\\alpha_i y_i$ 加权）构造。\" 大多数 $\\alpha_i$ 是 0（稀疏）；只有 support vectors 有贡献。kernel 函数只是隐式地定义 $\\phi(x)$ 空间的内积。",
       "source": "topics/svm.html#eq-svm-soft-margin-dual-shape"
     }
   ],
@@ -580,26 +1393,146 @@
     {
       "title": "Kernel definition",
       "eq": "$$ k(x,x')=\\phi(x)^\\top\\phi(x') $$",
+      "symbols": [
+        {
+          "sym": "$K(x, x')$",
+          "en": "kernel function — outputs a scalar similarity between $x, x'$",
+          "cn": "kernel 函数 —— 输出 $x, x'$ 之间的标量相似度"
+        },
+        {
+          "sym": "$\\phi(x)$",
+          "en": "feature map (often very high or infinite dimensional)",
+          "cn": "特征映射（常为高维或无限维）"
+        },
+        {
+          "sym": "$\\phi(x)^\\top \\phi(x')$",
+          "en": "inner product in feature space — what the kernel computes implicitly",
+          "cn": "feature 空间中的内积 —— kernel 隐式计算的就是这个"
+        }
+      ],
+      "usage_en": "Use any positive-semidefinite (Mercer) kernel — that guarantees a valid feature map exists. Common choices: linear, polynomial, RBF. The kernel matrix $K_{ij} = K(x_i, x_j)$ is what algorithms (SVM dual, kernel ridge, kernel PCA) actually consume.",
+      "usage_cn": "使用任意正半定（Mercer）kernel —— 保证存在合法的 feature map。常见选择：linear、polynomial、RBF。算法（SVM dual、kernel ridge、kernel PCA）实际消费的是 kernel 矩阵 $K_{ij} = K(x_i, x_j)$。",
+      "intuition_en": "'A shortcut for inner products in a (possibly insanely high-dimensional) feature space — without ever materializing $\\phi(x)$.' Lets a linear method in $\\phi$-space behave non-linearly in $x$-space.",
+      "intuition_cn": "\"在（可能极高维的）feature 空间里做内积的捷径 —— 完全不必显式构造 $\\phi(x)$。\" 让 $\\phi$ 空间的线性方法在 $x$ 空间表现为非线性。",
       "source": "topics/kernel-methods.html#eq-kernel-methods-kernel-definition"
     },
     {
       "title": "Kernelized SVM prediction",
       "eq": "$$ f(x)=\\sum_i\\alpha_i y_i\\,k(x_i,x)+b $$",
+      "symbols": [
+        {
+          "sym": "$f(x)$",
+          "en": "decision function (sign gives the predicted class)",
+          "cn": "决策函数（符号给出预测类别）"
+        },
+        {
+          "sym": "$\\alpha_i y_i$",
+          "en": "signed dual weight for training point $i$",
+          "cn": "训练点 $i$ 的有符号对偶权重"
+        },
+        {
+          "sym": "$K(x_i, x)$",
+          "en": "similarity between training point $x_i$ and query $x$",
+          "cn": "训练点 $x_i$ 与查询 $x$ 的相似度"
+        },
+        {
+          "sym": "$b$",
+          "en": "bias term recovered from KKT conditions",
+          "cn": "从 KKT 条件恢复出来的 bias 项"
+        },
+        {
+          "sym": "$\\sum_i$",
+          "en": "sum over training samples — but most $\\alpha_i = 0$, so really just over support vectors",
+          "cn": "对训练样本求和 —— 但大多数 $\\alpha_i = 0$，实际只对 support vectors 求和"
+        }
+      ],
+      "usage_en": "Use after solving the dual: store the support vectors and their $\\alpha_i$, predict by computing kernel similarities to each. Cost is $O(\\#\\text{SV} \\cdot d)$ per prediction — good when SV count is small relative to training size.",
+      "usage_cn": "解完对偶后用：保存 support vectors 和它们的 $\\alpha_i$，预测时计算与每个的 kernel 相似度并求和。每次预测代价 $O(\\#\\text{SV} \\cdot d)$ —— 当 SV 数远小于训练集时高效。",
+      "intuition_en": "'Compare the query to the support vectors, weight by $\\alpha_i y_i$, sum the votes.' The decision is a weighted similarity-vote — the kernel is the similarity measure, the duals are the vote weights.",
+      "intuition_cn": "\"把查询与所有 support vectors 比相似度，按 $\\alpha_i y_i$ 加权求和。\" 决策就是一个加权相似度投票 —— kernel 是相似度，对偶变量是投票权重。",
       "source": "topics/kernel-methods.html#eq-kernel-methods-kernelized-svm-prediction"
     },
     {
       "title": "Polynomial kernel",
       "eq": "$$ k(x,x')=(1+x^\\top x')^d $$",
+      "symbols": [
+        {
+          "sym": "$x^\\top x'$",
+          "en": "raw inner product of inputs",
+          "cn": "输入的原始内积"
+        },
+        {
+          "sym": "$c \\ge 0$",
+          "en": "constant offset (controls cross-term mixing)",
+          "cn": "常数偏移（控制交叉项混合）"
+        },
+        {
+          "sym": "$d \\in \\mathbb{N}$",
+          "en": "degree — controls highest interaction order",
+          "cn": "阶数 —— 控制最高交互阶数"
+        },
+        {
+          "sym": "$(x^\\top x' + c)^d$",
+          "en": "kernel value after raising to power $d$",
+          "cn": "提升到 $d$ 次幂后的 kernel 值"
+        }
+      ],
+      "usage_en": "Use when you suspect feature interactions matter (e.g. $x_1 x_2$, $x_1^2$). Setting $c > 0$ keeps lower-order terms; $c = 0$ retains only degree-$d$ monomials. Computational cost is $O(d_{\\text{input}})$ — far cheaper than expanding $\\phi$.",
+      "usage_cn": "怀疑特征间存在交互（如 $x_1 x_2$、$x_1^2$）时用。$c > 0$ 保留低阶项；$c = 0$ 只保留 $d$ 阶单项。计算代价 $O(d_{\\text{input}})$ —— 远低于显式展开 $\\phi$。",
+      "intuition_en": "Implicit feature space contains all monomials up to degree $d$. Without the kernel trick, expanding to degree-3 in 100-dim input would mean $\\binom{103}{3} \\approx 176{,}000$ new features; the kernel does it as one dot product + power.",
+      "intuition_cn": "隐式 feature 空间包含所有最高 $d$ 阶单项。不用 kernel trick，100 维输入展开到 3 阶就是 $\\binom{103}{3} \\approx 176{,}000$ 个新特征；kernel 一次点积加幂运算就完成了。",
       "source": "topics/kernel-methods.html#eq-kernel-methods-polynomial-kernel"
     },
     {
       "title": "RBF / Gaussian kernel",
       "eq": "$$ k_\\sigma(x,x')=\\exp\\!\\left(-\\frac{\\|x-x'\\|_2^2}{2\\sigma^2}\\right) $$",
+      "symbols": [
+        {
+          "sym": "$\\|x - x'\\|^2$",
+          "en": "squared Euclidean distance between inputs",
+          "cn": "输入间的欧氏距离平方"
+        },
+        {
+          "sym": "$\\gamma > 0$",
+          "en": "bandwidth — large $\\gamma$ → very local; small $\\gamma$ → smooth",
+          "cn": "带宽 —— 大 $\\gamma$ → 非常局部；小 $\\gamma$ → 平滑"
+        },
+        {
+          "sym": "$\\exp(-\\gamma \\|x - x'\\|^2)$",
+          "en": "similarity decays as Gaussian over distance",
+          "cn": "相似度按 Gaussian 随距离衰减"
+        }
+      ],
+      "usage_en": "Default kernel in many libraries — works well out-of-the-box. Tune $\\gamma$ via cross-validation: a common heuristic is $\\gamma = 1/(2\\sigma^2)$ where $\\sigma$ is a typical pairwise distance. The implicit feature space is **infinite-dimensional**.",
+      "usage_cn": "许多库的默认 kernel —— 开箱即用。$\\gamma$ 用 cross-validation 调：常用启发式 $\\gamma = 1/(2\\sigma^2)$，$\\sigma$ 是典型成对距离。隐式 feature 空间是**无限维**的。",
+      "intuition_en": "'Similarity equals 1 when points coincide, decays smoothly toward 0 as they separate.' Like a soft KNN where every training point contributes, but distant ones contribute almost nothing.",
+      "intuition_cn": "\"两点重合时相似度为 1，随距离平滑衰减到 0。\" 类似软化版的 KNN —— 每个训练点都贡献，但远的几乎没贡献。",
       "source": "topics/kernel-methods.html#eq-kernel-methods-rbf-gaussian-kernel"
     },
     {
       "title": "XOR lifting from Lecture 7",
       "eq": "$$ \\phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$",
+      "symbols": [
+        {
+          "sym": "$x = (x_1, x_2)$",
+          "en": "2-D input — XOR is not linearly separable here",
+          "cn": "2 维输入 —— XOR 在这里不可线性分"
+        },
+        {
+          "sym": "$\\phi(x) = (x_1, x_2, x_1 x_2)$",
+          "en": "lifted feature map adding the product feature",
+          "cn": "提升的 feature map，加入乘积特征"
+        },
+        {
+          "sym": "$x_1 x_2$",
+          "en": "the new dimension that makes the four XOR points linearly separable in 3-D",
+          "cn": "新增维度，让 XOR 的四个点在 3D 中可线性分"
+        }
+      ],
+      "usage_en": "Canonical example showing why kernels (or hand-designed feature maps) help: XOR's four points form a checkerboard in 2-D that no line can split, but adding the product $x_1 x_2$ as a third coordinate makes them planarly separable.",
+      "usage_cn": "经典例子，说明 kernel（或手工设计的 feature map）为什么有用：XOR 的四个点在 2D 棋盘上没有直线能分开，但把乘积 $x_1 x_2$ 作为第三个坐标后在平面上就可分了。",
+      "intuition_en": "'Lift the data into a higher-dimensional space where it becomes linearly separable.' Polynomial kernel of degree 2 with $c = 0$ gives this XOR-friendly feature map essentially for free.",
+      "intuition_cn": "\"把数据抬到更高维空间，使其变得线性可分。\" 度数为 2、$c = 0$ 的 polynomial kernel 几乎免费地给出这个 XOR 友好的 feature map。",
       "source": "topics/kernel-methods.html#eq-kernel-methods-xor-lifting-from-lecture-7"
     }
   ],
@@ -607,26 +1540,136 @@
     {
       "title": "Entropy",
       "eq": "$$ I(D)=-\\sum_{c=1}^{C}p(c\\mid D)\\log_2 p(c\\mid D) $$",
+      "symbols": [
+        {
+          "sym": "$H(p)$",
+          "en": "Shannon entropy of distribution $p$",
+          "cn": "分布 $p$ 的 Shannon 熵"
+        },
+        {
+          "sym": "$p_k$",
+          "en": "probability of class $k$ in the node",
+          "cn": "节点中类别 $k$ 的占比"
+        },
+        {
+          "sym": "$\\log_2$",
+          "en": "log base 2 → entropy in bits (base $e$ → nats)",
+          "cn": "以 2 为底 → 单位是 bit；以 $e$ 为底 → nat"
+        },
+        {
+          "sym": "$-\\sum_k p_k \\log p_k$",
+          "en": "expected information content (always $\\ge 0$)",
+          "cn": "期望信息量（恒 $\\ge 0$）"
+        }
+      ],
+      "usage_en": "Use as the impurity measure when growing a classification tree. Compute the entropy of class proportions in a node; maximum is $\\log_2 K$ for $K$ classes (uniform), zero for pure node.",
+      "usage_cn": "分类树生长时作为不纯度度量。计算节点内类别比例的熵；$K$ 个类时最大值 $\\log_2 K$（均匀分布），纯节点时为 0。",
+      "intuition_en": "'How surprised am I when sampling a label from this node?' Pure node → no surprise (entropy 0); 50/50 → maximum surprise (entropy 1 bit for 2 classes).",
+      "intuition_cn": "\"从这个节点采样一个标签时我有多惊讶？\" 纯节点 → 不惊讶（熵 0）；50/50 → 最惊讶（2 类时熵 1 bit）。",
       "source": "topics/decision-trees.html#eq-decision-trees-entropy"
     },
     {
       "title": "Information gain",
       "eq": "$$ IG(D,f)=I(D)-\\sum_j\\frac{|D_j|}{|D|}I(D_j) $$",
+      "symbols": [
+        {
+          "sym": "$IG$",
+          "en": "information gain from splitting node $S$ on attribute $A$",
+          "cn": "在节点 $S$ 上按属性 $A$ 切分获得的信息增益"
+        },
+        {
+          "sym": "$H(S)$",
+          "en": "entropy of the parent node before splitting",
+          "cn": "切分前父节点的熵"
+        },
+        {
+          "sym": "$S_v$",
+          "en": "subset of $S$ where attribute $A$ takes value $v$",
+          "cn": "$S$ 中属性 $A$ 取 $v$ 的子集"
+        },
+        {
+          "sym": "$|S_v|/|S|$",
+          "en": "proportion of samples going to child $v$ — used to weight child entropies",
+          "cn": "进入子节点 $v$ 的样本占比 —— 给子节点熵加权"
+        },
+        {
+          "sym": "$\\sum_v$",
+          "en": "sum over all values $A$ can take",
+          "cn": "对 $A$ 所有可能取值求和"
+        }
+      ],
+      "usage_en": "At each node, evaluate $IG$ for every candidate split; pick the split with the largest $IG$. ID3 / C4.5 use this directly; CART uses Gini instead but the structure is the same.",
+      "usage_cn": "在每个节点对每个候选切分计算 $IG$，选 $IG$ 最大的那个。ID3 / C4.5 直接用这个；CART 用 Gini，但结构相同。",
+      "intuition_en": "'How much does splitting on $A$ reduce my uncertainty about the label?' A perfect split that creates pure children has $IG = H(S)$; a useless split (children look like the parent) has $IG = 0$.",
+      "intuition_cn": "\"按 $A$ 切分能减少多少对标签的不确定性？\" 完美切分（子节点全纯）$IG = H(S)$；无用切分（子节点像父节点）$IG = 0$。",
       "source": "topics/decision-trees.html#eq-decision-trees-information-gain"
     },
     {
       "title": "Gini impurity",
       "eq": "$$ G(D)=1-\\sum_c p_c^2 $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{Gini}(p)$",
+          "en": "Gini index of distribution $p$",
+          "cn": "分布 $p$ 的 Gini index"
+        },
+        {
+          "sym": "$p_k$",
+          "en": "probability of class $k$",
+          "cn": "类别 $k$ 的概率"
+        },
+        {
+          "sym": "$1 - \\sum_k p_k^2$",
+          "en": "probability that two random samples disagree",
+          "cn": "随机抽两个样本类别不同的概率"
+        }
+      ],
+      "usage_en": "Alternative impurity for classification trees — used by CART. Computationally cheaper than entropy (no log) and produces nearly identical trees in practice. Range: 0 (pure) to $1 - 1/K$ (uniform over $K$ classes).",
+      "usage_cn": "分类树的另一种不纯度 —— CART 使用。比熵更便宜（无 log），实际产生的树几乎相同。范围：0（纯）到 $1 - 1/K$（$K$ 类均匀）。",
+      "intuition_en": "'If I draw two samples from this node, how often do they disagree?' Pure node → never disagree (Gini 0); uniform → maximally often disagree.",
+      "intuition_cn": "\"从节点抽两个样本，它们多频繁地不同类？\" 纯节点 → 从不（Gini 0）；均匀分布 → 最频繁。",
       "source": "topics/decision-trees.html#eq-decision-trees-gini-impurity"
     },
     {
       "title": "Classification error",
       "eq": "$$ E(D)=1-\\max_c p(c\\mid D) $$",
+      "symbols": [
+        {
+          "sym": "$1 - \\max_k p_k$",
+          "en": "fraction of samples that would be misclassified by majority vote",
+          "cn": "按多数投票预测时的错分率"
+        }
+      ],
+      "usage_en": "Simplest impurity measure — the misclassification rate of the majority-class prediction. Rarely used to grow trees (less sensitive than entropy or Gini) but commonly used to **prune** them.",
+      "usage_cn": "最简单的不纯度 —— 多数类预测的错分率。很少用于树生长（敏感度不如熵或 Gini），但常用于**剪枝**。",
+      "intuition_en": "'If I predict the majority class for everyone in this node, what's my error rate?' Doesn't change as fast as entropy/Gini when split quality changes, so it under-rewards informative splits during growing.",
+      "intuition_cn": "\"如果对节点内所有样本都预测多数类，错误率是多少？\" 切分质量变化时它的变化慢于熵 / Gini，所以生长时对有信息的切分奖励不足。",
       "source": "topics/decision-trees.html#eq-decision-trees-classification-error"
     },
     {
       "title": "Continuous split rule",
       "eq": "$$ f(x)=\\mathbf{1}\\{x_j\\ge\\tau\\} $$",
+      "symbols": [
+        {
+          "sym": "$x_j$",
+          "en": "the feature being thresholded",
+          "cn": "被设阈值的特征"
+        },
+        {
+          "sym": "$t$",
+          "en": "threshold value",
+          "cn": "阈值"
+        },
+        {
+          "sym": "$x_j \\le t$ vs. $x_j > t$",
+          "en": "binary split based on the threshold",
+          "cn": "基于阈值的二元切分"
+        }
+      ],
+      "usage_en": "For continuous features, sort samples by $x_j$ and try every midpoint between consecutive values as a candidate threshold. Pick the $t$ giving the largest $IG$ / Gini decrease — exhaustive but $O(n \\log n)$ per feature.",
+      "usage_cn": "对连续特征，按 $x_j$ 排序，把相邻值之间的中点作为候选阈值。选 $IG$ / Gini 下降最大的 $t$ —— 暴力但每个特征 $O(n \\log n)$。",
+      "intuition_en": "'Find the best place to draw a vertical line through the feature axis.' Each split halves the data along one axis; together they carve the input space into axis-aligned rectangles, which is why decision boundaries look 'staircase-y'.",
+      "intuition_cn": "\"在该特征轴上找最佳的切割点。\" 每次切分把数据沿一个轴一分为二；多次切分把输入空间切成轴对齐的矩形，所以决策边界看起来像 \"楼梯\"。",
       "source": "topics/decision-trees.html#eq-decision-trees-continuous-split-rule"
     }
   ],
@@ -634,21 +1677,115 @@
     {
       "title": "Bootstrap sample",
       "eq": "$$ D_t=\\{(x_{i_s},y_{i_s})\\}_{s=1}^{n},\\qquad i_s\\sim\\text{Uniform}\\{1,\\dots,n\\} $$",
+      "symbols": [
+        {
+          "sym": "$D$",
+          "en": "original training set of size $n$",
+          "cn": "原始训练集，大小 $n$"
+        },
+        {
+          "sym": "$D^*$",
+          "en": "bootstrap sample — drawn with replacement, also size $n$",
+          "cn": "bootstrap 样本 —— 有放回抽取，大小同样为 $n$"
+        },
+        {
+          "sym": "$1 - 1/e \\approx 63.2\\%$",
+          "en": "expected fraction of original samples included in $D^*$ (rest are out-of-bag)",
+          "cn": "$D^*$ 中预期包含的原样本比例（其余为 out-of-bag）"
+        }
+      ],
+      "usage_en": "Sampling step at the heart of bagging. Each tree gets its own bootstrap sample; OOB samples (~37%) can be used as a free validation set without holding data out.",
+      "usage_cn": "Bagging 的核心采样步骤。每棵树拿到自己的 bootstrap 样本；OOB 样本（~37%）可以作为免费的验证集，不必再划分。",
+      "intuition_en": "'Resample with replacement to get $T$ slightly different training sets.' Some samples are used multiple times in one bootstrap, others not at all — the variation between bootstraps is what decorrelates the trees.",
+      "intuition_cn": "\"有放回重采样得到 $T$ 个略有差异的训练集。\" 一次 bootstrap 中有的样本被多次使用，有的根本没被选中 —— bootstrap 之间的差异让树之间去相关。",
       "source": "topics/bagging.html#eq-bagging-bootstrap-sample"
     },
     {
       "title": "Majority vote",
       "eq": "$$ F(x)=\\operatorname{sign}\\!\\left(\\sum_{t=1}^{T} f_t(x)\\right) $$",
+      "symbols": [
+        {
+          "sym": "$\\hat{y}(x)$",
+          "en": "ensemble prediction for input $x$",
+          "cn": "集成对输入 $x$ 的预测"
+        },
+        {
+          "sym": "$h_t(x)$",
+          "en": "prediction of the $t$-th base classifier",
+          "cn": "第 $t$ 个基分类器的预测"
+        },
+        {
+          "sym": "$T$",
+          "en": "total number of bagged classifiers",
+          "cn": "bagging 的基分类器数量"
+        },
+        {
+          "sym": "$\\mathrm{mode}$",
+          "en": "most-frequent prediction across the ensemble",
+          "cn": "集成中出现最多的预测"
+        }
+      ],
+      "usage_en": "Use majority vote for classification, mean for regression. More base learners → smoother predictions and lower variance, but diminishing returns past ~100 trees.",
+      "usage_cn": "分类用多数投票，回归用平均。基学习器数越多 → 预测越平滑、方差越低，但超过 ~100 棵树后收益递减。",
+      "intuition_en": "'Each tree gets one vote; the ensemble follows the majority.' Even if individual trees are unstable (high variance), the vote averages them out — that's the magic of bagging.",
+      "intuition_cn": "\"每棵树一票，集成跟随多数。\" 即使单棵树不稳定（方差大），投票也能把它们平均掉 —— 这就是 bagging 的魔法。",
       "source": "topics/bagging.html#eq-bagging-majority-vote"
     },
     {
       "title": "Variance of an average",
       "eq": "$$ \\operatorname{Var}\\!\\left(\\frac1T\\sum_t f_t\\right)\\approx \\frac{\\sigma^2}{T} $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{Var}(\\bar{Z})$",
+          "en": "variance of the mean of $T$ random predictions",
+          "cn": "$T$ 个随机预测均值的方差"
+        },
+        {
+          "sym": "$\\sigma^2$",
+          "en": "variance of one base learner's prediction",
+          "cn": "单个基学习器预测的方差"
+        },
+        {
+          "sym": "$T$",
+          "en": "number of base learners (bags)",
+          "cn": "基学习器数量"
+        },
+        {
+          "sym": "$\\rho$",
+          "en": "**pairwise correlation** between two base learners' predictions",
+          "cn": "两个基学习器预测之间的**成对相关系数**"
+        }
+      ],
+      "usage_en": "Use to understand why bagging helps and where it stops helping. As $T \\to \\infty$, variance bottoms out at $\\rho \\sigma^2$ (the correlation floor). Random forests reduce $\\rho$ further by random feature subsetting at each split.",
+      "usage_cn": "用来理解 bagging 为什么有效以及何时失效。$T \\to \\infty$ 时方差收敛到 $\\rho \\sigma^2$（相关性下界）。Random Forest 在每次切分时随机选特征，进一步降低 $\\rho$。",
+      "intuition_en": "'Independent averaging beats variance, but correlated averaging only goes so far.' If trees were perfectly uncorrelated ($\\rho = 0$) variance would shrink to $\\sigma^2 / T$; in practice trees agree on a lot, so the floor is higher.",
+      "intuition_cn": "\"独立平均能压低方差，但相关平均压不到底。\" 如果树完全独立（$\\rho = 0$）方差会降到 $\\sigma^2 / T$；实际中树之间常常意见一致，所以下限更高。",
       "source": "topics/bagging.html#eq-bagging-variance-of-an-average"
     },
     {
       "title": "Random forest split idea",
       "eq": "$$ \\text{consider about }\\sqrt d\\text{ features per split} $$",
+      "symbols": [
+        {
+          "sym": "$m$",
+          "en": "number of features randomly sampled at each split candidate",
+          "cn": "每次候选切分时随机采样的特征数"
+        },
+        {
+          "sym": "$d$",
+          "en": "total feature count (full pool)",
+          "cn": "总特征数（完整池）"
+        },
+        {
+          "sym": "typical: $m = \\sqrt{d}$",
+          "en": "rule of thumb for classification ($m = d/3$ for regression)",
+          "cn": "分类的经验值（回归常用 $m = d/3$）"
+        }
+      ],
+      "usage_en": "At each split, restrict the search to a random subset of $m < d$ features. This forces different trees to use different features → reduces $\\rho$ → lower ensemble variance than plain bagging on the same data.",
+      "usage_cn": "每次切分把搜索限制在 $m < d$ 的随机特征子集内。这迫使不同树使用不同特征 → 降低 $\\rho$ → 集成方差比同等 bagging 更低。",
+      "intuition_en": "'Don't let any one strong feature dominate every tree.' Without this, all trees would split on the most informative feature first and end up nearly identical; random subsetting forces diversity.",
+      "intuition_cn": "\"不让某个强特征主导每棵树。\" 没有这一步，所有树都会先用信息量最大的特征切分，结果几乎相同；随机采样强制多样性。",
       "source": "topics/bagging.html#eq-bagging-random-forest-split-idea"
     }
   ],
@@ -656,21 +1793,130 @@
     {
       "title": "Additive ensemble",
       "eq": "$$ F_t(x)=F_{t-1}(x)+\\alpha_t f_t(x) $$",
+      "symbols": [
+        {
+          "sym": "$F(x)$",
+          "en": "final ensemble prediction (real-valued; sign for class)",
+          "cn": "最终集成预测（实值；取符号得类别）"
+        },
+        {
+          "sym": "$h_t(x) \\in \\{-1, +1\\}$",
+          "en": "$t$-th weak classifier's prediction",
+          "cn": "第 $t$ 个弱分类器的预测"
+        },
+        {
+          "sym": "$\\alpha_t$",
+          "en": "weight (importance) of the $t$-th weak learner",
+          "cn": "第 $t$ 个弱学习器的权重（重要性）"
+        },
+        {
+          "sym": "$T$",
+          "en": "total boosting rounds",
+          "cn": "boosting 总轮数"
+        },
+        {
+          "sym": "$\\mathrm{sign}(F(x))$",
+          "en": "thresholded prediction for binary classification",
+          "cn": "二分类时取符号得到预测"
+        }
+      ],
+      "usage_en": "Build the ensemble greedily: at each round add a new weak learner with the right $\\alpha_t$ to most reduce the loss. Used in AdaBoost (exponential loss) and gradient boosting (any differentiable loss).",
+      "usage_cn": "贪心地构建集成：每一轮加一个新的弱学习器并选最佳 $\\alpha_t$ 以最大限度降低 loss。用于 AdaBoost（指数 loss）和 gradient boosting（任意可导 loss）。",
+      "intuition_en": "'Weighted vote — but the weight depends on each learner's track record, and learners are added one at a time.' Different from bagging in two ways: sequential not parallel, weighted not equal.",
+      "intuition_cn": "\"加权投票 —— 但权重依赖于每个学习器的表现，学习器是一个个串行加入的。\" 与 bagging 的两点区别：串行 vs 并行，加权 vs 等权。",
       "source": "topics/boosting.html#eq-boosting-additive-ensemble"
     },
     {
       "title": "Exponential loss",
       "eq": "$$ L(F)=\\frac1m\\sum_{i=1}^m \\exp(-y_iF(x_i)) $$",
+      "symbols": [
+        {
+          "sym": "$L(F)$",
+          "en": "exponential loss of the ensemble $F$",
+          "cn": "集成 $F$ 的指数 loss"
+        },
+        {
+          "sym": "$y_i F(x_i)$",
+          "en": "signed margin of sample $i$",
+          "cn": "样本 $i$ 的有符号 margin"
+        },
+        {
+          "sym": "$e^{-y_i F(x_i)}$",
+          "en": "huge penalty when the margin is very negative",
+          "cn": "margin 非常负时惩罚极大"
+        }
+      ],
+      "usage_en": "AdaBoost is exactly forward stagewise minimization of $L(F)$ — adding a weak learner at each step that most decreases the exponential loss. Choice of loss → choice of boosting algorithm (logistic loss → LogitBoost; squared loss → L2Boost).",
+      "usage_cn": "AdaBoost 本质就是对 $L(F)$ 做 forward stagewise 最小化 —— 每步加入最能降低指数 loss 的弱学习器。loss 选择 → 算法选择（logistic loss → LogitBoost；平方 loss → L2Boost）。",
+      "intuition_en": "'Penalize wrong predictions exponentially.' Confidently wrong examples ($y_i F(x_i) \\ll 0$) blow up the loss, forcing the next round to focus there. That's why AdaBoost is so sensitive to label noise.",
+      "intuition_cn": "\"指数地惩罚错误预测。\" 自信但错（$y_i F(x_i) \\ll 0$）的样本让 loss 爆炸，迫使下一轮聚焦于此。所以 AdaBoost 对标签噪声非常敏感。",
       "source": "topics/boosting.html#eq-boosting-exponential-loss"
     },
     {
       "title": "Example weights",
       "eq": "$$ w_i=\\exp(-y_iF_{t-1}(x_i)) $$",
+      "symbols": [
+        {
+          "sym": "$D_{t+1}(i)$",
+          "en": "weight of sample $i$ in round $t+1$",
+          "cn": "第 $t+1$ 轮中样本 $i$ 的权重"
+        },
+        {
+          "sym": "$D_t(i)$",
+          "en": "weight in the previous round",
+          "cn": "上一轮的权重"
+        },
+        {
+          "sym": "$y_i h_t(x_i) \\in \\{-1, +1\\}$",
+          "en": "+1 if classified correctly by $h_t$, -1 if wrong",
+          "cn": "$h_t$ 预测对为 +1，错为 -1"
+        },
+        {
+          "sym": "$Z_t$",
+          "en": "normalization constant so weights sum to 1",
+          "cn": "归一化常数，让权重和为 1"
+        },
+        {
+          "sym": "$\\alpha_t$",
+          "en": "round-$t$ classifier weight (computed from $h_t$'s error rate)",
+          "cn": "第 $t$ 轮分类器权重（由 $h_t$ 错误率算出）"
+        }
+      ],
+      "usage_en": "Update step in AdaBoost: increase weight on samples $h_t$ got wrong, decrease on the right ones. Next round's weak learner is trained against this re-weighted distribution and forced to focus on the hard cases.",
+      "usage_cn": "AdaBoost 的更新：被 $h_t$ 错分的样本权重增大，正确的减小。下一轮的弱学习器在这个重赋权分布上训练，被迫聚焦在难样本。",
+      "intuition_en": "'Show the next weak learner more of the examples that gave the previous one trouble.' By round $T$, the easy examples are nearly weight-zero and only the hard frontier matters.",
+      "intuition_cn": "\"把上一个学习器搞错的样本，多展示给下一个学习器看。\" 到第 $T$ 轮时，简单样本权重几乎为 0，只有困难前沿的样本重要。",
       "source": "topics/boosting.html#eq-boosting-example-weights"
     },
     {
       "title": "Classifier coefficient",
       "eq": "$$ \\alpha_t^*=\\frac12\\log\\frac{1-\\epsilon_t}{\\epsilon_t} $$",
+      "symbols": [
+        {
+          "sym": "$\\alpha_t$",
+          "en": "weight of the $t$-th weak learner in the final ensemble",
+          "cn": "第 $t$ 个弱学习器在最终集成中的权重"
+        },
+        {
+          "sym": "$\\epsilon_t \\in (0, 0.5)$",
+          "en": "weighted error rate of $h_t$ on the round-$t$ distribution",
+          "cn": "$h_t$ 在第 $t$ 轮分布下的加权错误率"
+        },
+        {
+          "sym": "$\\frac{1-\\epsilon_t}{\\epsilon_t}$",
+          "en": "odds ratio of correct to incorrect predictions",
+          "cn": "正确 vs 错误预测的几率比"
+        },
+        {
+          "sym": "$\\frac{1}{2}\\log$",
+          "en": "half-log of the odds — derived from minimizing exponential loss",
+          "cn": "几率的半对数 —— 由最小化指数 loss 导出"
+        }
+      ],
+      "usage_en": "Computed in closed form once $h_t$'s error $\\epsilon_t$ is measured. Lower $\\epsilon_t$ → larger $\\alpha_t$ → more vote in the final ensemble. If $\\epsilon_t \\ge 0.5$, the weak learner is worse than random — stop or flip its predictions.",
+      "usage_cn": "测出 $h_t$ 的错误率 $\\epsilon_t$ 后用闭式解算出。$\\epsilon_t$ 越小 → $\\alpha_t$ 越大 → 在最终集成中票更重。$\\epsilon_t \\ge 0.5$ 时弱学习器比随机还差 —— 应停止或翻转其预测。",
+      "intuition_en": "'Better-than-random learners get amplified; near-random ones get muted.' At $\\epsilon = 0.5$, $\\alpha = 0$ (no influence); at $\\epsilon = 0$, $\\alpha = \\infty$ (one learner can't be perfect, so this never happens in practice).",
+      "intuition_cn": "\"比随机好的学习器被放大，接近随机的被压低。\" $\\epsilon = 0.5$ 时 $\\alpha = 0$（无影响）；$\\epsilon = 0$ 时 $\\alpha = \\infty$（实际不会发生，单个学习器不可能完美）。",
       "source": "topics/boosting.html#eq-boosting-classifier-coefficient"
     }
   ],
@@ -678,26 +1924,151 @@
     {
       "title": "Centering",
       "eq": "$$ \\mu=\\frac1N\\sum_i x^{(i)},\\qquad \\bar x^{(i)}=x^{(i)}-\\mu $$",
+      "symbols": [
+        {
+          "sym": "$X$",
+          "en": "centered data matrix (rows are samples)",
+          "cn": "中心化后的数据矩阵（行是样本）"
+        },
+        {
+          "sym": "$X_{\\text{raw}}$",
+          "en": "raw data before centering",
+          "cn": "中心化前的原始数据"
+        },
+        {
+          "sym": "$\\bar{x}$",
+          "en": "feature-wise mean (a $d$-vector)",
+          "cn": "按特征求均值（$d$ 维向量）"
+        },
+        {
+          "sym": "$\\mathbf{1}$",
+          "en": "all-ones column vector for broadcasting the mean over rows",
+          "cn": "全 1 列向量，把均值按行广播"
+        }
+      ],
+      "usage_en": "Always do this first. Without centering, the first principal component would just point at the data's centroid rather than the direction of maximum variance. Don't standardize unless features have wildly different units.",
+      "usage_cn": "PCA 必须先做这一步。不中心化的话，第一主成分会指向数据的质心而不是最大方差方向。除非特征单位差别极大，否则不要做 standardize。",
+      "intuition_en": "'Move the data so the origin is at the center of mass.' This makes the covariance computation reflect actual spread rather than offset.",
+      "intuition_cn": "\"把数据平移到质心位于原点。\" 这样协方差才能反映真实的离散程度，而不是偏移量。",
       "source": "topics/pca.html#eq-pca-centering"
     },
     {
       "title": "Empirical covariance",
       "eq": "$$ \\Sigma=\\frac1N\\bar X\\bar X^\\top=\\frac1N\\sum_i\\bar x^{(i)}\\bar x^{(i)\\top} $$",
+      "symbols": [
+        {
+          "sym": "$\\Sigma$",
+          "en": "empirical covariance matrix ($d \\times d$, symmetric, PSD)",
+          "cn": "经验协方差矩阵（$d \\times d$，对称，PSD）"
+        },
+        {
+          "sym": "$X$",
+          "en": "centered data matrix ($n$ samples × $d$ features)",
+          "cn": "中心化后的数据矩阵（$n$ 个样本 × $d$ 个特征）"
+        },
+        {
+          "sym": "$\\frac{1}{n-1}$",
+          "en": "Bessel-corrected denominator (use $1/n$ for biased MLE estimate)",
+          "cn": "Bessel 修正分母（无修正用 $1/n$，是 MLE）"
+        }
+      ],
+      "usage_en": "Compute once after centering. Off-diagonal entries are pairwise covariances; diagonal entries are per-feature variances. PCA then finds eigenvectors of $\\Sigma$, ordered by eigenvalue.",
+      "usage_cn": "中心化后只算一次。非对角线元素是成对协方差；对角线元素是各特征的方差。PCA 接下来求 $\\Sigma$ 的特征向量，按特征值排序。",
+      "intuition_en": "Captures how features co-vary. A large positive entry $\\Sigma_{ij}$ means features $i$ and $j$ tend to grow together; PCA looks for combinations that capture the most of this joint variation.",
+      "intuition_cn": "刻画特征间的协变关系。$\\Sigma_{ij}$ 大的正值意味着特征 $i, j$ 倾向同时增大；PCA 找的是能 capture 最多这种联合变化的方向组合。",
       "source": "topics/pca.html#eq-pca-empirical-covariance"
     },
     {
       "title": "First principal component",
       "eq": "$$ w_1=\\arg\\max_{\\|w\\|_2=1} w^\\top\\Sigma w $$",
+      "symbols": [
+        {
+          "sym": "$u_1$",
+          "en": "first principal component (a unit $d$-vector)",
+          "cn": "第一主成分（单位 $d$ 维向量）"
+        },
+        {
+          "sym": "$\\Sigma$",
+          "en": "empirical covariance matrix",
+          "cn": "经验协方差矩阵"
+        },
+        {
+          "sym": "$\\lambda_1$",
+          "en": "largest eigenvalue of $\\Sigma$ — variance along $u_1$",
+          "cn": "$\\Sigma$ 的最大特征值 —— $u_1$ 方向的方差"
+        },
+        {
+          "sym": "$\\arg\\max_{\\|u\\|=1}$",
+          "en": "constrained maximization over unit vectors",
+          "cn": "在单位向量上做约束最大化"
+        }
+      ],
+      "usage_en": "Computed via eigendecomposition of $\\Sigma$ or SVD of $X$. The $k$-th principal component is the eigenvector with the $k$-th largest eigenvalue. Use top-$k$ to project to a $k$-dimensional subspace that retains the most variance.",
+      "usage_cn": "通过 $\\Sigma$ 的特征分解或 $X$ 的 SVD 得到。第 $k$ 个主成分是第 $k$ 大特征值对应的特征向量。取前 $k$ 个投影到 $k$ 维子空间，保留最多方差。",
+      "intuition_en": "'Find the direction along which the data varies the most.' All other components are orthogonal to it and capture progressively less variance — the eigenvalues are exactly the variance along each component.",
+      "intuition_cn": "\"找数据变化最大的方向。\" 其他主成分都正交于它且方差依次递减 —— 特征值正是每个主成分上的方差。",
       "source": "topics/pca.html#eq-pca-first-principal-component"
     },
     {
       "title": "Projection and reconstruction",
       "eq": "$$ \\hat x=U^\\top(x-\\mu),\\qquad \\tilde x=U\\hat x+\\mu $$",
+      "symbols": [
+        {
+          "sym": "$z = U_k^\\top x$",
+          "en": "$k$-D coordinates of $x$ in the principal-component basis",
+          "cn": "$x$ 在主成分基下的 $k$ 维坐标"
+        },
+        {
+          "sym": "$U_k$",
+          "en": "matrix whose columns are the top-$k$ principal components",
+          "cn": "列为前 $k$ 个主成分的矩阵"
+        },
+        {
+          "sym": "$\\hat{x} = U_k z$",
+          "en": "reconstruction of $x$ in the original $d$-D space",
+          "cn": "$x$ 在原 $d$ 维空间的重构"
+        },
+        {
+          "sym": "$\\|x - \\hat{x}\\|^2$",
+          "en": "reconstruction error — minimized by PCA among all rank-$k$ projections",
+          "cn": "重构误差 —— 在所有秩 $k$ 投影中由 PCA 最小化"
+        }
+      ],
+      "usage_en": "Use to compress data to $k$ dimensions (e.g. for visualization, denoising, or as input to a downstream model). Don't forget to add the mean back when reconstructing the original-scale signal.",
+      "usage_cn": "用于把数据压缩到 $k$ 维（可视化、去噪，或作为下游模型输入）。重构原尺度信号时别忘了把均值加回去。",
+      "intuition_en": "'Throw away the low-variance directions, keep only the principal ones.' The reconstruction error equals the sum of the discarded eigenvalues — quantifies how much information you lost.",
+      "intuition_cn": "\"扔掉方差小的方向，只保留主要的。\" 重构误差等于被扔掉的特征值之和 —— 量化丢失的信息量。",
       "source": "topics/pca.html#eq-pca-projection-and-reconstruction"
     },
     {
       "title": "SVD route",
       "eq": "$$ \\frac1{\\sqrt N}\\bar X=USV^\\top,\\qquad \\Sigma=US^2U^\\top $$",
+      "symbols": [
+        {
+          "sym": "$X = U\\Sigma V^\\top$",
+          "en": "SVD of the centered data matrix",
+          "cn": "中心化数据矩阵的 SVD"
+        },
+        {
+          "sym": "$V$",
+          "en": "right singular vectors — columns are the principal components",
+          "cn": "右奇异向量 —— 列就是主成分"
+        },
+        {
+          "sym": "$\\Sigma$",
+          "en": "diagonal of singular values $\\sigma_i$",
+          "cn": "奇异值对角阵 $\\sigma_i$"
+        },
+        {
+          "sym": "$\\sigma_i^2 / (n-1)$",
+          "en": "variance along the $i$-th principal direction (matches eigenvalue of cov)",
+          "cn": "第 $i$ 个主方向上的方差（与协方差特征值匹配）"
+        }
+      ],
+      "usage_en": "Numerically more stable and direct than computing $X^\\top X$ then eigendecomposing. SVD also handles rank-deficient $X$ gracefully. Most PCA libraries (sklearn, numpy) use SVD under the hood.",
+      "usage_cn": "数值上比先算 $X^\\top X$ 再特征分解更稳定且直接。SVD 也能优雅处理秩不足的 $X$。大多数 PCA 库（sklearn、numpy）底层都用 SVD。",
+      "intuition_en": "Why it works: $X^\\top X = V\\Sigma^2 V^\\top$ — the right singular vectors $V$ are exactly the eigenvectors of the (uncentered) covariance, and squared singular values are eigenvalues. Free PCA from a single decomposition.",
+      "intuition_cn": "为什么有效：$X^\\top X = V\\Sigma^2 V^\\top$ —— 右奇异向量 $V$ 正好是协方差的特征向量，奇异值平方就是特征值。一次分解免费得到 PCA。",
       "source": "topics/pca.html#eq-pca-svd-route"
     }
   ],
@@ -705,21 +2076,115 @@
     {
       "title": "Objective",
       "eq": "$$ J=\\sum_{i=1}^n\\sum_{k=1}^K r_{ik}\\|x^{(i)}-\\mu_k\\|_2^2 $$\n$$ r_{ik}\\in\\{0,1\\},\\qquad \\sum_k r_{ik}=1 $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{WCSS}$",
+          "en": "within-cluster sum of squares (the loss to minimize)",
+          "cn": "簇内平方和（要最小化的 loss）"
+        },
+        {
+          "sym": "$K$",
+          "en": "number of clusters (a hyperparameter)",
+          "cn": "簇数（超参数）"
+        },
+        {
+          "sym": "$C_k$",
+          "en": "set of points assigned to cluster $k$",
+          "cn": "分配给簇 $k$ 的点集"
+        },
+        {
+          "sym": "$\\mu_k$",
+          "en": "centroid of cluster $k$ (mean of its points)",
+          "cn": "簇 $k$ 的质心（其点的均值）"
+        }
+      ],
+      "usage_en": "Use as the optimization target. K-means alternates between updating $\\{\\mu_k\\}$ and updating assignments to monotonically decrease WCSS. Pick $K$ via the elbow method, silhouette score, or domain knowledge.",
+      "usage_cn": "作为优化目标。K-means 交替更新 $\\{\\mu_k\\}$ 和分配，单调下降 WCSS。$K$ 用 elbow 法、silhouette score 或领域知识选。",
+      "intuition_en": "'Sum of squared distances from each point to its cluster's center.' Smaller WCSS = tighter clusters. Adding more $K$ always reduces WCSS (extreme: $K = n$ → WCSS = 0), so 'just minimize WCSS' isn't a clustering criterion alone.",
+      "intuition_cn": "\"每个点到所属簇中心的距离平方之和。\" WCSS 越小簇越紧。增大 $K$ 总能降 WCSS（极端：$K = n$ → WCSS = 0），所以仅 \"最小化 WCSS\" 不能作为唯一聚类准则。",
       "source": "topics/kmeans.html#eq-kmeans-objective"
     },
     {
       "title": "Assignment step",
       "eq": "$$ r_{ik}=1\\quad\\text{if}\\quad k=\\arg\\min_j\\|x^{(i)}-\\mu_j\\|_2^2 $$",
+      "symbols": [
+        {
+          "sym": "$z_i$",
+          "en": "assignment for sample $i$ — index of its cluster",
+          "cn": "样本 $i$ 的分配 —— 它所属簇的下标"
+        },
+        {
+          "sym": "$\\arg\\min_k$",
+          "en": "pick the cluster index $k$ minimizing the distance",
+          "cn": "选距离最小的簇下标 $k$"
+        },
+        {
+          "sym": "$\\|x_i - \\mu_k\\|^2$",
+          "en": "squared Euclidean distance from $x_i$ to centroid $\\mu_k$",
+          "cn": "$x_i$ 到质心 $\\mu_k$ 的欧氏距离平方"
+        }
+      ],
+      "usage_en": "Step 1 of each Lloyd iteration: assign each point to its closest centroid (ties broken arbitrarily). Cost is $O(nKd)$ per pass — cheap but dominant when $K$ or $n$ is large.",
+      "usage_cn": "Lloyd 迭代每轮第 1 步：把每个点分配给最近的质心（同距任选）。每轮代价 $O(nKd)$ —— 便宜但 $K$ 或 $n$ 大时成主要成本。",
+      "intuition_en": "'Each point joins the nearest centroid.' Holding centroids fixed, this assignment minimizes the WCSS contribution of each point — the per-point optimum.",
+      "intuition_cn": "\"每个点加入最近的质心所在簇。\" 固定质心时，这个分配让每个点对 WCSS 的贡献最小 —— 即逐点最优。",
       "source": "topics/kmeans.html#eq-kmeans-assignment-step"
     },
     {
       "title": "Update step",
       "eq": "$$ \\mu_k=\\frac{\\sum_i r_{ik}x^{(i)}}{\\sum_i r_{ik}} $$",
+      "symbols": [
+        {
+          "sym": "$\\mu_k$",
+          "en": "updated centroid for cluster $k$",
+          "cn": "簇 $k$ 更新后的质心"
+        },
+        {
+          "sym": "$|C_k|$",
+          "en": "number of points currently assigned to cluster $k$",
+          "cn": "当前分配给簇 $k$ 的点数"
+        },
+        {
+          "sym": "$\\sum_{i \\in C_k} x_i$",
+          "en": "sum of all assigned points (numerator of the mean)",
+          "cn": "所有分配点的求和（均值的分子）"
+        }
+      ],
+      "usage_en": "Step 2 of each Lloyd iteration: recompute each centroid as the mean of its currently assigned points. Reassignment in step 1 then converges WCSS until no point switches clusters.",
+      "usage_cn": "Lloyd 迭代每轮第 2 步：把每个质心重算为当前所属点的均值。回到第 1 步重新分配，直到没有点换簇时 WCSS 收敛。",
+      "intuition_en": "'Each centroid moves to the center of mass of its current followers.' Holding assignments fixed, this is the per-cluster optimum — the mean minimizes squared distance to a set of points.",
+      "intuition_cn": "\"每个质心搬到当前 \"追随者\" 的质心位置。\" 固定分配时这是逐簇最优 —— 均值是平方距离和的最小化点。",
       "source": "topics/kmeans.html#eq-kmeans-update-step"
     },
     {
       "title": "Per-iteration cost",
       "eq": "$$ O(KNd)\\text{ for assignments},\\qquad O(Nd)\\text{ for means} $$",
+      "symbols": [
+        {
+          "sym": "$n$",
+          "en": "number of samples",
+          "cn": "样本数"
+        },
+        {
+          "sym": "$K$",
+          "en": "number of clusters",
+          "cn": "簇数"
+        },
+        {
+          "sym": "$d$",
+          "en": "feature dimension",
+          "cn": "特征维度"
+        },
+        {
+          "sym": "$O(nKd)$",
+          "en": "cost of one full Lloyd iteration (assignment + update)",
+          "cn": "一次完整 Lloyd 迭代的代价（分配 + 更新）"
+        }
+      ],
+      "usage_en": "Use to estimate runtime: K-means scales linearly in all three of $n, K, d$. For very large $n$ use mini-batch K-means; for very large $K$ use approximate methods (k-d tree, hierarchical clustering).",
+      "usage_cn": "用来估计运行时间：K-means 在 $n, K, d$ 三个量上都是线性。$n$ 极大用 mini-batch K-means；$K$ 极大用近似方法（k-d tree、层次聚类）。",
+      "intuition_en": "'Cheap per iteration, expensive in number of iterations.' Convergence is usually fast (10s of iterations) but can vary; multiple random initializations are standard practice (kmeans++ to pick smarter seeds).",
+      "intuition_cn": "\"每轮便宜，但轮数可能多。\" 收敛通常很快（几十轮）但有波动；多次随机初始化是常规做法（用 kmeans++ 选更聪明的种子）。",
       "source": "topics/kmeans.html#eq-kmeans-per-iteration-cost"
     }
   ],
@@ -944,16 +2409,99 @@
     {
       "title": "Generic recurrence",
       "eq": "$$ h^{(t)} = f(h^{(t-1)}, x^{(t)}), \\qquad y^{(t)} = g(h^{(t)}) $$",
+      "symbols": [
+        {
+          "sym": "$h_t$",
+          "en": "hidden state at time $t$ (carries memory)",
+          "cn": "$t$ 时刻的隐藏状态（承载记忆）"
+        },
+        {
+          "sym": "$h_{t-1}$",
+          "en": "previous hidden state (the recurrent input)",
+          "cn": "上一时刻隐藏状态（recurrent 输入）"
+        },
+        {
+          "sym": "$x_t$",
+          "en": "input at time $t$ (current token / observation)",
+          "cn": "$t$ 时刻的输入（当前 token / 观测）"
+        },
+        {
+          "sym": "$f_\\theta$",
+          "en": "transition function (any neural net) — same parameters $\\theta$ across time",
+          "cn": "转移函数（任意神经网络）—— 各时刻共享参数 $\\theta$"
+        }
+      ],
+      "usage_en": "The skeleton of any recurrent model. Apply $f_\\theta$ at each time step, threading $h_{t-1}$ forward. Choice of $f_\\theta$ defines the architecture: tanh → vanilla RNN, gating → LSTM/GRU, attention → Transformer (no recurrence at all).",
+      "usage_cn": "任意 recurrent 模型的骨架。每时刻应用 $f_\\theta$，把 $h_{t-1}$ 串下去。$f_\\theta$ 的选择决定了架构：tanh → 普通 RNN，门控 → LSTM/GRU，attention → Transformer（完全去掉 recurrence）。",
+      "intuition_en": "'A function that takes its own previous output as part of its input.' This recurrence is what lets the network remember things across time without storing the full history explicitly.",
+      "intuition_cn": "\"把自己上一刻的输出作为当前输入一部分的函数。\" 这种 recurrence 让网络能跨时刻记忆，而不必显式保存全部历史。",
       "source": "topics/rnn.html#eq-rnn-generic-recurrence"
     },
     {
       "title": "Elman RNN form from Lecture 14",
       "eq": "$$ h^{(t)}=\\sigma_h(W_{hx}x^{(t)}+W_{hh}h^{(t-1)}+b_h) $$\n$$ y^{(t)}=\\sigma_y(W_{yh}h^{(t)}+b_y) $$",
+      "symbols": [
+        {
+          "sym": "$h_t$",
+          "en": "hidden state — typically a $H$-dim vector",
+          "cn": "隐藏状态 —— 通常是 $H$ 维向量"
+        },
+        {
+          "sym": "$W_h$",
+          "en": "hidden-to-hidden weight matrix ($H \\times H$)",
+          "cn": "隐藏到隐藏的权重矩阵（$H \\times H$）"
+        },
+        {
+          "sym": "$W_x$",
+          "en": "input-to-hidden weight matrix ($H \\times d$)",
+          "cn": "输入到隐藏的权重矩阵（$H \\times d$）"
+        },
+        {
+          "sym": "$b$",
+          "en": "bias vector ($H$-dim)",
+          "cn": "偏置向量（$H$ 维）"
+        },
+        {
+          "sym": "$\\tanh$",
+          "en": "elementwise nonlinearity squashing into $(-1, 1)$",
+          "cn": "逐元素非线性，压到 $(-1, 1)$"
+        }
+      ],
+      "usage_en": "Vanilla / Elman RNN — simplest form. Train via Backprop Through Time (BPTT): unroll the recurrence over time and apply standard backprop. Gradients are products of $W_h^\\top$ across time → vanishing/exploding (next item).",
+      "usage_cn": "普通 / Elman RNN —— 最简形式。训练用 Backprop Through Time (BPTT)：把 recurrence 按时间展开后做标准反向传播。梯度是各时刻 $W_h^\\top$ 的连乘 → vanishing/exploding（下一条）。",
+      "intuition_en": "'Combine the current input and a tanh-squashed view of the past.' Same weights every step → the network can't tell time positions apart, only what came right before.",
+      "intuition_cn": "\"把当前输入与 tanh 压缩后的 \"过去\" 结合起来。\" 每步用相同权重 → 网络分不清绝对时间位置，只知道紧邻的上一刻。",
       "source": "topics/rnn.html#eq-rnn-elman-rnn-form-from-lecture-14"
     },
     {
       "title": "Why gradients vanish or explode",
       "eq": "$$ \\frac{\\partial h^{(T)}}{\\partial h^{(1)}}=\\prod_{t=2}^{T}\\frac{\\partial h^{(t)}}{\\partial h^{(t-1)}} $$",
+      "symbols": [
+        {
+          "sym": "$\\partial L / \\partial h_0$",
+          "en": "gradient of the loss with respect to the initial hidden state",
+          "cn": "loss 关于初始隐藏状态的梯度"
+        },
+        {
+          "sym": "$\\prod_{t=1}^{T} W_h^\\top$",
+          "en": "product of the same matrix $T$ times — eigenvalues compound",
+          "cn": "同一矩阵连乘 $T$ 次 —— 特征值复利"
+        },
+        {
+          "sym": "$\\lambda_{\\max}(W_h)$",
+          "en": "largest eigenvalue magnitude — controls the dominant term",
+          "cn": "$W_h$ 最大特征值绝对值 —— 主导项"
+        },
+        {
+          "sym": "$T$",
+          "en": "sequence length — the longer, the worse the compounding",
+          "cn": "序列长度 —— 越长复利效应越严重"
+        }
+      ],
+      "usage_en": "Diagnose long-sequence training failures. If $|\\lambda_{\\max}| < 1$ → gradient $\\to 0$ (no learning of long-range deps); if $|\\lambda_{\\max}| > 1$ → gradient $\\to \\infty$ (NaN training). Mitigation: gating (LSTM/GRU), gradient clipping, careful init.",
+      "usage_cn": "诊断长序列训练失败。$|\\lambda_{\\max}| < 1$ → 梯度 $\\to 0$（学不到长距离依赖）；$|\\lambda_{\\max}| > 1$ → 梯度 $\\to \\infty$（NaN 训练）。缓解：门控（LSTM/GRU）、梯度裁剪、谨慎初始化。",
+      "intuition_en": "'Multiplying $T$ small numbers gives 0; multiplying $T$ big numbers gives $\\infty$.' Either way, a vanilla RNN can't carry gradient information far through time, which is exactly the problem LSTM was invented to fix.",
+      "intuition_cn": "\"$T$ 个小数连乘得 0；$T$ 个大数连乘得 $\\infty$。\" 两种情况下普通 RNN 都无法把梯度信息传得很远 —— 这正是 LSTM 被发明出来解决的问题。",
       "source": "topics/rnn.html#eq-rnn-why-gradients-vanish-or-explode"
     }
   ],
@@ -961,16 +2509,104 @@
     {
       "title": "LSTM gates from Lecture 14",
       "eq": "$$ i^{(t)}=\\sigma(W_{ix}x^{(t)}+W_{ih}h^{(t-1)}+b_i) $$\n$$ f^{(t)}=\\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$\n$$ o^{(t)}=\\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$\n$$ \\tilde c^{(t)}=\\sigma_c(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$",
+      "symbols": [
+        {
+          "sym": "$f_t, i_t, o_t$",
+          "en": "forget / input / output gates — each in $[0, 1]^H$ via sigmoid",
+          "cn": "forget / input / output 门 —— 各为 sigmoid 出来的 $[0, 1]^H$"
+        },
+        {
+          "sym": "$\\sigma$",
+          "en": "sigmoid — outputs gate values between 0 and 1",
+          "cn": "sigmoid —— 输出 0 到 1 之间的门值"
+        },
+        {
+          "sym": "$W_*, b_*$",
+          "en": "per-gate weight matrices and biases (4 sets total)",
+          "cn": "每个门的权重矩阵和偏置（共 4 套）"
+        },
+        {
+          "sym": "$[h_{t-1}, x_t]$",
+          "en": "concatenation of previous hidden state and current input",
+          "cn": "上一时刻隐藏状态与当前输入拼接"
+        }
+      ],
+      "usage_en": "Three sigmoid gates control information flow. Each gate is computed from $[h_{t-1}, x_t]$ via its own affine layer, then squashed to $(0, 1)$ — values near 0 close the gate, near 1 open it. Train end-to-end with backprop.",
+      "usage_cn": "三个 sigmoid 门控制信息流。每个门用自己的仿射层从 $[h_{t-1}, x_t]$ 算出再压到 $(0, 1)$ —— 接近 0 关，接近 1 开。端到端用 backprop 训练。",
+      "intuition_en": "'Learn when to remember, when to update, when to expose.' Gates make the recurrence adaptive — the network decides per time-step what to keep in memory and what to discard, instead of a fixed mixing rule.",
+      "intuition_cn": "\"学会何时记住、何时更新、何时输出。\" 门让 recurrence 自适应 —— 网络逐时刻决定保留什么、丢弃什么，而不是固定的混合规则。",
       "source": "topics/lstm.html#eq-lstm-lstm-gates-from-lecture-14"
     },
     {
       "title": "Cell and hidden updates",
       "eq": "$$ c^{(t)}=f^{(t)}\\odot c^{(t-1)}+i^{(t)}\\odot \\tilde c^{(t)}, \\qquad h^{(t)}=o^{(t)}\\odot \\sigma_h(c^{(t)}) $$",
+      "symbols": [
+        {
+          "sym": "$c_t$",
+          "en": "cell state — the long-term memory carrier ($H$-dim)",
+          "cn": "cell state —— 长期记忆载体（$H$ 维）"
+        },
+        {
+          "sym": "$h_t$",
+          "en": "hidden state — what gets exposed to the next layer / output",
+          "cn": "隐藏状态 —— 暴露给下一层 / 输出的部分"
+        },
+        {
+          "sym": "$\\tilde{c}_t$",
+          "en": "candidate cell update — $\\tanh$ of an affine layer",
+          "cn": "候选 cell 更新 —— 仿射层的 $\\tanh$"
+        },
+        {
+          "sym": "$f_t \\odot c_{t-1}$",
+          "en": "elementwise product — forget gate decides what stays from old memory",
+          "cn": "逐元素乘 —— forget 门决定旧记忆中保留什么"
+        },
+        {
+          "sym": "$i_t \\odot \\tilde{c}_t$",
+          "en": "input gate decides what new info to write",
+          "cn": "input 门决定写入什么新信息"
+        },
+        {
+          "sym": "$\\odot$",
+          "en": "elementwise (Hadamard) product",
+          "cn": "逐元素（Hadamard）积"
+        }
+      ],
+      "usage_en": "The cell update has **only addition and elementwise multiplication** — no matrix multiplication chain like vanilla RNN. That's what stops gradients from compounding catastrophically through time.",
+      "usage_cn": "cell 更新里**只有加法和逐元素乘** —— 没有像普通 RNN 那样的矩阵连乘链。这正是阻止梯度跨时刻灾难性复利的关键。",
+      "intuition_en": "'A conveyor belt $c_t$ runs through time; gates clip onto it.' The forget gate erases bits, the input gate writes new bits, the output gate reads bits to expose as $h_t$. Gradient flows along the belt almost unchanged.",
+      "intuition_cn": "\"传送带 $c_t$ 贯穿时间；门夹在带子上。\" forget 门擦除位，input 门写入新位，output 门读取位作为 $h_t$ 暴露。梯度沿着传送带几乎不变地流过。",
       "source": "topics/lstm.html#eq-lstm-cell-and-hidden-updates"
     },
     {
       "title": "GRU summary",
       "eq": "$$ z^{(t)}=\\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \\qquad r^{(t)}=\\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$\n$$ h^{(t)}=(1-z^{(t)})\\odot \\tilde h^{(t)}+z^{(t)}\\odot h^{(t-1)} $$",
+      "symbols": [
+        {
+          "sym": "$z_t$",
+          "en": "update gate (combines forget + input into one)",
+          "cn": "update 门（把 forget + input 合并）"
+        },
+        {
+          "sym": "$r_t$",
+          "en": "reset gate (controls how much past to use when computing the candidate)",
+          "cn": "reset 门（控制算候选时用多少过去）"
+        },
+        {
+          "sym": "$\\tilde{h}_t$",
+          "en": "candidate hidden state",
+          "cn": "候选隐藏状态"
+        },
+        {
+          "sym": "$h_t = (1 - z_t) \\odot h_{t-1} + z_t \\odot \\tilde{h}_t$",
+          "en": "blended update — no separate cell state",
+          "cn": "混合更新 —— 没有单独的 cell state"
+        }
+      ],
+      "usage_en": "Use as a lighter alternative to LSTM. Same gating spirit but only 2 gates (vs 3) and no separate cell state, so ~25% fewer parameters and slightly faster. Empirically often comparable to LSTM on most tasks.",
+      "usage_cn": "作为 LSTM 的轻量替代。同样的门控思想但只有 2 个门（vs 3）且没有单独 cell state，所以参数少 ~25%、稍快。实证上多数任务与 LSTM 相当。",
+      "intuition_en": "'GRU = LSTM with one gate merged and the cell state folded into the hidden state.' Less expressive in theory but often just as good in practice; pick LSTM if you have plenty of compute, GRU if you want speed.",
+      "intuition_cn": "\"GRU = LSTM 把一个门合并、cell state 与 hidden state 合一。\" 理论上表达力略弱，实际常一样好；算力充足选 LSTM，要速度选 GRU。",
       "source": "topics/lstm.html#eq-lstm-gru-summary"
     }
   ],
@@ -1329,16 +2965,94 @@
     {
       "title": "Single-query attention",
       "eq": "$$ s_i = k_i^\\top q,\\qquad \\alpha_i=\\frac{\\exp(s_i)}{\\sum_j \\exp(s_j)},\\qquad y=\\sum_i \\alpha_i v_i $$",
+      "symbols": [
+        {
+          "sym": "$q$",
+          "en": "query vector ($d_k$-dim)",
+          "cn": "query 向量（$d_k$ 维）"
+        },
+        {
+          "sym": "$K$",
+          "en": "matrix of keys (one row per token, $n \\times d_k$)",
+          "cn": "key 矩阵（每个 token 一行，$n \\times d_k$）"
+        },
+        {
+          "sym": "$V$",
+          "en": "matrix of values (one row per token, $n \\times d_v$)",
+          "cn": "value 矩阵（每个 token 一行，$n \\times d_v$）"
+        },
+        {
+          "sym": "$\\mathrm{softmax}(qK^\\top)$",
+          "en": "row of attention weights (sums to 1)",
+          "cn": "一行注意力权重（和为 1）"
+        },
+        {
+          "sym": "$\\mathrm{softmax}(qK^\\top)V$",
+          "en": "weighted sum of values — the attention output",
+          "cn": "value 的加权和 —— attention 输出"
+        }
+      ],
+      "usage_en": "Use to retrieve information from a memory: each query gets a soft-select over the values, weighted by query-key similarity. This is the building block of all modern attention.",
+      "usage_cn": "用于从 memory 中取信息：每个 query 在 value 上做软选择，权重由 query-key 相似度决定。这是所有现代 attention 的基础构件。",
+      "intuition_en": "'Like a soft dictionary lookup.' Query says what you want; keys advertise what each value is; the softmax picks a smooth mixture rather than one hard match.",
+      "intuition_cn": "\"像软字典查找。\" query 说你想要什么；key 宣传每个 value 是什么；softmax 选择平滑混合，而不是硬匹配单个。",
       "source": "topics/attention.html#eq-attention-single-query-attention"
     },
     {
       "title": "Scaled dot-product attention",
       "eq": "$$ \\mathrm{Attention}(Q,K,V)=\\mathrm{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)V $$",
+      "symbols": [
+        {
+          "sym": "$Q, K, V$",
+          "en": "matrices of queries / keys / values for a batch of $n$ tokens",
+          "cn": "$n$ 个 token 的 query / key / value 矩阵"
+        },
+        {
+          "sym": "$QK^\\top$",
+          "en": "$n \\times n$ matrix of pairwise similarity scores",
+          "cn": "$n \\times n$ 的成对相似度分数矩阵"
+        },
+        {
+          "sym": "$\\sqrt{d_k}$",
+          "en": "square root of key dimension — scaling for stability",
+          "cn": "key 维度的平方根 —— 稳定性缩放"
+        },
+        {
+          "sym": "$\\mathrm{softmax}$",
+          "en": "applied row-wise → each row is a probability distribution",
+          "cn": "按行做 softmax → 每行都是一个概率分布"
+        }
+      ],
+      "usage_en": "Standard form used in Transformers. The $\\sqrt{d_k}$ divisor prevents huge dot products in high $d_k$ from saturating softmax and killing gradients. Compute as one matmul → divide → softmax → matmul.",
+      "usage_cn": "Transformer 的标准形式。除以 $\\sqrt{d_k}$ 防止高维 $d_k$ 下点积过大让 softmax 饱和、梯度消失。计算流程：一次 matmul → 除 → softmax → matmul。",
+      "intuition_en": "'For every token, compute its similarity to every other token, normalize to probabilities, take the weighted average of values.' The result captures context from across the whole sequence in one parallel operation.",
+      "intuition_cn": "\"对每个 token，计算它与所有其他 token 的相似度，归一化成概率，对 value 加权平均。\" 结果在一次并行操作中 capture 整个序列的上下文。",
       "source": "topics/attention.html#eq-attention-scaled-dot-product-attention"
     },
     {
       "title": "Causal mask",
       "eq": "$$ \\mathrm{softmax}\\!\\left(\\frac{QK^\\top + M}{\\sqrt{d_k}}\\right),\\qquad M_{ij}=\\begin{cases}0,&j\\le i\\\\-\\infty,&j>i\\end{cases} $$",
+      "symbols": [
+        {
+          "sym": "$M$",
+          "en": "additive mask added before softmax — position $(i, j)$ is $-\\infty$ if $j > i$",
+          "cn": "softmax 前加的 mask —— 位置 $(i, j)$ 在 $j > i$ 时为 $-\\infty$"
+        },
+        {
+          "sym": "$j > i$",
+          "en": "future positions (the model shouldn't see them)",
+          "cn": "未来位置（模型不应看到）"
+        },
+        {
+          "sym": "$-\\infty$",
+          "en": "after softmax, these entries become exactly 0",
+          "cn": "经过 softmax 后这些项正好为 0"
+        }
+      ],
+      "usage_en": "Apply for autoregressive / causal models (GPT, decoder-only Transformers). At training time, the mask lets you parallelize across all positions while pretending each position only sees its left context. No mask needed for encoder-only (BERT) or full cross-attention.",
+      "usage_cn": "用于自回归 / 因果模型（GPT、decoder-only Transformer）。训练时 mask 让你能跨所有位置并行，同时假装每个位置只看到左侧上下文。encoder-only（BERT）或完整 cross-attention 不需要 mask。",
+      "intuition_en": "'Block the model from attending to the future during training, so it learns to predict left-to-right.' Without the mask, predicting the next token would be trivial — it could just copy from itself.",
+      "intuition_cn": "\"训练时阻止模型注意未来，让它学会从左到右预测。\" 没有 mask 的话，预测下一 token 就是 trivial 的 —— 它可以直接复制自己。",
       "source": "topics/attention.html#eq-attention-causal-mask"
     }
   ],
@@ -1346,21 +3060,110 @@
     {
       "title": "Sinusoidal positional encoding",
       "eq": "$$ PE(pos,2i)=\\sin\\!\\left(\\frac{pos}{10000^{2i/d_{\\text{model}}}}\\right),\\qquad PE(pos,2i+1)=\\cos\\!\\left(\\frac{pos}{10000^{2i/d_{\\text{model}}}}\\right) $$",
+      "symbols": [
+        {
+          "sym": "$PE_{pos, 2i}$",
+          "en": "even-index dimensions use sine",
+          "cn": "偶数维用 sine"
+        },
+        {
+          "sym": "$PE_{pos, 2i+1}$",
+          "en": "odd-index dimensions use cosine",
+          "cn": "奇数维用 cosine"
+        },
+        {
+          "sym": "$pos$",
+          "en": "position index in the sequence (0, 1, 2, ...)",
+          "cn": "序列中的位置下标（0, 1, 2, ...）"
+        },
+        {
+          "sym": "$i$",
+          "en": "dimension pair index (0 to $d/2 - 1$)",
+          "cn": "维度对下标（0 到 $d/2 - 1$）"
+        },
+        {
+          "sym": "$10000^{2i/d}$",
+          "en": "geometric progression of wavelengths from $2\\pi$ to $10000 \\cdot 2\\pi$",
+          "cn": "波长的几何级数，从 $2\\pi$ 到 $10000 \\cdot 2\\pi$"
+        }
+      ],
+      "usage_en": "Add to token embeddings before feeding to the Transformer. No learned parameters — purely deterministic. Allows the model to extrapolate to sequence lengths longer than it saw during training (in theory).",
+      "usage_cn": "加到 token embedding 上后再送入 Transformer。没有可学习参数 —— 纯确定性。理论上让模型能外推到训练时未见的更长序列。",
+      "intuition_en": "'Each dimension is a sinusoid of a different frequency — together they encode position uniquely.' Like binary representation but smooth: low dims change slowly (coarse position), high dims oscillate fast (fine position).",
+      "intuition_cn": "\"每个维度是不同频率的正弦波 —— 合起来唯一编码位置。\" 类似二进制表示但平滑：低维变化慢（粗位置），高维震荡快（细位置）。",
       "source": "topics/positional-encoding.html#eq-positional-encoding-sinusoidal-positional-encoding"
     },
     {
       "title": "Shift by $k$",
       "eq": "$$ \\begin{aligned} PE(pos+k,2i)&=\\cos(k\\omega_i)\\,PE(pos,2i)+\\sin(k\\omega_i)\\,PE(pos,2i+1),\\\\ PE(pos+k,2i+1)&=-\\sin(k\\omega_i)\\,PE(pos,2i)+\\cos(k\\omega_i)\\,PE(pos,2i+1). \\end{aligned} $$",
+      "symbols": [
+        {
+          "sym": "$PE_{pos+k}$",
+          "en": "encoding at position shifted by $k$",
+          "cn": "位置偏移 $k$ 后的编码"
+        },
+        {
+          "sym": "$T_k$",
+          "en": "rotation matrix that depends only on $k$, not on $pos$",
+          "cn": "只依赖 $k$、不依赖 $pos$ 的旋转矩阵"
+        },
+        {
+          "sym": "$T_k \\cdot PE_{pos}$",
+          "en": "rotating $PE_{pos}$ by $T_k$ gives $PE_{pos+k}$",
+          "cn": "把 $PE_{pos}$ 旋转 $T_k$ 即得 $PE_{pos+k}$"
+        }
+      ],
+      "usage_en": "Crucial property for relative position reasoning. The model can implement 'attend to the token $k$ positions ago' as a fixed linear operation on $PE$, without needing to learn a separate rule per position.",
+      "usage_cn": "对相对位置推理至关重要的性质。模型可以把 \"注意 $k$ 个位置之前的 token\" 实现为对 $PE$ 的固定线性操作，不必针对每个位置单独学习规则。",
+      "intuition_en": "'Linearly translatable encoding — shifting the position is equivalent to rotating the encoding.' This is exactly why sinusoidal PE was chosen over arbitrary positional embeddings: relative position info is captured for free.",
+      "intuition_cn": "\"可线性平移的编码 —— 位置移动等价于编码旋转。\" 选择正弦 PE 而非任意位置 embedding 的原因正是这个：免费捕获相对位置信息。",
       "source": "topics/positional-encoding.html#eq-positional-encoding-shift-by-k"
     },
     {
       "title": "Relative-position dot product",
       "eq": "$$ PE(pos_1)^\\top PE(pos_2)=\\sum_i \\cos\\!\\big((pos_2-pos_1)\\omega_i\\big) $$",
+      "symbols": [
+        {
+          "sym": "$PE_{pos_a}^\\top PE_{pos_b}$",
+          "en": "dot product between two positional encodings",
+          "cn": "两个位置编码的点积"
+        },
+        {
+          "sym": "$pos_a - pos_b$",
+          "en": "their relative offset (the only thing the dot product depends on)",
+          "cn": "它们的相对偏移（点积唯一依赖的量）"
+        },
+        {
+          "sym": "$\\sum_i \\cos(\\Delta \\cdot \\omega_i)$",
+          "en": "depends only on $\\Delta = pos_a - pos_b$",
+          "cn": "只依赖 $\\Delta = pos_a - pos_b$"
+        }
+      ],
+      "usage_en": "Important property for attention scores: $Q^\\top K$ in attention will partially see this dot product, so attention can naturally attend to relative position. Underpins later relative-position schemes like RoPE.",
+      "usage_cn": "对 attention score 的重要性质：attention 中的 $Q^\\top K$ 会部分看到这个点积，所以 attention 能自然地按相对位置 attend。是后续相对位置方案如 RoPE 的基础。",
+      "intuition_en": "'Two tokens at the same distance apart always have the same dot product, regardless of where in the sequence.' Translation-invariant similarity — exactly what you want for language, where 'two tokens ago' should mean the same thing in any context.",
+      "intuition_cn": "\"距离相同的两个 token 点积始终相同，无论在序列何处。\" 平移不变的相似度 —— 正是语言所需要的，\"两个 token 之前\" 在任何上下文都应是同一个意思。",
       "source": "topics/positional-encoding.html#eq-positional-encoding-relative-position-dot-product"
     },
     {
       "title": "Angle-addition identities",
       "eq": "$$ \\sin((pos+k)\\omega)=\\sin(pos\\omega)\\cos(k\\omega)+\\cos(pos\\omega)\\sin(k\\omega) $$\\n$$ \\cos((pos+k)\\omega)=\\cos(pos\\omega)\\cos(k\\omega)-\\sin(pos\\omega)\\sin(k\\omega) $$",
+      "symbols": [
+        {
+          "sym": "$\\sin(\\alpha + \\beta)$",
+          "en": "expands as $\\sin\\alpha\\cos\\beta + \\cos\\alpha\\sin\\beta$",
+          "cn": "展开为 $\\sin\\alpha\\cos\\beta + \\cos\\alpha\\sin\\beta$"
+        },
+        {
+          "sym": "$\\cos(\\alpha + \\beta)$",
+          "en": "expands as $\\cos\\alpha\\cos\\beta - \\sin\\alpha\\sin\\beta$",
+          "cn": "展开为 $\\cos\\alpha\\cos\\beta - \\sin\\alpha\\sin\\beta$"
+        }
+      ],
+      "usage_en": "These trig identities are why $PE_{pos+k}$ can be written as a linear function of $PE_{pos}$. Used in derivations of the shift-invariance and dot-product properties above.",
+      "usage_cn": "这些三角恒等式是为什么 $PE_{pos+k}$ 可以写成 $PE_{pos}$ 的线性函数。用于推导上面的平移不变性和点积性质。",
+      "intuition_en": "'Sine and cosine of a shifted angle are linear combinations of sine and cosine of the original.' This linearity is what makes sinusoidal PE behave so nicely with attention's matrix operations.",
+      "intuition_cn": "\"偏移角的正弦余弦是原始正弦余弦的线性组合。\" 这种线性正是正弦 PE 与 attention 的矩阵运算配合得如此优雅的原因。",
       "source": "topics/positional-encoding.html#eq-positional-encoding-hw4-2-1-2-prove-the-linear-shift-property"
     }
   ],
@@ -1368,16 +3171,104 @@
     {
       "title": "Block skeleton",
       "eq": "$$ X' = X + \\mathrm{MHA}(\\mathrm{LN}(X)),\\qquad X_{\\text{out}}=X' + \\mathrm{FFN}(\\mathrm{LN}(X')) $$",
+      "symbols": [
+        {
+          "sym": "$x$",
+          "en": "input sequence (one block sees the previous block's output)",
+          "cn": "输入序列（每个 block 接收上一 block 的输出）"
+        },
+        {
+          "sym": "$\\mathrm{MHA}$",
+          "en": "multi-head attention sublayer",
+          "cn": "multi-head attention 子层"
+        },
+        {
+          "sym": "$\\mathrm{FFN}$",
+          "en": "position-wise feed-forward sublayer (2-layer MLP)",
+          "cn": "逐位置 feed-forward 子层（2 层 MLP）"
+        },
+        {
+          "sym": "$\\mathrm{LN}$",
+          "en": "LayerNorm (often pre-norm: $\\mathrm{LN}$ before sublayer)",
+          "cn": "LayerNorm（常用 pre-norm：$\\mathrm{LN}$ 在子层前）"
+        },
+        {
+          "sym": "$+ x$",
+          "en": "residual connection — sum the sublayer output with the input",
+          "cn": "residual 连接 —— 子层输出与输入相加"
+        }
+      ],
+      "usage_en": "Stack $N$ such blocks (typically 12–96 in modern LMs). Pre-norm vs post-norm matters for training stability; modern LMs (GPT-3+) almost universally use pre-norm. Each block has the same structure but its own parameters.",
+      "usage_cn": "堆叠 $N$ 个这种 block（现代 LM 中通常 12–96 个）。pre-norm vs post-norm 对训练稳定性有影响；现代 LM（GPT-3+）几乎都用 pre-norm。每个 block 结构相同但参数独立。",
+      "intuition_en": "'Two sublayers per block: one mixes information across positions (attention), one transforms each position individually (FFN). Residuals + LayerNorm keep gradients well-behaved.' The whole stack is fully parallel — that's what makes Transformers train fast on GPUs.",
+      "intuition_cn": "\"每个 block 有两个子层：一个跨位置混合信息（attention），一个对每个位置单独变换（FFN）。residual + LayerNorm 让梯度稳定。\" 整个堆叠完全并行 —— 这就是 Transformer 在 GPU 上训练快的原因。",
       "source": "topics/transformer.html#eq-transformer-block-skeleton"
     },
     {
       "title": "Multi-head attention projections",
       "eq": "$$ Q=XW_Q,\\qquad K=XW_K,\\qquad V=XW_V,\\qquad \\mathrm{MHA}(X)=\\mathrm{Concat}(head_1,\\ldots,head_N)W_O $$",
+      "symbols": [
+        {
+          "sym": "$h$",
+          "en": "number of heads (typically 8 to 96)",
+          "cn": "head 数（通常 8 到 96）"
+        },
+        {
+          "sym": "$W_i^Q, W_i^K, W_i^V$",
+          "en": "per-head projections from $d_{model}$ to $d_k = d_{model}/h$",
+          "cn": "每个 head 的投影，$d_{model}$ → $d_k = d_{model}/h$"
+        },
+        {
+          "sym": "$\\mathrm{head}_i$",
+          "en": "scaled dot-product attention output for head $i$",
+          "cn": "head $i$ 的 scaled dot-product attention 输出"
+        },
+        {
+          "sym": "$W^O$",
+          "en": "output projection mapping concatenated heads back to $d_{model}$",
+          "cn": "输出投影，把拼接的 heads 映回 $d_{model}$"
+        }
+      ],
+      "usage_en": "Implementation note: in practice $W^Q, W^K, W^V$ are stored as single matrices of shape $d_{model} \\times d_{model}$ and reshaped to $(h, d_k)$ on the fly — same number of parameters either way.",
+      "usage_cn": "实现上：实际中 $W^Q, W^K, W^V$ 存为形状 $d_{model} \\times d_{model}$ 的矩阵，在运行时 reshape 为 $(h, d_k)$ —— 参数量一样。",
+      "intuition_en": "'Run $h$ separate attentions in parallel, each in a smaller subspace, then concatenate.' Different heads can specialize on different relations (syntax, coreference, position offsets) without interfering with each other.",
+      "intuition_cn": "\"$h$ 个 attention 并行运行，每个在更小的子空间，然后拼接。\" 不同 head 可以专注不同关系（语法、coreference、位置偏移）而互不干扰。",
       "source": "topics/transformer.html#eq-transformer-multi-head-attention-projections"
     },
     {
       "title": "Parameter count from HW4 §2.4",
       "eq": "$$ \\text{attention per layer}=4D^2,\\qquad \\text{MLP per layer}=2DF $$\n$$ \\text{full model}=L(4D^2+2DF)+2VD $$",
+      "symbols": [
+        {
+          "sym": "$d$",
+          "en": "model hidden size $d_{model}$",
+          "cn": "模型 hidden size $d_{model}$"
+        },
+        {
+          "sym": "$d_{ff}$",
+          "en": "feed-forward hidden size (typically $4d$)",
+          "cn": "feed-forward hidden size（通常 $4d$）"
+        },
+        {
+          "sym": "$N$",
+          "en": "number of stacked blocks",
+          "cn": "堆叠 block 数"
+        },
+        {
+          "sym": "$4 d^2$",
+          "en": "QKV + output projections in MHA: $3 d^2$ + $d^2$ = $4 d^2$",
+          "cn": "MHA 中的 QKV + 输出投影：$3 d^2 + d^2 = 4 d^2$"
+        },
+        {
+          "sym": "$2 d \\cdot d_{ff}$",
+          "en": "two linear layers in FFN ($d \\to d_{ff}$ and back)",
+          "cn": "FFN 中两个线性层（$d \\to d_{ff}$ 和回来）"
+        }
+      ],
+      "usage_en": "Use to estimate model size before training. With $d_{ff} = 4d$, total params $\\approx N \\cdot (4d^2 + 8d^2) = 12 N d^2$ (excluding embeddings, biases, LayerNorms — small relative). GPT-3 had $d = 12288, N = 96$ → ~175B params.",
+      "usage_cn": "训练前估算模型大小用。$d_{ff} = 4d$ 时，总参数 $\\approx N \\cdot (4d^2 + 8d^2) = 12 N d^2$（不含 embedding、bias、LayerNorm —— 相对较小）。GPT-3 $d = 12288, N = 96$ → ~175B 参数。",
+      "intuition_en": "'Most parameters live in the FFN, not attention.' Roughly 2/3 of a Transformer's compute (and parameters) is the position-wise FFN; this is why MoE Transformers replace FFNs with sparse experts.",
+      "intuition_cn": "\"大多数参数在 FFN 而非 attention。\" Transformer 约 2/3 的计算（和参数）在逐位置 FFN；这就是 MoE Transformer 把 FFN 换成稀疏 expert 的原因。",
       "source": "topics/transformer.html#eq-transformer-parameter-count-from-hw4-2-4"
     }
   ],
@@ -1385,31 +3276,187 @@
     {
       "title": "Autoregressive factorization",
       "eq": "$$ P_\\theta(x_1,\\ldots,x_T)=\\prod_{t=1}^{T}P_\\theta(x_t\\mid x_{\\lt t}) $$",
+      "symbols": [
+        {
+          "sym": "$P(y_{1:T})$",
+          "en": "joint probability over a sequence of $T$ tokens",
+          "cn": "$T$ 个 token 序列的联合概率"
+        },
+        {
+          "sym": "$y_t$",
+          "en": "the $t$-th token (output of the model at step $t$)",
+          "cn": "第 $t$ 个 token（模型在第 $t$ 步的输出）"
+        },
+        {
+          "sym": "$y_{<t} = y_1, \\ldots, y_{t-1}$",
+          "en": "all earlier tokens — the conditioning context",
+          "cn": "所有先前 token —— 条件上下文"
+        },
+        {
+          "sym": "$\\prod_{t=1}^{T}$",
+          "en": "chain rule of probability over the sequence",
+          "cn": "对序列应用概率链式法则"
+        }
+      ],
+      "usage_en": "Chain rule applied to a sequence — exact, no approximation. The model only needs to learn $P(y_t \\mid y_{<t})$ for one token; the joint follows by product. Train by maximizing log-likelihood = minimizing NLL.",
+      "usage_cn": "对序列应用链式法则 —— 精确，无近似。模型只需学单个 token 的 $P(y_t \\mid y_{<t})$；联合通过连乘得到。训练时最大化 log-likelihood = 最小化 NLL。",
+      "intuition_en": "'Predict one token at a time, conditioning on everything before.' Lets us turn a hard joint distribution problem into $T$ smaller next-token classification problems, all sharing the same model.",
+      "intuition_cn": "\"一次预测一个 token，条件是之前的所有内容。\" 把困难的联合分布问题转成 $T$ 个共享同一模型的下一 token 分类问题。",
       "source": "topics/llm.html#eq-llm-autoregressive-factorization"
     },
     {
       "title": "Next-token probability",
       "eq": "$$ P_\\theta(x_t=i\\mid x_{\\lt t})=\\frac{\\exp(z_{t,i})}{\\sum_{j\\in V}\\exp(z_{t,j})} $$",
+      "symbols": [
+        {
+          "sym": "$P_\\theta$",
+          "en": "model's predicted distribution (parameters $\\theta$)",
+          "cn": "模型预测分布（参数 $\\theta$）"
+        },
+        {
+          "sym": "$z_t$",
+          "en": "logit vector at step $t$ — one entry per vocabulary token",
+          "cn": "第 $t$ 步的 logit 向量 —— 词表每个 token 一项"
+        },
+        {
+          "sym": "$\\mathrm{softmax}$",
+          "en": "converts logits to a probability distribution",
+          "cn": "把 logits 转成概率分布"
+        },
+        {
+          "sym": "$\\theta$",
+          "en": "all parameters of the Transformer (embeddings, attention, FFN, output)",
+          "cn": "Transformer 全部参数（embedding、attention、FFN、输出）"
+        }
+      ],
+      "usage_en": "The model's only output: a distribution over the vocabulary at each position. Apply during inference (sample / argmax) and during training (compute loss against true next token).",
+      "usage_cn": "模型唯一的输出：每个位置上的词表分布。推理时（采样 / argmax）和训练时（与真实下一 token 算 loss）都用它。",
+      "intuition_en": "'A classifier with $|V|$ classes (vocab size), run at every position.' That's it — an LLM is conceptually a giant per-position classifier; the recurrence comes from feeding outputs back as inputs at inference.",
+      "intuition_cn": "\"一个有 $|V|$ 类（词表大小）的分类器，在每个位置运行。\" 就这么简单 —— LLM 在概念上就是一个巨大的逐位置分类器；recurrence 来自推理时把输出反馈作为输入。",
       "source": "topics/llm.html#eq-llm-next-token-probability"
     },
     {
       "title": "NLL / cross-entropy loss",
       "eq": "$$ \\mathcal{L}(X;\\theta)=-\\frac{1}{T}\\sum_{t=1}^{T}\\log P_\\theta(x_t\\mid x_{\\lt t}) $$",
+      "symbols": [
+        {
+          "sym": "$L$",
+          "en": "training loss (averaged over tokens / examples)",
+          "cn": "训练 loss（对 token / 样本求平均）"
+        },
+        {
+          "sym": "$P_\\theta(y_t \\mid y_{<t})$",
+          "en": "model probability at the true next token",
+          "cn": "模型在真实下一 token 上的概率"
+        },
+        {
+          "sym": "$-\\log$",
+          "en": "negative log → minimize this to maximize likelihood",
+          "cn": "负对数 → 最小化它即最大化 likelihood"
+        }
+      ],
+      "usage_en": "Standard LM loss. For a batch of sequences, average $-\\log P_\\theta(y_t \\mid y_{<t})$ over all token positions. Implemented in PyTorch as `F.cross_entropy(logits, targets)` after Transformer outputs logits.",
+      "usage_cn": "标准 LM loss。对一个 batch 序列，对所有 token 位置上的 $-\\log P_\\theta(y_t \\mid y_{<t})$ 求平均。在 PyTorch 中用 `F.cross_entropy(logits, targets)` 实现，输入是 Transformer 的 logits。",
+      "intuition_en": "'Penalize the model proportionally to how much probability it gave to the wrong token.' If the truth had probability 0.01, the loss is $-\\log 0.01 \\approx 4.6$ — confidently wrong is heavily penalized.",
+      "intuition_cn": "\"按 \"模型给错误 token 多少概率\" 比例地惩罚模型。\" 真实 token 概率 0.01 时 loss $= -\\log 0.01 \\approx 4.6$ —— 自信但错被重罚。",
       "source": "topics/llm.html#eq-llm-nll-cross-entropy-loss"
     },
     {
       "title": "Perplexity",
       "eq": "$$ PP(X)=\\exp(\\mathcal{L}(X;\\theta))=\\left(\\prod_{t=1}^T P_\\theta(x_t\\mid x_{\\lt t})\\right)^{-1/T} $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{PPL}$",
+          "en": "perplexity — exponentiated average NLL",
+          "cn": "perplexity —— 指数化的平均 NLL"
+        },
+        {
+          "sym": "$\\exp(\\bar{L})$",
+          "en": "$e$ raised to the average loss in nats",
+          "cn": "以 $e$ 为底的均值 loss（nats）的指数"
+        },
+        {
+          "sym": "low PPL",
+          "en": "high probability assigned to truth → 'confident and correct'",
+          "cn": "对真实序列赋了高概率 → \"自信且正确\""
+        },
+        {
+          "sym": "PPL of $V$",
+          "en": "uniform random model over vocab size $V$ (worst case for fair comparisons)",
+          "cn": "对词表 $V$ 均匀随机预测的 baseline（公平比较的最坏情况）"
+        }
+      ],
+      "usage_en": "Use to compare LMs on the same dataset (only meaningful with the same tokenizer / vocab). Lower is better. SOTA models on standard benchmarks have PPL of single digits; random predictions would give PPL of $|V|$.",
+      "usage_cn": "用于在同一数据集上比较 LM（必须同 tokenizer / 词表才有意义）。越低越好。标准 benchmark 上的 SOTA 模型 PPL 个位数；随机预测的 PPL 等于 $|V|$。",
+      "intuition_en": "'How many equally-likely options does the model effectively consider per token?' PPL 10 means the model is as uncertain as if choosing uniformly from 10 tokens — much narrower than the full vocab.",
+      "intuition_cn": "\"模型每个 token 等价于在多少个等可能选项中犹豫？\" PPL 10 意味着模型不确定性等同于从 10 个 token 中均匀选 —— 远比整个词表窄。",
       "source": "topics/llm.html#eq-llm-perplexity"
     },
     {
       "title": "Temperature decoding",
       "eq": "$$ P_T(i)=\\mathrm{softmax}\\!\\left(\\frac{z_i}{T}\\right) $$",
+      "symbols": [
+        {
+          "sym": "$P_\\tau$",
+          "en": "rescaled distribution at temperature $\\tau$",
+          "cn": "温度 $\\tau$ 下重缩放的分布"
+        },
+        {
+          "sym": "$\\tau$",
+          "en": "temperature — $\\tau < 1$ sharper, $\\tau > 1$ flatter, $\\tau \\to 0$ argmax",
+          "cn": "温度 —— $\\tau < 1$ 更尖锐，$\\tau > 1$ 更平坦，$\\tau \\to 0$ 即 argmax"
+        },
+        {
+          "sym": "$z_t$",
+          "en": "raw logits before softmax",
+          "cn": "softmax 前的原始 logits"
+        },
+        {
+          "sym": "low $\\tau$",
+          "en": "deterministic / focused output (good for code, math)",
+          "cn": "确定性 / 聚焦输出（适合代码、数学）"
+        },
+        {
+          "sym": "high $\\tau$",
+          "en": "creative / diverse output (good for stories, brainstorming)",
+          "cn": "创造性 / 多样输出（适合故事、头脑风暴）"
+        }
+      ],
+      "usage_en": "Apply at sampling time only — doesn't affect training. Standard recipe: $\\tau = 0$ for deterministic answers, $\\tau \\in [0.7, 1.0]$ for normal use, $\\tau > 1$ for high creativity. Often combined with top-$k$ or top-$p$ (nucleus) sampling.",
+      "usage_cn": "只在采样时用 —— 不影响训练。标准做法：$\\tau = 0$ 给确定答案，$\\tau \\in [0.7, 1.0]$ 日常使用，$\\tau > 1$ 高创造性。常配合 top-$k$ 或 top-$p$（nucleus）采样。",
+      "intuition_en": "'Heat = randomness.' Cold model: always picks the most likely token (deterministic). Hot model: picks freely from the long tail (creative but may produce nonsense). The exponent $1/\\tau$ controls the contrast.",
+      "intuition_cn": "\"温度 = 随机性。\" 冷模型：总选最可能 token（确定性）。热模型：从长尾里自由选（有创造性但可能胡言）。指数 $1/\\tau$ 控制对比度。",
       "source": "topics/llm.html#eq-llm-temperature-decoding"
     },
     {
       "title": "LoRA update",
       "eq": "$$ W = W_0+\\Delta W,\\qquad \\Delta W=BA,\\qquad r\\ll \\min(d,k) $$",
+      "symbols": [
+        {
+          "sym": "$W_0$",
+          "en": "frozen pretrained weight matrix (very large, e.g. $d \\times d$)",
+          "cn": "冻结的预训练权重矩阵（极大，如 $d \\times d$）"
+        },
+        {
+          "sym": "$A \\in \\mathbb{R}^{r \\times d}, B \\in \\mathbb{R}^{d \\times r}$",
+          "en": "low-rank trainable factors with rank $r \\ll d$",
+          "cn": "低秩可训练因子，秩 $r \\ll d$"
+        },
+        {
+          "sym": "$\\Delta W = BA$",
+          "en": "low-rank update added to $W_0$ at inference",
+          "cn": "推理时加到 $W_0$ 的低秩更新"
+        },
+        {
+          "sym": "$r$",
+          "en": "LoRA rank — typically 4 to 64 (much less than $d$)",
+          "cn": "LoRA 秩 —— 通常 4 到 64（远小于 $d$）"
+        }
+      ],
+      "usage_en": "Use for parameter-efficient fine-tuning. Train only $A, B$ (which together have $2dr$ params, much less than $d^2$); merge into $W_0$ at deployment for zero inference overhead. Standard for adapting LLMs to new tasks / styles cheaply.",
+      "usage_cn": "用于参数高效微调。只训 $A, B$（共 $2dr$ 参数，远小于 $d^2$）；部署时合并到 $W_0$，推理零开销。便宜地适配 LLM 到新任务 / 风格的标准方法。",
+      "intuition_en": "'The change you need to fine-tune is usually low-rank — even though the original matrix isn't.' By restricting $\\Delta W$ to rank $r$, you train far fewer parameters but still cover most of the useful adaptations.",
+      "intuition_cn": "\"微调所需的改动通常是低秩的 —— 即使原始矩阵不是。\" 把 $\\Delta W$ 限制为秩 $r$，训练参数大幅减少但仍能覆盖大多数有用的适配方向。",
       "source": "topics/llm.html#eq-llm-lora-update"
     }
   ],
@@ -1681,21 +3728,110 @@
     {
       "title": "Binary Bayes rule",
       "eq": "$$ f_{\\text{Bayes}}(x)=\\begin{cases}1,&\\eta(x)\\ge \\frac12\\\\0,&\\eta(x)<\\frac12\\end{cases},\\qquad \\eta(x)=\\Pr(Y=1\\mid X=x) $$",
+      "symbols": [
+        {
+          "sym": "$\\hat{y}^*(x)$",
+          "en": "Bayes-optimal predicted class for input $x$",
+          "cn": "对输入 $x$ 的 Bayes 最优预测类别"
+        },
+        {
+          "sym": "$\\eta(x) = P(Y = 1 \\mid X = x)$",
+          "en": "true class-1 posterior (assumed known here)",
+          "cn": "真实的类 1 后验（这里假设已知）"
+        },
+        {
+          "sym": "$\\eta(x) > 0.5$",
+          "en": "predict class 1 when class 1 is more likely than class 0",
+          "cn": "类 1 比类 0 更可能时预测 1"
+        },
+        {
+          "sym": "$\\mathbf{1}[\\cdot]$",
+          "en": "indicator function — 1 if condition holds, 0 otherwise",
+          "cn": "示性函数 —— 条件成立为 1，否则 0"
+        }
+      ],
+      "usage_en": "Theoretical optimal classifier — assumes you know the true posterior $\\eta(x)$. Use as a benchmark: any practical classifier's accuracy is upper-bounded by Bayes accuracy. Real algorithms approximate $\\eta(x)$ from data.",
+      "usage_cn": "理论最优分类器 —— 假设知道真实后验 $\\eta(x)$。作为 benchmark：任何实际分类器的准确率上界都是 Bayes 准确率。真实算法从数据中估计 $\\eta(x)$。",
+      "intuition_en": "'Pick whichever class is more likely given the input.' Can't beat this — it's literally the best possible decision rule for 0-1 loss. The gap between any classifier and the Bayes classifier is what learning theory tries to bound.",
+      "intuition_cn": "\"哪个类更可能就预测哪个。\" 无法超越 —— 它是 0-1 loss 下字面意义上最优的决策规则。任何分类器与 Bayes 分类器的差距正是学习理论想要刻画的。",
       "source": "topics/bayes-classifier.html#eq-bayes-classifier-binary-bayes-rule"
     },
     {
       "title": "Bayes error",
       "eq": "$$ \\epsilon_\\mu^*=\\mathbb{E}_X\\left[\\min\\{\\eta(X),1-\\eta(X)\\}\\right] $$",
+      "symbols": [
+        {
+          "sym": "$L^*$",
+          "en": "Bayes error — minimum achievable expected 0-1 loss",
+          "cn": "Bayes error —— 0-1 loss 下可达的最小期望值"
+        },
+        {
+          "sym": "$\\mathbb{E}_X$",
+          "en": "expectation over the data distribution",
+          "cn": "对数据分布求期望"
+        },
+        {
+          "sym": "$\\min(\\eta(x), 1 - \\eta(x))$",
+          "en": "irreducible per-instance error of the Bayes classifier",
+          "cn": "Bayes 分类器在每个实例上的不可消除误差"
+        }
+      ],
+      "usage_en": "The hard floor on test error. If $L^* = 0$ the problem is fully separable; if $L^* > 0$ no classifier — no matter how complex — can ever achieve zero error on this distribution. Use to set realistic expectations.",
+      "usage_cn": "测试误差的硬下界。$L^* = 0$ 时问题完全可分；$L^* > 0$ 时再复杂的分类器在此分布下都不可能零误差。用来设定现实的期望。",
+      "intuition_en": "'The unavoidable noise in the data.' At any point where $\\eta(x)$ is exactly 0.5, you're guaranteed to be wrong half the time — there's nothing to learn there. Bayes error sums up all such irreducible mistakes.",
+      "intuition_cn": "\"数据本身不可避免的噪声。\" 任何 $\\eta(x)$ 正好等于 0.5 的点，必有一半概率出错 —— 那里没什么可学。Bayes error 把所有这种不可消除的错误加起来。",
       "source": "topics/bayes-classifier.html#eq-bayes-classifier-bayes-error"
     },
     {
       "title": "Equivalent binary form",
       "eq": "$$ \\epsilon_\\mu^*=\\frac12-\\frac12\\mathbb{E}_X\\left[|2\\eta(X)-1|\\right] $$",
+      "symbols": [
+        {
+          "sym": "$\\eta(x) > 0.5$",
+          "en": "predict class 1",
+          "cn": "预测类 1"
+        },
+        {
+          "sym": "$P(Y = 1 \\mid x) > P(Y = 0 \\mid x)$",
+          "en": "equivalent statement — class 1 has higher posterior than class 0",
+          "cn": "等价表述 —— 类 1 后验大于类 0"
+        },
+        {
+          "sym": "$P(x \\mid Y = 1) P(Y = 1) > P(x \\mid Y = 0) P(Y = 0)$",
+          "en": "Bayes rule expansion (denominators cancel)",
+          "cn": "Bayes 公式展开后（分母相消）"
+        }
+      ],
+      "usage_en": "Three equivalent ways to write the binary Bayes rule. The third is most useful in practice — it lets you use generative models (estimate likelihood × prior) instead of directly modeling the posterior.",
+      "usage_cn": "二分类 Bayes 规则的三种等价写法。第三种实践中最实用 —— 让你用生成模型（估计 likelihood × prior）而不必直接建模后验。",
+      "intuition_en": "'Compare two posteriors, or equivalently, two (likelihood × prior) products.' Discriminative models (logistic regression, neural nets) target the posterior directly; generative models (Naive Bayes, GMMs) target likelihood and prior separately.",
+      "intuition_cn": "\"比较两个后验，或等价地比较两个 (likelihood × prior) 乘积。\" 判别模型（logistic regression、神经网络）直接 target 后验；生成模型（Naive Bayes、GMM）分别 target likelihood 和 prior。",
       "source": "topics/bayes-classifier.html#eq-bayes-classifier-equivalent-binary-form"
     },
     {
       "title": "Squared-loss regression",
       "eq": "$$ f_{\\text{Bayes}}(X)=\\mathbb{E}[Y\\mid X],\\qquad \\epsilon_\\mu^*=\\mathbb{E}\\operatorname{Var}(Y\\mid X) $$",
+      "symbols": [
+        {
+          "sym": "$f^*(x)$",
+          "en": "Bayes-optimal regressor under squared loss",
+          "cn": "平方 loss 下的 Bayes 最优回归器"
+        },
+        {
+          "sym": "$\\mathbb{E}[Y \\mid X = x]$",
+          "en": "conditional expectation of $Y$ given $X = x$",
+          "cn": "$X = x$ 给定时 $Y$ 的条件期望"
+        },
+        {
+          "sym": "$\\arg\\min_f \\mathbb{E}[(Y - f(X))^2]$",
+          "en": "minimize expected squared error",
+          "cn": "最小化期望平方误差"
+        }
+      ],
+      "usage_en": "The regression analog of the Bayes classifier. The optimal regressor under squared loss is just the conditional mean. Linear regression approximates this with a linear function; flexible models (nearest neighbors, random forests, neural nets) try to recover it more faithfully.",
+      "usage_cn": "回归版的 Bayes 分类器。平方 loss 下的最优回归器就是条件均值。Linear regression 用线性函数近似它；灵活模型（最近邻、Random Forest、神经网络）试图更忠实地恢复它。",
+      "intuition_en": "'For squared loss, the best prediction at each $x$ is the average of the targets that have ever been seen there.' Asymmetric losses give other functionals (median for L1, quantile for pinball loss).",
+      "intuition_cn": "\"对平方 loss，每个 $x$ 处的最佳预测就是该处所有目标值的平均。\" 不对称 loss 给出其他函数（L1 → 中位数；pinball loss → 分位数）。",
       "source": "topics/bayes-classifier.html#eq-bayes-classifier-squared-loss-regression"
     }
   ],
@@ -1703,16 +3839,89 @@
     {
       "title": "Core equation",
       "eq": "$$ \\epsilon_\\mu(f)= \\underbrace{\\left(\\epsilon_\\mu(f)-\\inf_{g\\in\\mathcal{F}}\\epsilon_\\mu(g)\\right)}_{\\text{estimation error}} +\\underbrace{\\left(\\inf_{g\\in\\mathcal{F}}\\epsilon_\\mu(g)-\\epsilon_\\mu^*\\right)}_{\\text{approximation error}} +\\underbrace{\\epsilon_\\mu^*}_{\\text{Bayes error}} $$",
+      "symbols": [
+        {
+          "sym": "$L(\\hat{f})$",
+          "en": "test loss of the trained predictor $\\hat{f}$",
+          "cn": "训练得到的预测器 $\\hat{f}$ 的测试 loss"
+        },
+        {
+          "sym": "$L^*$",
+          "en": "Bayes error (irreducible)",
+          "cn": "Bayes error（不可消除）"
+        },
+        {
+          "sym": "$L(f^*_F) - L^*$",
+          "en": "**approximation error** — gap from $L^*$ caused by class restriction $F$",
+          "cn": "**approximation error** —— 由类别限制 $F$ 造成的与 $L^*$ 的差距"
+        },
+        {
+          "sym": "$L(\\hat{f}) - L(f^*_F)$",
+          "en": "**estimation error** — gap caused by finite training data",
+          "cn": "**estimation error** —— 由有限训练数据造成的差距"
+        }
+      ],
+      "usage_en": "Diagnose your model: is the bottleneck not enough capacity (high approximation error → use richer class) or not enough data (high estimation error → collect more data, regularize, or use a smaller class)? Most ML decisions trade these off.",
+      "usage_cn": "诊断模型瓶颈：是容量不足（approximation error 大 → 用更丰富的类别）还是数据不够（estimation error 大 → 收集更多数据、正则化、或用更小的类别）？大多数 ML 决策都在权衡这两者。",
+      "intuition_en": "'Total error = unavoidable + can't-express + bad-luck-from-finite-data.' Bayes error is fixed; the other two trade off via model complexity.",
+      "intuition_cn": "\"总误差 = 不可避免的 + 类别表达不出的 + 有限数据带来的运气。\" Bayes error 固定；后两者通过模型复杂度互相权衡。",
       "source": "topics/error-decomposition.html#eq-error-decomposition-core-equation"
     },
     {
       "title": "Best-in-class predictor",
       "eq": "$$ f_{\\mathcal{F}}^*\\in\\arg\\min_{g\\in\\mathcal{F}}\\epsilon_\\mu(g) $$",
+      "symbols": [
+        {
+          "sym": "$f^*_F$",
+          "en": "best predictor within the function class $F$",
+          "cn": "函数类 $F$ 内的最佳预测器"
+        },
+        {
+          "sym": "$F$",
+          "en": "the hypothesis class (e.g., linear models, depth-3 trees, fixed-width MLPs)",
+          "cn": "假设类（如线性模型、深度 3 的树、固定宽度 MLP）"
+        },
+        {
+          "sym": "$\\arg\\min_{f \\in F}$",
+          "en": "minimize over the chosen class — *not* over all functions",
+          "cn": "在选定的类内最小化 —— *不是*在所有函数中"
+        },
+        {
+          "sym": "$L(f)$",
+          "en": "true test loss of $f$ on the data distribution",
+          "cn": "$f$ 在数据分布上的真实测试 loss"
+        }
+      ],
+      "usage_en": "Theoretical object — assumes infinite data and perfect optimization. The gap $L(f^*_F) - L^*$ measures how much accuracy your hypothesis class costs you, regardless of how well you fit it.",
+      "usage_cn": "理论对象 —— 假设无限数据和完美优化。差距 $L(f^*_F) - L^*$ 衡量假设类本身造成的精度损失，不论拟合得多好。",
+      "intuition_en": "'The best you could hope for if you had infinite training data, given the model family you chose.' If $F$ is too small (e.g. linear for a non-linear truth), even infinite data can't save you.",
+      "intuition_cn": "\"假设无限训练数据时，给定模型族能达到的最佳。\" $F$ 太小（如非线性真值用线性拟合），无限数据也救不了。",
       "source": "topics/error-decomposition.html#eq-error-decomposition-best-in-class-predictor"
     },
     {
       "title": "Learned predictor",
       "eq": "$$ \\hat f=\\mathcal{A}(\\mathcal{D}) $$",
+      "symbols": [
+        {
+          "sym": "$\\hat{f}$",
+          "en": "the predictor your training procedure actually returned",
+          "cn": "训练过程实际返回的预测器"
+        },
+        {
+          "sym": "$\\arg\\min_{f \\in F} L_n(f)$",
+          "en": "ERM (empirical risk minimization) — minimize loss on the **training** sample",
+          "cn": "ERM（经验风险最小化）—— 在**训练**样本上最小化 loss"
+        },
+        {
+          "sym": "$L_n(f) = \\frac{1}{n}\\sum_{i=1}^{n} \\ell(f(x_i), y_i)$",
+          "en": "empirical (training) loss",
+          "cn": "经验（训练）loss"
+        }
+      ],
+      "usage_en": "What the algorithm actually computes. The gap $L(\\hat{f}) - L(f^*_F)$ is **estimation error** — how much you're hurt by training on a finite sample instead of the true distribution. Shrinks as $n$ grows; bounded by VC theory.",
+      "usage_cn": "算法实际计算的对象。差距 $L(\\hat{f}) - L(f^*_F)$ 即 **estimation error** —— 用有限样本训练（而非真实分布）造成的损失。随 $n$ 增长而缩小；VC 理论给出上界。",
+      "intuition_en": "'You picked the best on the training set, but the training set wasn't the true world.' The risk of overfitting lives here — large $F$ means many candidates, each with random training-set quirks.",
+      "intuition_cn": "\"你在训练集上选了最佳，但训练集不是真实世界。\" 过拟合的风险在这里 —— $F$ 大意味着候选很多，每个都带训练集的随机怪癖。",
       "source": "topics/error-decomposition.html#eq-error-decomposition-learned-predictor"
     }
   ],
@@ -1720,26 +3929,166 @@
     {
       "title": "Training error",
       "eq": "$$ \\hat\\epsilon_{\\mathcal{D}}(f)=\\frac1n\\sum_{i=1}^n\\mathbf{1}\\{f(x^{(i)})\\ne y^{(i)}\\} $$",
+      "symbols": [
+        {
+          "sym": "$L_n(f)$",
+          "en": "empirical (training) loss of $f$",
+          "cn": "$f$ 的经验（训练）loss"
+        },
+        {
+          "sym": "$n$",
+          "en": "number of training samples",
+          "cn": "训练样本数"
+        },
+        {
+          "sym": "$\\ell(f(x_i), y_i)$",
+          "en": "per-sample loss (e.g. 0-1 loss, squared loss)",
+          "cn": "单样本 loss（如 0-1 loss、平方 loss）"
+        },
+        {
+          "sym": "$\\frac{1}{n} \\sum$",
+          "en": "average over the training set",
+          "cn": "对训练集求平均"
+        }
+      ],
+      "usage_en": "What ERM minimizes. Reported in training curves; should decrease (or at least not increase) as you train longer. By itself doesn't tell you if the model will generalize — that's what test error and PAC bounds are for.",
+      "usage_cn": "ERM 最小化的对象。训练曲线中报告；训练越长应该下降（至少不上升）。单看它无法判断是否泛化 —— 这是测试 error 和 PAC bound 的工作。",
+      "intuition_en": "'How well does the predictor fit the data we gave it?' Tells you whether your optimizer is working; says little about future data.",
+      "intuition_cn": "\"预测器对我们给的数据拟合得多好？\" 告诉你优化器是否正常工作；对未来数据贡献不大。",
       "source": "topics/pac.html#eq-pac-training-error"
     },
     {
       "title": "Test error",
       "eq": "$$ \\epsilon_\\mu(f)=\\Pr_\\mu(f(X)\\ne Y) $$",
+      "symbols": [
+        {
+          "sym": "$L(f)$",
+          "en": "true (population) loss — expectation under the data distribution $\\mathcal{D}$",
+          "cn": "真实（总体）loss —— 在数据分布 $\\mathcal{D}$ 下的期望"
+        },
+        {
+          "sym": "$\\mathbb{E}_{(x, y) \\sim \\mathcal{D}}$",
+          "en": "expectation over fresh examples drawn from the unknown distribution",
+          "cn": "对从未知分布抽取的新样本求期望"
+        },
+        {
+          "sym": "$\\ell(f(x), y)$",
+          "en": "per-sample loss on a fresh test point",
+          "cn": "新测试点上的单样本 loss"
+        }
+      ],
+      "usage_en": "What you actually care about. Estimated using a held-out test set; PAC theory gives high-probability upper bounds based on training error + a complexity penalty.",
+      "usage_cn": "你真正关心的东西。用留出的测试集估计；PAC 理论用 \"训练 error + 复杂度罚项\" 给出高概率上界。",
+      "intuition_en": "'How well will the predictor do on data it has never seen?' This is the only quantity that matters at deployment. Training error is a stand-in; test set is a finite-sample estimate; PAC is the worst-case theoretical bound.",
+      "intuition_cn": "\"预测器在没见过的数据上表现如何？\" 部署时唯一关心的量。训练 error 是替代；测试集是有限样本估计；PAC 是理论上最坏情况上界。",
       "source": "topics/pac.html#eq-pac-test-error"
     },
     {
       "title": "Finite realizable ERM bound",
       "eq": "$$ n\\ge \\frac1\\epsilon\\left(\\log|\\mathcal{F}|+\\log\\frac1\\delta\\right) $$",
+      "symbols": [
+        {
+          "sym": "$F$",
+          "en": "finite hypothesis class with $|F|$ predictors",
+          "cn": "有限假设类，含 $|F|$ 个预测器"
+        },
+        {
+          "sym": "$\\hat{f}$",
+          "en": "the ERM predictor — minimizes training error in $F$",
+          "cn": "ERM 预测器 —— $F$ 内最小化训练 error"
+        },
+        {
+          "sym": "realizable",
+          "en": "$F$ contains a perfect classifier ($L_n(f^*) = 0$ achievable)",
+          "cn": "realizable —— $F$ 中有完美分类器（可达 $L_n(f^*) = 0$）"
+        },
+        {
+          "sym": "$\\epsilon$",
+          "en": "target accuracy gap (smaller → tighter)",
+          "cn": "目标精度差距（越小越紧）"
+        },
+        {
+          "sym": "$\\delta$",
+          "en": "failure probability (smaller → more confident)",
+          "cn": "失败概率（越小越自信）"
+        },
+        {
+          "sym": "$n \\ge \\frac{1}{\\epsilon}(\\ln |F| + \\ln \\frac{1}{\\delta})$",
+          "en": "sample-complexity sufficient condition",
+          "cn": "样本复杂度的充分条件"
+        }
+      ],
+      "usage_en": "Use to estimate how much training data you need for a finite hypothesis class. Doubling $|F|$ (more candidates) only adds $\\ln 2 / \\epsilon$ samples — logarithmic dependence, very mild. The bound becomes tight when you can verify that $F$ is realizable for the data.",
+      "usage_cn": "用来估计有限假设类需要多少训练数据。$|F|$ 翻倍（候选增多）只多需 $\\ln 2 / \\epsilon$ 样本 —— 对数依赖，很温和。当能验证 $F$ 对数据 realizable 时这个 bound 较紧。",
+      "intuition_en": "'You need enough samples to rule out every bad hypothesis in $F$ that happens to fit the training data well.' Larger $F$ means more bad hypotheses to rule out; the log dependence is what makes ML tractable for huge classes.",
+      "intuition_cn": "\"你需要足够多的样本来排除 $F$ 中所有 \"恰好拟合训练数据\" 的坏假设。\" $F$ 越大要排除的坏假设越多；对数依赖让 ML 在巨大类别上仍然可行。",
       "source": "topics/pac.html#eq-pac-finite-realizable-erm-bound"
     },
     {
       "title": "Agnostic PAC target",
       "eq": "$$ \\Pr\\left(\\epsilon_\\mu(f)\\le \\min_{g\\in\\mathcal{H}}\\epsilon_\\mu(g)+\\epsilon\\right)\\ge 1-\\delta $$",
+      "symbols": [
+        {
+          "sym": "$\\hat{f}$",
+          "en": "ERM predictor (output of training)",
+          "cn": "ERM 预测器（训练输出）"
+        },
+        {
+          "sym": "$f^*$",
+          "en": "best predictor in class — $\\arg\\min_{f \\in F} L(f)$",
+          "cn": "类内最佳预测器 —— $\\arg\\min_{f \\in F} L(f)$"
+        },
+        {
+          "sym": "$\\epsilon$",
+          "en": "target excess error compared to $f^*$",
+          "cn": "相对 $f^*$ 的目标超额误差"
+        },
+        {
+          "sym": "$\\delta$",
+          "en": "failure probability",
+          "cn": "失败概率"
+        },
+        {
+          "sym": "agnostic",
+          "en": "no realizability assumption — $f^*$ may have non-zero error",
+          "cn": "无 realizability 假设 —— $f^*$ 可能有非零 error"
+        }
+      ],
+      "usage_en": "More realistic than realizable PAC. Goal becomes: ERM is at most $\\epsilon$ worse than the best-in-class. Sample complexity is now $O(1/\\epsilon^2)$ instead of $O(1/\\epsilon)$ — needs more data because the bound is harder.",
+      "usage_cn": "比 realizable PAC 更现实。目标变成：ERM 比类内最佳差不超过 $\\epsilon$。样本复杂度变成 $O(1/\\epsilon^2)$ 而非 $O(1/\\epsilon)$ —— 需要更多数据，因为 bound 更难。",
+      "intuition_en": "'I can't promise you'll be perfect, only that you'll be close to the best $F$ has to offer.' Drops the unrealistic assumption that the truth lies in $F$, at the cost of needing more data to certify the result.",
+      "intuition_cn": "\"我不能保证你完美，只能保证你接近 $F$ 能提供的最佳。\" 放弃 \"真值在 $F$ 内\" 的不切实际假设，代价是需要更多数据来认证结果。",
       "source": "topics/pac.html#eq-pac-agnostic-pac-target"
     },
     {
       "title": "Bad finite-class ERM failure bound",
       "eq": "$$ \\Pr(\\exists\\text{ bad }f\\in\\mathcal{F}\\text{ consistent with }\\mathcal{D})\\le |\\mathcal{F}|e^{-n\\epsilon} $$",
+      "symbols": [
+        {
+          "sym": "$P(L(\\hat{f}) > \\epsilon)$",
+          "en": "probability ERM returns a poorly-generalizing classifier",
+          "cn": "ERM 返回泛化差的分类器的概率"
+        },
+        {
+          "sym": "$|F|$",
+          "en": "size of hypothesis class — more candidates, more chances of bad luck",
+          "cn": "假设类大小 —— 候选越多，运气差的可能越大"
+        },
+        {
+          "sym": "$(1 - \\epsilon)^n$",
+          "en": "probability one specific bad classifier survives $n$ samples by chance",
+          "cn": "一个具体坏分类器靠运气存活 $n$ 样本的概率"
+        },
+        {
+          "sym": "union bound",
+          "en": "sum over $|F|$ candidates → factor of $|F|$",
+          "cn": "对 $|F|$ 个候选取并集 → 因子 $|F|$"
+        }
+      ],
+      "usage_en": "Use to derive sample complexity. Setting the right-hand side $\\le \\delta$ and solving for $n$ gives $n \\ge \\frac{1}{\\epsilon}(\\ln|F| + \\ln\\frac{1}{\\delta})$ — exactly the realizable PAC bound.",
+      "usage_cn": "用来推导样本复杂度。把右边设 $\\le \\delta$ 解出 $n$ 即得 $n \\ge \\frac{1}{\\epsilon}(\\ln|F| + \\ln\\frac{1}{\\delta})$ —— 正好是 realizable PAC bound。",
+      "intuition_en": "'Pretend each bad classifier independently flips a coin per sample with probability $1 - \\epsilon$ of surviving; bound the chance any survive.' Union bound over $|F|$ candidates is loose but gives the famous $\\ln|F|$ scaling.",
+      "intuition_cn": "\"假装每个坏分类器对每个样本独立抛硬币，存活概率 $1 - \\epsilon$；bound 住有任何存活的概率。\" 对 $|F|$ 候选用 union bound 虽宽松，却给出著名的 $\\ln|F|$ scaling。",
       "source": "topics/pac.html#eq-pac-example-2-finite-class-erm"
     }
   ],
@@ -1747,21 +4096,120 @@
     {
       "title": "Hoeffding",
       "eq": "$$ \\Pr\\left(|\\bar Z_n-\\mathbb{E}\\bar Z_n|\\ge \\epsilon\\right)\\le 2\\exp\\left(-\\frac{2n\\epsilon^2}{(b-a)^2}\\right) $$",
+      "symbols": [
+        {
+          "sym": "$\\bar{X}_n$",
+          "en": "sample mean over $n$ i.i.d. observations",
+          "cn": "$n$ 个 i.i.d. 观测的样本均值"
+        },
+        {
+          "sym": "$\\mu$",
+          "en": "true mean of the underlying distribution",
+          "cn": "底层分布的真实均值"
+        },
+        {
+          "sym": "$\\epsilon$",
+          "en": "deviation tolerance — how close $\\bar{X}_n$ must be to $\\mu$",
+          "cn": "偏差容忍度 —— $\\bar{X}_n$ 离 $\\mu$ 多近"
+        },
+        {
+          "sym": "$2 e^{-2 n \\epsilon^2}$",
+          "en": "exponentially small failure probability",
+          "cn": "指数级小的失败概率"
+        }
+      ],
+      "usage_en": "Use whenever you want to say 'the empirical average is close to the true mean with high probability'. Foundation of generalization bounds for **one fixed classifier**; combined with union bound or VC theory to extend across classes.",
+      "usage_cn": "想说 \"经验均值大概率接近真实均值\" 时使用。**单个固定分类器**泛化 bound 的基础；结合 union bound 或 VC 理论推广到整个类别。",
+      "intuition_en": "'Sample averages of bounded random variables concentrate around the true mean exponentially fast.' Doubling $n$ doubles the exponent — getting twice the data makes you exponentially more confident.",
+      "intuition_cn": "\"有界随机变量的样本均值以指数速度集中于真实均值。\" 样本数翻倍指数翻倍 —— 多一倍数据指数级更自信。",
       "source": "topics/vc-dimension.html#eq-vc-dimension-hoeffding"
     },
     {
       "title": "Fixed classifier bound",
       "eq": "$$ \\epsilon_\\mu(f)\\le \\hat\\epsilon_{\\mathcal{D}}(f)+\\sqrt{\\frac{\\log(2/\\delta)}{2n}} $$",
+      "symbols": [
+        {
+          "sym": "$L(f)$",
+          "en": "true loss of a fixed classifier $f$",
+          "cn": "固定分类器 $f$ 的真实 loss"
+        },
+        {
+          "sym": "$L_n(f)$",
+          "en": "empirical loss of $f$ on $n$ samples",
+          "cn": "$f$ 在 $n$ 样本上的经验 loss"
+        },
+        {
+          "sym": "$\\epsilon$",
+          "en": "target gap between true and empirical loss",
+          "cn": "真实与经验 loss 的目标差距"
+        },
+        {
+          "sym": "$\\delta = 2 e^{-2 n \\epsilon^2}$",
+          "en": "failure probability from Hoeffding",
+          "cn": "Hoeffding 给出的失败概率"
+        }
+      ],
+      "usage_en": "Hoeffding applied to a single classifier. Holds **only for $f$ chosen independently of the training data** — does not hold for $\\hat{f}$ chosen by ERM. To handle ERM, you need union bound (finite class) or VC bound (infinite class).",
+      "usage_cn": "对单个分类器应用 Hoeffding。**仅对独立于训练数据选定的 $f$** 成立 —— 对 ERM 选出的 $\\hat{f}$ 不成立。要处理 ERM，需要 union bound（有限类）或 VC bound（无限类）。",
+      "intuition_en": "'For one classifier picked in advance, training error is a great estimate of test error.' This is why an honest test set works: you commit to the classifier first, then evaluate.",
+      "intuition_cn": "\"对于事先选好的一个分类器，训练 error 是测试 error 的很好估计。\" 这就是诚实的测试集为什么能工作：先确定分类器，再评估。",
       "source": "topics/vc-dimension.html#eq-vc-dimension-fixed-classifier-bound"
     },
     {
       "title": "VC dimension definition",
       "eq": "$$ \\operatorname{VCdim}(\\mathcal{F})=\\max\\{|S|:\\mathcal{F}\\text{ shatters }S\\} $$",
+      "symbols": [
+        {
+          "sym": "$\\mathrm{VC}(F)$",
+          "en": "VC dimension of hypothesis class $F$",
+          "cn": "假设类 $F$ 的 VC 维"
+        },
+        {
+          "sym": "shatter",
+          "en": "$F$ can realize **every** labeling of the points (all $2^n$ ways)",
+          "cn": "$F$ 能实现这些点的**所有**标注方式（$2^n$ 种）"
+        },
+        {
+          "sym": "largest $n$",
+          "en": "biggest sample size where shattering is still possible",
+          "cn": "仍能 shatter 的最大样本数"
+        }
+      ],
+      "usage_en": "Compute by exhibiting $n$ points that $F$ shatters (lower bound) and showing no $n+1$ can be shattered (upper bound). Linear classifiers in $\\mathbb{R}^d$: VC = $d+1$. Decision trees with $L$ leaves: VC $\\le L \\log L$. Neural nets: VC scales with parameters.",
+      "usage_cn": "通过 \"展示 $n$ 个能被 $F$ shatter 的点\"（下界）和 \"证明任何 $n+1$ 个都不能 shatter\"（上界）来计算。$\\mathbb{R}^d$ 中线性分类器：VC = $d+1$。叶节点数 $L$ 的决策树：VC $\\le L \\log L$。神经网络：VC 与参数量同阶。",
+      "intuition_en": "'How many points can the class label arbitrarily?' A higher VC dimension means a richer class — more flexible to fit data, but also more prone to overfitting. The 'effective complexity' of the class.",
+      "intuition_cn": "\"该类能任意标注多少个点？\" VC 维越高类越丰富 —— 拟合能力强但更容易过拟合。是该类的 \"有效复杂度\"。",
       "source": "topics/vc-dimension.html#eq-vc-dimension-vc-dimension-definition"
     },
     {
       "title": "Typical VC-style bound",
       "eq": "$$ \\epsilon_\\mu(f)\\le \\hat\\epsilon_{\\mathcal{D}}(f)+\\mathcal{O}\\!\\left(\\sqrt{\\frac{\\operatorname{VCdim}(\\mathcal{F})+\\log(1/\\delta)}{n}}\\right) $$",
+      "symbols": [
+        {
+          "sym": "$L(\\hat{f})$",
+          "en": "true loss of the ERM predictor",
+          "cn": "ERM 预测器的真实 loss"
+        },
+        {
+          "sym": "$L_n(\\hat{f})$",
+          "en": "training loss of the ERM predictor",
+          "cn": "ERM 预测器的训练 loss"
+        },
+        {
+          "sym": "$d$",
+          "en": "VC dimension of the class $F$",
+          "cn": "类 $F$ 的 VC 维"
+        },
+        {
+          "sym": "$O\\!\\left(\\sqrt{(d \\log(n/d) + \\log(1/\\delta))/n}\\right)$",
+          "en": "complexity penalty (decreases with more data)",
+          "cn": "复杂度罚项（数据越多越小）"
+        }
+      ],
+      "usage_en": "Use to bound generalization for **infinite** hypothesis classes. Sample complexity scales as $n = O(d / \\epsilon^2)$ — linear in VC dimension. This is how you justify that 'more data → better generalization' even for very expressive models.",
+      "usage_cn": "用来 bound **无限**假设类的泛化。样本复杂度 $n = O(d / \\epsilon^2)$ —— 与 VC 维线性相关。这就是为什么 \"数据越多 → 泛化越好\" 对表达力极强的模型也成立。",
+      "intuition_en": "'Test error ≤ training error + a penalty that grows with class complexity and shrinks with data size.' The bound is loose for deep nets in practice (deep learning's mystery), but it's the right mental model for classical ML.",
+      "intuition_cn": "\"测试 error ≤ 训练 error + 一个 \"复杂度大就大、数据多就小\" 的罚项。\" 这个 bound 对深度网络实际上很松（深度学习之谜），但对经典 ML 是正确的心智模型。",
       "source": "topics/vc-dimension.html#eq-vc-dimension-typical-vc-style-bound"
     }
   ],
@@ -1769,7 +4217,7 @@
     {
       "title": "MDP tuple",
       "eq": "$$ \\mathcal{M}=(\\mathcal{S},\\mathcal{A},P,R,\\gamma) $$",
-      "source": "topics/mdp.html#mdp-en",
+      "source": "topics/mdp.html#eq-mdp-mdp-tuple",
       "intuition_en": "An MDP is the full mathematical description of an RL environment: states, actions, dynamics, rewards, and how much future reward is discounted.",
       "intuition_cn": "MDP 是 RL 环境的完整数学描述：状态、动作、环境转移、奖励，以及未来奖励如何折扣。",
       "usage_en": "For any RL word problem, first identify these five pieces. Value functions, Bellman equations, DP, and Q-learning all plug into this tuple.",
@@ -2679,7 +5127,7 @@
     {
       "title": "Log-derivative trick",
       "eq": "$$ \\nabla J=\\int P_\\theta(\\tau)R(\\tau)\\nabla\\log P_\\theta(\\tau)\\,d\\tau,\\qquad \\nabla\\log P_\\theta(\\tau)=\\sum_t\\nabla\\log\\pi_\\theta(a_t\\mid s_t) $$",
-      "source": "topics/policy-gradient.html#eq-policy-gradient-example-1-log-derivative-derivation-hw5-4-1",
+      "source": "topics/policy-gradient.html#eq-policy-gradient-log-derivative-trick",
       "intuition_en": "This moves the gradient from the sampling probability into a log-probability gradient that the policy network can compute.",
       "intuition_cn": "这个技巧把对采样概率的梯度，转成策略网络能计算的 log 概率梯度。",
       "usage_en": "Use it to derive policy gradient: write ∇P=P∇logP; environment transitions drop out if they do not depend on θ.",
@@ -2778,7 +5226,17 @@
           </div>
         </div>`);
     }
-    return `<div class="equation-explain">${parts.join("")}</div>`;
+    // Wrap in <details> so each card collapses by default. The <summary>
+    // line replaces the click target — clicking it toggles `open`.
+    return `
+      <details class="equation-explain-wrap">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">${parts.join("")}</div>
+      </details>`;
   }
 
   function renderEquationSheet() {
@@ -2856,14 +5314,48 @@
     });
   }
 
+  // Toggle every <details class="equation-explain-wrap"> open / closed.
+  // Stays in sync with the actual DOM state — re-rendering or per-card
+  // clicks don't desync the button label.
+  function syncExpandAllLabel() {
+    const btn = document.getElementById("expandAllExplanations");
+    if (!btn) return;
+    const all = document.querySelectorAll(".equation-explain-wrap");
+    const open = document.querySelectorAll(".equation-explain-wrap[open]");
+    const allOpen = all.length > 0 && open.length === all.length;
+    btn.dataset.state = allOpen ? "open" : "closed";
+    btn.setAttribute("aria-pressed", allOpen ? "true" : "false");
+  }
+  function wireExpandAll() {
+    const btn = document.getElementById("expandAllExplanations");
+    if (!btn || btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+    btn.addEventListener("click", () => {
+      const all = document.querySelectorAll(".equation-explain-wrap");
+      const open = document.querySelectorAll(".equation-explain-wrap[open]");
+      const target = open.length === all.length ? false : true;
+      all.forEach(d => { d.open = target; });
+      syncExpandAllLabel();
+    });
+    document.addEventListener("toggle", (e) => {
+      if (e.target.classList && e.target.classList.contains("equation-explain-wrap")) {
+        syncExpandAllLabel();
+      }
+    }, true);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     renderEquationSheet();
+    syncExpandAllLabel();
+    wireExpandAll();
     const input = document.getElementById("searchInput");
     if (input) input.addEventListener("input", applyEquationSearch);
     document.addEventListener("click", e => {
-      if (e.target.closest(".lang-switch button")) setTimeout(renderEquationSheet, 0);
+      if (e.target.closest(".lang-switch button")) {
+        setTimeout(() => { renderEquationSheet(); syncExpandAllLabel(); }, 0);
+      }
     });
   });
 
-  window.EQUATION_SHEET = { data: EQUATION_DATA, render: renderEquationSheet };
+  window.EQUATION_SHEET = { data: EQUATION_DATA, render: renderEquationSheet, explain: explainHtml };
 })();

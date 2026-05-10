@@ -133,6 +133,13 @@ html.lang-preserve-scroll {
   --logo-from: #10b981;
   --logo-to: #3b82f6;
   --color-scheme: light;
+
+  /* TOC collapse handle — light glass. */
+  --toc-handle-bg: rgba(255, 255, 255, 0.55);
+  --toc-handle-bg-hover: rgba(255, 255, 255, 0.92);
+  --toc-handle-border: rgba(15, 23, 42, 0.10);
+  --toc-handle-shadow: 0 4px 14px rgba(15, 23, 42, 0.10);
+  --toc-handle-shadow-hover: 0 8px 22px rgba(15, 23, 42, 0.16);
 }
 
 html[data-theme="dark"] {
@@ -191,6 +198,13 @@ html[data-theme="dark"] {
   --logo-from: #34d399;
   --logo-to: #60a5fa;
   --color-scheme: dark;
+
+  /* TOC collapse handle — barely-there dark glass. */
+  --toc-handle-bg: rgba(255, 255, 255, 0.04);
+  --toc-handle-bg-hover: rgba(255, 255, 255, 0.10);
+  --toc-handle-border: rgba(255, 255, 255, 0.12);
+  --toc-handle-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --toc-handle-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.50);
 }
 
 html { color-scheme: var(--color-scheme); }
@@ -607,8 +621,13 @@ a:hover { text-decoration: underline; }
   color: var(--text);
   text-decoration: none;
 }
+/* On-this-page TOC: default = no background, neutral text. Scroll-position
+   `.active` highlights with COLOR only (accent green text + bold), no
+   filled pill. The roadmap-position pill at the top of the TOC keeps
+   its green-fill style via the separate `.toc-roadmap-list .current a`
+   rule below. */
 .toc a.active {
-  background: var(--accent-soft);
+  background: transparent;
   color: var(--accent);
   font-weight: 700;
 }
@@ -617,8 +636,8 @@ a:hover { text-decoration: underline; }
   gap: 6px;
 }
 .toc-depth-1 a {
-  background: var(--accent-soft);
-  color: var(--text-soft);
+  background: transparent;
+  color: var(--text);
   font-weight: 700;
 }
 .toc-depth-1 a.active {
@@ -778,13 +797,16 @@ html[data-theme="dark"] .toc-problem-link:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  /* Subtle glass — slightly tinted, mostly transparent, picks up the
+     page bg via backdrop-filter. Token-ized so dark mode pulls
+     darker glass without needing a separate override block. */
+  border: 1px solid var(--toc-handle-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--toc-handle-bg);
   color: var(--text-soft);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--toc-handle-shadow);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
   cursor: pointer;
   transition:
     background 0.18s ease,
@@ -794,9 +816,9 @@ html[data-theme="dark"] .toc-problem-link:hover {
   will-change: transform;
 }
 .toc-panel-handle:hover {
-  background: #ffffff;
-  border-color: rgba(16, 185, 129, 0.34);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+  background: var(--toc-handle-bg-hover);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: var(--toc-handle-shadow-hover);
   transform: translateX(1px);
 }
 .toc-panel-handle:focus-visible {
@@ -1371,13 +1393,63 @@ html[data-theme="dark"] .toc-problem-link:hover {
   gap: 12px;
   margin-top: 24px;
 }
-/* Optional per-formula explanation block — renders only for items with
-   symbols / usage / intuition fields. Visually subordinate to the formula
-   so the cheatsheet still reads as a formula sheet at a glance. */
-.equation-explain {
-  margin-top: 12px;
-  padding-top: 12px;
+/* Per-formula explanation block. Wrapped in a <details> so each card
+   stays collapsed by default; clicking the <summary> reveals the
+   symbols / usage / intuition rows. The "Expand all explanations"
+   button in the equation-toolbar toggles every <details> at once. */
+.equation-explain-wrap {
+  margin-top: 10px;
   border-top: 1px dashed var(--border);
+}
+.equation-explain-toggle {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 2px 4px;
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: color 0.12s ease;
+}
+.equation-explain-toggle::-webkit-details-marker { display: none; }
+.equation-explain-toggle:hover { color: var(--accent); }
+.explain-toggle-chevron {
+  display: inline-block;
+  transition: transform 0.18s ease;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.equation-explain-wrap[open] > .equation-explain-toggle .explain-toggle-chevron {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+.equation-explain-wrap[open] > .equation-explain-toggle {
+  color: var(--accent);
+}
+
+/* Toolbar above the equation grid — holds the "Expand all" button. */
+.equation-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+#expandAllExplanations {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+#expandAllExplanations[data-state="closed"] .expand-label-close { display: none; }
+#expandAllExplanations[data-state="open"]   .expand-label-open  { display: none; }
+/* Active language still has to win — the .en-only / .cn-only rules
+   stay in charge of which language pair shows. */
+
+.equation-explain {
+  padding: 10px 0 4px;
   display: grid;
   gap: 10px;
   font-size: 12.5px;
@@ -1417,10 +1489,81 @@ html[data-theme="dark"] .toc-problem-link:hover {
 }
 .explain-sym-def { color: var(--text-soft); }
 .explain-text    { color: var(--text-soft); }
+html[data-theme="dark"] .equation-explain-wrap {
+  background: rgba(15, 23, 42, 0.46);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px 8px;
+}
+html[data-theme="dark"] .equation-explain-wrap[open] {
+  border-color: rgba(52, 211, 153, 0.40);
+}
+html[data-theme="dark"] .equation-explain-toggle {
+  color: #e2e8f0;
+  font-weight: 650;
+}
+html[data-theme="dark"] .equation-explain-toggle:hover,
+html[data-theme="dark"] .equation-explain-wrap[open] > .equation-explain-toggle {
+  color: var(--accent);
+}
+html[data-theme="dark"] .explain-toggle-chevron {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .equation-explain {
+  color: #dbe7f3;
+}
+html[data-theme="dark"] .explain-label {
+  color: #f8fafc;
+  opacity: 1;
+}
+html[data-theme="dark"] .explain-sym-def,
+html[data-theme="dark"] .explain-text {
+  color: #d5e1ef;
+}
 html[data-theme="dark"] .explain-sym {
-  background: var(--bg-card);
-  border-color: var(--border-strong);
-  color: var(--text);
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.42);
+  color: #f8fafc;
+}
+
+/* Topic-page formula explanations: the new Symbols / How to read /
+   How to use blocks sit directly inside formula callouts. Give them a
+   real dark surface and brighter typography, independent of the
+   collapsible cheatsheet explanation styles above. */
+html[data-theme="dark"] .callout.formula .equation-explain {
+  background: rgba(15, 23, 42, 0.46);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 12px;
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .callout.formula .equation-explain .explain-label {
+  color: #f8fafc;
+  opacity: 1;
+}
+html[data-theme="dark"] .callout.formula .equation-explain .explain-text,
+html[data-theme="dark"] .callout.formula .equation-explain .explain-sym-def {
+  color: #dbe4ef;
+}
+html[data-theme="dark"] .callout.formula .equation-explain .explain-symbols li {
+  padding-bottom: 5px;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.18);
+}
+html[data-theme="dark"] .callout.formula .equation-explain .explain-symbols li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+html[data-theme="dark"] .callout.formula .equation-explain .explain-sym {
+  background: rgba(167, 139, 250, 0.18);
+  border-color: rgba(196, 181, 253, 0.48);
+  color: #f5f3ff;
+  font-weight: 650;
+}
+html[data-theme="dark"] .callout.formula .eq {
+  background: #0f172a;
+  border-color: rgba(167, 139, 250, 0.34);
+  color: #f8fafc;
 }
 
 @media (max-width: 760px) {
@@ -2757,7 +2900,15 @@ html[data-theme="dark"] .section-node:hover { background: var(--btn-hover-bg); b
 html[data-theme="dark"] .toc { background: var(--bg-card); }
 html[data-theme="dark"] .toc a { color: var(--text-soft); }
 html[data-theme="dark"] .toc a:hover { background: var(--btn-hover-bg); color: var(--text); }
-html[data-theme="dark"] .toc a.active { background: var(--accent-soft); color: var(--accent); }
+html[data-theme="dark"] .toc a.active { background: transparent; color: var(--accent); }
+html[data-theme="dark"] .toc-depth-1 a { background: transparent; color: var(--text); }
+html[data-theme="dark"] .toc-depth-1 a.active { background: transparent; color: var(--accent); }
+/* Keep the roadmap-position pill filled in dark mode — only the
+   on-this-page items go borderless. */
+html[data-theme="dark"] .toc-roadmap-list .current a {
+  background: var(--accent-soft);
+  color: #6ee7b7;
+}
 html[data-theme="dark"] .topic { background: var(--bg-card); }
 html[data-theme="dark"] .ref-chip { background: var(--bg-soft); color: var(--text-soft); }
 html[data-theme="dark"] .ref-chip.lecture { background: var(--info-soft); border-color: var(--info); color: var(--info); }
@@ -3094,6 +3245,45 @@ html[data-theme="dark"] .equation-math {
   color: var(--text);
   background: transparent;
 }
+html[data-theme="dark"] .equation-explain-wrap {
+  background: rgba(15, 23, 42, 0.46);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px 8px;
+}
+html[data-theme="dark"] .equation-explain-wrap[open] {
+  border-color: rgba(52, 211, 153, 0.40);
+}
+html[data-theme="dark"] .equation-explain-toggle {
+  color: #e2e8f0;
+  font-weight: 650;
+}
+html[data-theme="dark"] .equation-explain-toggle:hover,
+html[data-theme="dark"] .equation-explain-wrap[open] > .equation-explain-toggle {
+  color: #6ee7b7;
+}
+html[data-theme="dark"] .equation-explain-toggle .explain-toggle-chevron {
+  color: #93c5fd;
+}
+html[data-theme="dark"] .equation-explain-wrap[open] > .equation-explain-toggle .explain-toggle-chevron {
+  color: #6ee7b7;
+}
+html[data-theme="dark"] .equation-explain {
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .explain-label {
+  color: #f8fafc;
+  opacity: 1;
+}
+html[data-theme="dark"] .explain-text,
+html[data-theme="dark"] .explain-sym-def {
+  color: #dbeafe;
+}
+html[data-theme="dark"] .explain-sym {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.42);
+  color: #f8fafc;
+}
 html[data-theme="dark"] .equation-source {
   background: var(--code-bg);
   border-color: var(--border);
@@ -3135,7 +3325,11 @@ html[data-theme="dark"] .topic[style*="background: #fff"] {
 html[data-theme="dark"] .topic h2,
 html[data-theme="dark"] .topic h3,
 html[data-theme="dark"] .topic h4 { color: var(--text); }
-html[data-theme="dark"] .topic p { color: var(--text-soft); }
+html[data-theme="dark"] .topic p,
+html[data-theme="dark"] .topic li,
+html[data-theme="dark"] .topic .mini-list > div {
+  color: var(--text);
+}
 html[data-theme="dark"] .topic table { color: var(--text); }
 html[data-theme="dark"] .topic table thead tr { color: var(--text-muted) !important; }
 html[data-theme="dark"] .topic table th,
@@ -3150,6 +3344,113 @@ html[data-theme="dark"] code {
   color: var(--text);
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+/* Topic pages — dark readability pass.
+   Keep long-form body copy bright, while metadata / source notes stay
+   secondary. Section and callout accents use lighter dark-mode colors
+   so headings remain colorful without becoming muddy on navy surfaces. */
+html[data-theme="dark"] .topic .topic-lede,
+html[data-theme="dark"] .topic > p,
+html[data-theme="dark"] .topic .callout p,
+html[data-theme="dark"] .topic .callout li,
+html[data-theme="dark"] .lesson-section p,
+html[data-theme="dark"] .lesson-section li {
+  color: var(--text);
+}
+html[data-theme="dark"] .topic .example-source,
+html[data-theme="dark"] .lesson-section .source-note,
+html[data-theme="dark"] .topic .bi-text .en,
+html[data-theme="dark"] .topic .subtitle,
+html[data-theme="dark"] .topic .crumbs,
+html[data-theme="dark"] .topic .crumbs a {
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .lesson-section .study-box {
+  background: var(--code-bg);
+  border-color: var(--border);
+}
+html[data-theme="dark"] .lesson-section .eq {
+  background: var(--eq-bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+html[data-theme="dark"] .topic h3.section-blue,
+html[data-theme="dark"] .lesson-section.concept h2 {
+  color: #93c5fd;
+}
+html[data-theme="dark"] .topic h3.section-orange,
+html[data-theme="dark"] .lesson-section.plain h2,
+html[data-theme="dark"] .lesson-section.intuition-section h2,
+html[data-theme="dark"] .lesson-section.tips-section h2 {
+  color: #fb923c;
+}
+html[data-theme="dark"] .topic h3.section-purple,
+html[data-theme="dark"] .lesson-section.equations h2 {
+  color: #c4b5fd;
+}
+html[data-theme="dark"] .topic h3.section-gray,
+html[data-theme="dark"] .lesson-section.examples h2 {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .topic h3.section-yellow,
+html[data-theme="dark"] .lesson-section.exam-section h2,
+html[data-theme="dark"] .lesson-section.checklist-section h2 {
+  color: #fde68a;
+}
+html[data-theme="dark"] .topic h3.section-red,
+html[data-theme="dark"] .lesson-section.mistakes h2 {
+  color: #fca5a5;
+}
+html[data-theme="dark"] .callout.intuition .head { color: #fb923c; }
+html[data-theme="dark"] .callout.danger .head { color: #fca5a5; }
+html[data-theme="dark"] .callout.tips .head,
+html[data-theme="dark"] .callout.exam-yellow .head { color: #fde68a; }
+html[data-theme="dark"] .callout.example .head { color: var(--text); }
+html[data-theme="dark"] .callout .head b,
+html[data-theme="dark"] .topic b,
+html[data-theme="dark"] .topic strong {
+  color: var(--text);
+}
+html[data-theme="dark"] .topic a {
+  color: #93c5fd;
+}
+html[data-theme="dark"] .topic a:hover {
+  color: #bfdbfe;
+}
+
+/* Formula-heavy topic pages (MLP / Backprop / CNN): make the dark-mode
+   teaching blocks read crisply after adding explicit Symbols / How to use
+   explanations. */
+html[data-theme="dark"] .topic h3.section-blue::before { background: #60a5fa; }
+html[data-theme="dark"] .topic h3.section-orange::before { background: #fb923c; }
+html[data-theme="dark"] .topic h3.section-purple::before { background: #a78bfa; }
+html[data-theme="dark"] .topic h3.section-gray::before { background: #cbd5e1; }
+html[data-theme="dark"] .topic h3.section-yellow::before { background: #facc15; }
+html[data-theme="dark"] .topic h3.section-red::before { background: #f87171; }
+
+html[data-theme="dark"] .topic .callout.formula {
+  border-left-color: #c4b5fd;
+}
+html[data-theme="dark"] .topic .callout.formula .head {
+  color: #d8b4fe;
+}
+html[data-theme="dark"] .topic .callout.formula p,
+html[data-theme="dark"] .topic .callout.formula li {
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .topic .callout.formula strong {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .topic .callout.formula .eq {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+html[data-theme="dark"] .topic .callout.formula .eq mjx-container,
+html[data-theme="dark"] .topic .callout.formula .eq mjx-math {
+  color: #f8fafc !important;
 }
 
 /* Roadmap (Atlas) — bring up node + edge contrast a notch.
@@ -3189,3 +3490,566 @@ html[data-theme="dark"] .mermaid-view svg .label,
 html[data-theme="dark"] .mermaid-view svg .label foreignObject *,
 html[data-theme="dark"] .mermaid-view svg text { fill: var(--text); }
 html[data-theme="dark"] .mermaid-view svg .edgeLabel { background: var(--bg-card); }
+
+/* Topic detail pages — final dark readability pass.
+   The Learning Theory formula cards now carry dense symbol explanations,
+   so body copy, inline labels, and MathJax need stronger contrast than
+   the general muted dark-page style. Keep accent color on headings only. */
+html[data-theme="dark"] .block-page .topic {
+  background: #101a2b;
+  border-color: #475569;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+html[data-theme="dark"] .block-page .topic,
+html[data-theme="dark"] .block-page .topic p,
+html[data-theme="dark"] .block-page .topic li,
+html[data-theme="dark"] .block-page .topic td,
+html[data-theme="dark"] .block-page .topic th,
+html[data-theme="dark"] .block-page .topic .mini-list {
+  color: #e5edf7;
+}
+html[data-theme="dark"] .block-page .topic .topic-lede {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .block-page .topic b,
+html[data-theme="dark"] .block-page .topic strong {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .block-page .topic h2,
+html[data-theme="dark"] .block-page .topic h4 {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .block-page .topic h3 {
+  border-bottom-color: #475569;
+}
+html[data-theme="dark"] .block-page .topic h3.section-blue { color: #93c5fd; }
+html[data-theme="dark"] .block-page .topic h3.section-blue::before { background: #60a5fa; }
+html[data-theme="dark"] .block-page .topic h3.section-orange { color: #fdba74; }
+html[data-theme="dark"] .block-page .topic h3.section-orange::before { background: #fb923c; }
+html[data-theme="dark"] .block-page .topic h3.section-purple { color: #d8b4fe; }
+html[data-theme="dark"] .block-page .topic h3.section-purple::before { background: #c084fc; }
+html[data-theme="dark"] .block-page .topic h3.section-gray { color: #cbd5e1; }
+html[data-theme="dark"] .block-page .topic h3.section-gray::before { background: #94a3b8; }
+html[data-theme="dark"] .block-page .topic h3.section-yellow { color: #fde68a; }
+html[data-theme="dark"] .block-page .topic h3.section-yellow::before { background: #facc15; }
+html[data-theme="dark"] .block-page .topic h3.section-red { color: #fca5a5; }
+html[data-theme="dark"] .block-page .topic h3.section-red::before { background: #f87171; }
+html[data-theme="dark"] .block-page .topic .callout {
+  background: rgba(148, 163, 184, 0.06);
+  border-radius: 0 8px 8px 0;
+  color: #e5edf7;
+  padding: 10px 14px 10px 16px;
+}
+html[data-theme="dark"] .block-page .topic .callout.formula {
+  background: rgba(167, 139, 250, 0.08);
+  border-left-color: #c4b5fd;
+}
+html[data-theme="dark"] .block-page .topic .callout p,
+html[data-theme="dark"] .block-page .topic .callout li {
+  color: #e5edf7;
+}
+html[data-theme="dark"] .block-page .topic .callout h4 {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .block-page .topic .callout.formula h4 {
+  color: #d8b4fe;
+}
+html[data-theme="dark"] .block-page .topic .callout .head {
+  color: #93c5fd;
+}
+html[data-theme="dark"] .block-page .topic .callout.formula .head {
+  color: #d8b4fe;
+}
+html[data-theme="dark"] .block-page .topic .mini-list > div {
+  border-left-color: #64748b;
+}
+html[data-theme="dark"] .block-page .topic .example-source {
+  color: #bac7d6;
+}
+html[data-theme="dark"] .block-page .topic .eq {
+  background: #0b1220;
+  border-color: #64748b;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+html[data-theme="dark"] .block-page .topic .eq mjx-container,
+html[data-theme="dark"] .block-page .topic .eq mjx-container *,
+html[data-theme="dark"] .block-page .topic .callout mjx-container,
+html[data-theme="dark"] .block-page .topic .callout mjx-container * {
+  color: #f8fafc !important;
+}
+
+/* Topic formula pages — dark-mode readability pass.
+   The topic pages carry dense explanatory prose inside callouts; keep
+   body copy bright enough to read while preserving color only on section
+   titles and callout headings. */
+html[data-theme="dark"] .block-main .topic {
+  background: #121d31;
+  border-color: #46556c;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+html[data-theme="dark"] .block-main .topic p,
+html[data-theme="dark"] .block-main .topic li,
+html[data-theme="dark"] .block-main .topic .mini-list > div {
+  color: #dbe4ef;
+}
+html[data-theme="dark"] .block-main .topic .topic-lede {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .block-main .topic b,
+html[data-theme="dark"] .block-main .topic strong {
+  color: #ffffff;
+}
+html[data-theme="dark"] .block-main .topic h3.section-blue { color: #93c5fd; }
+html[data-theme="dark"] .block-main .topic h3.section-blue::before { background: #60a5fa; }
+html[data-theme="dark"] .block-main .topic h3.section-orange { color: #fdba74; }
+html[data-theme="dark"] .block-main .topic h3.section-orange::before { background: #fb923c; }
+html[data-theme="dark"] .block-main .topic h3.section-purple { color: #c4b5fd; }
+html[data-theme="dark"] .block-main .topic h3.section-purple::before { background: #a78bfa; }
+html[data-theme="dark"] .block-main .topic h3.section-gray { color: #cbd5e1; }
+html[data-theme="dark"] .block-main .topic h3.section-gray::before { background: #94a3b8; }
+html[data-theme="dark"] .block-main .topic h3.section-yellow { color: #fde68a; }
+html[data-theme="dark"] .block-main .topic h3.section-yellow::before { background: #facc15; }
+html[data-theme="dark"] .block-main .topic h3.section-red { color: #fca5a5; }
+html[data-theme="dark"] .block-main .topic h3.section-red::before { background: #f87171; }
+
+html[data-theme="dark"] .block-main .topic .callout {
+  border-left-width: 4px;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula {
+  background: rgba(167, 139, 250, 0.045);
+  padding: 10px 0 10px 18px;
+}
+html[data-theme="dark"] .block-main .topic .callout.example {
+  background: rgba(148, 163, 184, 0.05);
+  padding: 10px 0 10px 18px;
+}
+html[data-theme="dark"] .block-main .topic .callout p,
+html[data-theme="dark"] .block-main .topic .callout li {
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .block-main .topic .callout .head {
+  font-weight: 700;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .head { color: #c4b5fd; }
+html[data-theme="dark"] .block-main .topic .callout.example .head { color: #f8fafc; }
+html[data-theme="dark"] .block-main .topic .eq {
+  background: #0f172a;
+  border-color: #526179;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+html[data-theme="dark"] .block-main .topic .example-source {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .block-main .topic .mini-list > div {
+  border-left-color: #526179;
+}
+
+/* Topic formula explanations — high-contrast dark reading surface.
+   These rules live after the broad dark-mode topic overrides above, so the
+   newly expanded formula cards keep readable body text and colored section
+   headings in Auto-encoder / VAE / Contrastive and the rest of /topics/. */
+html[data-theme="dark"] .topic h3.section-blue {
+  color: #93c5fd;
+}
+html[data-theme="dark"] .topic h3.section-blue::before {
+  background: #93c5fd;
+}
+html[data-theme="dark"] .topic h3.section-orange {
+  color: #fb923c;
+}
+html[data-theme="dark"] .topic h3.section-orange::before {
+  background: #fb923c;
+}
+html[data-theme="dark"] .topic h3.section-purple {
+  color: #c4b5fd;
+}
+html[data-theme="dark"] .topic h3.section-purple::before {
+  background: #c4b5fd;
+}
+html[data-theme="dark"] .topic h3.section-gray {
+  color: #e5e7eb;
+}
+html[data-theme="dark"] .topic h3.section-gray::before {
+  background: #94a3b8;
+}
+html[data-theme="dark"] .topic h3.section-yellow {
+  color: #facc15;
+}
+html[data-theme="dark"] .topic h3.section-yellow::before {
+  background: #facc15;
+}
+html[data-theme="dark"] .topic h3.section-red {
+  color: #fca5a5;
+}
+html[data-theme="dark"] .topic h3.section-red::before {
+  background: #fca5a5;
+}
+html[data-theme="dark"] .topic .callout {
+  color: var(--text);
+}
+html[data-theme="dark"] .topic .callout p,
+html[data-theme="dark"] .topic .callout li,
+html[data-theme="dark"] .topic .callout b,
+html[data-theme="dark"] .topic .callout strong {
+  color: var(--text);
+}
+html[data-theme="dark"] .topic .callout.formula {
+  border-left-color: #c4b5fd;
+}
+html[data-theme="dark"] .topic .callout.formula .head {
+  color: #c4b5fd;
+}
+html[data-theme="dark"] .topic .callout.formula p b,
+html[data-theme="dark"] .topic .callout.formula p strong {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .topic .callout.formula ul {
+  color: var(--text);
+}
+html[data-theme="dark"] .topic .callout.formula li::marker {
+  color: #c4b5fd;
+}
+html[data-theme="dark"] .topic .callout.formula .eq {
+  background: #0f172a;
+  border-color: #5b6678;
+  color: #f8fafc;
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain {
+  background: rgba(11, 18, 32, 0.72);
+  border: 1px solid rgba(196, 181, 253, 0.28);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 12px;
+  color: #e8eef7;
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-label {
+  color: #ffffff;
+  opacity: 1;
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-text,
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-sym-def {
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-symbols li {
+  padding-bottom: 5px;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.20);
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-symbols li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+html[data-theme="dark"] .topic .callout.formula .equation-explain .explain-sym {
+  background: rgba(167, 139, 250, 0.22);
+  border-color: rgba(216, 180, 254, 0.58);
+  color: #faf5ff;
+  font-weight: 700;
+}
+
+/* Topic lesson pages — keep the new teaching-note pages readable in dark
+   mode. This sits after the broad `.topic h2/h3` dark rule above, so the
+   section-title colors survive while body text stays calm and neutral. */
+html[data-theme="dark"] .lesson-section {
+  color: var(--text);
+}
+html[data-theme="dark"] .lesson-section p,
+html[data-theme="dark"] .lesson-section li {
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .lesson-section b,
+html[data-theme="dark"] .lesson-section strong {
+  color: var(--text);
+}
+html[data-theme="dark"] .lesson-section h3 {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+html[data-theme="dark"] .lesson-section h3::before {
+  background: var(--border-strong);
+}
+html[data-theme="dark"] .lesson-section.concept h2 { color: #93c5fd; }
+html[data-theme="dark"] .lesson-section.plain h2,
+html[data-theme="dark"] .lesson-section.intuition-section h2,
+html[data-theme="dark"] .lesson-section.tips-section h2 { color: #fb923c; }
+html[data-theme="dark"] .lesson-section.equations h2 { color: #c4b5fd; }
+html[data-theme="dark"] .lesson-section.examples h2 { color: #cbd5e1; }
+html[data-theme="dark"] .lesson-section.mistakes h2 { color: #fca5a5; }
+html[data-theme="dark"] .lesson-section.exam-section h2,
+html[data-theme="dark"] .lesson-section.checklist-section h2 { color: #facc15; }
+
+html[data-theme="dark"] .lesson-section .study-box {
+  background: var(--code-bg);
+  border-color: var(--border-strong);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 rgba(148, 163, 184, 0.24);
+}
+html[data-theme="dark"] .lesson-section .study-box p,
+html[data-theme="dark"] .lesson-section .study-box li {
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .lesson-section .eq {
+  background: #111a2a;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+html[data-theme="dark"] .lesson-section .source-note,
+html[data-theme="dark"] .example-source {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .mini-list > div {
+  border-left-color: var(--border-strong);
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .topic h3.section-blue { color: #93c5fd; }
+html[data-theme="dark"] .topic h3.section-blue::before { background: #93c5fd; }
+html[data-theme="dark"] .topic h3.section-orange { color: #fb923c; }
+html[data-theme="dark"] .topic h3.section-orange::before { background: #fb923c; }
+html[data-theme="dark"] .topic h3.section-purple { color: #c4b5fd; }
+html[data-theme="dark"] .topic h3.section-purple::before { background: #c4b5fd; }
+html[data-theme="dark"] .topic h3.section-gray { color: #cbd5e1; }
+html[data-theme="dark"] .topic h3.section-gray::before { background: #94a3b8; }
+html[data-theme="dark"] .topic h3.section-yellow { color: #facc15; }
+html[data-theme="dark"] .topic h3.section-yellow::before { background: #facc15; }
+html[data-theme="dark"] .topic h3.section-red { color: #fca5a5; }
+html[data-theme="dark"] .topic h3.section-red::before { background: #fca5a5; }
+
+/* Recent topic additions: final dark-mode polish.
+   Keep the new roadmap TOC, formula explanations, and Python snippets
+   readable after the broader legacy dark overrides above. */
+html[data-theme="dark"] .toc-panel-handle {
+  background: rgba(15, 23, 42, 0.74);
+  border-color: rgba(148, 163, 184, 0.36);
+  color: #e2e8f0;
+}
+html[data-theme="dark"] .toc-panel-handle:hover,
+html[data-theme="dark"] .toc-panel-handle:focus-visible {
+  background: rgba(30, 41, 59, 0.90);
+  border-color: rgba(52, 211, 153, 0.58);
+  color: #f8fafc;
+}
+html[data-theme="dark"] .toc-panel-body {
+  color: #e5edf7;
+}
+html[data-theme="dark"] .toc h2,
+html[data-theme="dark"] .toc-section-label {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .toc a {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .toc-depth-1 a,
+html[data-theme="dark"] .toc a:hover {
+  color: #f8fafc;
+}
+html[data-theme="dark"] .toc-roadmap-num {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .toc-roadmap-list .current a {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.36);
+  color: #a7f3d0;
+}
+
+html[data-theme="dark"] .lesson-section .study-box {
+  background: #111c2f;
+  border-color: #526179;
+  color: #f1f5f9;
+  box-shadow: inset 3px 0 0 rgba(196, 181, 253, 0.42);
+}
+html[data-theme="dark"] .lesson-section .study-box p,
+html[data-theme="dark"] .lesson-section .study-box li {
+  color: #e5edf7;
+}
+html[data-theme="dark"] .lesson-section .study-box b,
+html[data-theme="dark"] .lesson-section .study-box strong {
+  color: #ffffff;
+}
+html[data-theme="dark"] .lesson-section .study-box code {
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: #f8fafc;
+}
+html[data-theme="dark"] .lesson-section .eq {
+  background: #0b1220;
+  border-color: #64748b;
+  color: #f8fafc;
+}
+html[data-theme="dark"] .lesson-section .eq mjx-container,
+html[data-theme="dark"] .lesson-section .eq mjx-container * {
+  color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .python-section-note {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .python-code-card {
+  background: #0f172a;
+  border-color: #475569;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+}
+html[data-theme="dark"] .python-code-card[open] {
+  border-color: #64748b;
+}
+html[data-theme="dark"] .python-code-summary {
+  background: #162237;
+  border-bottom-color: #475569;
+  color: #f8fafc;
+}
+html[data-theme="dark"] .python-code-summary::before {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .python-code-editor {
+  background: #0b1220;
+  border-top-color: #334155;
+  color: #e5edf7;
+}
+html[data-theme="dark"] .python-code-lines li::before {
+  color: #94a3b8;
+}
+html[data-theme="dark"] .python-code-lines code {
+  background: transparent;
+  color: #e5edf7;
+}
+html[data-theme="dark"] .python-code-lines li:hover {
+  background: rgba(148, 163, 184, 0.07);
+}
+html[data-theme="dark"] .py-keyword { color: #93c5fd; }
+html[data-theme="dark"] .py-module { color: #ddd6fe; }
+html[data-theme="dark"] .py-string { color: #fde68a; }
+html[data-theme="dark"] .py-number { color: #fca5a5; }
+html[data-theme="dark"] .py-comment { color: #bbf7d0; }
+
+/* Final pass for /topics/ formula explanation cards. Keep this last so it
+   wins over older broad topic-page dark overrides. */
+html[data-theme="dark"] .block-main .topic .callout.formula {
+  background: rgba(216, 180, 254, 0.07);
+  border-left-color: #d8b4fe;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .head {
+  color: #d8b4fe;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula p,
+html[data-theme="dark"] .block-main .topic .callout.formula li {
+  color: #f1f5f9;
+  line-height: 1.78;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula b,
+html[data-theme="dark"] .block-main .topic .callout.formula strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula li::marker {
+  color: #d8b4fe;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .eq {
+  background: #0f172a;
+  border-color: #64748b;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .eq mjx-container,
+html[data-theme="dark"] .block-main .topic .callout.formula .eq mjx-math {
+  color: #f8fafc !important;
+}
+
+/* Dark mode readability final guard.
+   Keep this literally last: older generated pages and inline-ish topic
+   markup use many broad selectors, so this restores strong contrast for
+   the actual study text while preserving softer colors for metadata. */
+html[data-theme="dark"] .block-main .topic,
+html[data-theme="dark"] .block-main .topic p,
+html[data-theme="dark"] .block-main .topic li,
+html[data-theme="dark"] .block-main .topic .mini-list > div,
+html[data-theme="dark"] .block-main .lesson-section p,
+html[data-theme="dark"] .block-main .lesson-section li {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .block-main .topic .topic-lede,
+html[data-theme="dark"] .block-main .topic .callout p,
+html[data-theme="dark"] .block-main .topic .callout li {
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .block-main .topic b,
+html[data-theme="dark"] .block-main .topic strong,
+html[data-theme="dark"] .block-main .lesson-section b,
+html[data-theme="dark"] .block-main .lesson-section strong {
+  color: #ffffff;
+}
+html[data-theme="dark"] .block-main .example-source,
+html[data-theme="dark"] .block-main .source-note,
+html[data-theme="dark"] .block-main .topic .subtitle,
+html[data-theme="dark"] .block-main .topic .crumbs,
+html[data-theme="dark"] .block-main .topic .crumbs a,
+html[data-theme="dark"] .block-main .topic .bi-text .en {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .block-main .topic .callout.warn .head,
+html[data-theme="dark"] .block-main .topic .callout.intuition .head {
+  color: #fb923c;
+}
+html[data-theme="dark"] .block-main .topic .callout.exam .head {
+  color: #86efac;
+}
+html[data-theme="dark"] .block-main .topic .callout.danger .head {
+  color: #fca5a5;
+}
+html[data-theme="dark"] .block-main .topic .callout.tips .head,
+html[data-theme="dark"] .block-main .topic .callout.exam-yellow .head {
+  color: #fde68a;
+}
+
+/* Learning Theory topic pages: final dark-mode polish for dense formula notes. */
+html[data-theme="dark"] .block-main .topic {
+  background: #111c2e;
+  border-color: #4b5b72;
+}
+html[data-theme="dark"] .block-main .topic .topic-lede,
+html[data-theme="dark"] .block-main .topic .callout,
+html[data-theme="dark"] .block-main .topic .callout p,
+html[data-theme="dark"] .block-main .topic .callout li,
+html[data-theme="dark"] .block-main .topic .callout .mini-list > div {
+  color: #eef4fb;
+}
+html[data-theme="dark"] .block-main .topic .callout {
+  background: rgba(148, 163, 184, 0.055);
+  border-left-width: 4px;
+  border-radius: 0 8px 8px 0;
+  padding: 11px 14px 11px 18px;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula {
+  background: rgba(167, 139, 250, 0.07);
+  border-left-color: #ddd6fe;
+}
+html[data-theme="dark"] .block-main .topic .callout .head,
+html[data-theme="dark"] .block-main .topic .callout h4,
+html[data-theme="dark"] .block-main .topic .callout b,
+html[data-theme="dark"] .block-main .topic .callout strong {
+  color: #ffffff;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .head,
+html[data-theme="dark"] .block-main .topic .callout.formula h4 {
+  color: #ddd6fe;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula li::marker {
+  color: #ddd6fe;
+}
+html[data-theme="dark"] .block-main .topic .callout .mini-list > div {
+  border-left-color: #64748b;
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .eq,
+html[data-theme="dark"] .block-main .topic .eq {
+  background: #0b1220;
+  border-color: #64748b;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+html[data-theme="dark"] .block-main .topic .callout.formula .eq mjx-container,
+html[data-theme="dark"] .block-main .topic .callout.formula .eq mjx-container *,
+html[data-theme="dark"] .block-main .topic .eq mjx-container,
+html[data-theme="dark"] .block-main .topic .eq mjx-container * {
+  color: #f8fafc !important;
+}
+html[data-theme="dark"] .block-main .topic .example-source {
+  color: #cbd5e1;
+}

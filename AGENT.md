@@ -313,6 +313,22 @@ Per-dimension `all` / `none` mini-buttons at each section head; global `Select a
 
 `cheatsheet.html` is a thin shell; the actual content lives in `assets/equation-sheet.js` as data (one entry per topic, with a list of formula blocks each carrying an EN + CN explanation, the LaTeX, and an optional worked-example fragment). The cheatsheet renderer iterates that list and emits the purple formula callouts. To add a new equation, edit the data file — don't touch the HTML.
 
+#### Per-formula explanation block
+
+Every formula entry can carry three optional fields that render as a collapsible explanation panel under the formula:
+
+| Field | Purpose | Example |
+| --- | --- | --- |
+| `symbols` | array of `{ sym, en, cn }` — what each variable / operator means | `{ sym: "$\\hat{y}(x)$", en: "predicted label", cn: "预测标签" }` |
+| `usage_en` / `usage_cn` | how to use the formula (procedure / hyperparams / numerical notes) | bilingual paragraph |
+| `intuition_en` / `intuition_cn` | how to understand it (geometric / probabilistic / "why does this work") | bilingual paragraph |
+
+The renderer wraps the explanation in a `<details class="equation-explain-wrap">` so each formula stays **collapsed by default** — clicking the `<summary>` ("Explain" / "解释" with a rotating chevron) reveals the panel. The cheatsheet header has a single `#expandAllExplanations` button that toggles every `<details>` open/closed at once; its label flips between "⊞ Expand all" and "⊟ Collapse all" based on current state. Search haystack indexes the explanation text too, so you can find a formula by an intuition phrase.
+
+When the explanation fields are absent, the formula renders as a plain title + LaTeX + Source link — backwards-compatible with formulas that haven't been authored yet. As of this writing, all 176 formula entries have all three fields populated; new entries should match.
+
+LaTeX inside explanation strings is fully MathJax-rendered (works inside `$...$`). Symbol pills (`<code class="explain-sym">`) carry inline math too. Bilingual rule for explanations: CN is Chinese-dominant with English keywords inline (`Hessian`, `Lagrangian`, `softmax`, `kernel`, `argmax`, etc.), not a literal translation of EN.
+
 ---
 
 ## Workflow when changing things
