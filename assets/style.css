@@ -1249,6 +1249,9 @@ html[data-theme="dark"] .toc-problem-link:hover {
 .visual-grid-single {
   grid-template-columns: minmax(0, 620px);
 }
+.visual-grid-wide {
+  grid-template-columns: 1fr;
+}
 .topic-figure {
   margin: 0;
 }
@@ -1265,6 +1268,13 @@ html[data-theme="dark"] .toc-problem-link:hover {
   color: var(--text-soft);
   font-size: 13px;
   line-height: 1.6;
+}
+html[data-theme="dark"] .topic-figure img {
+  background: #f8fafc;
+  border-color: var(--border-strong);
+}
+html[data-theme="dark"] .topic-figure figcaption {
+  color: var(--text-soft);
 }
 .visual-notes {
   margin-top: 14px;
