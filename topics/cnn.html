@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Local conn + weight sharing</span><span class="cn-only">局部连接 + 权重共享</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_12.pdf" target="_blank">📄 Lecture 12</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/machine-learning/introduction-convolution-neural-network/" target="_blank" rel="noopener">🔗 GFG CNN intro</a></div>
     </div>
 
 <div class="en-only">
@@ -57,6 +58,10 @@
     <li><b>Filter volume:</b> one filter has shape $F_h\times F_w\times C_{\text{in}}$; using $C_{\text{out}}$ filters creates $C_{\text{out}}$ output feature maps.</li>
     <li><b>Pooling:</b> a fixed operation such as max or average summarizes a local window, usually reduces spatial size, and adds no learned parameters.</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/cnn-feature-extraction-classification.svg" alt="CNN pipeline from input image through convolution, ReLU, pooling, flattening, fully connected layers, and class probabilities" loading="lazy" />
+    <figcaption><b>Architecture map.</b> The left side is feature extraction: convolution + ReLU turns local pixel patches into feature maps, and pooling compresses each map spatially. The right side is classification: flatten converts the final feature maps into a vector, then fully connected layers turn that vector into class scores or probabilities. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/introduction-convolution-neural-network/" target="_blank" rel="noopener">GeeksforGeeks CNN introduction</a>.</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of a convolution filter as a tiny stencil that scans over an image. At each location it asks, “does this little pattern appear here?” One stencil might detect vertical edges; another might detect a corner; deeper layers combine those into object parts.</p>
@@ -183,6 +188,10 @@
         <li><b>Filter volume</b>：一个 filter 的 shape 是 $F_h\times F_w\times C_{\text{in}}$；用 $C_{\text{out}}$ 个 filters 就得到 $C_{\text{out}}$ 张 feature maps。</li>
         <li><b>Pooling</b>：用 max / average 等固定操作总结局部窗口，通常会降低 spatial size，而且没有 learnable parameters。</li>
       </ul>
+      <figure class="topic-figure">
+        <img src="../assets/figures/cnn-feature-extraction-classification.svg" alt="CNN 从 input image 到 convolution, ReLU, pooling, flatten, fully connected layers 和 class probabilities 的流程图" loading="lazy" />
+        <figcaption><b>Architecture map.</b> 左半边是 feature extraction：convolution + ReLU 把局部 pixel patches 变成 feature maps，pooling 再压缩每张 feature map 的空间尺寸。右半边是 classification：flatten 把最后的 feature maps 拉成 vector，fully connected layers 再把这个 vector 变成 class scores / probabilities。参考：<a href="https://www.geeksforgeeks.org/machine-learning/introduction-convolution-neural-network/" target="_blank" rel="noopener">GeeksforGeeks CNN introduction</a>。</figcaption>
+      </figure>
 
       <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
       <p>把 convolution filter 想成一个小模板，在图片上从左到右、从上到下扫描。每扫到一个位置，它就问：“这个局部有没有我关心的 pattern？”浅层可能看边缘，深层会把边缘组合成纹理、部件、物体。</p>

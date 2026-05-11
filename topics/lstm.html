@@ -39,7 +39,9 @@
       <h1>🔄 <span class="en-only">LSTM</span><span class="cn-only">长短期记忆</span></h1>
       <div class="subtitle"><span class="en-only">Gates · Cell state · Long-term dependencies</span><span class="cn-only">门控 · cell state · 长程依赖</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_14.pdf" target="_blank">📄 Lecture 14</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/deep-learning/long-short-term-memory-networks-using-pytorch/" target="_blank" rel="noopener">🔗 GeeksforGeeks LSTM</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/gated-recurrent-unit-networks/" target="_blank" rel="noopener">🔗 GeeksforGeeks GRU</a></div>
     </div>
 
 <div class="en-only">
@@ -58,6 +60,25 @@
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of an LSTM as a notebook with three small switches. One switch decides what old notes to erase, one decides what new note to write, and one decides how much of the notebook to show to the rest of the model.</p>
   <p>A GRU is the simpler travel version of the notebook: fewer switches, easier to carry, often good enough.</p>
+
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/lstm-cell-flow.svg" alt="LSTM cell diagram showing the cell state highway, hidden state path, input, gates, tanh layers, and pointwise operations" loading="lazy" />
+      <figcaption><b>How to read this picture.</b> The top horizontal line is the cell state $c_t$, the memory highway. The bottom line is the hidden state $h_t$, the part exposed to the next layer or prediction head. Yellow boxes are learned layers; green circles are pointwise operations such as multiply and add. Reference: <a href="https://www.geeksforgeeks.org/deep-learning/long-short-term-memory-networks-using-pytorch/" target="_blank" rel="noopener">GeeksforGeeks LSTM overview</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/gru-vs-lstm-gates.svg" alt="GRU versus LSTM comparison showing two GRU gates and no separate cell state versus three LSTM gates and a separate cell state" loading="lazy" />
+      <figcaption><b>What the comparison is saying.</b> GRU merges memory control into update/reset gates and stores information directly in the hidden state. LSTM separates memory into $c_t$ and uses input, forget, and output gates, which gives more control but usually more parameters. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/gated-recurrent-unit-networks/" target="_blank" rel="noopener">GeeksforGeeks GRU overview</a>.</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Diagram-to-equation map</div>
+    <div class="mini-list">
+      <div><b>Top memory line.</b> This is $c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot\tilde c^{(t)}$: multiply old memory by the forget gate, add the gated candidate memory.</div>
+      <div><b>Bottom hidden line.</b> This is $h^{(t)}=o^{(t)}\odot\sigma_h(c^{(t)})$: expose only the part of the updated cell state that the output gate allows.</div>
+      <div><b>GRU shortcut.</b> There is no separate $c_t$ line; $h_t$ is both memory and output, mixed by the update gate $z_t$.</div>
+    </div>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>The cell state $c^{(t)}$ is the important highway. Instead of replacing memory completely, LSTM updates it additively:</p>
@@ -119,6 +140,7 @@
   <ul>
     <li>Know what input, forget, and output gates mean.</li>
     <li>Be able to read and explain the LSTM cell update equation.</li>
+    <li>Map an LSTM or GRU cell diagram back to the gates and update equations.</li>
     <li>Explain how gates mitigate vanishing gradients compared with vanilla RNNs.</li>
     <li>Compare LSTM and GRU at the conceptual level.</li>
   </ul>
@@ -149,6 +171,25 @@
       <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
       <p>把 LSTM 想成一本笔记本加三个开关：一个决定旧笔记擦多少，一个决定新笔记写多少，一个决定这页笔记给外面看多少。</p>
       <p>GRU 就像轻量版旅行笔记本：开关少一些，背起来更轻，很多任务上也够用。</p>
+
+      <div class="visual-grid visual-grid-wide">
+        <figure class="topic-figure">
+          <img src="../assets/figures/lstm-cell-flow.svg" alt="LSTM cell 图：展示 cell state、hidden state、input、gates、tanh 和 pointwise operations" loading="lazy" />
+          <figcaption><b>怎么看这张图.</b> 上面横着走的是 cell state $c_t$，也就是 memory highway；下面横着走的是 hidden state $h_t$，是模型对外暴露的表示。黄色方块是 learned layers，绿色圆圈是 multiply / add 这类 pointwise operations。参考：<a href="https://www.geeksforgeeks.org/deep-learning/long-short-term-memory-networks-using-pytorch/" target="_blank" rel="noopener">GeeksforGeeks LSTM overview</a>。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/gru-vs-lstm-gates.svg" alt="GRU 与 LSTM 对比图：GRU 两个 gates 且没有单独 cell state；LSTM 三个 gates 且有 cell state" loading="lazy" />
+          <figcaption><b>这张对比图要抓什么.</b> GRU 把 memory control 合并进 update / reset gates，并把信息直接存在 hidden state 里；LSTM 把 memory 单独放在 $c_t$，再用 input、forget、output gates 控制读写，所以控制更细，但参数通常更多。参考：<a href="https://www.geeksforgeeks.org/machine-learning/gated-recurrent-unit-networks/" target="_blank" rel="noopener">GeeksforGeeks GRU overview</a>。</figcaption>
+        </figure>
+      </div>
+      <div class="callout intuition">
+        <div class="head">图和公式怎么对应</div>
+        <div class="mini-list">
+          <div><b>上面的 memory line</b>：对应 $c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot\tilde c^{(t)}$。意思是：旧记忆先乘 forget gate，再加上被 input gate 控制的新 candidate memory。</div>
+          <div><b>下面的 hidden line</b>：对应 $h^{(t)}=o^{(t)}\odot\sigma_h(c^{(t)})$。意思是：cell state 先过一个 squash function，再由 output gate 决定暴露多少。</div>
+          <div><b>GRU 的 shortcut</b>：没有单独 $c_t$ 这条线；$h_t$ 同时承担 memory 和 output，由 update gate $z_t$ 混合旧状态与 candidate。</div>
+        </div>
+      </div>
 
       <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
       <p>最重要的是 cell state $c^{(t)}$ 这条“记忆高速路”。LSTM 不是每步都重写记忆，而是做加法式更新：</p>
@@ -210,6 +251,7 @@
       <ul>
         <li>知道 input / forget / output gate 各自含义。</li>
         <li>能读懂并解释 LSTM cell update。</li>
+        <li>能把 LSTM / GRU cell 图里的 arrows、gates、pointwise ops 对回公式。</li>
         <li>能说明 gate 如何缓解 vanilla RNN 的 vanishing gradients。</li>
         <li>能概念性比较 LSTM 和 GRU。</li>
       </ul>

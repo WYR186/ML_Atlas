@@ -41,7 +41,8 @@
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
         <a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/bellman-equation/" target="_blank" rel="noopener">🔗 GFG Bellman</a></div>
     </div>
 
 <div class="en-only">
@@ -63,6 +64,16 @@
     <div class="head">One step now, the rest later</div>
     <p>Standing in a state is like standing at an intersection. The value is: what do I get immediately if I take this action, plus how good is the place I land afterward?</p>
     <p>The optimal version adds one extra question: among all possible first actions, which one gives the best immediate-plus-future score?</p>
+  </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/bellman-grid-without-backup.svg" alt="Grid world before Bellman backups with rough value 1 assigned to many reachable states" loading="lazy" />
+      <figcaption><b>Before Bellman backups.</b> This rough value table marks many reachable states as $V=1$, so it does not tell the agent which route is closer to the trophy or safer from the fire. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/bellman-equation/" target="_blank" rel="noopener">GeeksforGeeks Bellman equation maze example</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/bellman-grid-with-backup.svg" alt="Grid world after Bellman backups showing discounted values propagated from the goal and penalty states" loading="lazy" />
+      <figcaption><b>After Bellman backups.</b> Values now reflect immediate reward plus discounted future value. With $\gamma=0.9$, a state one step from reward $1$ gets about $0.9$, two steps away gets about $0.81$, and states near the penalty become less attractive.</figcaption>
+    </figure>
   </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
@@ -195,6 +206,16 @@
     <div class="head">先走一步，再看余下路线</div>
     <p>把一个状态想成路口。你先选一个方向，马上拿到一点 reward，然后到达下一个路口。这个选择到底好不好，不只看眼前 reward，还看下一个路口未来有多值钱。</p>
     <p>Bellman 的大白话就是：不要一次想完整条路，先想一步，然后把剩下的路交给 value function。</p>
+  </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/bellman-grid-without-backup.svg" alt="没有 Bellman backup 时，grid world 中很多 reachable states 都被粗略标成 V=1" loading="lazy" />
+      <figcaption><b>没有 Bellman backup 时.</b> 这张表把很多能到 trophy 的 states 都粗略标成 $V=1$，但它看不出谁离 trophy 更近，也看不出谁更靠近 fire。参考：<a href="https://www.geeksforgeeks.org/machine-learning/bellman-equation/" target="_blank" rel="noopener">GeeksforGeeks Bellman equation maze example</a>。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/bellman-grid-with-backup.svg" alt="使用 Bellman backup 后，grid world 中 value 从 reward 和 penalty states 折扣传播" loading="lazy" />
+      <figcaption><b>使用 Bellman backup 后.</b> Value 变成“当前 reward + discounted future value”。当 $\gamma=0.9$ 时，离 $R=1$ 一步的 state 大约是 $0.9$，两步大约是 $0.81$；靠近 $R=-1$ 的路径会变得没那么吸引人。</figcaption>
+    </figure>
   </div>
 
   <h3 class="section-orange">3. 核心直觉</h3>

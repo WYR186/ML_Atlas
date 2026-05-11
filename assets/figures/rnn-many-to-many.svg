@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 460" role="img" aria-labelledby="title desc">
+  <title id="title">Many-to-many recurrent network pattern</title>
+  <desc id="desc">A sequence of multiple inputs produces a sequence of multiple outputs, usually one output per time step.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 26px Arial,sans-serif;fill:#111827}
+      .label{font:700 20px Arial,sans-serif;fill:#111827}
+      .box{fill:none;stroke:#111827;stroke-width:1.5}
+      .input{fill:#006b2f;stroke:#111827;stroke-width:1.3}
+      .state{fill:#22954b;stroke:#111827;stroke-width:1.3}
+      .output{fill:#dff4d7;stroke:#111827;stroke-width:1.3}
+      .arrow{stroke:#111827;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="430" height="460" fill="#f8fafc"/>
+  <text x="315" y="36" text-anchor="middle" class="title">Many to Many</text>
+  <text x="90" y="104" text-anchor="middle" class="label">Multiple</text>
+  <text x="88" y="128" text-anchor="middle" class="label">Outputs</text>
+  <text x="103" y="382" text-anchor="middle" class="label">Multiple Inputs</text>
+  <rect class="box" x="205" y="56" width="200" height="360" rx="8"/>
+  <rect class="output" x="230" y="84" width="35" height="92" rx="6"/>
+  <rect class="output" x="300" y="84" width="35" height="92" rx="6"/>
+  <rect class="output" x="370" y="84" width="35" height="92" rx="6"/>
+  <rect class="state" x="230" y="218" width="42" height="92" rx="6"/>
+  <rect class="state" x="300" y="218" width="42" height="92" rx="6"/>
+  <rect class="state" x="370" y="218" width="42" height="92" rx="6"/>
+  <rect class="input" x="230" y="337" width="42" height="92" rx="6"/>
+  <rect class="input" x="300" y="337" width="42" height="92" rx="6"/>
+  <rect class="input" x="370" y="337" width="42" height="92" rx="6"/>
+  <path class="arrow" d="M251 337V313"/>
+  <path class="arrow" d="M321 337V313"/>
+  <path class="arrow" d="M391 337V313"/>
+  <path class="arrow" d="M251 218V179"/>
+  <path class="arrow" d="M321 218V179"/>
+  <path class="arrow" d="M391 218V179"/>
+  <path class="arrow" d="M272 264H298"/>
+  <path class="arrow" d="M342 264H368"/>
+</svg>

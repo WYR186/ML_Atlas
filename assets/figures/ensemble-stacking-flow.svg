@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Stacking ensemble workflow</title>
+  <desc id="desc">Different base models produce predictions that become features for a meta learner, which learns how to combine them into a final prediction.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="960" height="430" fill="#f8fafc"/>
+  <text x="480" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">Stacking</text>
+  <text x="354" y="92" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">Different base models</text>
+  <text x="640" y="116" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">Meta learner</text>
+
+  <g id="table">
+    <rect x="0" y="0" width="96" height="76" rx="4" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+    <polygon points="76,0 96,20 76,20" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <rect x="5" y="6" width="40" height="13" fill="#229653"/>
+    <rect x="49" y="6" width="25" height="13" fill="#86efac"/>
+    <g stroke="#94a3b8" stroke-width="1">
+      <path d="M0 25 H96"/><path d="M0 42 H96"/><path d="M0 59 H96"/>
+      <path d="M24 0 V76"/><path d="M48 0 V76"/><path d="M76 0 V76"/>
+    </g>
+    <g stroke="#64748b" stroke-width="1" stroke-dasharray="2 2">
+      <path d="M80 34 H92"/><path d="M80 51 H92"/><path d="M80 68 H92"/>
+    </g>
+  </g>
+  <g id="network">
+    <g stroke="#166534" stroke-width="2.5">
+      <path d="M0 0 L32 22 L0 44 M32 22 L70 0 M32 22 L70 44 M32 22 L32 70"/>
+    </g>
+    <g fill="#249352">
+      <circle cx="0" cy="0" r="9"/><circle cx="0" cy="44" r="9"/><circle cx="32" cy="22" r="9"/>
+      <circle cx="70" cy="0" r="9"/><circle cx="70" cy="44" r="9"/><circle cx="32" cy="70" r="9"/>
+    </g>
+  </g>
+  <g id="tree">
+    <g stroke="#166534" stroke-width="2.4">
+      <path d="M42 8 L18 46 M42 8 L72 46 M18 46 L8 82 M18 46 L36 82 M72 46 L58 82 M72 46 L90 82"/>
+    </g>
+    <g fill="#249352">
+      <circle cx="42" cy="8" r="8"/><circle cx="18" cy="46" r="8"/><circle cx="72" cy="46" r="8"/>
+      <circle cx="8" cy="82" r="8"/><circle cx="36" cy="82" r="8"/><circle cx="58" cy="82" r="8"/><circle cx="90" cy="82" r="8"/>
+    </g>
+  </g>
+  <g id="meta">
+    <line x1="0" y1="100" x2="122" y2="100" stroke="#229653" stroke-width="4"/>
+    <line x1="0" y1="100" x2="0" y2="0" stroke="#229653" stroke-width="4"/>
+    <line x1="14" y1="88" x2="105" y2="14" stroke="#166534" stroke-width="3"/>
+    <g fill="#249352" stroke="#ffffff" stroke-width="1.2">
+      <circle cx="18" cy="76" r="5"/><circle cx="30" cy="70" r="5"/><circle cx="43" cy="61" r="5"/>
+      <circle cx="55" cy="52" r="5"/><circle cx="68" cy="45" r="5"/><circle cx="80" cy="34" r="5"/>
+      <circle cx="92" cy="26" r="5"/><circle cx="104" cy="18" r="5"/>
+    </g>
+  </g>
+
+  <use href="#table" x="68" y="92" filter="url(#shadow)"/>
+  <use href="#table" x="68" y="202" filter="url(#shadow)"/>
+  <use href="#table" x="68" y="312" filter="url(#shadow)"/>
+  <path d="M190 130 H302" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M190 240 H302" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M190 350 H302" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+
+  <use href="#network" x="330" y="94"/>
+  <use href="#network" x="330" y="204"/>
+  <use href="#tree" x="318" y="300"/>
+  <text x="370" y="184" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">model A</text>
+  <text x="370" y="294" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">model B</text>
+  <text x="370" y="402" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">model C</text>
+
+  <path d="M430 130 C500 168 520 188 560 216" stroke="#111827" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+  <path d="M430 240 H560" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M430 350 C500 316 520 292 560 264" stroke="#111827" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+  <text x="510" y="200" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#334155">out-of-fold</text>
+  <text x="510" y="218" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#334155">predictions</text>
+
+  <use href="#meta" x="590" y="168" filter="url(#shadow)"/>
+  <path d="M730 220 H825" stroke="#111827" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="838" y="190" width="108" height="60" rx="30" fill="#e5e7eb" stroke="#cbd5e1" filter="url(#shadow)"/>
+  <text x="892" y="228" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Prediction</text>
+
+  <text x="480" y="407" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#475569">learn how to combine models instead of using a fixed vote</text>
+</svg>

@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" role="img" aria-labelledby="title desc">
+  <title id="title">LSTM cell flow diagram</title>
+  <desc id="desc">A teaching diagram showing the LSTM cell-state highway, hidden-state path, input, forget gate, input gate, candidate memory, output gate, and pointwise operations.</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#e6ece7" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0L10 5L0 10Z" fill="#182033"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#1f2937" flood-opacity=".12"/>
+    </filter>
+  </defs>
+  <style>
+    .bg { fill: #f8fbf7; }
+    .grid { fill: url(#grid); opacity: .85; }
+    .cell { fill: #dff2d7; stroke: #b7ddb0; stroke-width: 2; }
+    .wire { fill: none; stroke: #182033; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    .wire-noarrow { fill: none; stroke: #182033; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .thin { stroke-width: 2; }
+    .gate { fill: #ffd22e; stroke: #efb71f; stroke-width: 1.5; }
+    .gate-label { font: 700 19px Arial, sans-serif; fill: #182033; text-anchor: middle; dominant-baseline: middle; }
+    .op { fill: #15a866; stroke: #0b8b53; stroke-width: 1.5; }
+    .op-label { font: 800 22px Arial, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: middle; }
+    .label { font: 700 19px Arial, sans-serif; fill: #111827; }
+    .small { font: 600 14px Arial, sans-serif; fill: #334155; }
+    .hint { font: 600 13px Arial, sans-serif; fill: #475569; }
+    .call { fill: #ffffff; stroke: #d7e2dc; stroke-width: 1.2; }
+    .blue { fill: #8bd3f7; stroke: #65b8e6; stroke-width: 1.5; }
+  </style>
+
+  <rect class="bg" width="980" height="640"/>
+  <rect class="grid" width="980" height="640"/>
+  <rect x="145" y="100" width="695" height="370" rx="26" class="cell" filter="url(#shadow)"/>
+
+  <text x="490" y="52" text-anchor="middle" style="font:800 32px Arial, sans-serif;fill:#0f172a;">LSTM Cell: Gates Control a Memory Highway</text>
+  <text x="490" y="80" text-anchor="middle" class="hint">Read left to right: keep old memory, write useful new memory, then expose part of it as h(t).</text>
+
+  <text x="44" y="164" class="label">c(t-1)</text>
+  <path class="wire" d="M112 156H282"/>
+  <circle cx="300" cy="156" r="17" class="op"/>
+  <text x="300" y="156" class="op-label">x</text>
+  <path class="wire-noarrow" d="M317 156H515"/>
+  <circle cx="535" cy="156" r="17" class="op"/>
+  <text x="535" y="156" class="op-label">+</text>
+  <path class="wire" d="M552 156H930"/>
+  <text x="934" y="164" class="label">c(t)</text>
+  <text x="385" y="132" class="small">cell state highway</text>
+
+  <text x="36" y="418" class="label">h(t-1)</text>
+  <path class="wire" d="M118 410H875"/>
+  <text x="889" y="418" class="label">h(t)</text>
+
+  <circle cx="180" cy="535" r="28" class="blue"/>
+  <text x="180" y="541" text-anchor="middle" style="font:800 22px Arial, sans-serif;fill:#0f172a;">x(t)</text>
+  <path class="wire-noarrow thin" d="M180 507V410"/>
+  <path class="wire-noarrow thin" d="M180 410C200 385 220 377 244 378"/>
+
+  <rect x="238" y="322" width="82" height="48" rx="7" class="gate"/>
+  <text x="279" y="346" class="gate-label">sigmoid</text>
+  <text x="279" y="394" text-anchor="middle" class="small">forget gate f(t)</text>
+  <path class="wire-noarrow thin" d="M279 322V174"/>
+  <path class="wire-noarrow thin" d="M279 174C279 164 286 158 300 156"/>
+  <path class="wire-noarrow thin" d="M210 410C228 388 248 372 279 370"/>
+
+  <rect x="354" y="322" width="82" height="48" rx="7" class="gate"/>
+  <text x="395" y="346" class="gate-label">sigmoid</text>
+  <text x="395" y="394" text-anchor="middle" class="small">input gate i(t)</text>
+  <path class="wire-noarrow thin" d="M395 370V252"/>
+  <circle cx="462" cy="252" r="17" class="op"/>
+  <text x="462" y="252" class="op-label">x</text>
+  <path class="wire-noarrow thin" d="M395 252H445"/>
+  <path class="wire-noarrow thin" d="M230 410C260 385 316 374 395 370"/>
+
+  <rect x="464" y="322" width="92" height="48" rx="7" class="gate"/>
+  <text x="510" y="346" class="gate-label">tanh</text>
+  <text x="510" y="394" text-anchor="middle" class="small">candidate c-tilde(t)</text>
+  <path class="wire-noarrow thin" d="M510 322V252H479"/>
+  <path class="wire-noarrow thin" d="M479 252C520 246 532 208 535 173"/>
+  <path class="wire-noarrow thin" d="M245 410C302 386 397 377 510 370"/>
+
+  <rect x="654" y="322" width="82" height="48" rx="7" class="gate"/>
+  <text x="695" y="346" class="gate-label">sigmoid</text>
+  <text x="695" y="394" text-anchor="middle" class="small">output gate o(t)</text>
+  <path class="wire-noarrow thin" d="M278 410C390 390 546 382 695 370"/>
+
+  <rect x="660" y="206" width="96" height="48" rx="7" class="gate"/>
+  <text x="708" y="230" class="gate-label">tanh</text>
+  <text x="709" y="196" text-anchor="middle" class="small">squash memory</text>
+  <path class="wire-noarrow thin" d="M708 156V206"/>
+  <path class="wire-noarrow thin" d="M708 254V296"/>
+
+  <circle cx="708" cy="410" r="17" class="op"/>
+  <text x="708" y="410" class="op-label">x</text>
+  <path class="wire-noarrow thin" d="M695 370C695 390 700 398 708 410"/>
+  <path class="wire-noarrow thin" d="M708 296V393"/>
+  <path class="wire-noarrow thin" d="M725 410H872"/>
+  <path class="wire-noarrow thin" d="M708 393C708 350 776 332 790 296"/>
+  <path class="wire" d="M790 296V110"/>
+  <circle cx="790" cy="78" r="29" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="790" y="84" text-anchor="middle" style="font:800 22px Arial, sans-serif;fill:#111827;">h(t)</text>
+
+  <rect x="95" y="505" width="36" height="26" rx="6" class="call"/>
+  <path class="wire-noarrow thin" d="M113 530C124 550 144 558 166 552"/>
+  <text x="95" y="585" class="small">copy/branch: x(t) and h(t-1) feed every gate</text>
+
+  <rect x="102" y="32" width="126" height="36" rx="8" class="call"/>
+  <rect x="116" y="40" width="24" height="20" rx="4" class="gate"/>
+  <text x="151" y="55" class="small">learned layer</text>
+  <circle cx="295" cy="50" r="12" class="op"/>
+  <text x="295" y="50" class="op-label" style="font-size:16px;">x</text>
+  <text x="316" y="55" class="small">pointwise op</text>
+
+  <rect x="820" y="498" width="120" height="78" rx="10" class="call"/>
+  <text x="880" y="522" text-anchor="middle" class="small">Exam reading</text>
+  <text x="834" y="546" class="hint">1. Top line = c</text>
+  <text x="834" y="565" class="hint">2. Bottom line = h</text>
+  <text x="834" y="584" class="hint">3. Yellow boxes = gates</text>
+</svg>

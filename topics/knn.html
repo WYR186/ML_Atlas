@@ -41,7 +41,8 @@
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_1.pdf" target="_blank">📄 Lecture 1</a>
         <a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
-        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/how-to-find-the-optimal-value-of-k-in-knn/" target="_blank" rel="noopener">🔗 GeeksforGeeks KNN k</a></div>
     </div>
 
 <div class="en-only">
@@ -66,6 +67,25 @@
     <p>Imagine you've moved to a new neighborhood and want to guess whether your phone will get good cellular reception at the new place. The simplest possible strategy: ask your $k$ closest neighbors, and go with whatever most of them say. That's literally KNN classification — and it works because cellular signal really does depend on location, so nearby neighbors are informative about you.</p>
     <p>For regression, replace "vote" with "average" — instead of asking "good or bad?", ask "how many bars do you usually get?" and report the mean of their answers.</p>
     <p>The catch is that "closest" depends entirely on which ruler you use. If you measure distance in feet, the neighbor across the street wins; if you measure it in number of intervening trees, a different neighbor wins. So picking the right distance metric — and putting all the features on a comparable scale — is the whole game.</p>
+  </div>
+
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/knn-neighbor-clusters.svg" alt="KNN diagram showing a query point with arrows to nearby labeled samples inside several clusters" loading="lazy" />
+      <figcaption><b>How to read this picture.</b> The green regions are not learned clusters in the k-means sense; they are just visual neighborhoods of labeled training samples. KNN predicts for $P_t$ by computing distances from $P_t$ to stored samples, taking the nearest $k$, then voting or averaging. Reference context: <a href="https://www.geeksforgeeks.org/machine-learning/how-to-find-the-optimal-value-of-k-in-knn/" target="_blank" rel="noopener">GeeksforGeeks on choosing $k$ in KNN</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/knn-category-vote.svg" alt="KNN classification diagram showing Category A, Category B, a new data point, and five nearest neighbors voting for Category B" loading="lazy" />
+      <figcaption><b>Voting intuition.</b> With $k=5$, the new point has three nearby Category B samples and two nearby Category A samples, so the majority vote predicts Category B. Changing $k$ can change the answer: small $k$ reacts to local noise, while large $k$ may wash out local structure.</figcaption>
+    </figure>
+  </div>
+  <div class="callout tips">
+    <div class="head">Choosing $k$ from the diagrams</div>
+    <div class="mini-list">
+      <div><b>Start with scaled features.</b> Distance is only meaningful after features use comparable units; otherwise the "nearest" arrows in the figure are misleading.</div>
+      <div><b>Try a range of odd $k$ values.</b> Odd $k$ reduces tie risk in classification. Use validation or cross-validation instead of eyeballing the picture.</div>
+      <div><b>Read the error curve.</b> The elbow idea is to pick the point where error improves a lot before flattening. If two $k$ values perform similarly, the larger one is usually smoother and less noisy.</div>
+    </div>
   </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
@@ -147,7 +167,7 @@
       <li><b>Know your label convention.</b> Discrete labels → vote. Real-valued targets → average.</li>
       <li><b>Always standardize before computing distances</b> (subtract the per-feature mean, divide by std). If the problem doesn't say to, mention you would normally do it.</li>
       <li><b>Tie handling.</b> Even-$k$ binary classification and equal-distance ties happen; obey whatever rule the problem gives ("break arbitrarily," "smaller index wins," etc.).</li>
-      <li><b>Pick $k$ by cross-validation</b>; in conceptual questions explain the bias-variance trade-off ($k\!\uparrow$: smoother + higher bias; $k\!\downarrow$: jagged + higher variance).</li>
+      <li><b>Pick $k$ by cross-validation</b>; in conceptual questions explain the bias-variance trade-off ($k\!\uparrow$: smoother + higher bias; $k\!\downarrow$: jagged + higher variance). For classification, odd $k$ often avoids ties; elbow plots are a quick visual check of where validation error flattens.</li>
       <li><b>For high-dim arguments,</b> invoke distance concentration (Example 2) and conclude "nearest-neighbor relations become unreliable."</li>
     </ol>
   </div>
@@ -176,6 +196,7 @@
       <li>Name the two scaling failure modes: <b>feature-scale dominance</b> (fix with standardization) and <b>curse of dimensionality / distance concentration</b> (no fix — switch methods or reduce dimension).</li>
       <li>Cite the asymptotic guarantee: 1-NN error $\le 2\times$ Bayes error as $n\to\infty$.</li>
       <li>Explain how $k$ controls bias / variance and the role of the Voronoi tessellation at $k=1$.</li>
+      <li>Know practical $k$ selection: validation / cross-validation first, elbow plot as a visual diagnostic, odd $k$ for fewer classification ties.</li>
       <li>Be ready to compare classification vs regression: discrete vote vs continuous average; same neighbor lookup, different aggregation.</li>
     </ul>
   </div>
@@ -189,6 +210,7 @@
       <li>Distance: $\|x-x_i\|_2=\sqrt{\sum_j (x_j-x_{ij})^2}$. Standardize features first.</li>
       <li>$k=1$ ⇒ zero training error, jagged Voronoi boundary, high variance.</li>
       <li>$k\uparrow$ ⇒ smoother boundary, higher bias.</li>
+      <li>Choose $k$ with validation / cross-validation; odd $k$ helps avoid classification ties.</li>
       <li>1-NN asymptotic error $\le 2\,\epsilon^*_{\text{Bayes}}$.</li>
       <li>Curse of dimensionality: nearest / farthest distance ratio $\to 1$ as $d\to\infty$.</li>
       <li>Speedups: kd-tree (low-d), LSH (high-d).</li>
@@ -241,6 +263,25 @@
     <p>想象你刚搬到一个新小区，想猜自家这个位置的手机蜂窝信号好不好。最朴素的策略：问 $k$ 个最近的邻居，按多数人的回答下结论 —— 这就是 KNN classification 的字面写照。之所以靠谱，是因为蜂窝信号真的和地理位置强相关，离得近的邻居确实能给你提供信息。</p>
     <p>回归就把 "投票" 换成 "平均" —— 不再问 "好 / 坏"，而是问 "你这里平时是几格信号"，把他们的回答平均一下作为自己的预测。</p>
     <p>关键点：所谓 "最近" 完全取决于你用什么尺子。用 "英尺" 量是马路对面那家，用 "中间隔了多少棵树" 量又会换人。所以选对距离度量、把所有 feature 放到可比的 scale —— 才是 KNN 的全部诀窍。</p>
+  </div>
+
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/knn-neighbor-clusters.svg" alt="KNN 图：query point 通过箭头连接到多个 labeled training samples" loading="lazy" />
+      <figcaption><b>怎么看这张图.</b> 绿色区域不是 k-means 那种被学出来的 clusters，只是为了帮助你看见 labeled samples 的局部邻域。KNN 对 $P_t$ 做预测时，真正做的事是：算 $P_t$ 到所有训练样本的距离，取最近的 $k$ 个，然后分类做 vote、回归做 average。参考语境：<a href="https://www.geeksforgeeks.org/machine-learning/how-to-find-the-optimal-value-of-k-in-knn/" target="_blank" rel="noopener">GeeksforGeeks on choosing $k$ in KNN</a>。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/knn-category-vote.svg" alt="KNN 分类图：Category A、Category B、新数据点，以及 5 个最近邻投票为 Category B" loading="lazy" />
+      <figcaption><b>投票直觉.</b> 如果 $k=5$，新点附近有 3 个 Category B、2 个 Category A，那么 majority vote 预测 Category B。换一个 $k$ 可能会换答案：$k$ 太小容易被局部噪声带偏，$k$ 太大又会把 local structure 平滑掉。</figcaption>
+    </figure>
+  </div>
+  <div class="callout tips">
+    <div class="head">从图里理解怎么选 $k$</div>
+    <div class="mini-list">
+      <div><b>先做 feature scaling.</b> 只有各个 feature 单位可比，图里的 "nearest" 箭头才有意义；否则量级最大的 feature 会支配距离。</div>
+      <div><b>试一组 odd $k$.</b> 分类任务里 odd $k$ 能减少 tie。不要凭肉眼选，用 validation 或 cross-validation 比较。</div>
+      <div><b>看 error curve.</b> Elbow method 的意思是找 validation error 明显下降后开始变平的位置。若多个 $k$ 表现差不多，较大的 $k$ 通常更平滑、抗噪声更好。</div>
+    </div>
   </div>
 
   <h3 class="section-orange">3. 核心直觉</h3>
@@ -322,7 +363,7 @@
       <li><b>分清 label 类型.</b> 离散标签 → 投票；实数目标 → 取平均。</li>
       <li><b>距离前永远先标准化</b>（每个 feature 减 mean、除 std）。即便题目没要求，也要在答题时点一句 "正常会先做 standardization"。</li>
       <li><b>Tie handling.</b> 偶数 $k$ 二分类、距离相等都会出 tie；按题目规则（"任意" / "下标小者优先" / "距离和小者优先"）即可。</li>
-      <li><b>$k$ 用 cross-validation 选</b>；概念题里要会讲 bias / variance trade-off（$k\!\uparrow$：更平滑、bias 高；$k\!\downarrow$：更碎、variance 高）。</li>
+      <li><b>$k$ 用 cross-validation 选</b>；概念题里要会讲 bias / variance trade-off（$k\!\uparrow$：更平滑、bias 高；$k\!\downarrow$：更碎、variance 高）。分类里常用 odd $k$ 减少 tie；elbow plot 可以快速看 validation error 什么时候开始变平。</li>
       <li><b>高维论证</b> 要用 distance concentration（例 2），结论是 "nearest-neighbor 关系不再可靠"。</li>
     </ol>
   </div>
@@ -351,6 +392,7 @@
       <li>说出两种 scaling 失败模式：<b>feature-scale dominance</b>（用 standardization 解决）与 <b>curse of dimensionality / distance concentration</b>（无解 —— 换方法或先降维）。</li>
       <li>引用 asymptotic 保证：$n\to\infty$ 时 1-NN error $\le 2\times$ Bayes error。</li>
       <li>解释 $k$ 如何控制 bias / variance；$k=1$ 时 Voronoi tessellation 的角色。</li>
+      <li>知道 practical $k$ selection：优先 validation / cross-validation，elbow plot 辅助观察，odd $k$ 降低分类 tie。</li>
       <li>能比较 classification vs regression：离散投票 vs 连续平均；找邻居一致，aggregation 不同。</li>
     </ul>
   </div>
@@ -364,6 +406,7 @@
       <li>距离：$\|x-x_i\|_2=\sqrt{\sum_j (x_j-x_{ij})^2}$；先标准化。</li>
       <li>$k=1$ ⇒ 训练 error 0，Voronoi 边界，variance 高。</li>
       <li>$k\uparrow$ ⇒ 边界更平滑、bias 升高。</li>
+      <li>$k$ 用 validation / cross-validation 选；classification 里 odd $k$ 更少 tie。</li>
       <li>1-NN asymptotic error $\le 2\,\epsilon^*_{\text{Bayes}}$。</li>
       <li>维度灾难：$d\to\infty$ 时 nearest / farthest 距离比 $\to 1$。</li>
       <li>加速：kd-tree（低维）、LSH（高维）。</li>

@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">ELBO · Reparameterization · KL</span><span class="cn-only">ELBO · 重参数化 · KL</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_13.pdf" target="_blank">📄 Lecture 13</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/machine-learning/variational-autoencoders/" target="_blank" rel="noopener">🔗 GFG VAE intro</a></div>
     </div>
 
 <div class="en-only">
@@ -56,6 +57,10 @@
     <li><b>Decoder / generator network:</b> $p_\theta(x\mid z)$ maps latent codes to data space.</li>
     <li><b>Encoder / inference network:</b> $q_\phi(z\mid x)$ approximates the hard posterior over latents for a given input.</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/vae-latent-distribution-architecture.svg" alt="VAE architecture showing encoder outputs for mean and standard deviation, latent sampling, decoder, and reconstructed outputs" loading="lazy" />
+    <figcaption><b>Architecture map.</b> The encoder does not output one fixed code. It outputs distribution parameters, usually $\mu_\phi(x)$ and $\sigma_\phi(x)$ or <code>logvar</code>. A latent sample $z=\mu+\sigma\odot\epsilon$ is then sent through the decoder to reconstruct or generate $x$. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/variational-autoencoders/" target="_blank" rel="noopener">GeeksforGeeks VAE introduction</a>.</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of $z$ as a short recipe card: “a digit with this slant, this thickness, this style.” The decoder turns the recipe into an image. The encoder looks at a real image and guesses which recipe could have produced it.</p>
@@ -181,6 +186,10 @@
         <li><b>Decoder / generator network</b>：$p_\theta(x\mid z)$，把 latent code 映射到 data space。</li>
         <li><b>Encoder / inference network</b>：$q_\phi(z\mid x)$，近似给定输入 $x$ 后的 posterior。</li>
       </ul>
+      <figure class="topic-figure">
+        <img src="../assets/figures/vae-latent-distribution-architecture.svg" alt="VAE architecture：encoder 输出 mean 和 standard deviation，采样 latent z，再由 decoder 重建 x" loading="lazy" />
+        <figcaption><b>Architecture map.</b> Encoder 不是输出一个固定 code，而是输出 distribution parameters，通常是 $\mu_\phi(x)$ 和 $\sigma_\phi(x)$ 或 <code>logvar</code>。接着用 $z=\mu+\sigma\odot\epsilon$ sample latent code，再交给 decoder reconstruction / generation。参考：<a href="https://www.geeksforgeeks.org/machine-learning/variational-autoencoders/" target="_blank" rel="noopener">GeeksforGeeks VAE introduction</a>。</figcaption>
+      </figure>
 
       <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
       <p>可以把 $z$ 想成一张很短的“生成配方”：这个数字往左斜一点，笔画粗一点，风格圆一点。Decoder 根据配方画出图片。Encoder 看一张真实图片，反推它可能来自哪些配方。</p>

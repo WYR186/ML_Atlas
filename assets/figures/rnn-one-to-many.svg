@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 360" role="img" aria-labelledby="title desc">
+  <title id="title">One-to-many recurrent network pattern</title>
+  <desc id="desc">A single input seed produces multiple hidden states and multiple outputs over time.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 26px Arial,sans-serif;fill:#111827}
+      .label{font:700 20px Arial,sans-serif;fill:#111827}
+      .box{fill:none;stroke:#111827;stroke-width:1.5}
+      .input{fill:#22954b;stroke:#111827;stroke-width:1.3}
+      .state{fill:#bdf6a7;stroke:#111827;stroke-width:1.3}
+      .output{fill:#dff4d7;stroke:#111827;stroke-width:1.3}
+      .arrow{stroke:#111827;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="420" height="360" fill="#f8fafc"/>
+  <text x="280" y="38" text-anchor="middle" class="title">One to Many</text>
+  <text x="100" y="110" text-anchor="middle" class="label">Multiple Outputs</text>
+  <text x="107" y="270" text-anchor="middle" class="label">Single Input</text>
+  <rect class="box" x="205" y="58" width="180" height="270" rx="7"/>
+  <rect class="output" x="228" y="82" width="34" height="66" rx="5"/>
+  <rect class="output" x="286" y="82" width="34" height="66" rx="5"/>
+  <rect class="output" x="344" y="82" width="34" height="66" rx="5"/>
+  <rect class="state" x="228" y="176" width="34" height="66" rx="5"/>
+  <rect class="state" x="286" y="176" width="34" height="66" rx="5"/>
+  <rect class="state" x="344" y="176" width="34" height="66" rx="5"/>
+  <rect class="input" x="228" y="258" width="34" height="66" rx="5"/>
+  <path class="arrow" d="M245 258V244"/>
+  <path class="arrow" d="M245 176V151"/>
+  <path class="arrow" d="M303 176V151"/>
+  <path class="arrow" d="M361 176V151"/>
+  <path class="arrow" d="M262 209H284"/>
+  <path class="arrow" d="M320 209H342"/>
+</svg>

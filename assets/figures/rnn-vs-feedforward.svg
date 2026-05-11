@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-labelledby="title desc">
+  <title id="title">Recurrent neural network compared with feed-forward neural network</title>
+  <desc id="desc">The recurrent network has feedback loops on hidden units, while the feed-forward network only sends information forward.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 25px Arial,sans-serif;fill:#1f7a3f}
+      .label{font:700 15px Arial,sans-serif;fill:#475569}
+      .panel{fill:#ffffff;stroke:#e5e7eb;stroke-width:1.5}
+      .nodeIn{fill:#020617;stroke:#111827;stroke-width:1.2}
+      .nodeH{fill:#d8f0ce;stroke:#d8f0ce;stroke-width:1.2}
+      .arrow{stroke:#111827;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .loop{stroke:#111827;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#f8fafc"/>
+  <rect class="panel" x="16" y="24" width="424" height="372" rx="10"/>
+  <rect class="panel" x="460" y="24" width="424" height="372" rx="10"/>
+  <text x="228" y="62" text-anchor="middle" class="title">(a) Recurrent Neural Network</text>
+  <text x="672" y="62" text-anchor="middle" class="title">(b) Feed-Forward Neural Network</text>
+
+  <g transform="translate(55,100)">
+    <circle class="nodeIn" cx="40" cy="40" r="11"/>
+    <circle class="nodeIn" cx="40" cy="110" r="11"/>
+    <circle class="nodeIn" cx="40" cy="180" r="11"/>
+    <circle class="nodeIn" cx="40" cy="250" r="11"/>
+    <circle class="nodeH" cx="250" cy="60" r="34"/>
+    <circle class="nodeH" cx="250" cy="155" r="34"/>
+    <circle class="nodeH" cx="250" cy="250" r="34"/>
+    <path class="arrow" d="M51 40L216 60"/><path class="arrow" d="M51 40L216 155"/><path class="arrow" d="M51 40L216 250"/>
+    <path class="arrow" d="M51 110L216 60"/><path class="arrow" d="M51 110L216 155"/><path class="arrow" d="M51 110L216 250"/>
+    <path class="arrow" d="M51 180L216 60"/><path class="arrow" d="M51 180L216 155"/><path class="arrow" d="M51 180L216 250"/>
+    <path class="arrow" d="M51 250L216 60"/><path class="arrow" d="M51 250L216 155"/><path class="arrow" d="M51 250L216 250"/>
+    <path class="arrow" d="M284 60H360"/>
+    <path class="arrow" d="M284 155H360"/>
+    <path class="arrow" d="M284 250H360"/>
+    <path class="loop" d="M250 25C292 10 312 37 284 58"/>
+    <path class="loop" d="M250 120C292 105 312 132 284 153"/>
+    <path class="loop" d="M250 215C292 200 312 227 284 248"/>
+    <text x="250" y="314" text-anchor="middle" class="label">Hidden units reuse past state.</text>
+  </g>
+
+  <g transform="translate(500,100)">
+    <circle class="nodeIn" cx="40" cy="40" r="11"/>
+    <circle class="nodeIn" cx="40" cy="110" r="11"/>
+    <circle class="nodeIn" cx="40" cy="180" r="11"/>
+    <circle class="nodeIn" cx="40" cy="250" r="11"/>
+    <circle class="nodeH" cx="250" cy="60" r="34"/>
+    <circle class="nodeH" cx="250" cy="155" r="34"/>
+    <circle class="nodeH" cx="250" cy="250" r="34"/>
+    <path class="arrow" d="M51 40L216 60"/><path class="arrow" d="M51 40L216 155"/><path class="arrow" d="M51 40L216 250"/>
+    <path class="arrow" d="M51 110L216 60"/><path class="arrow" d="M51 110L216 155"/><path class="arrow" d="M51 110L216 250"/>
+    <path class="arrow" d="M51 180L216 60"/><path class="arrow" d="M51 180L216 155"/><path class="arrow" d="M51 180L216 250"/>
+    <path class="arrow" d="M51 250L216 60"/><path class="arrow" d="M51 250L216 155"/><path class="arrow" d="M51 250L216 250"/>
+    <path class="arrow" d="M284 60H360"/>
+    <path class="arrow" d="M284 155H360"/>
+    <path class="arrow" d="M284 250H360"/>
+    <text x="250" y="314" text-anchor="middle" class="label">No feedback loop, no built-in time memory.</text>
+  </g>
+</svg>

@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">AdaBoost reweighting pipeline</title>
+  <desc id="desc">A three-round AdaBoost diagram showing original data, reweighted data, weak classifiers, mistakes receiving larger weights, and an ensemble classifier.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <style>
+      .label{font:700 20px Arial,sans-serif;fill:#111827}
+      .small{font:600 15px Arial,sans-serif;fill:#334155}
+      .tiny{font:600 12px Arial,sans-serif;fill:#475569}
+      .classifier{fill:#15803d}
+      .correct{fill:none;stroke:#15803d;stroke-width:3}
+      .wrong{fill:none;stroke:#b91c1c;stroke-width:3}
+      .arrow{stroke:#111827;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .soft-arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .check{stroke:#15803d;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+      .cross{stroke:#b91c1c;stroke-width:4;fill:none;stroke-linecap:round}
+    </style>
+  </defs>
+
+  <rect width="960" height="520" fill="#f8fafc"/>
+  <rect x="24" y="150" width="912" height="292" fill="#dff2d6"/>
+  <text x="842" y="190" class="label">Ensemble</text>
+  <text x="842" y="214" class="label">classifier</text>
+
+  <g transform="translate(0,0)">
+    <text x="75" y="126" class="label">Original Data</text>
+    <circle cx="87" cy="52" r="10" fill="#b7e66c"/>
+    <circle cx="109" cy="45" r="11" fill="#f87171"/>
+    <circle cx="132" cy="45" r="11" fill="#60a5fa"/>
+    <circle cx="155" cy="52" r="10" fill="#67e8f9"/>
+    <circle cx="174" cy="67" r="10" fill="#b7e66c"/>
+    <circle cx="64" cy="73" r="10" fill="#60a5fa"/>
+    <circle cx="91" cy="72" r="10" fill="#60a5fa"/>
+    <circle cx="117" cy="68" r="10" fill="#67e8f9"/>
+    <circle cx="143" cy="70" r="10" fill="#b7e66c"/>
+    <circle cx="164" cy="87" r="10" fill="#60a5fa"/>
+    <circle cx="73" cy="97" r="10" fill="#f87171"/>
+    <circle cx="99" cy="94" r="10" fill="#b7e66c"/>
+    <circle cx="124" cy="96" r="10" fill="#f87171"/>
+    <circle cx="149" cy="100" r="10" fill="#67e8f9"/>
+    <circle cx="177" cy="103" r="10" fill="#f87171"/>
+    <path d="M 126 132 L 126 154" class="arrow"/>
+    <rect x="66" y="158" width="144" height="38" rx="2" class="classifier"/>
+    <text x="98" y="183" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#fff">Classifier</text>
+    <path d="M 138 198 L 138 235" class="arrow"/>
+    <rect x="38" y="244" width="176" height="82" class="correct"/>
+    <path d="M 62 276 L 74 288 L 94 266" class="check"/>
+    <circle cx="142" cy="276" r="10" fill="#b7e66c"/>
+    <circle cx="165" cy="276" r="10" fill="#b7e66c"/>
+    <circle cx="188" cy="276" r="10" fill="#b7e66c"/>
+    <circle cx="143" cy="300" r="10" fill="#b7e66c"/>
+    <circle cx="166" cy="300" r="10" fill="#b7e66c"/>
+    <circle cx="189" cy="300" r="10" fill="#60a5fa"/>
+    <path d="M 138 326 L 138 350" class="arrow"/>
+    <rect x="38" y="360" width="176" height="82" class="wrong"/>
+    <path d="M 58 374 L 77 393 M 77 374 L 58 393" class="cross"/>
+    <circle cx="120" cy="382" r="10" fill="#60a5fa"/>
+    <circle cx="145" cy="382" r="10" fill="#60a5fa"/>
+    <circle cx="169" cy="382" r="10" fill="#f87171"/>
+    <circle cx="192" cy="382" r="10" fill="#67e8f9"/>
+    <circle cx="102" cy="406" r="10" fill="#f87171"/>
+    <circle cx="127" cy="406" r="10" fill="#67e8f9"/>
+    <circle cx="151" cy="406" r="10" fill="#f87171"/>
+    <circle cx="175" cy="406" r="10" fill="#67e8f9"/>
+    <circle cx="198" cy="406" r="10" fill="#60a5fa"/>
+  </g>
+
+  <path d="M 214 402 C 258 402 242 54 274 54" class="soft-arrow"/>
+  <text x="228" y="246" class="tiny">mistakes get</text>
+  <text x="228" y="262" class="tiny">larger weight</text>
+
+  <g transform="translate(260,0)">
+    <text x="42" y="126" class="label">Weighted Data</text>
+    <circle cx="66" cy="52" r="10" fill="#cbd5e1"/>
+    <circle cx="90" cy="47" r="12" fill="#f87171"/>
+    <circle cx="116" cy="46" r="12" fill="#60a5fa"/>
+    <circle cx="141" cy="51" r="10" fill="#67e8f9"/>
+    <circle cx="162" cy="63" r="11" fill="#cbd5e1"/>
+    <circle cx="64" cy="78" r="13" fill="#60a5fa"/>
+    <circle cx="93" cy="76" r="10" fill="#b7e66c"/>
+    <circle cx="121" cy="75" r="13" fill="#f87171"/>
+    <circle cx="149" cy="78" r="11" fill="#67e8f9"/>
+    <circle cx="173" cy="92" r="10" fill="#60a5fa"/>
+    <circle cx="76" cy="103" r="9" fill="#67e8f9"/>
+    <circle cx="103" cy="101" r="13" fill="#60a5fa"/>
+    <circle cx="131" cy="102" r="11" fill="#cbd5e1"/>
+    <circle cx="158" cy="106" r="12" fill="#f87171"/>
+    <path d="M 126 132 L 126 154" class="arrow"/>
+    <rect x="66" y="158" width="144" height="38" rx="2" class="classifier"/>
+    <text x="98" y="183" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#fff">Classifier</text>
+    <path d="M 138 198 L 138 235" class="arrow"/>
+    <rect x="38" y="244" width="176" height="82" class="correct"/>
+    <path d="M 62 276 L 74 288 L 94 266" class="check"/>
+    <circle cx="128" cy="276" r="11" fill="#67e8f9"/>
+    <circle cx="153" cy="276" r="11" fill="#67e8f9"/>
+    <circle cx="180" cy="276" r="11" fill="#60a5fa"/>
+    <circle cx="101" cy="300" r="11" fill="#60a5fa"/>
+    <circle cx="128" cy="300" r="11" fill="#67e8f9"/>
+    <circle cx="153" cy="300" r="11" fill="#67e8f9"/>
+    <circle cx="180" cy="300" r="11" fill="#60a5fa"/>
+    <path d="M 138 326 L 138 350" class="arrow"/>
+    <rect x="38" y="360" width="176" height="82" class="wrong"/>
+    <path d="M 58 374 L 77 393 M 77 374 L 58 393" class="cross"/>
+    <circle cx="92" cy="406" r="13" fill="#b7e66c"/>
+    <circle cx="122" cy="382" r="13" fill="#60a5fa"/>
+    <circle cx="148" cy="382" r="13" fill="#f87171"/>
+    <circle cx="174" cy="382" r="13" fill="#f87171"/>
+    <circle cx="199" cy="382" r="12" fill="#b7e66c"/>
+    <circle cx="122" cy="406" r="12" fill="#67e8f9"/>
+    <circle cx="148" cy="406" r="13" fill="#f87171"/>
+    <circle cx="174" cy="406" r="12" fill="#b7e66c"/>
+  </g>
+
+  <text x="470" y="319" class="label">...</text>
+  <path d="M 474 290 L 474 76 L 548 76" class="soft-arrow"/>
+  <path d="M 476 402 C 528 402 512 54 552 54" class="soft-arrow"/>
+
+  <g transform="translate(520,0)">
+    <text x="42" y="126" class="label">Weighted Data</text>
+    <circle cx="78" cy="52" r="10" fill="#cbd5e1"/>
+    <circle cx="104" cy="46" r="12" fill="#f87171"/>
+    <circle cx="130" cy="47" r="12" fill="#60a5fa"/>
+    <circle cx="157" cy="52" r="10" fill="#67e8f9"/>
+    <circle cx="181" cy="62" r="10" fill="#cbd5e1"/>
+    <circle cx="65" cy="79" r="10" fill="#60a5fa"/>
+    <circle cx="91" cy="76" r="10" fill="#60a5fa"/>
+    <circle cx="116" cy="77" r="10" fill="#67e8f9"/>
+    <circle cx="142" cy="78" r="10" fill="#b7e66c"/>
+    <circle cx="168" cy="82" r="12" fill="#f87171"/>
+    <circle cx="70" cy="104" r="9" fill="#b7e66c"/>
+    <circle cx="96" cy="102" r="13" fill="#f87171"/>
+    <circle cx="123" cy="103" r="11" fill="#60a5fa"/>
+    <circle cx="150" cy="106" r="10" fill="#67e8f9"/>
+    <path d="M 126 132 L 126 154" class="arrow"/>
+    <rect x="66" y="158" width="144" height="38" rx="2" class="classifier"/>
+    <text x="98" y="183" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#fff">Classifier</text>
+    <path d="M 138 198 L 138 235" class="arrow"/>
+    <rect x="38" y="244" width="176" height="82" class="correct"/>
+    <path d="M 62 276 L 74 288 L 94 266" class="check"/>
+    <circle cx="126" cy="276" r="10" fill="#b7e66c"/>
+    <circle cx="151" cy="276" r="10" fill="#f87171"/>
+    <circle cx="177" cy="276" r="10" fill="#60a5fa"/>
+    <circle cx="127" cy="300" r="10" fill="#b7e66c"/>
+    <circle cx="152" cy="300" r="10" fill="#67e8f9"/>
+    <circle cx="177" cy="300" r="10" fill="#f87171"/>
+    <path d="M 138 326 L 138 350" class="arrow"/>
+    <rect x="38" y="360" width="176" height="82" class="wrong"/>
+    <path d="M 58 374 L 77 393 M 77 374 L 58 393" class="cross"/>
+    <circle cx="92" cy="382" r="10" fill="#60a5fa"/>
+    <circle cx="117" cy="382" r="10" fill="#60a5fa"/>
+    <circle cx="142" cy="382" r="10" fill="#f87171"/>
+    <circle cx="167" cy="382" r="10" fill="#67e8f9"/>
+    <circle cx="192" cy="382" r="10" fill="#67e8f9"/>
+    <circle cx="101" cy="406" r="10" fill="#b7e66c"/>
+    <circle cx="126" cy="406" r="10" fill="#67e8f9"/>
+    <circle cx="151" cy="406" r="10" fill="#60a5fa"/>
+    <circle cx="176" cy="406" r="10" fill="#b7e66c"/>
+    <circle cx="201" cy="406" r="10" fill="#b7e66c"/>
+  </g>
+
+  <path d="M 735 214 C 780 230 812 250 846 285" class="soft-arrow"/>
+  <rect x="826" y="300" width="106" height="62" rx="6" fill="#fff" stroke="#15803d" stroke-width="3"/>
+  <text x="850" y="326" class="small">weighted</text>
+  <text x="858" y="346" class="small">vote</text>
+</svg>

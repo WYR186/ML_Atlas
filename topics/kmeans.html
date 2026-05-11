@@ -55,6 +55,24 @@
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Drop $K$ magnets onto the scatter plot. Each point runs to its closest magnet. Then each magnet moves to the average location of the points that chose it. Repeat until nothing changes.</p>
   <p>The magnets usually settle down, but where they settle can depend heavily on where you dropped them first.</p>
+  <figure class="topic-figure">
+    <img src="../assets/figures/kmeans-workflow.svg" alt="K-means workflow showing raw data, centroid initialization, assignment, convergence, WCSS minimization, code, and the elbow method" loading="lazy" />
+    <figcaption>K-means workflow: start with unlabeled points, initialize centroids, assign each point to its nearest centroid, update centers, and repeat until assignments stop changing.</figcaption>
+  </figure>
+  <figure class="topic-figure">
+    <img src="../assets/figures/kmeans-before-after.svg" alt="Before and after K-means clustering showing mixed points becoming three separated clusters" loading="lazy" />
+    <figcaption>Before/after intuition: before clustering, colors are visually mixed; after K-means, each point has been grouped around a learned centroid.</figcaption>
+  </figure>
+  <div class="callout">
+    <div class="head">How to read these figures</div>
+    <div class="mini-list">
+      <div><b>Initialization:</b> choose $K$ starting centers. A poor start can lead to a poor local optimum, so restarts help.</div>
+      <div><b>Assignment:</b> each point chooses its nearest centroid using squared Euclidean distance.</div>
+      <div><b>Update:</b> each centroid moves to the mean of the points assigned to it.</div>
+      <div><b>Choosing $K$:</b> the elbow plot shows WCSS / inertia decreasing as $K$ grows; pick the bend where extra clusters help much less.</div>
+    </div>
+    <p class="source-note">Reference: <a href="https://www.analyticsvidhya.com/blog/2020/10/a-simple-explanation-of-k-means-clustering/" target="_blank" rel="noopener">Analytics Vidhya, "A Simple Explanation of K-Means Clustering"</a>.</p>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>With centers fixed, the best assignment is obvious: choose the nearest center. With assignments fixed, the best center is also obvious: the arithmetic mean of the assigned points.</p>
@@ -162,6 +180,24 @@
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>把 $K$ 块磁铁丢到散点图上。每个点跑向最近的磁铁；然后磁铁移动到选择它的点的平均位置。不断重复，直到没人想换队。</p>
       <p>磁铁通常会稳定下来，但稳定在哪，很依赖最开始扔在哪里。</p>
+      <figure class="topic-figure">
+        <img src="../assets/figures/kmeans-workflow.svg" alt="K-means workflow：raw data、centroid initialization、assignment、convergence、WCSS 和 elbow method" loading="lazy" />
+        <figcaption>K-means 流程图：从 unlabeled points 开始，初始化 centroids，把点分给最近 centroid，再更新中心，直到 assignments 不再明显变化。</figcaption>
+      </figure>
+      <figure class="topic-figure">
+        <img src="../assets/figures/kmeans-before-after.svg" alt="K-means 聚类前后对比：混在一起的点被分成三个 clusters" loading="lazy" />
+        <figcaption>Before / after 直觉：聚类前点混在一起；跑完 K-means 后，每个点会围绕 learned centroid 形成一个 cluster。</figcaption>
+      </figure>
+      <div class="callout">
+        <div class="head">这两张图怎么看</div>
+        <div class="mini-list">
+          <div><b>Initialization：</b> 先选 $K$ 个初始中心。初始点选差了可能掉进差的 local optimum，所以 multiple restarts 有用。</div>
+          <div><b>Assignment：</b> 每个点用 squared Euclidean distance 找最近 centroid。</div>
+          <div><b>Update：</b> 每个 centroid 移到分给它的 points 的 mean。</div>
+          <div><b>Choosing $K$：</b> elbow plot 展示 WCSS / inertia 随 $K$ 增大而下降；拐点之后收益变小，常被当成候选 $K$。</div>
+        </div>
+        <p class="source-note">参考：<a href="https://www.analyticsvidhya.com/blog/2020/10/a-simple-explanation-of-k-means-clustering/" target="_blank" rel="noopener">Analytics Vidhya, "A Simple Explanation of K-Means Clustering"</a>。</p>
+      </div>
 
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>如果 centers 固定，最优 assignment 很明显：选最近中心。如果 assignments 固定，最优 center 也很明显：取 assigned points 的 arithmetic mean。</p>

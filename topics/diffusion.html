@@ -39,7 +39,8 @@
       <h1>🌊 <span class="en-only">Diffusion Models</span><span class="cn-only">扩散模型</span></h1>
       <div class="subtitle"><span class="en-only">Forward · Reverse · ELBO</span><span class="cn-only">Forward · Reverse · ELBO</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_20.pdf" target="_blank">📄 Lecture 20</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/artificial-intelligence/what-are-diffusion-models/" target="_blank" rel="noopener">🔗 GFG diffusion intro</a></div>
     </div>
 
 <div class="en-only">
@@ -48,6 +49,10 @@
   <p class="topic-lede">A diffusion model is a generative model that learns to reverse a gradual noising process. The forward process turns clean data $x_0$ into nearly standard Gaussian noise $x_T$; the reverse process starts from noise and denoises step by step back to a sample.</p>
   <p>Lecture 20 frames diffusion models as iterative VAEs: instead of one latent variable $z$, we introduce a chain $x_1,\ldots,x_T$ of latent noisy states. More precisely, DDPMs behave like hierarchical variational autoencoders whose encoder is fixed by the chosen noising process $q$, while the generative decoder $p_\theta$ is learned.</p>
   <p>The goal is to transform a sample from a simple distribution, usually $x_T\sim\mathcal{N}(0,I)$, into a sample from the complex data distribution through many small denoising steps.</p>
+  <figure class="topic-figure">
+    <img src="../assets/figures/diffusion-forward-reverse-process.svg" alt="Diffusion model diagram showing forward diffusion adding noise and reverse diffusion denoising from noise to a generated image" loading="lazy" />
+    <figcaption><b>Process map.</b> Forward diffusion is fixed: repeatedly add Gaussian noise until the image becomes almost pure noise. Reverse diffusion is learned: start from random noise and repeatedly predict a slightly cleaner state. The trained model can then generate a new image by walking from $x_T$ back to $x_0$. Reference: <a href="https://www.geeksforgeeks.org/artificial-intelligence/what-are-diffusion-models/" target="_blank" rel="noopener">GeeksforGeeks diffusion overview</a>.</figcaption>
+  </figure>
 </section>
 
 <section class="topic lesson-section plain" id="diffusion-plain-en">
@@ -212,6 +217,10 @@
   <p class="topic-lede">Diffusion model 是一种生成模型，核心是学习反转一个逐步加噪过程。Forward process 把 clean data $x_0$ 逐步变成接近标准高斯噪声 $x_T$；reverse process 从噪声开始，一步步 denoise 回样本。</p>
   <p>Lecture 20 把 diffusion 看成 iterative VAE：VAE 只有一个 latent variable $z$，diffusion 则有一整条 latent noisy states：$x_1,\ldots,x_T$。更精确地说，DDPM 很像 hierarchical VAE：encoder 由预先定义的 noising process $q$ 固定住，真正要学习的是 generative decoder $p_\theta$。</p>
   <p>目标是把一个 simple distribution 里的样本，通常是 $x_T\sim\mathcal{N}(0,I)$，通过很多小步 denoising 变成复杂 data distribution 里的样本，比如 image。</p>
+  <figure class="topic-figure">
+    <img src="../assets/figures/diffusion-forward-reverse-process.svg" alt="Diffusion model 图：forward diffusion 加噪，reverse diffusion 从噪声逐步 denoise 成新图像" loading="lazy" />
+    <figcaption><b>Process map.</b> Forward diffusion 是固定过程：不断加入 Gaussian noise，直到图片接近 pure noise。Reverse diffusion 是学出来的过程：从 random noise 出发，每一步预测 slightly cleaner state。训练好的模型就可以从 $x_T$ 一路走回 $x_0$，生成新图像。参考：<a href="https://www.geeksforgeeks.org/artificial-intelligence/what-are-diffusion-models/" target="_blank" rel="noopener">GeeksforGeeks diffusion overview</a>。</figcaption>
+  </figure>
 </section>
 
 <section class="topic lesson-section plain" id="diffusion-plain-cn">

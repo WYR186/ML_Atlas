@@ -41,7 +41,8 @@
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
         <a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a>
+        <a class="ref-chip lecture" href="https://www.geeksforgeeks.org/machine-learning/bias-vs-variance-in-machine-learning/" target="_blank" rel="noopener">🔗 GeeksforGeeks Bias-Variance</a></div>
     </div>
 
 <div class="en-only">
@@ -64,6 +65,16 @@
   <p>A richer model class can represent more patterns, so approximation error tends to decrease. But if the dataset size is fixed, a richer class is easier to overfit, so estimation error can increase.</p>
   <p>This is the theory version of the bias-variance style trade-off: simple class means underfitting risk; overly rich class means generalization risk.</p>
   <p>As sample size $n$ grows, estimation error usually shrinks for a fixed class. As complexity grows, estimation error can grow because there are more hypotheses that may accidentally look good on a finite sample.</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/error-decomposition-bias-variance-tradeoff.svg" alt="Bias variance trade-off plot showing bias squared, variance, and total error against model complexity" loading="lazy" />
+      <figcaption><b>How to read the picture.</b> Moving right means choosing a more complex hypothesis class. Bias squared usually falls because the model can represent more patterns; variance rises because the fitted predictor becomes more sensitive to the training sample. Total error is lowest near the balance point, not at either extreme. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/bias-vs-variance-in-machine-learning/" target="_blank" rel="noopener">GeeksforGeeks bias-variance overview</a>.</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Connection to the three-term decomposition</div>
+    <p>The plot is a squared-loss intuition, so it is not the exact same formula as the true-risk split below. Still, it gives the same exam message: overly simple classes tend to have large approximation-style error, while overly complex classes can have large finite-sample estimation-style error.</p>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
@@ -195,6 +206,16 @@
   <p>模型类越强，能表达的函数越多，approximation error 往往更小。但训练集大小固定时，模型越灵活也越容易追着样本噪声跑，estimation error 风险会变大。</p>
   <p>这就是 theory 版本的 underfitting / overfitting trade-off：太简单会表达不足，太复杂会泛化不稳。</p>
   <p>当 sample size $n$ 变大，固定 $\mathcal{F}$ 下 estimation error 通常下降；当 complexity 变大，可选 hypotheses 更多，有限样本上“碰巧训练误差低”的坏模型也更多，estimation risk 会上升。</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/error-decomposition-bias-variance-tradeoff.svg" alt="bias variance trade-off 图：bias squared、variance 和 total error 随模型复杂度变化" loading="lazy" />
+      <figcaption><b>怎么看这张图：</b>横轴 model complexity 越往右，模型越灵活；纵轴 error 越高越差。Bias<sup>2</sup> 往右下降，因为复杂模型更能贴近真实规律；variance 往右上升，因为模型更容易被具体 training set 牵着走；total error 是两者加上 noise 后的整体效果，所以中间有一个 optimal model complexity。参考：<a href="https://www.geeksforgeeks.org/machine-learning/bias-vs-variance-in-machine-learning/" target="_blank" rel="noopener">GeeksforGeeks bias-variance overview</a>。</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">和三项误差分解怎么对应</div>
+    <p>这张图是 squared-loss 下 bias-variance 的直觉图，不要把它和下面的 true-risk decomposition 完全机械等同。但考试理解方向一致：太简单通常 approximation-style error 大；太复杂在样本有限时 estimation-style error 风险大；最优点不是最复杂模型，而是 balance point。</p>
+  </div>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="callout formula">

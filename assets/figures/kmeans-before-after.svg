@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" role="img" aria-labelledby="title desc">
+  <title id="title">Before and after K-means clustering</title>
+  <desc id="desc">A two-panel illustration showing mixed colored points before K-means and three separated clusters after K-means.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1,1 L8,5 L1,9" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .axis{stroke:#111827;stroke-width:4;stroke-linecap:square}
+      .divider{stroke:#111827;stroke-width:3}
+      .caption{font:500 18px system-ui,-apple-system,Segoe UI,sans-serif;fill:#111827}
+      .label{font:500 17px system-ui,-apple-system,Segoe UI,sans-serif;fill:#111827}
+      .arrow{fill:none;stroke:#111827;stroke-width:2.3;marker-end:url(#arrow)}
+      .red{fill:none;stroke:#ef233c;stroke-width:4}
+      .blue{fill:none;stroke:#08a6d1;stroke-width:4}
+      .lime{fill:none;stroke:#b9e51b;stroke-width:4}
+      .red-dot{fill:#ef233c}
+      .blue-star{fill:#08a6d1}
+      .lime-diamond{fill:none;stroke:#b9e51b;stroke-width:3}
+      .cluster-red{fill:none;stroke:#ef233c;stroke-width:3}
+      .cluster-blue{fill:none;stroke:#08a6d1;stroke-width:3}
+      .cluster-lime{fill:none;stroke:#b9e51b;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="860" height="420" fill="#fff"/>
+  <line class="divider" x1="365" y1="4" x2="365" y2="416"/>
+
+  <g id="before" transform="translate(18 42)">
+    <line class="axis" x1="0" y1="294" x2="318" y2="294"/>
+    <line class="axis" x1="0" y1="294" x2="0" y2="14"/>
+    <g transform="translate(54 78)">
+      <circle class="red-dot" cx="18" cy="24" r="4"/><circle class="red-dot" cx="34" cy="42" r="4"/><circle class="red-dot" cx="55" cy="34" r="4"/>
+      <circle class="red-dot" cx="20" cy="84" r="4"/><circle class="red-dot" cx="62" cy="76" r="4"/><circle class="red-dot" cx="6" cy="118" r="4"/>
+      <circle class="red-dot" cx="42" cy="132" r="4"/><circle class="red-dot" cx="78" cy="108" r="4"/>
+      <ellipse class="red" cx="40" cy="74" rx="13" ry="30" transform="rotate(84 40 74)"/>
+      <g transform="translate(70 52)">
+        <path class="blue-star" d="M20 0 24 12 37 12 26 20 30 33 20 25 10 33 14 20 3 12 16 12z" transform="scale(.55)"/>
+        <path class="blue-star" d="M62 13 66 25 79 25 68 33 72 46 62 38 52 46 56 33 45 25 58 25z" transform="scale(.55)"/>
+        <path class="blue-star" d="M34 43 38 55 51 55 40 63 44 76 34 68 24 76 28 63 17 55 30 55z" transform="scale(.55)"/>
+        <path class="blue-star" d="M78 63 82 75 95 75 84 83 88 96 78 88 68 96 72 83 61 75 74 75z" transform="scale(.55)"/>
+        <path class="blue-star" d="M15 82 19 94 32 94 21 102 25 115 15 107 5 115 9 102 -2 94 11 94z" transform="scale(.55)"/>
+        <path class="blue-star" d="M58 104 62 116 75 116 64 124 68 137 58 129 48 137 52 124 41 116 54 116z" transform="scale(.55)"/>
+      </g>
+      <g transform="translate(136 24)">
+        <path class="lime-diamond" d="M18 0 28 10 18 20 8 10z"/><path class="lime-diamond" d="M60 22 70 32 60 42 50 32z"/>
+        <path class="lime-diamond" d="M28 58 38 68 28 78 18 68z"/><path class="lime-diamond" d="M82 64 92 74 82 84 72 74z"/>
+        <path class="lime-diamond" d="M50 98 60 108 50 118 40 108z"/><path class="lime-diamond" d="M105 118 115 128 105 138 95 128z"/>
+      </g>
+    </g>
+    <text class="caption" x="160" y="326" text-anchor="middle">fig 1: before applying</text>
+    <text class="caption" x="160" y="350" text-anchor="middle">k-means clustering</text>
+  </g>
+
+  <g id="after" transform="translate(405 42)">
+    <line class="axis" x1="0" y1="302" x2="330" y2="302"/>
+    <line class="axis" x1="0" y1="302" x2="0" y2="50"/>
+    <path class="arrow" d="M-16 94 C-6 90,-2 82,0 70"/>
+    <g transform="translate(68 80)">
+      <circle class="red-dot" cx="20" cy="52" r="4"/><circle class="red-dot" cx="38" cy="46" r="4"/><circle class="red-dot" cx="55" cy="55" r="4"/>
+      <circle class="red-dot" cx="24" cy="76" r="4"/><circle class="red-dot" cx="46" cy="74" r="4"/><circle class="red-dot" cx="66" cy="82" r="4"/>
+      <circle class="red-dot" cx="14" cy="100" r="4"/><circle class="red-dot" cx="38" cy="101" r="4"/><circle class="red-dot" cx="60" cy="104" r="4"/>
+      <circle class="red-dot" cx="80" cy="92" r="4"/><ellipse class="cluster-red" cx="46" cy="80" rx="44" ry="32"/>
+    </g>
+    <g transform="translate(92 218)">
+      <path class="blue-star" d="M20 0 24 12 37 12 26 20 30 33 20 25 10 33 14 20 3 12 16 12z" transform="scale(.55)"/>
+      <path class="blue-star" d="M54 5 58 17 71 17 60 25 64 38 54 30 44 38 48 25 37 17 50 17z" transform="scale(.55)"/>
+      <path class="blue-star" d="M86 18 90 30 103 30 92 38 96 51 86 43 76 51 80 38 69 30 82 30z" transform="scale(.55)"/>
+      <path class="blue-star" d="M28 54 32 66 45 66 34 74 38 87 28 79 18 87 22 74 11 66 24 66z" transform="scale(.55)"/>
+      <path class="blue-star" d="M68 67 72 79 85 79 74 87 78 100 68 92 58 100 62 87 51 79 64 79z" transform="scale(.55)"/>
+      <ellipse class="cluster-blue" cx="44" cy="42" rx="50" ry="34"/>
+    </g>
+    <g transform="translate(220 150)">
+      <path class="lime-diamond" d="M18 0 28 10 18 20 8 10z"/><path class="lime-diamond" d="M52 8 62 18 52 28 42 18z"/>
+      <path class="lime-diamond" d="M88 18 98 28 88 38 78 28z"/><path class="lime-diamond" d="M22 48 32 58 22 68 12 58z"/>
+      <path class="lime-diamond" d="M62 54 72 64 62 74 52 64z"/><path class="lime-diamond" d="M104 58 114 68 104 78 94 68z"/>
+      <path class="lime-diamond" d="M44 90 54 100 44 110 34 100z"/><path class="lime-diamond" d="M82 94 92 104 82 114 72 104z"/>
+      <ellipse class="cluster-lime" cx="62" cy="58" rx="78" ry="42"/>
+    </g>
+    <path class="arrow" d="M128 72 C92 38,110 0,154 22"/>
+    <text class="label" x="164" y="30">cluster 1</text>
+    <path class="arrow" d="M246 150 C260 72,300 78,374 92"/>
+    <text class="label" x="382" y="98">cluster 2</text>
+    <path class="arrow" d="M164 248 C205 220,248 226,300 250"/>
+    <text class="label" x="308" y="256">cluster 3</text>
+    <text class="caption" x="160" y="354" text-anchor="middle">fig 2: After applying K-</text>
+    <text class="caption" x="160" y="378" text-anchor="middle">means clustering</text>
+  </g>
+</svg>

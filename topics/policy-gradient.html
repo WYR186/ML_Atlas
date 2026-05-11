@@ -42,7 +42,9 @@
         <a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
         <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a>
+        <a class="ref-chip lecture" href="https://www.geeksforgeeks.org/machine-learning/policy-gradient-methods-in-reinforcement-learning/" target="_blank" rel="noreferrer">🔗 GeeksforGeeks</a>
+        <a class="ref-chip lecture" href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/" target="_blank" rel="noreferrer">🔗 Lil'Log</a></div>
     </div>
 
 <div class="en-only">
@@ -75,6 +77,18 @@
     <p>The environment sampling process is not directly differentiable. The log-derivative trick uses $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$, so the gradient can be written in terms of $\nabla\log\pi_\theta(a_t\mid s_t)$, which is differentiable.</p>
     <p>The Policy Gradient Theorem is the formal reason this works cleanly: the gradient can be written with action values and policy derivatives without differentiating the unknown state distribution induced by the policy.</p>
     <p>PPO keeps policy-gradient updates from changing the policy too violently. GRPO, in Lecture 27, removes the learned value model and estimates advantages by comparing multiple completions for the same prompt.</p>
+  </div>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/policy-gradient-a3c-a2c-parallel.svg" alt="A3C asynchronous training compared with A2C synchronous coordinator-based training" loading="lazy" />
+      <figcaption><b>A3C vs. A2C parallel training.</b> Both use many actors to collect experience in parallel. A3C lets workers update global parameters independently; A2C adds a coordinator that waits for actors, batches their gradients, and applies one synchronized update.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to read A3C.</b> Each agent has its own environment rollout and communicates with global network parameters independently. This is fast and decorrelates experience, but workers may update using slightly stale policy parameters.</div>
+    <div><b>How to read A2C.</b> The coordinator acts like a barrier: all actors finish a batch, their gradients are gathered, then the global network updates once. This makes the update more synchronous and often more hardware-friendly.</div>
+    <div><b>Policy-gradient connection.</b> Every worker is still estimating a policy-gradient / actor-critic update from sampled trajectories; the diagram only changes how multiple workers share those updates.</div>
+    <div><b>References.</b> See <a href="https://www.geeksforgeeks.org/machine-learning/policy-gradient-methods-in-reinforcement-learning/" target="_blank" rel="noreferrer">GeeksforGeeks on policy-gradient basics</a> and <a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/" target="_blank" rel="noreferrer">Lilian Weng's A3C/A2C discussion</a>.</div>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -242,6 +256,18 @@
     <p>环境采样过程通常不能直接对策略参数求导。Log-derivative trick 用 $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$，把梯度写到可微的 $\nabla\log\pi_\theta(a_t\mid s_t)$ 上。</p>
     <p>Policy Gradient Theorem 的关键意义是：梯度可以写成 action value 和 policy derivative 的形式，不需要直接对未知的 state-visitation distribution 求导。</p>
     <p>PPO 的作用是限制 policy-gradient 更新不要太暴力。Lecture 27 中 GRPO 则去掉 learned value model，通过比较同一个 prompt 的多个 completions 来估计 advantages。</p>
+  </div>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/policy-gradient-a3c-a2c-parallel.svg" alt="A3C asynchronous training 与 A2C synchronous coordinator-based training 对比图" loading="lazy" />
+      <figcaption><b>A3C vs. A2C parallel training.</b> 两者都用多个 actors 并行收集 trajectories。A3C 让 workers 独立和 global parameters 交互；A2C 加一个 coordinator，等所有 actors 完成后，把 gradients 合成一个 synchronized update。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>A3C 怎么读：</b> 每个 agent 自己 rollout、自己根据经验估计 actor-critic update，然后异步影响 global network。优点是快、experience correlation 低；缺点是可能用到 slightly stale policy。</div>
+    <div><b>A2C 怎么读：</b> Coordinator 像一个同步闸门：等所有 actors 跑完一批，再统一收集 gradients 更新 global network。这样更新更 cohesive，也更适合 batch / GPU。</div>
+    <div><b>和 Policy Gradient 的关系：</b> 每个 worker 本质上仍在用 sampled trajectories 估计 policy-gradient / actor-critic 更新；图里区别只是多 worker 的更新如何共享和同步。</div>
+    <div><b>参考链接：</b> 可配合看 <a href="https://www.geeksforgeeks.org/machine-learning/policy-gradient-methods-in-reinforcement-learning/" target="_blank" rel="noreferrer">GeeksforGeeks 的 policy-gradient 基础</a> 和 <a href="https://lilianweng.github.io/posts/2018-04-08-policy-gradient/" target="_blank" rel="noreferrer">Lilian Weng 对 A3C/A2C 的说明</a>。</div>
   </div>
 
   <h3 class="section-purple">4. 关键公式</h3>

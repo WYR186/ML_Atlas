@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 690" role="img" aria-labelledby="title desc">
+  <title id="title">Three non-collinear points shattered by lines in two dimensions</title>
+  <desc id="desc">Eight panels showing every binary labeling of three non-collinear points, each separated by a different line, illustrating that two-dimensional linear classifiers can shatter three points.</desc>
+  <style>
+    .bg { fill: #f8fafc; }
+    .axis { stroke: #111827; stroke-width: 5; fill: none; stroke-linecap: square; }
+    .sep { stroke: #6aa84f; stroke-width: 4; fill: none; }
+    .red { fill: #ef1f2d; stroke: #8b0f18; stroke-width: 1.5; }
+    .blue { fill: #4f81bd; stroke: #1e3a8a; stroke-width: 1.5; }
+    .case { fill: #111827; font: 700 18px Georgia, "Times New Roman", serif; }
+    .title { fill: #111827; font: 800 24px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .note { fill: #334155; font: 600 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  </style>
+  <rect class="bg" width="1120" height="690" rx="24"/>
+  <text class="title" x="560" y="42" text-anchor="middle">Linear classifiers in 2D can shatter 3 non-collinear points</text>
+  <text class="note" x="560" y="66" text-anchor="middle">Each panel is one of the 2^3 binary labelings; a line realizes that labeling.</text>
+
+  <g transform="translate(48 92)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M4 94 L124 2"/>
+    <circle class="red" cx="88" cy="52" r="9"/>
+    <circle class="red" cx="162" cy="52" r="9"/>
+    <circle class="red" cx="120" cy="112" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #1</text>
+  </g>
+
+  <g transform="translate(292 92)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M4 128 L122 28"/>
+    <circle class="blue" cx="56" cy="50" r="9"/>
+    <circle class="red" cx="154" cy="54" r="9"/>
+    <circle class="red" cx="104" cy="119" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #2</text>
+  </g>
+
+  <g transform="translate(536 92)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M58 5 L160 122"/>
+    <circle class="red" cx="54" cy="54" r="9"/>
+    <circle class="blue" cx="148" cy="50" r="9"/>
+    <circle class="red" cx="96" cy="112" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #3</text>
+  </g>
+
+  <g transform="translate(780 92)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M2 118 L182 60"/>
+    <circle class="red" cx="58" cy="52" r="9"/>
+    <circle class="red" cx="136" cy="44" r="9"/>
+    <circle class="blue" cx="114" cy="111" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #4</text>
+  </g>
+
+  <g transform="translate(48 362)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M4 126 L124 46"/>
+    <circle class="red" cx="46" cy="58" r="9"/>
+    <circle class="blue" cx="150" cy="54" r="9"/>
+    <circle class="blue" cx="118" cy="116" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #5</text>
+  </g>
+
+  <g transform="translate(292 362)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M4 128 L182 56"/>
+    <circle class="blue" cx="48" cy="56" r="9"/>
+    <circle class="blue" cx="150" cy="52" r="9"/>
+    <circle class="red" cx="118" cy="114" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #6</text>
+  </g>
+
+  <g transform="translate(536 362)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M64 16 L154 132"/>
+    <circle class="blue" cx="52" cy="54" r="9"/>
+    <circle class="red" cx="154" cy="48" r="9"/>
+    <circle class="blue" cx="116" cy="112" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #7</text>
+  </g>
+
+  <g transform="translate(780 362)">
+    <path class="axis" d="M0 160 V0 M0 160 H190"/>
+    <path class="sep" d="M2 74 L122 4"/>
+    <circle class="blue" cx="80" cy="54" r="9"/>
+    <circle class="blue" cx="160" cy="50" r="9"/>
+    <circle class="blue" cx="128" cy="112" r="9"/>
+    <text class="case" x="95" y="194" text-anchor="middle">Case #8</text>
+  </g>
+
+  <text class="note" x="560" y="646" text-anchor="middle">Lower-bound proof idea: exhibit these 3 points and show all 8 labelings are linearly separable.</text>
+</svg>

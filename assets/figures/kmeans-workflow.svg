@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">K-means clustering workflow</title>
+  <desc id="desc">A K-means clustering overview showing raw data, centroid initialization, assignment, convergence, WCSS minimization, code, and the elbow method.</desc>
+  <defs>
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M 34 0 L 0 0 0 34" fill="none" stroke="#dfe6ee" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10" fill="none" stroke="#f28c38" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .bg{fill:#fbfaf7}
+      .grid{fill:url(#grid);opacity:.9}
+      .title{font:700 56px/1.1 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:1px;fill:#0b2545}
+      .label{font:700 26px system-ui,-apple-system,Segoe UI,sans-serif;fill:#10243f}
+      .small{font:600 17px system-ui,-apple-system,Segoe UI,sans-serif;fill:#10243f}
+      .code{font:500 24px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#172033}
+      .arrow{stroke:#f28c38;stroke-width:3;fill:none;marker-end:url(#arrow);stroke-linecap:round}
+      .pt-blue{fill:#3c91d9;stroke:#2077bd;stroke-width:1.4}
+      .pt-green{fill:#55ad86;stroke:#318764;stroke-width:1.4}
+      .pt-purple{fill:#855fd3;stroke:#6b46bd;stroke-width:1.4}
+      .centroid{fill:#ff9a3d;stroke:#d96d13;stroke-width:2}
+      .cross{stroke:#f28c38;stroke-width:4;stroke-linecap:round}
+      .card{fill:#ffffff;stroke:#e5e7eb;stroke-width:1.5;opacity:.92}
+      .line{stroke:#6d5bd0;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="720"/>
+  <rect class="grid" width="1200" height="720"/>
+  <text class="title" x="600" y="82" text-anchor="middle">K-MEANS CLUSTERING</text>
+
+  <text class="label" x="145" y="142" text-anchor="middle">Intuition</text>
+  <text class="label" x="405" y="142" text-anchor="middle">Initialization</text>
+  <text class="label" x="665" y="142" text-anchor="middle">Assignment</text>
+  <text class="label" x="935" y="142" text-anchor="middle">Convergence</text>
+  <path class="arrow" d="M276 265 H324"/>
+  <path class="arrow" d="M525 265 H573"/>
+  <path class="arrow" d="M805 265 H860"/>
+
+  <g transform="translate(62 172)">
+    <circle class="pt-blue" cx="22" cy="38" r="6"/><circle class="pt-blue" cx="58" cy="52" r="6"/><circle class="pt-blue" cx="98" cy="40" r="6"/>
+    <circle class="pt-blue" cx="132" cy="66" r="6"/><circle class="pt-blue" cx="168" cy="42" r="6"/><circle class="pt-blue" cx="205" cy="56" r="6"/>
+    <circle class="pt-blue" cx="35" cy="94" r="6"/><circle class="pt-blue" cx="79" cy="87" r="6"/><circle class="pt-blue" cx="116" cy="94" r="6"/>
+    <circle class="pt-blue" cx="151" cy="86" r="6"/><circle class="pt-blue" cx="191" cy="96" r="6"/><circle class="pt-blue" cx="223" cy="86" r="6"/>
+    <circle class="pt-blue" cx="24" cy="135" r="6"/><circle class="pt-blue" cx="63" cy="128" r="6"/><circle class="pt-blue" cx="99" cy="134" r="6"/>
+    <circle class="pt-blue" cx="137" cy="126" r="6"/><circle class="pt-blue" cx="178" cy="136" r="6"/><circle class="pt-blue" cx="215" cy="129" r="6"/>
+    <circle class="pt-blue" cx="45" cy="172" r="6"/><circle class="pt-blue" cx="86" cy="177" r="6"/><circle class="pt-blue" cx="128" cy="169" r="6"/>
+    <circle class="pt-blue" cx="166" cy="180" r="6"/><circle class="pt-blue" cx="207" cy="169" r="6"/>
+    <text class="label" x="125" y="260" text-anchor="middle">Raw Data</text>
+  </g>
+
+  <g transform="translate(335 182)">
+    <circle class="pt-blue" cx="16" cy="70" r="6"/><circle class="pt-blue" cx="86" cy="38" r="6"/><circle class="pt-blue" cx="144" cy="38" r="6"/>
+    <circle class="pt-blue" cx="72" cy="202" r="6"/><circle class="pt-blue" cx="157" cy="169" r="6"/><circle class="pt-blue" cx="190" cy="116" r="6"/>
+    <path class="cross" d="M56 108 l17 17 M73 108 l-17 17"/>
+    <path class="cross" d="M122 80 l17 17 M139 80 l-17 17"/>
+    <path class="cross" d="M97 152 l17 17 M114 152 l-17 17"/>
+    <text class="label" x="100" y="250" text-anchor="middle">Centroids</text>
+  </g>
+
+  <g transform="translate(608 172)">
+    <circle class="pt-green" cx="22" cy="92" r="7"/><circle class="pt-green" cx="48" cy="63" r="7"/><circle class="pt-green" cx="84" cy="68" r="7"/>
+    <circle class="pt-green" cx="118" cy="36" r="7"/><circle class="pt-green" cx="154" cy="50" r="7"/><circle class="pt-green" cx="181" cy="82" r="7"/>
+    <circle class="pt-green" cx="64" cy="133" r="7"/><circle class="pt-green" cx="102" cy="115" r="7"/><circle class="pt-green" cx="144" cy="97" r="7"/>
+    <circle class="pt-green" cx="194" cy="126" r="7"/><circle class="pt-green" cx="222" cy="141" r="7"/>
+    <circle class="pt-green" cx="50" cy="172" r="7"/><circle class="pt-green" cx="91" cy="158" r="7"/><circle class="pt-green" cx="126" cy="177" r="7"/>
+    <circle class="pt-green" cx="168" cy="158" r="7"/><circle class="pt-green" cx="207" cy="184" r="7"/>
+    <circle class="centroid" cx="112" cy="125" r="8"/>
+    <path class="arrow" d="M57 112 C78 118,91 121,103 124"/>
+    <path class="arrow" d="M82 78 C97 92,105 105,111 117"/>
+    <path class="arrow" d="M77 172 C92 158,103 145,109 133"/>
+  </g>
+
+  <g transform="translate(900 172)">
+    <circle class="pt-purple" cx="18" cy="124" r="7"/><circle class="pt-purple" cx="48" cy="94" r="7"/><circle class="pt-purple" cx="88" cy="122" r="7"/>
+    <circle class="pt-purple" cx="126" cy="88" r="7"/><circle class="pt-purple" cx="164" cy="57" r="7"/><circle class="pt-purple" cx="200" cy="86" r="7"/>
+    <circle class="pt-purple" cx="28" cy="170" r="7"/><circle class="pt-purple" cx="75" cy="162" r="7"/><circle class="pt-purple" cx="112" cy="176" r="7"/>
+    <circle class="pt-purple" cx="150" cy="146" r="7"/><circle class="pt-purple" cx="189" cy="123" r="7"/><circle class="pt-purple" cx="221" cy="155" r="7"/>
+    <circle class="pt-purple" cx="82" cy="210" r="7"/><circle class="pt-purple" cx="122" cy="203" r="7"/><circle class="pt-purple" cx="162" cy="198" r="7"/>
+    <circle class="centroid" cx="162" cy="125" r="8"/>
+  </g>
+
+  <text class="label" x="172" y="478" text-anchor="middle">Mathematics</text>
+  <path d="M282 470 H635" stroke="#f28c38" stroke-width="4" stroke-linecap="round"/>
+  <text class="label" x="692" y="478" text-anchor="middle">Code</text>
+  <text class="small" x="82" y="532">minimize <tspan font-weight="800">WCSS (Inertia)</tspan></text>
+
+  <g transform="translate(92 546)">
+    <circle class="pt-green" cx="24" cy="54" r="7"/><circle class="pt-green" cx="58" cy="28" r="7"/><circle class="pt-green" cx="90" cy="55" r="7"/>
+    <circle class="pt-green" cx="126" cy="22" r="7"/><circle class="pt-green" cx="73" cy="88" r="7"/><circle class="pt-green" cx="42" cy="98" r="7"/>
+    <circle class="centroid" cx="106" cy="64" r="7"/>
+    <path class="arrow" d="M145 62 H226"/>
+    <path class="arrow" d="M145 100 H216"/>
+    <circle class="pt-green" cx="262" cy="30" r="7"/><circle class="pt-green" cx="296" cy="42" r="7"/><circle class="pt-green" cx="330" cy="58" r="7"/>
+    <circle class="pt-green" cx="252" cy="87" r="7"/><circle class="pt-green" cx="287" cy="95" r="7"/><circle class="pt-green" cx="318" cy="86" r="7"/>
+    <circle class="centroid" cx="278" cy="67" r="7"/>
+  </g>
+
+  <rect class="card" x="535" y="500" width="330" height="150" rx="18"/>
+  <text class="code" x="560" y="540">kmeans = KMeans</text>
+  <text class="code" x="560" y="572">n_clusters = 3)</text>
+  <text class="code" x="560" y="604">kmeans.fit(X)</text>
+  <text class="code" x="560" y="636">labels = kmeans.labels_</text>
+
+  <text class="label" x="995" y="522" text-anchor="middle">Visualization</text>
+  <g transform="translate(918 548)">
+    <path d="M0 100 V0 M0 100 H190" stroke="#10243f" stroke-width="3"/>
+    <polyline class="line" points="22,18 58,62 102,82 178,96"/>
+    <circle fill="#6d5bd0" cx="58" cy="62" r="5"/><circle fill="#6d5bd0" cx="102" cy="82" r="5"/><circle fill="#6d5bd0" cx="178" cy="96" r="5"/>
+    <text class="small" x="95" y="134" text-anchor="middle">Elbow Method</text>
+  </g>
+</svg>

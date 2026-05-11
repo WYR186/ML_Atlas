@@ -42,7 +42,9 @@
         <a class="ref-chip lecture" href="../slides/Lecture_27.pdf" target="_blank">📄 Lecture 27</a>
         <a class="ref-chip lecture" href="../slides/final_review.pdf" target="_blank">📄 final review</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/q-learning-in-python/" target="_blank" rel="noopener">🔗 GFG Q-learning</a>
+        <a class="ref-chip lecture" href="https://huggingface.co/learn/deep-rl-course/unit2/q-learning" target="_blank" rel="noopener">🔗 Hugging Face Q-learning</a></div>
     </div>
 
 <div class="en-only">
@@ -56,11 +58,25 @@
     <p>Lecture 25 emphasizes the trajectory viewpoint: a trajectory is a sample, and each observed transition can update the current Q estimate through a Monte-Carlo / temporal-difference style moving average. Lecture 27 briefly recaps this before moving to practical LLM RL.</p>
     <p><b>Formal view.</b> Each transition performs a stochastic Bellman optimality backup: replace the unavailable expectation over all next states with one observed next state, then use $\max_{a'}Q(s',a')$ to aim directly at $Q^*$.</p>
   </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-feedback-loop.svg" alt="Q-learning feedback loop from input to response, feedback, learning update, and improved response" loading="lazy" />
+      <figcaption><b>Feedback loop picture.</b> Q-learning is trial-and-error learning: the agent tries an action, receives reward or correction, updates its Q-table, and makes a better choice when it sees a similar state again. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/q-learning-in-python/" target="_blank" rel="noopener">GeeksforGeeks Q-learning in Python</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-algorithm-loop.svg" alt="Q-learning algorithm loop: initialize Q-table, choose action, perform action, observe reward and next state, update Q-table, repeat" loading="lazy" />
+      <figcaption><b>Algorithm loop picture.</b> The flowchart is one episode loop. Initialize or reuse the Q-table, choose an action with exploration, execute it, observe reward and next state, then update only the visited entry $Q(s,a)$.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How this maps to the formula.</b> The feedback step supplies $(s,a,r,s')$. The learning step computes $r+\gamma\max_{a'}Q(s',a')$ and moves the old $Q(s,a)$ toward that target.</div>
+    <div><b>What repeats.</b> The loop repeats over many steps and episodes; better estimates gradually make the greedy policy $\pi(s)=\arg\max_a Q(s,a)$ more useful.</div>
+  </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <div class="callout intuition">
     <div class="head">A scoreboard that learns from experience</div>
-    <p>Keep a scoreboard $Q(s,a)$ for every action in every state. After trying an action, compare your old score with “reward now + best possible next score.” Then move the old score a little toward that target.</p>
+    <p>Keep a scoreboard $Q(s,a)$ for every action in every state. After trying an action, compare your old score with "reward now + best possible next score." Then move the old score a little toward that target.</p>
     <p>It is off-policy because the target assumes you will act greedily in the next state, even if the data was collected by a messy exploratory policy.</p>
   </div>
 
@@ -80,6 +96,17 @@
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-td-update-annotated.svg" alt="Annotated temporal-difference value update formula" loading="lazy" />
+      <figcaption><b>How to read the picture.</b> This is the state-value TD(0) version: $V(S_t)$ is the old value estimate for the current state, $R_{t+1}+\gamma V(S_{t+1})$ is the TD target, and the bracket is the TD error. The learning rate $\alpha$ says how far to move from the old estimate toward the target. Q-learning uses the same shape, but updates $Q(s,a)$ and replaces $V(S_{t+1})$ with $\max_{a'}Q(s',a')$. Reference: <a href="https://huggingface.co/learn/deep-rl-course/unit2/q-learning" target="_blank" rel="noopener">Hugging Face Deep RL Course, Unit 2</a>.</figcaption>
+    </figure>
+  </div>
+  <div class="callout formula">
+    <div class="head">From TD value update to Q-learning</div>
+    <p><b>TD value update:</b> $V(S_t)\leftarrow V(S_t)+\alpha[R_{t+1}+\gamma V(S_{t+1})-V(S_t)]$ evaluates a state by bootstrapping from the next state's value.</p>
+    <p><b>Q-learning update:</b> replace the state value with a state-action value and use the greedy next action: $Q(s,a)\leftarrow Q(s,a)+\alpha[r+\gamma\max_{a'}Q(s',a')-Q(s,a)]$.</p>
+  </div>
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
@@ -228,6 +255,20 @@
     <p>Lecture 25 强调 trajectory 视角：trajectory 是样本，每个观察到的 transition 都可以用 Monte-Carlo / temporal-difference 风格的 moving average 更新当前 Q 估计。Lecture 27 会快速 recap 这点，再进入 LLM RL 的 practical algorithms。</p>
     <p><b>Formal view.</b> 每个 transition 都是在做一次 stochastic Bellman optimality backup：用一个真实观察到的 next state 替代完整 expectation，再用 $\max_{a'}Q(s',a')$ 直接朝 $Q^*$ 学。</p>
   </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-feedback-loop.svg" alt="Q-learning feedback loop：input、response、feedback、learns、better response" loading="lazy" />
+      <figcaption><b>反馈循环怎么看：</b>Q-learning 是 trial-and-error：agent 先尝试 action，收到 reward / correction，再更新 Q-table；下次遇到类似 state 时，就更可能选出更好的 action。参考：<a href="https://www.geeksforgeeks.org/machine-learning/q-learning-in-python/" target="_blank" rel="noopener">GeeksforGeeks Q-learning in Python</a>。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-algorithm-loop.svg" alt="Q-learning algorithm loop：initialize Q-table、choose action、perform action、observe reward、update Q-table" loading="lazy" />
+      <figcaption><b>算法流程怎么看：</b>这是一轮 episode / interaction loop：初始化或复用 Q-table，用 exploration 选择 action，执行 action，观察 reward 和 next state，然后只更新访问到的 $Q(s,a)$。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>和公式怎么对应：</b>feedback 提供 sample $(s,a,r,s')$；learns 这一步计算 $r+\gamma\max_{a'}Q(s',a')$，再把旧 $Q(s,a)$ 往 target 移动。</div>
+    <div><b>为什么要重复：</b>loop 会跨很多 steps / episodes 重复；Q estimates 变好后，greedy policy $\pi(s)=\arg\max_a Q(s,a)$ 才逐渐靠谱。</div>
+  </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
   <div class="callout intuition">
@@ -252,6 +293,17 @@
   </div>
 
   <h3 class="section-purple">4. 关键公式</h3>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/q-learning-td-update-annotated.svg" alt="带标注的 temporal-difference value update 公式图" loading="lazy" />
+      <figcaption><b>怎么看这张图：</b>这是 state-value 的 TD(0) 更新。左边 $V(S_t)$ 是更新后的新 value；右边第一个 $V(S_t)$ 是旧估计；$R_{t+1}+\gamma V(S_{t+1})$ 是 TD target，也就是“现在 reward + 折扣后的下一状态 value”；中括号整体是 TD error，表示 target 和旧估计差多少；$\alpha$ 是 learning rate，决定旧估计往 target 方向挪多大一步。Q-learning 的形式完全类似，只是把 $V(S_t)$ 换成 $Q(s,a)$，把下一状态 value 换成 $\max_{a'}Q(s',a')$。参考：<a href="https://huggingface.co/learn/deep-rl-course/unit2/q-learning" target="_blank" rel="noopener">Hugging Face Deep RL Course, Unit 2</a>。</figcaption>
+    </figure>
+  </div>
+  <div class="callout formula">
+    <div class="head">从 TD value update 过渡到 Q-learning</div>
+    <p><b>TD value update:</b> $V(S_t)\leftarrow V(S_t)+\alpha[R_{t+1}+\gamma V(S_{t+1})-V(S_t)]$ 是在更新 state 本身的 value，用 next state 的 value 做 bootstrap。</p>
+    <p><b>Q-learning update:</b> 把 state value 换成 state-action value，并在 next state 里取 greedy action：$Q(s,a)\leftarrow Q(s,a)+\alpha[r+\gamma\max_{a'}Q(s',a')-Q(s,a)]$。</p>
+  </div>
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>

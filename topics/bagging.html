@@ -59,6 +59,25 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Averaging independent noisy predictors reduces variance. Bagging creates diversity through bootstrap samples; random forests add even more diversity by considering only a random subset of features at each split.</p>
   <p>Bias usually stays about the same because every base learner is drawn from the same underlying training distribution. If each learner is systematically wrong in the same direction, averaging does not cancel that shared error.</p>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-bagging-flow.svg" alt="Bagging workflow with bootstrap samples, parallel base models, aggregation, and final prediction" loading="lazy" />
+      <figcaption><b>Bagging = parallel diversity plus aggregation.</b> Each base model trains on a different bootstrap sample. At the end, the ensemble uses majority vote for classification or averaging for regression.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-boosting-flow.svg" alt="Boosting workflow with sequential learners and reweighted training data" loading="lazy" />
+      <figcaption><b>Boosting = sequential correction.</b> The next learner is trained after seeing where the previous ensemble struggled, so later models focus more on difficult or misclassified examples.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-stacking-flow.svg" alt="Stacking workflow with different base models feeding predictions into a meta learner" loading="lazy" />
+      <figcaption><b>Stacking = learn the combiner.</b> Different models produce predictions, and a meta learner learns how to combine those predictions instead of using a fixed vote or average.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to read Bagging.</b> The arrows split into independent training paths, then merge only at the final vote / average. That is why bagging is naturally parallel.</div>
+    <div><b>How to read Boosting.</b> The feedback arrows mean later learners depend on earlier mistakes. This dependence is the key contrast with bagging.</div>
+    <div><b>How to read Stacking.</b> The base models do not directly vote. Their predictions become new features for the meta learner, which learns a second-level model.</div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -123,6 +142,25 @@
   <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
   <p>对 independent noisy predictors 做 average 会降低 variance。Bagging 用 bootstrap samples 制造 diversity；Random Forest 又在每个 split 只看随机 feature subset，让树之间更不相关。</p>
   <p>Bias 通常基本不变，因为每个 base learner 都来自同一个 underlying data distribution。如果每个 learner 都朝同一个方向系统性出错，average 不会抵消这种 shared error。</p>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-bagging-flow.svg" alt="Bagging 流程图：bootstrap samples、parallel base models、aggregation、final prediction" loading="lazy" />
+      <figcaption><b>Bagging = parallel diversity + aggregation.</b> 每个 base model 看一个不同的 bootstrap sample；最后 classification 用 majority vote，regression 用 average。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-boosting-flow.svg" alt="Boosting 流程图：sequential learners 和 reweighted training data" loading="lazy" />
+      <figcaption><b>Boosting = sequential correction.</b> 后一轮 learner 会根据前面错在哪里来训练，所以会更关注 difficult / misclassified examples。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/ensemble-stacking-flow.svg" alt="Stacking 流程图：different base models 输出给 meta learner" loading="lazy" />
+      <figcaption><b>Stacking = learn the combiner.</b> 不同模型先各自预测，再把这些 predictions 当成新 features 交给 meta learner，让它学习怎么组合。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Bagging 怎么读：</b> 箭头分成多条 independent training paths，只在最后 vote / average 汇合，所以它天然适合 parallel training。</div>
+    <div><b>Boosting 怎么读：</b> 图里的 feedback arrows 表示 later learners 依赖 earlier mistakes，这是它和 bagging 最关键的区别。</div>
+    <div><b>Stacking 怎么读：</b> Base models 不直接投票；它们的 predictions 会变成 meta learner 的输入，形成 second-level model。</div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations · 核心公式</h3>
   <div class="cols2">

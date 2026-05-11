@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Conditional indep + MAP</span><span class="cn-only">条件独立 + MAP</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_5.pdf" target="_blank">📄 Lecture 5</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
-        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a></div>
+        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/naive-bayes-classifiers/" target="_blank" rel="noopener">🔗 GFG Naive Bayes</a></div>
     </div>
 
 <div class="en-only">
@@ -49,6 +50,25 @@
   <div class="callout">
     <div class="head">🧠 Key idea</div>
     <p>Generative classifier: model P(X, Y) by factoring P(Y) and P(X | Y) under the assumption that, given Y, the features are conditionally independent.</p>
+  </div>
+
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/naive-bayes-original-data.svg" alt="Original two-dimensional Naive Bayes data with green circle class y equals 1 and red square class y equals 2" loading="lazy" />
+      <figcaption><b>Start with labeled points.</b> The data live in two feature dimensions. Naive Bayes will not try to learn a boundary first; it estimates how each class could have generated these feature values.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/naive-bayes-first-dimension.svg" alt="Class conditional probability estimates along the first feature dimension for Naive Bayes" loading="lazy" />
+      <figcaption><b>Estimate one feature at a time.</b> Along $x_1$, each class gets its own likelihood curve, such as $P(x_1\mid Y=1)$ and $P(x_1\mid Y=2)$.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/naive-bayes-second-dimension.svg" alt="Class conditional probability estimates along the second feature dimension for Naive Bayes" loading="lazy" />
+      <figcaption><b>Repeat for $x_2$.</b> Gaussian Naive Bayes fits a separate mean and variance for each class-feature pair, so $x_2$ contributes another class-specific likelihood score.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/naive-bayes-resulting-distribution.svg" alt="Resulting class conditional distributions from multiplying per-feature likelihoods in Naive Bayes" loading="lazy" />
+      <figcaption><b>Multiply under the naive assumption.</b> Conditional independence gives $P(x\mid Y=y)=\prod_j P(x_j\mid Y=y)$. Then MAP multiplies by $P(Y=y)$ and picks the largest class score. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/naive-bayes-classifiers/" target="_blank" rel="noopener">GeeksforGeeks Naive Bayes classifiers</a>.</figcaption>
+    </figure>
   </div>
 
   <div class="callout formula">
@@ -149,6 +169,25 @@
       <div class="callout">
         <div class="head">🧠 Key idea</div>
         <p>生成式分类器：建模 $P(X,Y)$（即 $P(Y)$ 与 $P(X|Y)$）。<b>核心假设</b>：给定 $Y$ 时各特征条件独立。</p>
+      </div>
+
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/naive-bayes-original-data.svg" alt="Naive Bayes 原始二维数据，绿色圆点是 y=1，红色方块是 y=2" loading="lazy" />
+          <figcaption><b>先看 labeled points.</b> 数据在两个 feature dimensions 里。Naive Bayes 不是先画 boundary，而是先问：如果类别已经是 $Y=y$，这些 feature values 出现的概率有多大？</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/naive-bayes-first-dimension.svg" alt="Naive Bayes 沿第一维估计 class-conditional likelihood" loading="lazy" />
+          <figcaption><b>第一维单独估.</b> 沿 $x_1$ 投影后，每个 class 都有自己的 likelihood curve，例如 $P(x_1\mid Y=1)$ 和 $P(x_1\mid Y=2)$。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/naive-bayes-second-dimension.svg" alt="Naive Bayes 沿第二维估计 class-conditional likelihood" loading="lazy" />
+          <figcaption><b>第二维也单独估.</b> Gaussian Naive Bayes 会给每个 class-feature pair 拟合 mean 和 variance，所以 $x_2$ 会提供另一份 class-specific likelihood score。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/naive-bayes-resulting-distribution.svg" alt="Naive Bayes 把各维 likelihood 相乘得到 class conditional distribution" loading="lazy" />
+          <figcaption><b>最后把各维乘起来.</b> 条件独立假设给出 $P(x\mid Y=y)=\prod_j P(x_j\mid Y=y)$。再乘 prior $P(Y=y)$，比较哪个 class score 最大。参考：<a href="https://www.geeksforgeeks.org/machine-learning/naive-bayes-classifiers/" target="_blank" rel="noopener">GeeksforGeeks Naive Bayes classifiers</a>。</figcaption>
+        </figure>
       </div>
 
       <div class="callout formula">

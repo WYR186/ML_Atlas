@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
+  <title id="title">Encoder-decoder attention mechanism</title>
+  <desc id="desc">An RNN encoder produces hidden states. At each decoder step, alignment scores are normalized by softmax into attention weights, which form a context vector passed into the decoder RNN.</desc>
+  <defs>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#0284c7"/>
+    </marker>
+    <marker id="arrowBlack" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#111827"/>
+    </marker>
+    <marker id="arrowCoral" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#fb7185"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#8b5cf6"/>
+    </marker>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .label{font-family:Inter,Arial,sans-serif;fill:#0f172a}
+      .small{font-size:14px}
+      .tiny{font-size:12px}
+      .bold{font-weight:800}
+      .mid{font-weight:700}
+    </style>
+  </defs>
+
+  <rect width="980" height="700" fill="#f8fafc"/>
+  <text x="490" y="42" text-anchor="middle" class="label bold" font-size="28">Encoder-Decoder Attention</text>
+  <text x="490" y="68" text-anchor="middle" class="label small" fill="#475569">score each encoder state, softmax the scores, then build a context vector for the decoder</text>
+
+  <g id="rnnBox">
+    <rect x="-40" y="-24" width="80" height="48" rx="7" fill="#d9f2d4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="0" y="7" text-anchor="middle" class="label mid" font-size="18">RNN</text>
+  </g>
+  <g id="inputBox">
+    <rect x="-14" y="-50" width="28" height="92" rx="4" fill="#229653"/>
+    <text x="0" y="0" text-anchor="middle" class="label mid" font-size="15" fill="#ffffff">x</text>
+  </g>
+  <g id="scoreBox">
+    <rect x="-34" y="-17" width="68" height="34" rx="4" fill="#e0e7ff" stroke="#a5b4fc"/>
+  </g>
+  <g id="softmaxBox">
+    <rect x="-52" y="-21" width="104" height="42" rx="8" fill="#ede9fe" stroke="#c4b5fd"/>
+    <text x="0" y="6" text-anchor="middle" class="label mid" font-size="16">SOFTMAX</text>
+  </g>
+  <g id="contextBox">
+    <rect x="-74" y="-26" width="148" height="52" rx="8" fill="#fee2e2" stroke="#fecaca"/>
+    <text x="0" y="-4" text-anchor="middle" class="label mid" font-size="17">Context</text>
+    <text x="0" y="17" text-anchor="middle" class="label mid" font-size="17">Vector</text>
+  </g>
+
+  <!-- Encoder input and hidden states -->
+  <g transform="translate(135 585)">
+    <use href="#inputBox"/>
+    <text x="0" y="7" text-anchor="middle" class="label mid" font-size="15" fill="#ffffff">x₀</text>
+  </g>
+  <g transform="translate(300 585)">
+    <use href="#inputBox"/>
+    <text x="0" y="7" text-anchor="middle" class="label mid" font-size="15" fill="#ffffff">x₁</text>
+  </g>
+  <g transform="translate(465 585)">
+    <use href="#inputBox"/>
+    <text x="0" y="7" text-anchor="middle" class="label mid" font-size="15" fill="#ffffff">x₂</text>
+  </g>
+  <g transform="translate(630 585)">
+    <use href="#inputBox"/>
+    <text x="0" y="7" text-anchor="middle" class="label mid" font-size="15" fill="#ffffff">x₃</text>
+  </g>
+
+  <path d="M48 524 H95" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <text x="45" y="518" text-anchor="end" class="label mid" font-size="16">h′</text>
+  <g transform="translate(135 510)"><use href="#rnnBox"/></g>
+  <g transform="translate(300 510)"><use href="#rnnBox"/></g>
+  <g transform="translate(465 510)"><use href="#rnnBox"/></g>
+  <g transform="translate(630 510)"><use href="#rnnBox"/></g>
+  <path d="M175 510 H260" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M340 510 H425" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M505 510 H590" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M135 535 V551" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M300 535 V551" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M465 535 V551" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <path d="M630 535 V551" stroke="#111827" stroke-width="2.4" marker-end="url(#arrowBlack)"/>
+  <text x="124" y="475" class="label mid" font-size="15">h₀</text>
+  <text x="289" y="475" class="label mid" font-size="15">h₁</text>
+  <text x="454" y="475" class="label mid" font-size="15">h₂</text>
+  <text x="619" y="475" class="label mid" font-size="15">h₃</text>
+
+  <!-- Decoder RNNs -->
+  <g transform="translate(255 126)"><use href="#rnnBox"/></g>
+  <g transform="translate(510 126)"><use href="#rnnBox"/></g>
+  <g transform="translate(670 126)"><use href="#rnnBox"/></g>
+  <g transform="translate(830 126)"><use href="#rnnBox"/></g>
+  <path d="M20 126 H214" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M295 126 H470" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M550 126 H630" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M710 126 H790" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <path d="M20 126 V455 H590" fill="none" stroke="#7dd3fc" stroke-width="2.6"/>
+  <text x="35" y="178" class="label mid" font-size="17">s₀</text>
+  <text x="330" y="178" class="label mid" font-size="17">s₁</text>
+
+  <!-- Two attention blocks: t=0 and t=1 -->
+  <g transform="translate(235 250)" filter="url(#shadow)">
+    <use href="#contextBox"/>
+  </g>
+  <g transform="translate(235 326)"><use href="#softmaxBox"/></g>
+  <g transform="translate(112 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₀₀</text></g>
+  <g transform="translate(194 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₀₁</text></g>
+  <g transform="translate(276 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₀₂</text></g>
+  <g transform="translate(358 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₀₃</text></g>
+  <text x="136" y="318" class="label mid small">e₀₀</text>
+  <text x="205" y="318" class="label mid small">e₀₁</text>
+  <text x="274" y="318" class="label mid small">e₀₂</text>
+  <text x="343" y="318" class="label mid small">e₀₃</text>
+  <text x="118" y="278" class="label mid small">E₀₀</text>
+  <text x="190" y="278" class="label mid small">E₀₁</text>
+  <text x="262" y="278" class="label mid small">E₀₂</text>
+  <text x="334" y="278" class="label mid small">E₀₃</text>
+  <path d="M112 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M194 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M276 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M358 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M150 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M210 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M260 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M320 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M235 224 V162" stroke="#fb7185" stroke-width="2.4" marker-end="url(#arrowCoral)"/>
+  <text x="262" y="192" class="label mid" font-size="16">c₀</text>
+
+  <g transform="translate(505 250)" filter="url(#shadow)">
+    <use href="#contextBox"/>
+  </g>
+  <g transform="translate(505 326)"><use href="#softmaxBox"/></g>
+  <g transform="translate(382 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₁₀</text></g>
+  <g transform="translate(464 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₁₁</text></g>
+  <g transform="translate(546 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₁₂</text></g>
+  <g transform="translate(628 386)"><use href="#scoreBox"/><text x="0" y="6" text-anchor="middle" class="label mid small">a₁₃</text></g>
+  <text x="406" y="318" class="label mid small">e₁₀</text>
+  <text x="475" y="318" class="label mid small">e₁₁</text>
+  <text x="544" y="318" class="label mid small">e₁₂</text>
+  <text x="613" y="318" class="label mid small">e₁₃</text>
+  <text x="388" y="278" class="label mid small">E₁₀</text>
+  <text x="460" y="278" class="label mid small">E₁₁</text>
+  <text x="532" y="278" class="label mid small">E₁₂</text>
+  <text x="604" y="278" class="label mid small">E₁₃</text>
+  <path d="M382 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M464 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M546 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M628 369 V345" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <path d="M420 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M480 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M530 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M590 306 V280" stroke="#0284c7" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+  <path d="M505 224 V162" stroke="#fb7185" stroke-width="2.4" marker-end="url(#arrowCoral)"/>
+  <text x="532" y="192" class="label mid" font-size="16">c₁</text>
+
+  <!-- Encoder states connect to both attention blocks -->
+  <g stroke="#111827" stroke-width="2" fill="none" marker-end="url(#arrowBlack)" opacity="0.9">
+    <path d="M135 486 C128 455, 118 432, 112 405"/>
+    <path d="M300 486 C250 452, 220 430, 194 405"/>
+    <path d="M465 486 C376 452, 320 430, 276 405"/>
+    <path d="M630 486 C500 452, 420 430, 358 405"/>
+    <path d="M135 486 C240 450, 315 428, 382 405"/>
+    <path d="M300 486 C365 452, 420 430, 464 405"/>
+    <path d="M465 486 C496 450, 520 428, 546 405"/>
+    <path d="M630 486 C630 450, 630 428, 628 405"/>
+  </g>
+
+  <!-- Decoder state influence to scoring blocks -->
+  <g stroke="#0284c7" stroke-width="2" fill="none" marker-end="url(#arrowBlue)" opacity="0.7">
+    <path d="M255 150 C210 206, 166 276, 112 369"/>
+    <path d="M255 150 C235 218, 216 280, 194 369"/>
+    <path d="M255 150 C275 218, 276 280, 276 369"/>
+    <path d="M255 150 C318 218, 338 280, 358 369"/>
+    <path d="M510 150 C470 212, 420 288, 382 369"/>
+    <path d="M510 150 C500 218, 480 286, 464 369"/>
+    <path d="M510 150 C526 218, 538 286, 546 369"/>
+    <path d="M510 150 C560 218, 596 286, 628 369"/>
+  </g>
+
+  <g transform="translate(742 235)">
+    <rect x="0" y="0" width="196" height="154" rx="14" fill="#ffffff" stroke="#cbd5e1" filter="url(#shadow)"/>
+    <text x="98" y="30" text-anchor="middle" class="label bold" font-size="16">Read the symbols</text>
+    <text x="18" y="61" class="label small">hᵢ: encoder hidden state</text>
+    <text x="18" y="86" class="label small">sₜ: decoder state/query</text>
+    <text x="18" y="111" class="label small">eₜᵢ: alignment score</text>
+    <text x="18" y="136" class="label small">aₜᵢ: softmax weight</text>
+  </g>
+
+  <text x="490" y="674" text-anchor="middle" class="label small" fill="#475569">For every decoder step t, attention recomputes weights over all encoder states and builds a fresh context vector cₜ.</text>
+</svg>

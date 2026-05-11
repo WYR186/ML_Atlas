@@ -39,7 +39,8 @@
       <h1>🔄 <span class="en-only">RNN</span><span class="cn-only">循环神经网络</span></h1>
       <div class="subtitle"><span class="en-only">Sequential state · Parameter sharing · BPTT</span><span class="cn-only">序列状态 · 参数共享 · BPTT</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_14.pdf" target="_blank">📄 Lecture 14</a>
-        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a></div>
+        <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
+        <a class="ref-chip lecture" href="https://www.geeksforgeeks.org/machine-learning/introduction-to-recurrent-neural-network/" target="_blank">🔗 GeeksforGeeks RNN</a></div>
     </div>
 
 <div class="en-only">
@@ -63,6 +64,27 @@
   <p>The hidden state creates a path for information to flow from earlier inputs to later outputs. Parameter sharing is what makes the model scalable: the recurrence learned from one position can be reused at every other position, and it lets the model handle sequence lengths it never saw during training.</p>
   <p>The downside is also visible from the unrolled graph. A long sequence becomes a very deep computation graph, and the same recurrent Jacobian appears repeatedly in gradients. Repeated multiplication is the source of vanishing and exploding gradients.</p>
   <p>In encoder-decoder setups (e.g. machine translation), the entire input sequence is squeezed into a single fixed-size hidden state before decoding begins — the <b>information bottleneck</b> that later motivated attention.</p>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-working-unfold.svg" alt="A compact recurrent neural network unfolded into repeated time steps" loading="lazy" />
+      <figcaption>The folded picture is the model definition: one hidden cell with a feedback loop. The unfolded picture is what computation actually looks like over time: each step receives $x_t$, updates $h_t$, and passes memory forward using the same recurrent weights.</figcaption>
+    </figure>
+  </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-unrolled-timeline.svg" alt="Unrolled RNN timeline with inputs, hidden states, outputs, and shared weights" loading="lazy" />
+      <figcaption>Read the timeline from left to right. $U$ maps the current input into the state, $W$ carries information from the previous hidden state, and $O$ maps a hidden state to an output or loss.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-vs-feedforward.svg" alt="Comparison of recurrent and feed-forward neural networks" loading="lazy" />
+      <figcaption>A feed-forward network only pushes information forward within one fixed computation. An RNN adds a recurrent connection, so the hidden layer has a built-in way to reuse past information.</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Reading the RNN visuals</div>
+    <p>The circle or loop does not mean there are infinitely many different parameters. It means the same transition rule is applied repeatedly. When we unroll the loop, we draw many time steps, but $U$, $W$, and $O$ are shared across those steps.</p>
+    <p class="example-source">Reference: <a href="https://www.geeksforgeeks.org/machine-learning/introduction-to-recurrent-neural-network/" target="_blank">GeeksforGeeks, Introduction to Recurrent Neural Network</a>.</p>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
@@ -83,6 +105,12 @@
     <div class="eq">$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=J_TJ_{T-1}\cdots J_2 $</div>
     <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Backpropagation through time multiplies many local sensitivity matrices. Products with norms below 1 shrink; products with norms above 1 can explode.</p>
   </div>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-bptt-shared-weights.svg" alt="Backpropagation through time with shared recurrent weights" loading="lazy" />
+      <figcaption>BPTT treats the unrolled RNN like a deep network in time. The loss gradient flows backward through $h_3,h_2,h_1,\ldots$; because the same $W$ is used at every transition, the final gradient for $W$ is the sum of all time-step contributions.</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
   <div class="mini-list">
@@ -92,6 +120,24 @@
   </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-one-to-one.svg" alt="One-to-one sequence pattern" loading="lazy" />
+      <figcaption><b>One-to-one:</b> one input, one output. This is the ordinary feed-forward setting, included as a baseline rather than a real sequence problem.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-one-to-many.svg" alt="One-to-many sequence pattern" loading="lazy" />
+      <figcaption><b>One-to-many:</b> one seed input generates a sequence, such as image captioning or starting a music generator from a style vector.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-many-to-one.svg" alt="Many-to-one sequence pattern" loading="lazy" />
+      <figcaption><b>Many-to-one:</b> read a whole sequence, then output one label. Sentiment classification is the classic example.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/rnn-many-to-many.svg" alt="Many-to-many sequence pattern" loading="lazy" />
+      <figcaption><b>Many-to-many:</b> map a sequence to a sequence. The aligned version predicts one output per input step; the unaligned version uses encoder-decoder logic.</figcaption>
+    </figure>
+  </div>
   <ul>
     <li>First identify whether the problem is one-to-one, one-to-many, many-to-one, or many-to-many. Then separately ask whether it is <b>aligned</b> (output length = input length, one $y^{(t)}$ per $x^{(t)}$, e.g. POS tagging) or <b>unaligned</b> (lengths differ, e.g. machine translation — needs an encoder-decoder).</li>
     <li>Draw the unrolled graph before differentiating. Put one copy of the state update at each time step.</li>
@@ -150,6 +196,27 @@
       <p>hidden state 给早期输入到后期输出开了一条信息通道。参数共享让模型能处理任意长度序列：在位置 3 学到的“如何更新记忆”，位置 30 也能用，甚至训练时没见过的长度也能跑。</p>
       <p>麻烦也来自这里。把 RNN 在时间上 unroll 之后，长序列就是很深的计算图；梯度会反复乘相似的 Jacobian，于是容易 vanishing / exploding。</p>
       <p>在 encoder-decoder 结构里（例如机器翻译），整个输入序列要被压缩成一个固定大小的 hidden state 再开始解码 —— 这就是后来推动 attention 出现的 <b>information bottleneck</b>。</p>
+      <div class="visual-grid visual-grid-wide">
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-working-unfold.svg" alt="RNN 从循环结构展开成多个时间步" loading="lazy" />
+          <figcaption>左边的 folded 图是在定义模型：一个 hidden cell 带 feedback loop。右边的 unrolled 图才是按时间运行时的样子：每一步读入 $x_t$，更新 $h_t$，再把 memory 传给下一步；重点是参数复用，不是每一步新建一套参数。</figcaption>
+        </figure>
+      </div>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-unrolled-timeline.svg" alt="RNN 展开后的输入、隐藏状态、输出时间线" loading="lazy" />
+          <figcaption>这张图从左到右读。$U$ 表示 input-to-hidden，负责把当前 $x_t$ 写进状态；$W$ 表示 hidden-to-hidden，负责把上一时刻记忆传过来；$O$ 表示 hidden-to-output，把 $h_t$ 变成 output 或 loss。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-vs-feedforward.svg" alt="RNN 和 feed-forward network 的结构对比" loading="lazy" />
+          <figcaption>Feed-forward network 只在一次固定计算里向前传信息；RNN 多了 recurrent connection，所以 hidden layer 天生带“过去信息”的通道。</figcaption>
+        </figure>
+      </div>
+      <div class="callout intuition">
+        <div class="head">怎么看这些 RNN 图</div>
+        <p>图里的 loop 不是说有无限多个参数，而是说“同一个 transition rule 重复使用”。展开以后虽然画了很多时间步，但 $U$、$W$、$O$ 在所有时间步都是共享的。</p>
+        <p class="example-source">参考：<a href="https://www.geeksforgeeks.org/machine-learning/introduction-to-recurrent-neural-network/" target="_blank">GeeksforGeeks, Introduction to Recurrent Neural Network</a>。</p>
+      </div>
 
       <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
@@ -170,6 +237,12 @@
         <div class="eq">$$ \frac{\partial h^{(T)}}{\partial h^{(1)}}=J_TJ_{T-1}\cdots J_2 $$</div>
         <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> BPTT 会连续乘很多 local sensitivity matrices。Norm 小于 1 时越乘越小，gradient vanish；norm 大于 1 时可能 explode。</p>
       </div>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-bptt-shared-weights.svg" alt="BPTT 通过共享 recurrent weights 反向传播" loading="lazy" />
+          <figcaption>BPTT 可以看成“沿时间展开后的普通 backprop”。Loss 的梯度从 $h_3,h_2,h_1,\ldots$ 往回走；因为每段 transition 都用了同一个 $W$，所以 $\nabla_W L$ 要把每个时间步贡献的梯度加起来。</figcaption>
+        </figure>
+      </div>
 
       <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
       <div class="mini-list">
@@ -179,6 +252,24 @@
       </div>
 
       <h3 class="section-yellow">6. 解题技巧 / Problem-Solving Tips</h3>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-one-to-one.svg" alt="one-to-one 输入输出模式" loading="lazy" />
+          <figcaption><b>One-to-one</b>：一个输入对应一个输出。它更像普通 feed-forward baseline，本身不太体现 sequence memory。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-one-to-many.svg" alt="one-to-many 输入输出模式" loading="lazy" />
+          <figcaption><b>One-to-many</b>：一个 seed input 生成一串 output，例如 image captioning 或根据一个风格向量生成音乐片段。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-many-to-one.svg" alt="many-to-one 输入输出模式" loading="lazy" />
+          <figcaption><b>Many-to-one</b>：读完整个 sequence 后给一个 label，例如 sentiment classification、视频分类、异常检测。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/rnn-many-to-many.svg" alt="many-to-many 输入输出模式" loading="lazy" />
+          <figcaption><b>Many-to-many</b>：sequence 进、sequence 出。Aligned 版本每个时间步一个输出；unaligned 版本通常要 encoder-decoder。</figcaption>
+        </figure>
+      </div>
       <ul>
         <li>先判断任务类型：one-to-one、one-to-many、many-to-one、many-to-many。再单独问一句：是 <b>aligned</b>（输出长度 = 输入长度，每个 $x^{(t)}$ 对一个 $y^{(t)}$，例如 POS tagging）还是 <b>unaligned</b>（长度不同，例如机器翻译 —— 需要 encoder-decoder）。</li>
         <li>求导前先画 unrolled graph，每个时间步一份状态更新。</li>

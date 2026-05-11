@@ -39,7 +39,8 @@
       <h1>🔮 <span class="en-only">Attention</span><span class="cn-only">注意力机制</span></h1>
       <div class="subtitle"><span class="en-only">softmax(QKᵀ/√d) V</span><span class="cn-only">softmax(QKᵀ/√d) V</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip lecture" href="https://www.geeksforgeeks.org/artificial-intelligence/ml-attention-mechanism/" target="_blank" rel="noreferrer">🔗 GeeksforGeeks</a></div>
     </div>
 
 <div class="en-only">
@@ -68,6 +69,18 @@
   <p>Compared with an RNN, attention gives any two tokens a direct communication path inside one layer. That removes the old bottleneck where information had to squeeze through a long chain of hidden states.</p>
   <div class="study-box">
     <p><b>Why multiple heads?</b> A single head has one attention distribution. Multi-head attention gives the model several distributions in parallel, often over different representation subspaces, so one head might follow syntax while another follows topic or long-range reference.</p>
+  </div>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/attention-encoder-decoder-flow.svg" alt="Encoder-decoder attention diagram with encoder hidden states, alignment scores, softmax weights, context vectors, and decoder RNN states" loading="lazy" />
+      <figcaption><b>Encoder-decoder attention picture.</b> The encoder RNN produces hidden states $h_0,\dots,h_3$. At each decoder step, the decoder state $s_t$ scores every $h_i$, softmax converts those scores into attention weights, and the weighted sum becomes the context vector $c_t$ sent into the decoder.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to read the bottom row.</b> Inputs $x_0,\dots,x_3$ pass through the encoder RNN and create hidden states $h_0,\dots,h_3$. These are the candidate memories the decoder can read from.</div>
+    <div><b>How to read the middle blocks.</b> Each score $e_{t,i}$ measures how relevant encoder state $h_i$ is for decoder step $t$. Softmax turns the scores into weights $a_{t,i}$ that sum to 1.</div>
+    <div><b>How to read the top row.</b> The context vector $c_t=\sum_i a_{t,i}h_i$ is a custom summary for step $t$, so the decoder no longer relies on one fixed final encoder state.</div>
+    <div><b>Reference.</b> See <a href="https://www.geeksforgeeks.org/artificial-intelligence/ml-attention-mechanism/" target="_blank" rel="noreferrer">GeeksforGeeks: Attention Mechanism in ML</a> for a complementary walkthrough of scores, softmax weights, and context vectors.</div>
   </div>
 </section>
 
@@ -174,6 +187,18 @@
   <p>和 RNN 相比，attention 让任意两个 token 在一层里就能直接通信，不需要信息沿着很长的 hidden-state 链条一点点传过去，所以更少 bottleneck，也更适合并行计算。</p>
   <div class="study-box">
     <p><b>为什么要 multi-head?</b> 单个 head 只有一种 attention distribution。多头就是让模型同时开几条检索通道，通常在不同 representation subspaces 里看关系：一个 head 可以看 syntax，另一个看 topic 或 long-range reference。</p>
+  </div>
+  <div class="visual-grid visual-grid-wide">
+    <figure class="topic-figure">
+      <img src="../assets/figures/attention-encoder-decoder-flow.svg" alt="Encoder-decoder attention 示意图：encoder hidden states、alignment scores、softmax weights、context vectors、decoder RNN states" loading="lazy" />
+      <figcaption><b>Encoder-decoder attention 图.</b> 底部 encoder RNN 产生 $h_0,\dots,h_3$；每个 decoder step 用当前状态 $s_t$ 给所有 $h_i$ 打分，softmax 变成 attention weights，再加权求和得到 context vector $c_t$ 送进 decoder。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>底部怎么读：</b> 输入 $x_0,\dots,x_3$ 经过 encoder RNN，变成 hidden states $h_0,\dots,h_3$。这些就是 decoder 可以读取的 candidate memories。</div>
+    <div><b>中间怎么读：</b> 每个 score $e_{t,i}$ 表示 encoder state $h_i$ 对 decoder 第 $t$ 步有多相关；softmax 把这些分数变成总和为 1 的 weights $a_{t,i}$。</div>
+    <div><b>顶部怎么读：</b> $c_t=\sum_i a_{t,i}h_i$ 是第 $t$ 步专属的 summary，所以 decoder 不再只依赖 encoder 最后一个 fixed hidden state。</div>
+    <div><b>参考链接：</b> <a href="https://www.geeksforgeeks.org/artificial-intelligence/ml-attention-mechanism/" target="_blank" rel="noreferrer">GeeksforGeeks: Attention Mechanism in ML</a> 对 score、softmax weights 和 context vector 有另一版 walkthrough。</div>
   </div>
 </section>
 

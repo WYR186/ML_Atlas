@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Boosting ensemble workflow</title>
+  <desc id="desc">Weak learners are trained sequentially. Each round changes training weights based on previous mistakes, then the final model combines weighted predictions.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+    <marker id="greenArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#15803d"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="960" height="430" fill="#f8fafc"/>
+  <text x="480" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">Boosting</text>
+  <text x="136" y="330" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Training weights change</text>
+  <text x="136" y="354" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">after each prediction</text>
+  <text x="390" y="92" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Weak base models</text>
+
+  <g id="table">
+    <rect x="0" y="0" width="86" height="76" rx="4" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+    <polygon points="66,0 86,20 66,20" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <rect x="5" y="6" width="38" height="13" fill="#229653"/>
+    <rect x="47" y="6" width="18" height="13" fill="#86efac"/>
+    <g stroke="#94a3b8" stroke-width="1">
+      <path d="M0 25 H86"/><path d="M0 42 H86"/><path d="M0 59 H86"/>
+      <path d="M22 0 V76"/><path d="M45 0 V76"/><path d="M66 0 V76"/>
+    </g>
+    <g stroke="#64748b" stroke-width="1" stroke-dasharray="2 2">
+      <path d="M70 34 H82"/><path d="M70 51 H82"/><path d="M70 68 H82"/>
+    </g>
+  </g>
+  <g id="model">
+    <g stroke="#166534" stroke-width="2.5">
+      <path d="M0 0 L32 22 L0 44 M32 22 L70 0 M32 22 L70 44 M32 22 L32 70"/>
+    </g>
+    <g fill="#249352">
+      <circle cx="0" cy="0" r="9"/><circle cx="0" cy="44" r="9"/><circle cx="32" cy="22" r="9"/>
+      <circle cx="70" cy="0" r="9"/><circle cx="70" cy="44" r="9"/><circle cx="32" cy="70" r="9"/>
+    </g>
+  </g>
+  <g id="prediction">
+    <rect x="0" y="0" width="142" height="44" rx="22" fill="#e5e7eb" stroke="#cbd5e1"/>
+    <text x="71" y="28" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#111827">Prediction</text>
+  </g>
+
+  <use href="#table" x="94" y="106" filter="url(#shadow)"/>
+  <use href="#table" x="210" y="206" filter="url(#shadow)"/>
+  <use href="#table" x="286" y="310" filter="url(#shadow)"/>
+
+  <path d="M194 144 H316" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M310 244 H432" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M386 348 H508" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+
+  <use href="#model" x="344" y="108"/>
+  <use href="#model" x="460" y="208"/>
+  <use href="#model" x="536" y="312"/>
+
+  <path d="M444 144 H556" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M560 244 H672" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path d="M636 348 H748" stroke="#111827" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <use href="#prediction" x="584" y="122"/>
+  <use href="#prediction" x="700" y="222"/>
+  <use href="#prediction" x="776" y="326"/>
+
+  <path d="M655 166 V190 H254 V202" stroke="#15803d" stroke-width="2.2" fill="none" marker-end="url(#greenArrow)"/>
+  <path d="M771 266 V292 H330 V306" stroke="#15803d" stroke-width="2.2" fill="none" marker-end="url(#greenArrow)"/>
+  <text x="470" y="188" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#15803d">increase weights on mistakes</text>
+  <text x="552" y="292" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" fill="#15803d">next learner focuses there</text>
+
+  <path d="M878 144 C918 196 918 278 884 348" stroke="#111827" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="860" y="216" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">weighted</text>
+  <text x="860" y="236" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">vote</text>
+
+  <text x="480" y="407" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#475569">sequential training + adaptive reweighting = reduced bias, more noise sensitivity</text>
+</svg>

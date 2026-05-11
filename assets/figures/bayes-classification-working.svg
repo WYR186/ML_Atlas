@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-labelledby="title desc">
+  <title id="title">Bayesian classification workflow</title>
+  <desc id="desc">Likelihood, observed data, and prior flow into Bayes theorem, producing the posterior distribution used for classification.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f2937"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="920" height="520" rx="24" fill="#f8fafc"/>
+  <text x="460" y="54" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#111827">Bayesian Classification Working</text>
+  <text x="460" y="84" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#64748b">Combine prior belief with observed evidence to compute the posterior class distribution</text>
+
+  <g font-family="Inter, Arial, sans-serif" filter="url(#softShadow)">
+    <rect x="70" y="120" width="210" height="68" rx="10" fill="#1f8f46"/>
+    <text x="175" y="162" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">Likelihood</text>
+    <text x="175" y="184" text-anchor="middle" font-size="13" fill="#dff8e7">P(data | class)</text>
+
+    <rect x="355" y="120" width="210" height="68" rx="10" fill="#2563eb"/>
+    <text x="460" y="162" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">Data</text>
+    <text x="460" y="184" text-anchor="middle" font-size="13" fill="#dbeafe">observed features x</text>
+
+    <rect x="640" y="120" width="210" height="68" rx="10" fill="#1f8f46"/>
+    <text x="745" y="162" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">Prior</text>
+    <text x="745" y="184" text-anchor="middle" font-size="13" fill="#dff8e7">P(class)</text>
+  </g>
+
+  <g stroke="#1f2937" stroke-width="2.6" fill="none" marker-end="url(#arrow)">
+    <path d="M 175 190 L 404 264"/>
+    <path d="M 460 190 L 460 255"/>
+    <path d="M 745 190 L 516 264"/>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" filter="url(#softShadow)">
+    <rect x="295" y="260" width="330" height="72" rx="10" fill="#fef3c7"/>
+    <text x="460" y="302" text-anchor="middle" font-size="24" font-weight="800" fill="#111827">Bayes' Theorem</text>
+    <text x="460" y="324" text-anchor="middle" font-size="13" fill="#92400e">posterior proportional to likelihood x prior</text>
+  </g>
+
+  <path d="M 460 335 L 460 404" stroke="#1f2937" stroke-width="2.6" fill="none" marker-end="url(#arrow)"/>
+
+  <g font-family="Inter, Arial, sans-serif" filter="url(#softShadow)">
+    <rect x="300" y="408" width="320" height="70" rx="10" fill="#d9f4d0"/>
+    <text x="460" y="450" text-anchor="middle" font-size="23" font-weight="800" fill="#14532d">Posterior Distribution</text>
+    <text x="460" y="471" text-anchor="middle" font-size="13" fill="#166534">P(class | data), then choose max class</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="15" fill="#334155">
+    <text x="88" y="230">How much does this class explain the data?</text>
+    <text x="588" y="230">How common was this class before seeing data?</text>
+  </g>
+</svg>

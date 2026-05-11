@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">Variational autoencoder latent distribution architecture</title>
+  <desc id="desc">A variational autoencoder diagram showing input features, encoder hidden layers, mean and standard deviation outputs, latent samples, decoder hidden layers, and reconstructed outputs.</desc>
+  <style>
+    .bg { fill: #f8fafc; }
+    .panel { fill: #ffffff; stroke: #d8e2ee; stroke-width: 1.5; }
+    .dist-panel { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .node-in { fill: #168a43; stroke: #0f6b34; stroke-width: 2; }
+    .node-h { fill: #dcfce7; stroke: #15803d; stroke-width: 2; }
+    .node-z { fill: #bbf7d0; stroke: #15803d; stroke-width: 2; }
+    .node-out { fill: #168a43; stroke: #0f6b34; stroke-width: 2; }
+    .line { stroke: #15803d; stroke-width: 1.2; opacity: 0.72; }
+    .sample-line { stroke: #111827; stroke-width: 1.5; opacity: 0.75; }
+    .label { fill: #111827; font: 700 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .small { fill: #111827; font: 700 18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .node-text { fill: #ffffff; font: 700 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .hidden-text { fill: #111827; font: 700 20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .tiny { fill: #334155; font: 600 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .arrow-fill { fill: #168a43; }
+  </style>
+
+  <rect class="bg" width="1120" height="520" rx="24"/>
+  <rect class="panel" x="28" y="58" width="500" height="346" rx="22"/>
+  <rect class="panel" x="592" y="58" width="500" height="346" rx="22"/>
+  <text class="label" x="560" y="48" text-anchor="middle">Latent state distributions</text>
+
+  <g id="encoder-lines">
+    <path class="line" d="M78 105 L205 130"/><path class="line" d="M78 105 L205 190"/><path class="line" d="M78 105 L205 250"/><path class="line" d="M78 105 L205 310"/>
+    <path class="line" d="M78 155 L205 130"/><path class="line" d="M78 155 L205 190"/><path class="line" d="M78 155 L205 250"/><path class="line" d="M78 155 L205 310"/>
+    <path class="line" d="M78 205 L205 130"/><path class="line" d="M78 205 L205 190"/><path class="line" d="M78 205 L205 250"/><path class="line" d="M78 205 L205 310"/>
+    <path class="line" d="M78 255 L205 130"/><path class="line" d="M78 255 L205 190"/><path class="line" d="M78 255 L205 250"/><path class="line" d="M78 255 L205 310"/>
+    <path class="line" d="M78 305 L205 130"/><path class="line" d="M78 305 L205 190"/><path class="line" d="M78 305 L205 250"/><path class="line" d="M78 305 L205 310"/>
+    <path class="line" d="M78 355 L205 130"/><path class="line" d="M78 355 L205 190"/><path class="line" d="M78 355 L205 250"/><path class="line" d="M78 355 L205 310"/>
+    <path class="line" d="M205 130 L330 130"/><path class="line" d="M205 130 L330 190"/><path class="line" d="M205 130 L330 250"/><path class="line" d="M205 130 L330 310"/>
+    <path class="line" d="M205 190 L330 130"/><path class="line" d="M205 190 L330 190"/><path class="line" d="M205 190 L330 250"/><path class="line" d="M205 190 L330 310"/>
+    <path class="line" d="M205 250 L330 130"/><path class="line" d="M205 250 L330 190"/><path class="line" d="M205 250 L330 250"/><path class="line" d="M205 250 L330 310"/>
+    <path class="line" d="M205 310 L330 130"/><path class="line" d="M205 310 L330 190"/><path class="line" d="M205 310 L330 250"/><path class="line" d="M205 310 L330 310"/>
+  </g>
+
+  <g id="input-nodes">
+    <circle class="node-in" cx="78" cy="105" r="28"/><text class="node-text" x="78" y="112" text-anchor="middle">x1</text>
+    <circle class="node-in" cx="78" cy="155" r="28"/><text class="node-text" x="78" y="162" text-anchor="middle">x2</text>
+    <circle class="node-in" cx="78" cy="205" r="28"/><text class="node-text" x="78" y="212" text-anchor="middle">x3</text>
+    <circle class="node-in" cx="78" cy="255" r="28"/><text class="node-text" x="78" y="262" text-anchor="middle">x4</text>
+    <circle class="node-in" cx="78" cy="305" r="28"/><text class="node-text" x="78" y="312" text-anchor="middle">x5</text>
+    <circle class="node-in" cx="78" cy="355" r="28"/><text class="node-text" x="78" y="362" text-anchor="middle">x6</text>
+  </g>
+
+  <g id="encoder-hidden">
+    <circle class="node-h" cx="205" cy="130" r="28"/><text class="hidden-text" x="205" y="137" text-anchor="middle">a1</text>
+    <circle class="node-h" cx="205" cy="190" r="28"/><text class="hidden-text" x="205" y="197" text-anchor="middle">a2</text>
+    <circle class="node-h" cx="205" cy="250" r="28"/><text class="hidden-text" x="205" y="257" text-anchor="middle">a3</text>
+    <circle class="node-h" cx="205" cy="310" r="28"/><text class="hidden-text" x="205" y="317" text-anchor="middle">a4</text>
+    <circle class="node-h" cx="330" cy="130" r="28"/><text class="hidden-text" x="330" y="137" text-anchor="middle">a1</text>
+    <circle class="node-h" cx="330" cy="190" r="28"/><text class="hidden-text" x="330" y="197" text-anchor="middle">a2</text>
+    <circle class="node-h" cx="330" cy="250" r="28"/><text class="hidden-text" x="330" y="257" text-anchor="middle">a3</text>
+    <circle class="node-h" cx="330" cy="310" r="28"/><text class="hidden-text" x="330" y="317" text-anchor="middle">a4</text>
+  </g>
+
+  <rect class="dist-panel" x="412" y="76" width="116" height="282" rx="12"/>
+  <line x1="412" y1="205" x2="528" y2="205" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text class="small" x="470" y="100" text-anchor="middle">Mean</text>
+  <text class="small" x="470" y="343" text-anchor="middle">Std. dev.</text>
+  <g id="latent-params">
+    <circle class="node-h" cx="470" cy="132" r="28"/><text class="hidden-text" x="470" y="139" text-anchor="middle">mu1</text>
+    <circle class="node-h" cx="470" cy="188" r="28"/><text class="hidden-text" x="470" y="195" text-anchor="middle">mu2</text>
+    <circle class="node-h" cx="470" cy="252" r="28"/><text class="hidden-text" x="470" y="259" text-anchor="middle">sig1</text>
+    <circle class="node-h" cx="470" cy="308" r="28"/><text class="hidden-text" x="470" y="315" text-anchor="middle">sig2</text>
+  </g>
+  <g id="to-latent-params">
+    <path class="sample-line" d="M330 130 L470 132"/><path class="sample-line" d="M330 130 L470 188"/><path class="sample-line" d="M330 130 L470 252"/><path class="sample-line" d="M330 130 L470 308"/>
+    <path class="sample-line" d="M330 190 L470 132"/><path class="sample-line" d="M330 190 L470 188"/><path class="sample-line" d="M330 190 L470 252"/><path class="sample-line" d="M330 190 L470 308"/>
+    <path class="sample-line" d="M330 250 L470 132"/><path class="sample-line" d="M330 250 L470 188"/><path class="sample-line" d="M330 250 L470 252"/><path class="sample-line" d="M330 250 L470 308"/>
+    <path class="sample-line" d="M330 310 L470 132"/><path class="sample-line" d="M330 310 L470 188"/><path class="sample-line" d="M330 310 L470 252"/><path class="sample-line" d="M330 310 L470 308"/>
+  </g>
+
+  <text class="small" x="560" y="110" text-anchor="middle">sample</text>
+  <text class="tiny" x="560" y="130" text-anchor="middle">z = mu + sigma * eps</text>
+  <g id="z-sample-lines">
+    <path class="sample-line" d="M498 132 L600 188"/>
+    <path class="sample-line" d="M498 188 L600 188"/>
+    <path class="sample-line" d="M498 252 L600 188"/>
+    <path class="sample-line" d="M498 308 L600 188"/>
+    <path class="sample-line" d="M498 132 L600 252"/>
+    <path class="sample-line" d="M498 188 L600 252"/>
+    <path class="sample-line" d="M498 252 L600 252"/>
+    <path class="sample-line" d="M498 308 L600 252"/>
+  </g>
+  <circle class="node-z" cx="600" cy="188" r="28"/><text class="hidden-text" x="600" y="195" text-anchor="middle">z1</text>
+  <circle class="node-z" cx="600" cy="252" r="28"/><text class="hidden-text" x="600" y="259" text-anchor="middle">z2</text>
+
+  <g id="decoder-lines">
+    <path class="line" d="M628 188 L735 130"/><path class="line" d="M628 188 L735 190"/><path class="line" d="M628 188 L735 250"/><path class="line" d="M628 188 L735 310"/>
+    <path class="line" d="M628 252 L735 130"/><path class="line" d="M628 252 L735 190"/><path class="line" d="M628 252 L735 250"/><path class="line" d="M628 252 L735 310"/>
+    <path class="line" d="M735 130 L860 130"/><path class="line" d="M735 130 L860 190"/><path class="line" d="M735 130 L860 250"/><path class="line" d="M735 130 L860 310"/>
+    <path class="line" d="M735 190 L860 130"/><path class="line" d="M735 190 L860 190"/><path class="line" d="M735 190 L860 250"/><path class="line" d="M735 190 L860 310"/>
+    <path class="line" d="M735 250 L860 130"/><path class="line" d="M735 250 L860 190"/><path class="line" d="M735 250 L860 250"/><path class="line" d="M735 250 L860 310"/>
+    <path class="line" d="M735 310 L860 130"/><path class="line" d="M735 310 L860 190"/><path class="line" d="M735 310 L860 250"/><path class="line" d="M735 310 L860 310"/>
+    <path class="line" d="M860 130 L1020 105"/><path class="line" d="M860 130 L1020 155"/><path class="line" d="M860 130 L1020 205"/>
+    <path class="line" d="M860 190 L1020 155"/><path class="line" d="M860 190 L1020 205"/><path class="line" d="M860 190 L1020 255"/>
+    <path class="line" d="M860 250 L1020 255"/><path class="line" d="M860 250 L1020 305"/><path class="line" d="M860 250 L1020 355"/>
+    <path class="line" d="M860 310 L1020 205"/><path class="line" d="M860 310 L1020 305"/><path class="line" d="M860 310 L1020 355"/>
+  </g>
+
+  <g id="decoder-hidden">
+    <circle class="node-h" cx="735" cy="130" r="28"/><text class="hidden-text" x="735" y="137" text-anchor="middle">a1</text>
+    <circle class="node-h" cx="735" cy="190" r="28"/><text class="hidden-text" x="735" y="197" text-anchor="middle">a2</text>
+    <circle class="node-h" cx="735" cy="250" r="28"/><text class="hidden-text" x="735" y="257" text-anchor="middle">a3</text>
+    <circle class="node-h" cx="735" cy="310" r="28"/><text class="hidden-text" x="735" y="317" text-anchor="middle">a4</text>
+    <circle class="node-h" cx="860" cy="130" r="28"/><text class="hidden-text" x="860" y="137" text-anchor="middle">a1</text>
+    <circle class="node-h" cx="860" cy="190" r="28"/><text class="hidden-text" x="860" y="197" text-anchor="middle">a2</text>
+    <circle class="node-h" cx="860" cy="250" r="28"/><text class="hidden-text" x="860" y="257" text-anchor="middle">a3</text>
+    <circle class="node-h" cx="860" cy="310" r="28"/><text class="hidden-text" x="860" y="317" text-anchor="middle">a4</text>
+  </g>
+
+  <g id="output-nodes">
+    <circle class="node-out" cx="1020" cy="105" r="28"/><text class="node-text" x="1020" y="112" text-anchor="middle">x1</text>
+    <circle class="node-out" cx="1020" cy="155" r="28"/><text class="node-text" x="1020" y="162" text-anchor="middle">x2</text>
+    <circle class="node-out" cx="1020" cy="205" r="28"/><text class="node-text" x="1020" y="212" text-anchor="middle">x3</text>
+    <circle class="node-out" cx="1020" cy="255" r="28"/><text class="node-text" x="1020" y="262" text-anchor="middle">x4</text>
+    <circle class="node-out" cx="1020" cy="305" r="28"/><text class="node-text" x="1020" y="312" text-anchor="middle">x5</text>
+    <circle class="node-out" cx="1020" cy="355" r="28"/><text class="node-text" x="1020" y="362" text-anchor="middle">x6</text>
+  </g>
+
+  <path class="arrow-fill" d="M146 428 H360 V408 L430 448 L360 488 V468 H146 Z"/>
+  <text class="small" x="285" y="455" text-anchor="middle" fill="#ffffff">Encoder</text>
+  <path class="arrow-fill" d="M648 428 H862 V408 L932 448 L862 488 V468 H648 Z"/>
+  <text class="small" x="787" y="455" text-anchor="middle" fill="#ffffff">Decoder</text>
+  <text class="tiny" x="560" y="492" text-anchor="middle">Encoder predicts distribution parameters. Sampling creates z. Decoder reconstructs or generates x.</text>
+</svg>

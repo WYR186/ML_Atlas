@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Bagging ensemble workflow</title>
+  <desc id="desc">Bootstrap samples train independent base models in parallel, then their predictions are combined by majority vote or averaging.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#111827"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="960" height="430" fill="#f8fafc"/>
+  <text x="480" y="48" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">Bagging</text>
+  <text x="104" y="88" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#334155">Different bootstrap</text>
+  <text x="104" y="110" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#334155">subsets of data</text>
+  <text x="385" y="108" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">Base models</text>
+  <text x="652" y="95" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Vote for classification</text>
+  <text x="652" y="118" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">or average for regression</text>
+
+  <g id="table">
+    <rect x="0" y="0" width="86" height="76" rx="4" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+    <polygon points="66,0 86,20 66,20" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+    <rect x="5" y="6" width="38" height="13" fill="#229653"/>
+    <rect x="47" y="6" width="18" height="13" fill="#86efac"/>
+    <g stroke="#94a3b8" stroke-width="1">
+      <path d="M0 25 H86"/><path d="M0 42 H86"/><path d="M0 59 H86"/>
+      <path d="M22 0 V76"/><path d="M45 0 V76"/><path d="M66 0 V76"/>
+    </g>
+    <g stroke="#64748b" stroke-width="1" stroke-dasharray="2 2">
+      <path d="M70 34 H82"/><path d="M70 51 H82"/><path d="M70 68 H82"/>
+    </g>
+  </g>
+
+  <g id="model">
+    <g stroke="#166534" stroke-width="2.5">
+      <path d="M0 0 L32 22 L0 44 M32 22 L70 0 M32 22 L70 44 M32 22 L32 70"/>
+    </g>
+    <g fill="#249352">
+      <circle cx="0" cy="0" r="9"/><circle cx="0" cy="44" r="9"/><circle cx="32" cy="22" r="9"/>
+      <circle cx="70" cy="0" r="9"/><circle cx="70" cy="44" r="9"/><circle cx="32" cy="70" r="9"/>
+    </g>
+  </g>
+
+  <use href="#table" x="72" y="132" filter="url(#shadow)"/>
+  <use href="#table" x="72" y="226" filter="url(#shadow)"/>
+  <use href="#table" x="72" y="320" filter="url(#shadow)"/>
+  <text x="115" y="218" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">sample 1</text>
+  <text x="115" y="312" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" fill="#64748b">sample 2</text>
+
+  <path d="M188 170 H300" stroke="#111827" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M188 264 H300" stroke="#111827" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M188 358 H300" stroke="#111827" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <use href="#model" x="328" y="134"/>
+  <use href="#model" x="328" y="228"/>
+  <use href="#model" x="328" y="322"/>
+
+  <path d="M430 166 C498 170 530 190 574 222" stroke="#111827" stroke-width="2.3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M430 264 H574" stroke="#111827" stroke-width="2.3" marker-end="url(#arrow)"/>
+  <path d="M430 354 C498 346 530 326 574 296" stroke="#111827" stroke-width="2.3" fill="none" marker-end="url(#arrow)"/>
+
+  <g transform="translate(610 190)" filter="url(#shadow)">
+    <circle cx="40" cy="66" r="28" fill="#ffffff" stroke="#229653" stroke-width="5"/>
+    <circle cx="40" cy="66" r="15" fill="#229653"/>
+    <rect x="76" y="40" width="18" height="54" fill="#229653"/>
+    <rect x="102" y="20" width="18" height="74" fill="#229653"/>
+    <path d="M22 96 L0 110" stroke="#229653" stroke-width="14" stroke-linecap="round"/>
+    <g stroke="#229653" stroke-width="2" fill="#dcfce7">
+      <circle cx="28" cy="28" r="6"/><circle cx="70" cy="18" r="6"/><circle cx="110" cy="8" r="6"/>
+      <path d="M28 28 L70 18 L110 8"/>
+    </g>
+  </g>
+
+  <path d="M760 256 H828" stroke="#111827" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <rect x="840" y="225" width="108" height="62" rx="31" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="894" y="263" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700" fill="#0f172a">Prediction</text>
+
+  <text x="480" y="407" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" fill="#475569">independent training + aggregation = lower variance</text>
+</svg>

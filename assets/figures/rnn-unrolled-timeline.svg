@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" role="img" aria-labelledby="title desc">
+  <title id="title">Unrolled recurrent neural network timeline</title>
+  <desc id="desc">A recurrent network unfolded through time, showing inputs, hidden states, outputs, and the same transition weights reused at each step.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 28px Arial,sans-serif;fill:#111827}
+      .label{font:700 22px Arial,sans-serif;fill:#111827}
+      .small{font:700 15px Arial,sans-serif;fill:#111827}
+      .hint{font:600 14px Arial,sans-serif;fill:#475569}
+      .cell{fill:#dff4d7;stroke:#111827;stroke-width:1.5}
+      .input{fill:#e8f2fb;stroke:#111827;stroke-width:1.5}
+      .loss{fill:#fff2cf;stroke:#111827;stroke-width:1.5}
+      .arrow{stroke:#111827;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#111827;stroke-width:2;stroke-dasharray:2 6;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="900" height="340" fill="#f8fafc"/>
+  <text x="450" y="44" text-anchor="middle" class="title">Unrolled RNN Timeline</text>
+
+  <text x="72" y="178" text-anchor="middle" class="label">Unfold</text>
+  <path class="arrow" d="M72 188H145"/>
+  <path class="dash" d="M156 188H188"/>
+
+  <g transform="translate(205,78)">
+    <circle class="loss" cx="58" cy="28" r="28"/>
+    <text x="58" y="35" text-anchor="middle" class="label">L<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+    <rect class="cell" x="0" y="116" width="116" height="44" rx="5"/>
+    <text x="58" y="145" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+    <circle class="input" cx="58" cy="238" r="30"/>
+    <text x="58" y="245" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+    <path class="arrow" d="M58 208V162"/><text x="72" y="190" class="small">U</text>
+    <path class="arrow" d="M58 116V58"/><text x="72" y="92" class="small">O</text>
+  </g>
+
+  <path class="arrow" d="M321 216H438"/><text x="374" y="204" class="small">W</text>
+  <g transform="translate(438,78)">
+    <circle class="loss" cx="58" cy="28" r="28"/>
+    <text x="58" y="35" text-anchor="middle" class="label">L<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+    <rect class="cell" x="0" y="116" width="116" height="44" rx="5"/>
+    <text x="58" y="145" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+    <circle class="input" cx="58" cy="238" r="30"/>
+    <text x="58" y="245" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+    <path class="arrow" d="M58 208V162"/><text x="72" y="190" class="small">U</text>
+    <path class="arrow" d="M58 116V58"/><text x="72" y="92" class="small">O</text>
+  </g>
+
+  <path class="arrow" d="M554 216H671"/><text x="607" y="204" class="small">W</text>
+  <g transform="translate(671,78)">
+    <circle class="loss" cx="58" cy="28" r="28"/>
+    <text x="58" y="35" text-anchor="middle" class="label">L<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+    <rect class="cell" x="0" y="116" width="116" height="44" rx="5"/>
+    <text x="58" y="145" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+    <circle class="input" cx="58" cy="238" r="30"/>
+    <text x="58" y="245" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+    <path class="arrow" d="M58 208V162"/><text x="72" y="190" class="small">U</text>
+    <path class="arrow" d="M58 116V58"/><text x="72" y="92" class="small">O</text>
+  </g>
+  <path class="dash" d="M787 216H835"/>
+  <text x="450" y="322" text-anchor="middle" class="hint">Unrolling turns one recurrent rule into a time-indexed computation graph; the parameters are shared, not copied independently.</text>
+</svg>

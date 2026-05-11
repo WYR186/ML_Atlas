@@ -56,6 +56,12 @@
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>A tree is a flowchart. Start at the root, answer a yes/no question, move left or right, and repeat until a leaf tells you the label.</p>
   <p>The training algorithm asks: which question makes the children less mixed than the parent? A perfect question sends each class into its own branch.</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/decision-tree-working.svg" alt="Decision tree routing input features through split questions to leaf prediction scores" loading="lazy" />
+      <figcaption><b>How to read this picture.</b> The left panel is one example described by features such as age, gender, and occupation. The right panel shows inference: start at the root, answer each split question, follow exactly one branch, and stop at a leaf. The leaf stores the final prediction score.</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Entropy, Gini, and classification error are all impurity measures. They are low when a node is pure and high when labels are mixed.</p>
@@ -172,6 +178,12 @@
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>树就是 flowchart。你从 root 开始，回答一个 yes/no 问题，往左或往右走，直到 leaf 给出 label。</p>
       <p>训练时最关键的问题是：哪个问题能让孩子节点“不那么混”？如果一个问题能把不同类别干净分开，它就是好 split。</p>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/decision-tree-working.svg" alt="Decision tree 从 input features 经过 split questions 到 leaf prediction scores 的流程图" loading="lazy" />
+          <figcaption><b>怎么看这张图.</b> 左边是一条样本的 features，比如 age、gender、occupation；右边是 inference 过程：从 root 开始，每个 internal node 问一个 yes/no split question，只沿一条 branch 往下走，最后到达 leaf。Leaf 里存的就是最终 prediction score。</figcaption>
+        </figure>
+      </div>
 
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>Entropy、Gini、classification error 都是在量化 impurity：节点越纯，impurity 越低；类别越混，impurity 越高。</p>

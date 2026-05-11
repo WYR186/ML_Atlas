@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Model-known DP</span><span class="cn-only">model-known DP</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">✅ hw5_sol</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/machine-learning/what-is-the-difference-between-value-iteration-and-policy-iteration/" target="_blank" rel="noopener">🔗 GeeksforGeeks</a></div>
     </div>
 
 <div class="en-only">
@@ -62,12 +63,30 @@
     <p>Value iteration is like repeatedly updating a map: every location asks, “if I take the best first move, what is my new estimated total score?”</p>
     <p>Policy iteration is like choosing a full route plan, grading that plan, then editing the plan wherever another first move looks better.</p>
   </div>
+  <figure class="topic-figure">
+    <img src="../assets/figures/value-iteration-network-planner.svg" alt="Value iteration network style diagram with state features, reward and transition models, a VI module, attention, and a reactive policy" loading="lazy" />
+    <figcaption>Repository-local SVG redrawn from the value-iteration-network visual idea, so GitHub Pages can serve it without external image hosting.</figcaption>
+  </figure>
+  <p class="source-note">Visual reference: <a href="https://www.geeksforgeeks.org/machine-learning/what-is-the-difference-between-value-iteration-and-policy-iteration/" target="_blank" rel="noopener">GeeksforGeeks, Value Iteration vs. Policy Iteration</a>.</p>
+  <div class="study-box">
+    <p><b>How to read the VI module diagram.</b> The left side is the current state representation $\phi(s)$. The planning block uses reward information $R$ and transition information $P$ to perform Bellman-style planning on an MDP, producing a value map $V$.</p>
+    <p><b>What attention is doing here.</b> In a value-iteration-network style view, attention reads the part of the value map relevant to the current state and turns it into $\psi(s)$, which the reactive policy uses with $\phi(s)$ to choose an action. For the exam, the core idea is still simpler: value iteration repeatedly applies the Bellman optimality backup, then extracts a greedy policy.</p>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <div class="callout intuition">
     <div class="head">Why the algorithms improve</div>
     <p>Bellman optimality gives a fixed point for the best possible values. Value iteration approaches that fixed point directly through repeated contraction.</p>
     <p>Policy iteration takes a different path: evaluation tells you exactly how good the current policy is, and improvement makes the policy greedy with respect to that evaluation. If the policy stops changing, it is optimal.</p>
+    <figure class="topic-figure">
+      <img src="../assets/figures/policy-iteration-critic-actor-cycle.svg" alt="Policy iteration cycle connecting policy evaluation, value function, policy improvement, and policy pi" loading="lazy" />
+      <figcaption>Policy iteration is a loop: evaluate the current policy, improve it greedily, then evaluate the new policy.</figcaption>
+    </figure>
+    <p class="source-note">Visual reference: <a href="https://www.geeksforgeeks.org/machine-learning/what-is-the-difference-between-value-iteration-and-policy-iteration/" target="_blank" rel="noopener">GeeksforGeeks, Value Iteration vs. Policy Iteration</a>.</p>
+    <div class="study-box">
+      <p><b>Critic vs actor intuition.</b> Policy evaluation is the critic: it answers "how good is the current policy?" Policy improvement is the actor update: it changes the policy by taking the one-step action that looks best under the critic's value function.</p>
+      <p><b>Stopping rule.</b> If the greedy improvement step no longer changes the policy, the loop has reached a stable policy. In a finite discounted MDP, that stable policy is optimal.</p>
+    </div>
     <p>This is the <b>generalized policy iteration</b> viewpoint: evaluation and improvement keep pulling each other toward optimality. Value iteration can be read as a truncated version of policy iteration, doing only a one-step optimality backup instead of fully evaluating a policy before improving.</p>
     <p>Policy iteration improves monotonically: a greedy improvement is strictly better unless the policy is already optimal. In finite MDPs, there are only finitely many deterministic policies, so policy iteration reaches an optimal policy in finite steps.</p>
   </div>
@@ -200,12 +219,30 @@
     <p>Value iteration 像不停更新地图：每个位置都问“如果我现在走最好的第一步，总分会是多少？”</p>
     <p>Policy iteration 像先定一套路线方案，给它打分，然后在每个路口看有没有更好的第一步；如果没有地方想改，这套方案就是最优。</p>
   </div>
+  <figure class="topic-figure">
+    <img src="../assets/figures/value-iteration-network-planner.svg" alt="Value iteration network 风格图：state features、reward/transition model、VI module、attention 和 reactive policy" loading="lazy" />
+    <figcaption>这张图已重画成仓库内 SVG 静态资源，GitHub Pages 部署后不依赖外部图片链接。</figcaption>
+  </figure>
+  <p class="source-note">视觉参考：<a href="https://www.geeksforgeeks.org/machine-learning/what-is-the-difference-between-value-iteration-and-policy-iteration/" target="_blank" rel="noopener">GeeksforGeeks, Value Iteration vs. Policy Iteration</a>。</p>
+  <div class="study-box">
+    <p><b>怎么看 VI module 图？</b> 左边 $\phi(s)$ 是当前 state representation；planning block 用 reward 信息 $R$ 和 transition 信息 $P$ 在 MDP 上做 Bellman-style planning，输出 value map $V$。</p>
+    <p><b>Attention 在这里干嘛？</b> Value-iteration-network 视角里，attention 从 value map 里读出和当前 state 最相关的部分，形成 $\psi(s)$；reactive policy 再结合 $\phi(s)$ 和 $\psi(s)$ 选 action。考试里更核心的版本是：VI 反复做 Bellman optimality backup，最后抽取 greedy policy。</p>
+  </div>
 
   <h3 class="section-orange">3. 核心直觉</h3>
   <div class="callout intuition">
     <div class="head">为什么会越来越好</div>
     <p>Bellman optimality 给出最优 value 的 fixed point。Value iteration 直接靠 contraction 往这个 fixed point 靠近。</p>
     <p>Policy iteration 则把问题拆开：evaluation 精确知道当前 policy 有多好；improvement 用这个评价去做 greedy 更新。策略不再变化时，就已经满足 optimality。</p>
+    <figure class="topic-figure">
+      <img src="../assets/figures/policy-iteration-critic-actor-cycle.svg" alt="Policy iteration 循环图：policy evaluation、value function、policy improvement 和 policy pi" loading="lazy" />
+      <figcaption>Policy iteration 是一个循环：先 evaluate 当前 policy，再 greedy improve，然后继续 evaluate 新 policy。</figcaption>
+    </figure>
+    <p class="source-note">视觉参考：<a href="https://www.geeksforgeeks.org/machine-learning/what-is-the-difference-between-value-iteration-and-policy-iteration/" target="_blank" rel="noopener">GeeksforGeeks, Value Iteration vs. Policy Iteration</a>。</p>
+    <div class="study-box">
+      <p><b>Critic / actor 怎么理解？</b> Policy evaluation 是 critic：回答“当前 policy 到底好不好？” Policy improvement 是 actor update：根据 critic 给出的 value function，把 policy 改成 one-step greedy。</p>
+      <p><b>什么时候停？</b> 如果 greedy improvement 后 policy 不再变化，就叫 policy stable。在 finite discounted MDP 里，这个 stable policy 就是 optimal。</p>
+    </div>
     <p>这就是 <b>generalized policy iteration / GPI</b>：evaluation 和 improvement 两股力量互相拉着系统走向 optimality。Value iteration 可以看成 truncated policy iteration：不把某个 policy 完整 evaluate 到收敛，而是每轮只做一步 optimality backup。</p>
     <p>Policy iteration 有 monotonicity：greedy improvement 会得到更好的 policy，除非当前 policy 已经 optimal。有限 MDP 只有有限多个 deterministic policies，所以 PI 会在有限步内到达 optimal policy。</p>
   </div>

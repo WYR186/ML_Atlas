@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" role="img" aria-labelledby="title desc">
+  <title id="title">Q-learning feedback loop</title>
+  <desc id="desc">A trial and error feedback loop where an agent makes a prediction, receives feedback, updates its knowledge, and improves the next response.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="980" height="500" rx="24" fill="#f8fafc"/>
+  <text x="490" y="50" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#111827">Q-learning: Learn From Feedback</text>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <g transform="translate(70,130)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <path d="M54 43 C52 30 61 25 70 25 C73 33 67 40 58 43" fill="#22c55e"/>
+      <circle cx="55" cy="62" r="23" fill="#ef4444"/>
+      <circle cx="70" cy="62" r="23" fill="#f87171"/>
+      <text x="82" y="70" font-size="32" font-weight="800" fill="#111827">?</text>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Input</text>
+    </g>
+
+    <g transform="translate(250,130)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <rect x="26" y="28" width="46" height="42" rx="3" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+      <path d="M34 61 L43 49 L52 55 L63 39" fill="none" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="18" fill="#fef3c7" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="8" fill="#22c55e" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="28" r="8" fill="#f87171" stroke="#111827" stroke-width="2"/>
+      <path d="M62 44 L78 28" stroke="#111827" stroke-width="2"/>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Response</text>
+    </g>
+
+    <g transform="translate(430,130)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <circle cx="58" cy="42" r="17" fill="#9ca3af" stroke="#111827" stroke-width="3"/>
+      <path d="M30 95 C35 72 81 72 86 95 Z" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+      <path d="M58 59 L58 95" stroke="#111827" stroke-width="3"/>
+      <path d="M46 80 L70 80" stroke="#111827" stroke-width="3"/>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Feedback</text>
+    </g>
+
+    <g transform="translate(610,130)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <rect x="26" y="28" width="46" height="42" rx="3" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+      <path d="M34 61 L43 49 L52 55 L63 39" fill="none" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="18" fill="#fef3c7" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="8" fill="#22c55e" stroke="#111827" stroke-width="3"/>
+      <path d="M40 83 L76 39" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Learns</text>
+    </g>
+
+    <g transform="translate(790,130)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <rect x="26" y="28" width="46" height="42" rx="3" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+      <path d="M34 61 L43 49 L52 55 L63 39" fill="none" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="18" fill="#fef3c7" stroke="#111827" stroke-width="3"/>
+      <circle cx="78" cy="74" r="8" fill="#22c55e" stroke="#111827" stroke-width="3"/>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Better response</text>
+    </g>
+
+    <g transform="translate(790,320)">
+      <rect width="116" height="116" rx="18" fill="#dff3d8" filter="url(#shadow)"/>
+      <path d="M54 43 C52 30 61 25 70 25 C73 33 67 40 58 43" fill="#22c55e"/>
+      <circle cx="55" cy="62" r="23" fill="#ef4444"/>
+      <circle cx="70" cy="62" r="23" fill="#f87171"/>
+      <text x="82" y="70" font-size="32" font-weight="800" fill="#111827">?</text>
+      <text x="58" y="150" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Next input</text>
+    </g>
+  </g>
+
+  <g stroke="#111827" stroke-width="3" marker-end="url(#arrow)" fill="none">
+    <path d="M 190 188 L 242 188"/>
+    <path d="M 370 188 L 422 188"/>
+    <path d="M 550 188 L 602 188"/>
+    <path d="M 730 188 L 782 188"/>
+    <path d="M 848 248 L 848 312"/>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" filter="url(#shadow)">
+    <path d="M300 93 C288 70 317 51 339 65 C352 43 392 50 394 77 C420 81 424 119 397 126 L306 126 C282 123 279 99 300 93 Z" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+    <text x="350" y="88" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Wrong</text>
+    <text x="350" y="107" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">guess</text>
+
+    <path d="M490 84 C479 64 505 48 525 59 C538 41 572 49 573 73 C596 77 599 112 575 118 L496 118 C474 116 471 89 490 84 Z" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+    <text x="535" y="91" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Reward /</text>
+    <text x="535" y="110" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">correction</text>
+
+    <path d="M663 88 C654 69 681 54 701 65 C714 48 746 56 746 80 C767 85 768 116 746 122 L671 122 C650 120 645 94 663 88 Z" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+    <text x="706" y="101" text-anchor="middle" font-size="16" font-weight="800" fill="#111827">Update Q</text>
+
+    <path d="M835 84 C823 62 851 46 871 59 C884 41 919 50 920 75 C944 80 946 116 922 123 L841 123 C819 121 814 90 835 84 Z" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+    <text x="882" y="92" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Improved</text>
+    <text x="882" y="111" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">choice</text>
+  </g>
+</svg>

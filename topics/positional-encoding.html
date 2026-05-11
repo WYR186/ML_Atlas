@@ -39,7 +39,8 @@
       <h1>🔮 <span class="en-only">Positional Encoding</span><span class="cn-only">位置编码</span></h1>
       <div class="subtitle"><span class="en-only">sin / cos position injection</span><span class="cn-only">sin / cos 注入位置</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/nlp/positional-encoding-in-transformers/" target="_blank" rel="noopener">🔗 GeeksforGeeks</a></div>
     </div>
 
 <div class="en-only">
@@ -55,6 +56,15 @@
   <p>Think of token embeddings as words written on identical sticky notes. Without position, shuffling the notes can look too similar to the model. Positional encoding writes a small coordinate mark on every sticky note: "this is position 0", "this is position 1", and so on.</p>
   <p>That matters because word order changes meaning: "good, not bad" and "bad, not good" contain nearly the same words, but the order flips the message.</p>
   <p>Sinusoidal positional encoding uses waves of different frequencies. Low-frequency waves change slowly and help with broad location; high-frequency waves change quickly and help distinguish nearby positions.</p>
+  <figure class="topic-figure">
+    <img src="../assets/figures/positional-encoding-transformer-flow.svg" alt="Positional encoding diagram showing token embeddings, position vectors P1 through P8, a Transformer block, and contextualized outputs" loading="lazy" />
+    <figcaption>The SVG is stored inside this repository so GitHub Pages can render it without depending on an external image host.</figcaption>
+  </figure>
+  <p class="source-note">Reference used for the visual idea: <a href="https://www.geeksforgeeks.org/nlp/positional-encoding-in-transformers/" target="_blank" rel="noopener">GeeksforGeeks, Positional Encoding in Transformers</a>.</p>
+  <div class="study-box">
+    <p><b>How to read the diagram.</b> The colored word boxes are token embeddings. The labels $P1,\ldots,P8$ are position vectors. The Transformer input at slot $n$ is the word's vector plus that slot's position vector, so "coffee" at $P3$ and "coffee" at $P7$ are no longer identical inputs.</p>
+    <p><b>Important caveat.</b> Positional encoding supplies order; it does not automatically know that "He" refers to "John." Attention can learn that relation after the tokens carry both content and location.</p>
+  </div>
 </section>
 
 <section class="topic lesson-section intuition-section" id="pe-intuition-en">
@@ -186,6 +196,15 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <p>可以把 token embedding 想成写着单词的便利贴。如果不标位置，把便利贴打乱以后，模型看到的东西可能差不多。Positional encoding 就是在每张便利贴上写一个小坐标：“我是第 0 个”“我是第 1 个”。</p>
   <p>这很关键，因为 word order 会改变意思：比如 “good, not bad” 和 “bad, not good” 单词几乎一样，但顺序一换，语义就反过来了。</p>
   <p>sin/cos 版本用了很多不同频率的波。低频变化慢，帮助模型知道大概位置；高频变化快，帮助区分相邻位置。</p>
+  <figure class="topic-figure">
+    <img src="../assets/figures/positional-encoding-transformer-flow.svg" alt="Positional encoding 示意图：token embeddings、P1 到 P8 的 position vectors、Transformer block 和 contextualized outputs" loading="lazy" />
+    <figcaption>这张图已重画成仓库内 SVG 静态资源，所以 GitHub Pages 部署后不会依赖外部图片链接。</figcaption>
+  </figure>
+  <p class="source-note">视觉参考：<a href="https://www.geeksforgeeks.org/nlp/positional-encoding-in-transformers/" target="_blank" rel="noopener">GeeksforGeeks, Positional Encoding in Transformers</a>。</p>
+  <div class="study-box">
+    <p><b>怎么看这张图？</b> 彩色单词框是 token embeddings；$P1,\ldots,P8$ 是 position vectors。第 $n$ 个位置真正送进 Transformer 的不是单独的 word vector，而是 word vector + position vector，所以 $P3$ 的 "coffee" 和 $P7$ 的 "coffee" 会变成不同输入。</p>
+    <p><b>注意边界。</b> Positional encoding 只提供 order / location，不会自动知道 "He" 指代 "John"。它给 attention 提供位置线索，后续 attention 才能结合内容学出这种 long-range relation。</p>
+  </div>
 </section>
 
 <section class="topic lesson-section intuition-section" id="pe-intuition-cn">

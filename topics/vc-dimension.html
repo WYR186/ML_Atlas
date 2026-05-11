@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Hoeffding · VC bound</span><span class="cn-only">Hoeffding · VC bound</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a>
+        <a class="ref-chip" href="https://medium.com/faqk-like-socrates/how-does-vc-dimension-characterise-pac-learning-a2f478b18ce5" target="_blank" rel="noopener">🔗 Medium VC/PAC</a></div>
     </div>
 
 <div class="en-only">
@@ -56,6 +57,10 @@
     <li>Finite VC dimension gives uniform generalization guarantees.</li>
     <li>Infinite or very large complexity means more samples are needed to control overfitting.</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/vc-dimension-three-point-shattering.svg" alt="Eight line separation cases showing all binary labelings of three non-collinear points" loading="lazy" />
+    <figcaption><b>Shattering picture.</b> Three non-collinear points have $2^3=8$ possible binary labelings. The diagram shows that a 2D line can realize each labeling by placing the red points on one side and the blue points on the other. This proves the lower-bound half: linear classifiers in $\mathbb{R}^2$ have VC dimension at least 3. The separate upper-bound step is to show every four-point set has at least one impossible labeling. Reference: <a href="https://medium.com/faqk-like-socrates/how-does-vc-dimension-characterise-pac-learning-a2f478b18ce5" target="_blank" rel="noopener">Medium discussion of VC dimension and PAC learning</a>.</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>VC dimension asks: how many points can this model label in absolutely any way I request? If it can label many arbitrary patterns, it is powerful, but also dangerous with small data.</p>
@@ -208,6 +213,10 @@
     <li>有限 VC dimension 能给 uniform generalization guarantee。</li>
     <li>复杂度太高时，需要更多样本来控制 overfitting。</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/vc-dimension-three-point-shattering.svg" alt="八种 line separation case：三个不共线点的所有 binary labelings 都能被直线分开" loading="lazy" />
+    <figcaption><b>Shattering 图.</b> 三个不共线点一共有 $2^3=8$ 种 binary labelings。图里每个小面板展示一种 labeling，并用一条 line 把 red / blue 分开。它证明的是 lower bound：$\mathbb{R}^2$ 中 linear classifiers 的 VC dimension 至少是 3。上界还要另证：任意 4 个点都会有一种 labeling 做不到。参考：<a href="https://medium.com/faqk-like-socrates/how-does-vc-dimension-characterise-pac-learning-a2f478b18ce5" target="_blank" rel="noopener">Medium discussion of VC dimension and PAC learning</a>。</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
   <p>VC dimension 问的是：给我几个点，我随便指定红蓝标签，你这个模型都能画出来吗？能随便画的点越多，模型越强，也越容易在小数据上乱记。</p>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Bias variance trade-off against model complexity</title>
+  <desc id="desc">A plot of error versus model complexity. Bias squared decreases as complexity increases, variance increases, and total error is U-shaped with an optimal model complexity near the middle.</desc>
+  <defs>
+    <marker id="axisArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <marker id="curveArrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#1f8f45"/>
+    </marker>
+    <marker id="curveArrowBlack" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 30px Arial,sans-serif;fill:#111827}
+      .label{font:700 24px Arial,sans-serif;fill:#111827}
+      .small{font:700 16px Arial,sans-serif;fill:#334155}
+      .axis{stroke:#111827;stroke-width:2.4;fill:none;marker-end:url(#axisArrow)}
+      .guide{stroke:#111827;stroke-width:2.2;stroke-dasharray:6 7;fill:none}
+      .total{stroke:#111827;stroke-width:4;fill:none;marker-end:url(#curveArrowBlack)}
+      .variance{stroke:#1f8f45;stroke-width:4.5;fill:none;marker-end:url(#curveArrowGreen)}
+      .bias{stroke:#1f8f45;stroke-width:4.5;fill:none;marker-end:url(#curveArrowGreen)}
+      .zone{fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1}
+      .dot{fill:#111827}
+    </style>
+  </defs>
+  <rect width="960" height="520" fill="#f8fafc"/>
+  <text x="480" y="44" text-anchor="middle" class="title">Bias-Variance Trade-off</text>
+
+  <rect class="zone" x="90" y="76" width="230" height="330" rx="12" opacity="0.58"/>
+  <rect class="zone" x="642" y="76" width="230" height="330" rx="12" opacity="0.58"/>
+  <text x="205" y="102" text-anchor="middle" class="small">underfit region</text>
+  <text x="757" y="102" text-anchor="middle" class="small">overfit region</text>
+
+  <path class="axis" d="M90 420H880"/>
+  <path class="axis" d="M90 420V86"/>
+  <text x="500" y="482" text-anchor="middle" class="label">Model Complexity</text>
+  <text x="36" y="255" text-anchor="middle" class="label" transform="rotate(-90 36 255)">Error</text>
+
+  <path class="bias" d="M850 380C710 379 562 371 456 334C326 289 203 233 102 118"/>
+  <path class="variance" d="M102 384C276 394 407 379 502 334C640 269 744 196 850 108"/>
+  <path class="total" d="M102 108C236 238 362 300 502 304C648 308 754 223 850 104"/>
+
+  <path class="guide" d="M502 80V420"/>
+  <circle class="dot" cx="502" cy="334" r="5"/>
+  <text x="502" y="145" text-anchor="middle" class="label">Optimal Model</text>
+  <text x="502" y="176" text-anchor="middle" class="label">Complexity</text>
+
+  <text x="695" y="150" class="label">Total error</text>
+  <text x="746" y="250" class="label">Variance</text>
+  <text x="760" y="356" class="label">Bias<tspan baseline-shift="super" font-size="15">2</tspan></text>
+
+  <text x="190" y="446" text-anchor="middle" class="small">simple model</text>
+  <text x="760" y="446" text-anchor="middle" class="small">complex model</text>
+</svg>

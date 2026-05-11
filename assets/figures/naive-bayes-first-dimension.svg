@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="title desc">
+  <title id="title">Estimating class conditional probability along the first feature dimension</title>
+  <desc id="desc">Naive Bayes projects each class onto the first feature dimension and estimates one class conditional distribution per class.</desc>
+  <defs>
+    <marker id="axisArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="420" rx="22" fill="#f8fafc"/>
+  <text x="400" y="58" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800" fill="#111827">Estimation of First Dimension</text>
+
+  <g stroke="#111827" stroke-width="2" stroke-dasharray="4 5" fill="none" marker-end="url(#axisArrow)">
+    <path d="M 44 236 H 712"/>
+    <path d="M 362 362 V 92"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <path d="M 366 116 C 398 121 414 138 401 153 C 389 168 369 169 364 184 C 386 186 398 199 389 214 C 378 231 358 226 350 213 C 340 197 352 185 359 174 C 367 161 356 147 360 132 C 361 125 363 120 366 116 Z" fill="#fee2e2" stroke="#111827" stroke-width="1.2"/>
+    <path d="M 356 196 C 390 205 397 229 377 244 C 357 260 390 280 374 302 C 363 318 340 310 352 289 C 360 273 344 263 350 247 C 357 230 337 214 356 196 Z" fill="#dff3d7" stroke="#111827" stroke-width="1.2"/>
+  </g>
+
+  <g stroke="#ffffff" stroke-width="3" filter="url(#softShadow)">
+    <rect x="354" y="127" width="16" height="16" rx="2" fill="#bf1a0a"/>
+    <rect x="354" y="152" width="16" height="16" rx="2" fill="#bf1a0a"/>
+    <rect x="354" y="177" width="16" height="16" rx="2" fill="#bf1a0a"/>
+    <rect x="354" y="200" width="16" height="16" rx="2" fill="#bf1a0a"/>
+
+    <circle cx="362" cy="214" r="7" fill="#238b45"/>
+    <circle cx="362" cy="239" r="7" fill="#238b45"/>
+    <circle cx="362" cy="258" r="7" fill="#238b45"/>
+    <circle cx="362" cy="298" r="7" fill="#238b45"/>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" fill="#111827">
+    <text x="395" y="124" font-size="24" font-weight="700">P(x<tspan baseline-shift="sub" font-size="15">1</tspan>|y = 2)</text>
+    <text x="396" y="318" font-size="24" font-weight="700">P(x<tspan baseline-shift="sub" font-size="15">1</tspan>|y = 1)</text>
+    <text x="704" y="260" font-size="14" fill="#64748b">other feature</text>
+    <text x="332" y="102" font-size="14" fill="#64748b">x<tspan baseline-shift="sub" font-size="10">1</tspan></text>
+  </g>
+</svg>

@@ -60,6 +60,21 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Bagging reduces variance by averaging independent learners. Boosting reduces bias by combining weak learners sequentially, each one correcting the current ensemble's weak spots.</p>
   <p>AdaBoost can be derived as a forward stagewise additive model that minimizes exponential loss. The sample weights are exactly the loss-induced emphasis on examples with low or negative margins $y_iF(x_i)$.</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/adaboost-reweighting.svg" alt="AdaBoost reweighting diagram showing original data, weighted data, weak classifiers, mistakes, and a final ensemble vote" loading="lazy" />
+      <figcaption>The picture reads left to right. Start with equally weighted original data, train a weak classifier, then increase the weight of the points it misclassifies. The next classifier sees a weighted dataset where previous mistakes are louder. After many rounds, AdaBoost combines all weak classifiers with a weighted vote.</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">How to read the diagram</div>
+    <ul>
+      <li><b>Top row:</b> the training distribution changes. Larger dots mean larger sample weights.</li>
+      <li><b>Middle green boxes:</b> each weak learner gets some examples right and contributes a vote.</li>
+      <li><b>Bottom red boxes:</b> mistakes are fed forward by increasing their weights, so later learners focus on them.</li>
+      <li><b>Right side:</b> the final classifier is not one learner; it is the weighted ensemble vote.</li>
+    </ul>
+  </div>
   <div class="callout">
     <div class="head">AdaBoost.M1 loop</div>
     <ol>
@@ -223,6 +238,21 @@
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>Bagging 通过 averaging independent learners 降低 variance；Boosting 通过 sequential correction 降低 bias，让每个新 learner 盯着当前 ensemble 的弱点。</p>
       <p>AdaBoost 可以看成 forward stagewise additive model，用一轮一轮加 weak learner 的方式最小化 exponential loss。Sample weights 本质上是在强调 margin $y_iF(x_i)$ 小或为负的样本。</p>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/adaboost-reweighting.svg" alt="AdaBoost reweighting diagram showing original data, weighted data, weak classifiers, mistakes, and final ensemble vote" loading="lazy" />
+          <figcaption>这张图按从左到右读：先用 equally weighted original data 训练 weak classifier；它分错的点会被加大 weight；下一轮 classifier 看到的是“错题声音更大”的 weighted data。重复多轮后，AdaBoost 用所有 weak classifiers 的 weighted vote 组成最终 ensemble classifier。</figcaption>
+        </figure>
+      </div>
+      <div class="callout intuition">
+        <div class="head">这张图怎么读</div>
+        <ul>
+          <li><b>Top row:</b> training distribution 在变；点越大代表 sample weight 越大。</li>
+          <li><b>Middle green boxes:</b> 每个 weak learner 都会正确处理一部分样本，并贡献一次 vote。</li>
+          <li><b>Bottom red boxes:</b> 错分样本会被传到下一轮，因为它们的 weights 被放大。</li>
+          <li><b>Right side:</b> 最终模型不是某一个 learner，而是 weighted ensemble vote。</li>
+        </ul>
+      </div>
       <div class="callout">
         <div class="head">AdaBoost.M1 loop</div>
         <ol>

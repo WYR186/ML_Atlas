@@ -41,7 +41,8 @@
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_21.pdf" target="_blank">📄 Lecture 21</a>
         <a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/bayes-classification/" target="_blank" rel="noopener">🔗 GFG Bayes Classification</a></div>
     </div>
 
 <div class="en-only">
@@ -57,6 +58,10 @@
     <li>If labels are pure coin flips at every $x$, the Bayes error is 0.5 in binary classification.</li>
     <li>In practice we do not know $\mu$, so Bayes error is a theoretical benchmark, not a directly computable training objective.</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/bayes-classification-working.svg" alt="Bayesian classification workflow from likelihood, observed data, and prior through Bayes theorem to posterior distribution" loading="lazy" />
+    <figcaption><b>How to read this workflow.</b> The prior $P(C)$ is what you believe about class $C$ before seeing the example. The likelihood $P(x\mid C)$ asks how plausible the observed data $x$ would be if the class were $C$. Bayes' theorem combines them and normalizes by evidence $P(x)$ to produce the posterior $P(C\mid x)$, then classification chooses the class with the largest posterior. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/bayes-classification/" target="_blank" rel="noopener">GeeksforGeeks Bayes Classification</a>.</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Imagine asking the universe for the answer key. Even with the answer key, some examples are genuinely ambiguous: the same feature value may sometimes produce label 0 and sometimes label 1.</p>
@@ -80,6 +85,11 @@
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
+    <div class="callout formula wide">
+      <h4>Bayes theorem for classification</h4>
+      <div class="eq">$$ P(C_k\mid x)=\frac{P(x\mid C_k)P(C_k)}{P(x)},\qquad P(x)=\sum_j P(x\mid C_j)P(C_j) $$</div>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The posterior is proportional to likelihood times prior. The denominator is the same normalizing evidence across classes, so for prediction you can compare $P(x\mid C_k)P(C_k)$ and choose the largest.</p>
+    </div>
     <div class="callout formula">
       <h4>Binary Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
@@ -185,6 +195,10 @@
     <li>如果每个 $x$ 上 label 都像抛硬币，二分类 Bayes error 是 0.5。</li>
     <li>实际中我们不知道 $\mu$，所以 Bayes error 是 benchmark，不是可以直接训练的 objective。</li>
   </ul>
+  <figure class="topic-figure">
+    <img src="../assets/figures/bayes-classification-working.svg" alt="Bayesian classification workflow：likelihood、data、prior 经过 Bayes theorem 得到 posterior distribution" loading="lazy" />
+    <figcaption><b>怎么看这张图.</b> Prior $P(C)$ 是看到样本前对 class $C$ 的初始相信程度；likelihood $P(x\mid C)$ 问的是“如果类别真是 $C$，观察到这个 data $x$ 有多合理”；Bayes' theorem 把 likelihood 和 prior 结合起来，再用 evidence $P(x)$ normalize，得到 posterior $P(C\mid x)$。做 classification 时，对每个 class 都算 posterior，选最大的那个。参考：<a href="https://www.geeksforgeeks.org/machine-learning/bayes-classification/" target="_blank" rel="noopener">GeeksforGeeks Bayes Classification</a>。</figcaption>
+  </figure>
 
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
   <p>可以把 Bayes classifier 想成“上帝视角分类器”：它知道某个 $x$ 下 0 和 1 各有多大概率。</p>
@@ -208,6 +222,11 @@
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
+    <div class="callout formula wide">
+      <h4>Bayes theorem for classification</h4>
+      <div class="eq">$$ P(C_k\mid x)=\frac{P(x\mid C_k)P(C_k)}{P(x)},\qquad P(x)=\sum_j P(x\mid C_j)P(C_j) $$</div>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>Posterior 和 likelihood × prior 成正比。分母 $P(x)$ 是 evidence，用来把所有 classes 的 posterior normalize 成概率；做 prediction 时，因为同一个 $x$ 的 $P(x)$ 对所有 class 都一样，所以比较 $P(x\mid C_k)P(C_k)$ 选最大即可。</p>
+    </div>
     <div class="callout formula">
       <h4>二分类 Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>

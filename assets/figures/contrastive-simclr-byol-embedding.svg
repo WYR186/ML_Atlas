@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 570" role="img" aria-labelledby="title desc">
+  <title id="title">Contrastive learning embedding space for SimCLR and BYOL</title>
+  <desc id="desc">A before-and-after embedding space diagram showing an anchor and positive views pulled together while negatives are pushed into separate clusters.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+    <marker id="arrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#111827"/>
+    </marker>
+    <style>
+      .label { font-family: Inter, Arial, sans-serif; fill: #111827; }
+      .muted { fill: #4b5563; }
+      .panel { fill: #f8fbff; stroke: #d8e1ef; stroke-width: 1.5; }
+      .chip { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.2; }
+      .cluster { fill: #dbeafe; stroke: #334155; stroke-width: 2.2; stroke-dasharray: 5 7; opacity: .76; }
+      .negativeCluster { fill: #fee2e2; stroke: #991b1b; stroke-width: 2.2; stroke-dasharray: 5 7; opacity: .7; }
+      .carCluster { fill: #dcfce7; stroke: #166534; stroke-width: 2.2; stroke-dasharray: 5 7; opacity: .7; }
+    </style>
+  </defs>
+
+  <rect width="1040" height="570" fill="#f8fafc"/>
+
+  <g filter="url(#shadow)">
+    <rect x="74" y="20" width="892" height="68" rx="16" fill="#ffffff" stroke="#e5e7eb"/>
+  </g>
+  <text class="label" x="520" y="66" text-anchor="middle" font-size="37" font-weight="900">
+    <tspan fill="#1565c0">Contrastive Learning</tspan>
+    <tspan fill="#111827"> - SimCLR and BYOL</tspan>
+  </text>
+
+  <text class="label" x="250" y="128" text-anchor="middle" font-size="30" font-weight="850">Before training</text>
+  <text class="label muted" x="250" y="157" text-anchor="middle" font-size="18">views are mixed in embedding space</text>
+  <text class="label" x="790" y="128" text-anchor="middle" font-size="30" font-weight="850">After contrastive training</text>
+  <text class="label muted" x="790" y="157" text-anchor="middle" font-size="18">positives cluster, negatives separate</text>
+
+  <g filter="url(#shadow)">
+    <rect class="panel" x="68" y="178" width="376" height="326" rx="18"/>
+    <rect class="panel" x="598" y="178" width="376" height="326" rx="18"/>
+  </g>
+
+  <g class="label" text-anchor="middle" font-weight="800">
+    <g transform="translate(248 295)">
+      <circle class="chip" cx="0" cy="0" r="48"/>
+      <text x="0" y="-8" font-size="38">cat</text>
+      <text x="0" y="70" font-size="17">Anchor</text>
+    </g>
+    <g transform="translate(166 244)">
+      <circle class="chip" cx="0" cy="0" r="43"/>
+      <text x="0" y="-6" font-size="32">cat</text>
+      <text x="0" y="63" font-size="16">Positive 1</text>
+    </g>
+    <g transform="translate(326 358)">
+      <circle class="chip" cx="0" cy="0" r="43"/>
+      <text x="0" y="-6" font-size="32">cat</text>
+      <text x="0" y="63" font-size="16">Positive 2</text>
+    </g>
+    <g transform="translate(340 235)">
+      <circle class="chip" cx="0" cy="0" r="43"/>
+      <text x="0" y="-6" font-size="31">horse</text>
+      <text x="0" y="63" font-size="16">Negative 1</text>
+    </g>
+    <g transform="translate(170 392)">
+      <circle class="chip" cx="0" cy="0" r="43"/>
+      <text x="0" y="-6" font-size="31">car</text>
+      <text x="0" y="63" font-size="16">Negative 2</text>
+    </g>
+  </g>
+
+  <g>
+    <line x1="470" y1="342" x2="566" y2="342" stroke="#111827" stroke-width="3.5" stroke-dasharray="7 8" marker-end="url(#arrow)"/>
+    <text class="label" x="518" y="280" text-anchor="middle" font-size="30" font-weight="900">Pull positives</text>
+    <text class="label" x="518" y="318" text-anchor="middle" font-size="30" font-weight="900">push negatives</text>
+  </g>
+
+  <ellipse class="cluster" cx="740" cy="298" rx="135" ry="108"/>
+  <ellipse class="negativeCluster" cx="896" cy="288" rx="58" ry="96"/>
+  <ellipse class="carCluster" cx="772" cy="444" rx="128" ry="44"/>
+
+  <g class="label" text-anchor="middle" font-weight="800">
+    <g transform="translate(743 245)">
+      <circle class="chip" cx="0" cy="0" r="39"/>
+      <text x="0" y="-5" font-size="30">cat</text>
+      <text x="0" y="58" font-size="15">Anchor</text>
+    </g>
+    <g transform="translate(681 332)">
+      <circle class="chip" cx="0" cy="0" r="39"/>
+      <text x="0" y="-5" font-size="30">cat</text>
+      <text x="0" y="58" font-size="15">Positive 1</text>
+    </g>
+    <g transform="translate(804 338)">
+      <circle class="chip" cx="0" cy="0" r="39"/>
+      <text x="0" y="-5" font-size="30">cat</text>
+      <text x="0" y="58" font-size="15">Positive 2</text>
+    </g>
+    <g transform="translate(897 248)">
+      <circle class="chip" cx="0" cy="0" r="35"/>
+      <text x="0" y="-5" font-size="25">horse</text>
+      <text x="0" y="53" font-size="14">Negative 1</text>
+    </g>
+    <g transform="translate(895 352)">
+      <circle class="chip" cx="0" cy="0" r="35"/>
+      <text x="0" y="-5" font-size="25">horse</text>
+      <text x="0" y="53" font-size="14">Negative 2</text>
+    </g>
+    <g transform="translate(718 444)">
+      <circle class="chip" cx="0" cy="0" r="35"/>
+      <text x="0" y="-5" font-size="25">car</text>
+      <text x="0" y="53" font-size="14">Negative 3</text>
+    </g>
+    <g transform="translate(826 444)">
+      <circle class="chip" cx="0" cy="0" r="35"/>
+      <text x="0" y="-5" font-size="25">car</text>
+      <text x="0" y="53" font-size="14">Negative 4</text>
+    </g>
+  </g>
+
+  <text class="label muted" x="520" y="538" text-anchor="middle" font-size="18">
+    Positive pairs are different views of the same item; negatives are other items used as contrast.
+  </text>
+</svg>

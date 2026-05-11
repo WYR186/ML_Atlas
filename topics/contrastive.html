@@ -39,7 +39,9 @@
       <h1>🎭 <span class="en-only">Contrastive Learning</span><span class="cn-only">对比学习</span></h1>
       <div class="subtitle"><span class="en-only">InfoNCE · Pull positive, push negative</span><span class="cn-only">InfoNCE · 拉正推负</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_15.pdf" target="_blank">📄 Lecture 15</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip book" href="https://learnopencv.com/contrastive-learning-simclr-and-byol-with-code-example/" target="_blank" rel="noopener">🔗 LearnOpenCV</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/self-supervised-learning-ssl/" target="_blank" rel="noopener">🔗 GFG SSL</a></div>
     </div>
 
 <div class="en-only">
@@ -59,6 +61,16 @@
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of a model learning to recognize a person from different photos. A front-facing photo and a cropped photo of the same person should land near each other; a different person should land farther away.</p>
   <p>The labels are created by the data pipeline: two augmentations of one image are a positive pair; other images in the batch become negatives. Useful augmentations include cropping, flipping, blur, color shifts, and mild rotations.</p>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/contrastive-simclr-byol-embedding.svg" alt="Contrastive learning pulls anchor and positive views together while pushing negative examples away in embedding space" loading="lazy" />
+      <figcaption><b>Embedding-space view.</b> Before training, the anchor, positives, and negatives can be mixed. Contrastive learning makes augmented views of the same item cluster together and pushes unrelated items away. Reference: <a href="https://learnopencv.com/contrastive-learning-simclr-and-byol-with-code-example/" target="_blank" rel="noopener">LearnOpenCV on SimCLR and BYOL</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/self-supervised-pretrain-finetune.svg" alt="Self-supervised learning pretrains a representation with a pretext task and then finetunes a classifier on labels" loading="lazy" />
+      <figcaption><b>SSL training flow.</b> Pretraining uses unlabeled data and a pretext task to learn a representation. Finetuning reuses that representation with labels for a downstream task, such as classifying a dog. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/self-supervised-learning-ssl/" target="_blank" rel="noopener">GeeksforGeeks SSL overview</a>.</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Contrastive learning combines two pressures. Alignment pulls positives together; separation keeps negatives apart. Good embeddings preserve semantic content while ignoring nuisance transformations such as crop, color jitter, or mild rotation.</p>
@@ -156,6 +168,16 @@
       <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
       <p>想象模型在学“认人”：同一个人的正脸照和裁剪照应该离得近；另一个人的照片应该离得远。</p>
       <p>这里的 label 不是人工标的，而是 data pipeline 造出来的：同一图片的两个 augmentations 是 positive pair，batch 里的其它图片就是 negatives。常见 augmentations 包括 random crop、flip、blur、color shift、轻微 rotation。</p>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/contrastive-simclr-byol-embedding.svg" alt="Contrastive learning 在 embedding space 里拉近 anchor 和 positives，推远 negatives" loading="lazy" />
+          <figcaption><b>Embedding space 怎么看.</b> 训练前，anchor、positive views 和 negatives 可能混在一起；contrastive learning 会把同一对象的 augmented views 拉成一个 cluster，同时把不相关 objects 推远。参考：<a href="https://learnopencv.com/contrastive-learning-simclr-and-byol-with-code-example/" target="_blank" rel="noopener">LearnOpenCV 的 SimCLR / BYOL 介绍</a>。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/self-supervised-pretrain-finetune.svg" alt="Self-supervised learning 先用 pretext task 预训练 representation，再 finetune classifier" loading="lazy" />
+          <figcaption><b>SSL 流程怎么理解.</b> Pretraining 阶段用 unlabeled data 和 pretext task 学 representation；finetuning 阶段把这个 representation 接到 classifier 上，用少量 labeled data 适配 downstream task，例如 dog classification。参考：<a href="https://www.geeksforgeeks.org/machine-learning/self-supervised-learning-ssl/" target="_blank" rel="noopener">GeeksforGeeks SSL overview</a>。</figcaption>
+        </figure>
+      </div>
 
       <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
       <p>Contrastive learning 同时做两件事：alignment 把 positives 拉近，separation 把 negatives 拉开。好的 embedding 应该保留语义内容，同时忽略 crop、颜色扰动、轻微旋转这些 nuisance transformations。</p>

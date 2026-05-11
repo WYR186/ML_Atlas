@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">Working of a recurrent neural network and its unrolled form</title>
+  <desc id="desc">A compact RNN cell with a self-loop is unfolded into repeated time steps with shared input, recurrent, and output weights.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <style>
+      .title{font:800 30px Arial,sans-serif;fill:#111827}
+      .label{font:700 20px Arial,sans-serif;fill:#111827}
+      .white{fill:#fff}
+      .small{font:700 15px Arial,sans-serif;fill:#111827}
+      .cell{fill:#dff4d7;stroke:#111827;stroke-width:1.5}
+      .in{fill:#079669;stroke:#111827;stroke-width:1.5}
+      .out{fill:#65c7df;stroke:#111827;stroke-width:1.5}
+      .arrow{stroke:#111827;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#111827;stroke-width:2;stroke-dasharray:3 5;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="960" height="420" fill="#f8fafc"/>
+  <text x="480" y="48" text-anchor="middle" class="title">Working of Recurrent Neural Network</text>
+
+  <g transform="translate(50,110)">
+    <circle class="out" cx="80" cy="20" r="28"/><text x="80" y="27" text-anchor="middle" class="label white">y</text>
+    <rect class="cell" x="32" y="100" width="96" height="46"/><text x="80" y="131" text-anchor="middle" class="label">h</text>
+    <circle class="in" cx="80" cy="225" r="30"/><text x="80" y="232" text-anchor="middle" class="label white">x</text>
+    <path class="arrow" d="M80 195V148"/><text x="95" y="180" class="small">U</text>
+    <path class="arrow" d="M80 100V52"/><text x="94" y="78" class="small">W_y</text>
+    <path class="arrow" d="M31 123H0V162H31"/><text x="-14" y="129" class="small">W_h</text>
+    <text x="150" y="125" class="label">Unfold</text>
+    <path class="arrow" d="M150 122H215"/>
+  </g>
+
+  <g transform="translate(310,110)">
+    <text x="20" y="290" class="small">same U, W_h, W_y at every time step</text>
+    <g transform="translate(0,0)">
+      <circle class="out" cx="70" cy="20" r="28"/><text x="70" y="27" text-anchor="middle" class="label white">y<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+      <rect class="cell" x="22" y="100" width="96" height="46"/><text x="70" y="131" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+      <circle class="in" cx="70" cy="225" r="30"/><text x="70" y="232" text-anchor="middle" class="label white">x<tspan baseline-shift="sub" font-size="13">t-1</tspan></text>
+      <path class="arrow" d="M70 195V148"/><text x="83" y="180" class="small">U</text>
+      <path class="arrow" d="M70 100V52"/><text x="83" y="78" class="small">W_y</text>
+    </g>
+    <path class="arrow" d="M118 123H195"/><text x="153" y="112" class="small">W_h</text>
+    <g transform="translate(195,0)">
+      <circle class="out" cx="70" cy="20" r="28"/><text x="70" y="27" text-anchor="middle" class="label white">y<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+      <rect class="cell" x="22" y="100" width="96" height="46"/><text x="70" y="131" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+      <circle class="in" cx="70" cy="225" r="30"/><text x="70" y="232" text-anchor="middle" class="label white">x<tspan baseline-shift="sub" font-size="13">t</tspan></text>
+      <path class="arrow" d="M70 195V148"/><text x="83" y="180" class="small">U</text>
+      <path class="arrow" d="M70 100V52"/><text x="83" y="78" class="small">W_y</text>
+    </g>
+    <path class="arrow" d="M313 123H390"/><text x="348" y="112" class="small">W_h</text>
+    <g transform="translate(390,0)">
+      <circle class="out" cx="70" cy="20" r="28"/><text x="70" y="27" text-anchor="middle" class="label white">y<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+      <rect class="cell" x="22" y="100" width="96" height="46"/><text x="70" y="131" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+      <circle class="in" cx="70" cy="225" r="30"/><text x="70" y="232" text-anchor="middle" class="label white">x<tspan baseline-shift="sub" font-size="13">t+1</tspan></text>
+      <path class="arrow" d="M70 195V148"/><text x="83" y="180" class="small">U</text>
+      <path class="arrow" d="M70 100V52"/><text x="83" y="78" class="small">W_y</text>
+    </g>
+    <path class="dash" d="M-30 123H20"/>
+    <path class="dash" d="M508 123H570"/>
+  </g>
+</svg>

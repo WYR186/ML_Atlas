@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">(S, A, P, R, γ) · Markov property</span><span class="cn-only">(S, A, P, R, γ) · Markov 性</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_23.pdf" target="_blank">📄 Lecture 23</a>
         <a class="ref-chip lecture" href="../slides/Lecture_24.pdf" target="_blank">📄 Lecture 24</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/markov-decision-process/" target="_blank" rel="noopener">🔗 GFG MDP</a></div>
     </div>
 
 <div class="en-only">
@@ -59,6 +60,20 @@
     <li>$R(s,a)$: immediate reward.</li>
     <li>$\gamma\in[0,1)$: discount factor for future rewards; with bounded rewards, it keeps infinite-horizon returns finite.</li>
   </ul>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/mdp-components-overview.svg" alt="MDP component overview listing states, transition model, actions, rewards, and policy" loading="lazy" />
+      <figcaption><b>Component map.</b> The top half describes the environment: states, actions, transition model, and reward. The policy line is the agent's decision rule, mapping each state to an action or action distribution. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/markov-decision-process/" target="_blank" rel="noopener">GeeksforGeeks Markov Decision Process</a>.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/mdp-gridworld-example.svg" alt="GridWorld MDP with start state, agent, possible movement arrows, target, positive reward, and negative reward" loading="lazy" />
+      <figcaption><b>GridWorld picture.</b> Each cell is a state. Moving up, down, left, or right is an action. The star is a positive terminal reward, the black hazard is a negative terminal reward, and the arrows show that an intended move may still be modeled as stochastic.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to connect the two figures.</b> In GridWorld, $\mathcal{S}$ is the set of cells, $\mathcal{A}$ is the move set, $P$ describes where the agent lands after a move, $R$ assigns step / terminal rewards, and $\pi$ tells the agent which move to try.</div>
+    <div><b>Why this is not supervised learning.</b> A single move may look bad locally but good for long-term return, so the policy must optimize future reward, not one immediate label.</div>
+  </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of a game. The screen is the state. The button you press is the action. The score change is the reward. The game engine decides the next screen.</p>
@@ -178,6 +193,20 @@
     <li>$R(s,a)$：immediate reward。</li>
     <li>$\gamma\in[0,1)$：future reward 的 discount factor；reward 有界时，它能让 infinite-horizon return 保持有限。</li>
   </ul>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/mdp-components-overview.svg" alt="MDP components：states、transition model、actions、reward、policy" loading="lazy" />
+      <figcaption><b>组件图怎么看.</b> 上半部分是 environment：states、actions、transition model、reward。Policy 那一行是 agent 的 decision rule，也就是在每个 state 该选什么 action，或按什么概率选 action。参考：<a href="https://www.geeksforgeeks.org/machine-learning/markov-decision-process/" target="_blank" rel="noopener">GeeksforGeeks Markov Decision Process</a>。</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/mdp-gridworld-example.svg" alt="GridWorld MDP：start state、agent、movement arrows、target、positive reward、negative reward" loading="lazy" />
+      <figcaption><b>GridWorld 图怎么看.</b> 每个格子是一个 state；上下左右移动是 actions；星星是 positive terminal reward，黑色危险格是 negative terminal reward；箭头表示 agent 想往某个方向走，但实际 transition 可以是 stochastic。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>两张图怎么对应：</b>GridWorld 里 $\mathcal{S}$ 是所有格子，$\mathcal{A}$ 是移动动作，$P$ 决定动作后落到哪里，$R$ 给 step / terminal reward，$\pi$ 决定每个格子尝试哪个 action。</div>
+    <div><b>为什么不是 supervised learning：</b>一步动作本身不一定立刻看出好坏，策略要优化 long-term return，而不是匹配一个即时 label。</div>
+  </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
   <p>想象一个游戏：屏幕画面是 state，按哪个键是 action，分数变化是 reward，游戏引擎决定 next state。</p>

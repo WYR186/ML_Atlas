@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1580 650" role="img" aria-labelledby="title desc">
+  <title id="title">A3C and A2C parallel actor-critic training</title>
+  <desc id="desc">A3C sends global network parameters directly to asynchronous agents, while A2C inserts a coordinator that synchronizes parallel agents before updating the global network.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#111827"/>
+    </marker>
+    <marker id="greenArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto">
+      <path d="M0,0 L13,6.5 L0,13 Z" fill="#15803d"/>
+    </marker>
+    <filter id="shadow" x="-16%" y="-16%" width="132%" height="132%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .label{font-family:Inter,Arial,sans-serif;fill:#0f172a}
+      .muted{fill:#475569}
+      .box{fill:#f1f5f9;stroke:#111827;stroke-width:4}
+      .agent{fill:#ffffff;stroke:#111827;stroke-width:4}
+      .small{font-size:18px}
+      .mid{font-size:25px;font-weight:700}
+      .title{font-size:30px;font-weight:800}
+    </style>
+  </defs>
+
+  <rect width="1580" height="650" fill="#ffffff"/>
+
+  <!-- A3C -->
+  <g transform="translate(30 48)">
+    <text x="370" y="0" text-anchor="middle" class="label title">Training in parallel</text>
+    <rect x="0" y="205" width="230" height="150" rx="26" class="box" filter="url(#shadow)"/>
+    <text x="115" y="256" text-anchor="middle" class="label mid">Global</text>
+    <text x="115" y="292" text-anchor="middle" class="label mid">Network</text>
+    <text x="115" y="328" text-anchor="middle" class="label mid">Parameters</text>
+
+    <circle cx="470" cy="88" r="38" class="agent"/>
+    <circle cx="470" cy="215" r="38" class="agent"/>
+    <circle cx="470" cy="342" r="38" class="agent"/>
+    <circle cx="470" cy="508" r="38" class="agent"/>
+    <text x="540" y="97" class="label mid">Agent 1</text>
+    <text x="540" y="224" class="label mid">Agent 2</text>
+    <text x="540" y="351" class="label mid">Agent 3</text>
+    <text x="540" y="517" class="label mid">Agent n</text>
+    <text x="470" y="435" text-anchor="middle" class="label title">⋮</text>
+
+    <path d="M230 280 L432 96" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M230 280 L432 222" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M230 280 L432 338" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M230 280 L432 500" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+
+    <path d="M432 126 C352 156 300 198 232 260" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+    <path d="M432 245 C356 260 300 270 232 276" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+    <path d="M432 372 C356 344 300 318 232 300" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+
+    <text x="332" y="594" text-anchor="middle" class="label title">A3C (Async)</text>
+    <text x="332" y="624" text-anchor="middle" class="label small muted">workers update independently, so gradients may be slightly stale</text>
+  </g>
+
+  <line x1="790" y1="48" x2="790" y2="618" stroke="#e2e8f0" stroke-width="3"/>
+
+  <!-- A2C -->
+  <g transform="translate(835 48)">
+    <text x="440" y="0" text-anchor="middle" class="label title">Training in parallel</text>
+    <rect x="0" y="212" width="230" height="150" rx="26" class="box" filter="url(#shadow)"/>
+    <text x="115" y="263" text-anchor="middle" class="label mid">Global</text>
+    <text x="115" y="299" text-anchor="middle" class="label mid">Network</text>
+    <text x="115" y="335" text-anchor="middle" class="label mid">Parameters</text>
+
+    <rect x="300" y="212" width="230" height="150" rx="26" class="box" filter="url(#shadow)"/>
+    <text x="415" y="296" text-anchor="middle" class="label mid">Coordinator</text>
+    <path d="M230 287 H300" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+
+    <circle cx="720" cy="88" r="38" class="agent"/>
+    <circle cx="720" cy="215" r="38" class="agent"/>
+    <circle cx="720" cy="342" r="38" class="agent"/>
+    <circle cx="720" cy="508" r="38" class="agent"/>
+    <text x="790" y="97" class="label mid">Agent 1</text>
+    <text x="790" y="224" class="label mid">Agent 2</text>
+    <text x="790" y="351" class="label mid">Agent 3</text>
+    <text x="790" y="517" class="label mid">Agent n</text>
+    <text x="720" y="435" text-anchor="middle" class="label title">⋮</text>
+
+    <path d="M530 287 L682 96" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M530 287 L682 222" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M530 287 L682 338" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+    <path d="M530 287 L682 500" stroke="#111827" stroke-width="5" marker-end="url(#arrow)"/>
+
+    <path d="M682 126 C608 160 570 198 532 260" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+    <path d="M682 245 C610 260 570 274 532 284" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+    <path d="M682 372 C610 346 570 320 532 306" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#greenArrow)" stroke-dasharray="8 8"/>
+
+    <text x="320" y="194" text-anchor="middle" class="label small muted">wait, batch, then update</text>
+    <text x="490" y="594" text-anchor="middle" class="label title">A2C (Sync)</text>
+    <text x="490" y="624" text-anchor="middle" class="label small muted">coordinator synchronizes actors before the global update</text>
+  </g>
+</svg>

@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" role="img" aria-labelledby="title desc">
+  <title id="title">GRU versus LSTM gate comparison</title>
+  <desc id="desc">A side-by-side teaching diagram comparing GRU and LSTM. GRU has update and reset gates with no separate cell state. LSTM has input, forget, and output gates plus a separate cell state.</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#e6ecef" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0 0L10 5L0 10Z" fill="#182033"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#0f172a" flood-opacity=".11"/>
+    </filter>
+  </defs>
+  <style>
+    .bg { fill: #fbfcfb; }
+    .grid { fill: url(#grid); opacity: .75; }
+    .panel { fill: #dff2d7; stroke: #b7ddb0; stroke-width: 2; }
+    .split { stroke: #172033; stroke-width: 2; }
+    .wire { fill: none; stroke: #172033; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    .wire-noarrow { fill: none; stroke: #172033; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .dash { fill: none; stroke: #16a34a; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 8 7; }
+    .gate { fill: #ffffff; stroke: #d6e1dc; stroke-width: 1.5; }
+    .layer { fill: #ffd22e; stroke: #efb71f; stroke-width: 1.4; }
+    .op { fill: #15a866; stroke: #0b8b53; stroke-width: 1.5; }
+    .op-text { font: 800 18px Arial, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: middle; }
+    .title { font: 900 34px Arial, sans-serif; fill: #0f172a; text-anchor: middle; }
+    .label { font: 700 17px Arial, sans-serif; fill: #111827; text-anchor: middle; }
+    .small { font: 600 13px Arial, sans-serif; fill: #334155; text-anchor: middle; }
+    .badge { fill: #23934c; }
+    .badge-text { font: 800 23px Arial, sans-serif; fill: #ffffff; text-anchor: middle; dominant-baseline: middle; }
+    .caption { font: 700 22px Arial, sans-serif; fill: #111827; text-anchor: middle; }
+    .blue { fill: #8bd3f7; stroke: #65b8e6; stroke-width: 1.5; }
+  </style>
+
+  <rect class="bg" width="980" height="520"/>
+  <rect class="grid" width="980" height="520"/>
+  <line x1="490" y1="46" x2="490" y2="456" class="split"/>
+  <rect x="74" y="100" width="335" height="245" rx="16" class="panel" filter="url(#shadow)"/>
+  <rect x="572" y="100" width="335" height="245" rx="16" class="panel" filter="url(#shadow)"/>
+  <rect x="454" y="214" width="72" height="56" rx="12" fill="#ffffff" stroke="#172033" stroke-width="1.8"/>
+  <text x="490" y="250" class="caption">vs</text>
+
+  <text x="242" y="64" class="title">GRU</text>
+  <text x="740" y="64" class="title">LSTM</text>
+
+  <circle cx="107" cy="370" r="24" class="blue"/>
+  <text x="107" y="376" class="label">x(t)</text>
+  <path class="wire-noarrow" d="M107 346V300"/>
+  <path class="wire" d="M52 142H392"/>
+  <text x="360" y="126" class="small">h(t)</text>
+  <path class="wire-noarrow" d="M118 300C130 260 143 238 160 220"/>
+  <path class="wire-noarrow" d="M118 300C152 280 190 265 245 260"/>
+  <path class="dash" d="M105 142C139 162 151 188 160 220V302"/>
+  <path class="dash" d="M105 142C172 156 218 190 245 260V302"/>
+
+  <rect x="132" y="205" width="56" height="45" rx="7" class="gate"/>
+  <text x="160" y="233" class="label">r</text>
+  <text x="160" y="323" class="small">reset gate</text>
+  <rect x="217" y="244" width="56" height="45" rx="7" class="gate"/>
+  <text x="245" y="272" class="label">z</text>
+  <text x="245" y="323" class="small">update gate</text>
+  <rect x="297" y="206" width="58" height="45" rx="7" class="layer"/>
+  <text x="326" y="234" class="label">tanh</text>
+  <text x="326" y="323" class="small">candidate</text>
+  <circle cx="205" cy="143" r="15" class="op"/>
+  <text x="205" y="143" class="op-text">x</text>
+  <circle cx="304" cy="143" r="15" class="op"/>
+  <text x="304" y="143" class="op-text">+</text>
+  <path class="wire-noarrow" d="M160 205C160 170 181 151 190 144"/>
+  <path class="wire-noarrow" d="M245 244C255 190 282 154 289 144"/>
+  <path class="wire-noarrow" d="M326 206C322 180 311 158 304 143"/>
+  <circle cx="355" cy="96" r="18" fill="#e5e7eb" stroke="#cbd5e1"/>
+  <text x="355" y="101" class="small">h(t)</text>
+  <path class="wire-noarrow" d="M355 143V114"/>
+
+  <rect x="162" y="372" width="160" height="38" rx="4" class="badge"/>
+  <text x="242" y="393" class="badge-text">2 gates</text>
+  <text x="242" y="436" class="caption">No separate cell state</text>
+  <text x="242" y="466" class="caption">Simpler, faster</text>
+
+  <circle cx="604" cy="370" r="24" class="blue"/>
+  <text x="604" y="376" class="label">x(t)</text>
+  <path class="wire-noarrow" d="M604 346V300"/>
+  <path class="wire" d="M552 142H930"/>
+  <text x="570" y="126" class="small">c(t-1)</text>
+  <text x="916" y="126" class="small">c(t)</text>
+  <path class="wire" d="M552 290H930"/>
+  <text x="916" y="276" class="small">h(t)</text>
+
+  <circle cx="650" cy="142" r="15" class="op"/>
+  <text x="650" y="142" class="op-text">x</text>
+  <circle cx="742" cy="142" r="15" class="op"/>
+  <text x="742" y="142" class="op-text">+</text>
+  <circle cx="792" cy="222" r="15" class="op"/>
+  <text x="792" y="222" class="op-text">x</text>
+  <circle cx="842" cy="290" r="15" class="op"/>
+  <text x="842" y="290" class="op-text">x</text>
+  <rect x="622" y="206" width="54" height="43" rx="7" class="gate"/>
+  <text x="649" y="232" class="label">f</text>
+  <text x="650" y="88" class="small">forget gate</text>
+  <rect x="704" y="244" width="54" height="43" rx="7" class="gate"/>
+  <text x="731" y="270" class="label">i</text>
+  <text x="731" y="323" class="small">input gate</text>
+  <rect x="765" y="174" width="62" height="43" rx="7" class="layer"/>
+  <text x="796" y="201" class="label">tanh</text>
+  <text x="797" y="323" class="small">candidate</text>
+  <rect x="830" y="244" width="54" height="43" rx="7" class="gate"/>
+  <text x="857" y="270" class="label">o</text>
+  <text x="857" y="323" class="small">output gate</text>
+  <path class="wire-noarrow" d="M604 300C624 268 641 250 649 249"/>
+  <path class="wire-noarrow" d="M604 300C638 280 681 270 704 266"/>
+  <path class="wire-noarrow" d="M604 300C660 275 728 255 765 217"/>
+  <path class="wire-noarrow" d="M604 300C682 284 770 278 830 270"/>
+  <path class="wire-noarrow" d="M649 206C649 175 650 154 650 142"/>
+  <path class="wire-noarrow" d="M731 244C733 190 739 158 742 142"/>
+  <path class="wire-noarrow" d="M796 217C796 220 794 222 792 222"/>
+  <path class="wire-noarrow" d="M807 222C824 232 837 253 842 275"/>
+  <path class="wire-noarrow" d="M857 244C858 224 868 197 884 180"/>
+  <path class="wire-noarrow" d="M884 180V96"/>
+  <circle cx="884" cy="74" r="18" fill="#e5e7eb" stroke="#cbd5e1"/>
+  <text x="884" y="79" class="small">h(t)</text>
+
+  <rect x="660" y="372" width="160" height="38" rx="4" class="badge"/>
+  <text x="740" y="393" class="badge-text">3 gates</text>
+  <text x="740" y="436" class="caption">Has cell state</text>
+  <text x="740" y="466" class="caption">More control</text>
+</svg>

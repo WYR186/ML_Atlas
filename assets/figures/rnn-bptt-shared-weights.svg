@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" role="img" aria-labelledby="title desc">
+  <title id="title">Backpropagation through time with shared recurrent weights</title>
+  <desc id="desc">An unfolded RNN shows forward hidden states, a final loss, backward gradient arrows, and the same recurrent weight matrix contributing at every time step.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#111827"/>
+    </marker>
+    <marker id="redarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .title{font:800 28px Arial,sans-serif;fill:#111827}
+      .label{font:700 21px Arial,sans-serif;fill:#111827}
+      .white{fill:#fff}
+      .small{font:700 15px Arial,sans-serif;fill:#111827}
+      .hint{font:600 14px Arial,sans-serif;fill:#475569}
+      .state{fill:#1f944b;stroke:#111827;stroke-width:1.5}
+      .stateLight{fill:#dff4d7;stroke:#111827;stroke-width:1.5}
+      .input{fill:#dff4d7;stroke:#111827;stroke-width:1.5}
+      .loss{fill:#dff4d7;stroke:#111827;stroke-width:1.5}
+      .hub{fill:#1f944b;stroke:#111827;stroke-width:1.5}
+      .arrow{stroke:#111827;stroke-width:2.2;fill:none;marker-end:url(#arrow)}
+      .grad{stroke:#dc2626;stroke-width:2.2;stroke-dasharray:6 5;fill:none;marker-end:url(#redarrow)}
+      .thin{stroke:#111827;stroke-width:1.7;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="820" height="560" fill="#f8fafc"/>
+  <text x="410" y="42" text-anchor="middle" class="title">BPTT: Gradients Through Shared Weights</text>
+
+  <g transform="translate(65,88)">
+    <rect class="state" x="0" y="90" width="72" height="60" rx="5"/>
+    <text x="36" y="128" text-anchor="middle" class="label white">h<tspan baseline-shift="sub" font-size="13">0</tspan></text>
+    <rect class="state" x="130" y="90" width="72" height="60" rx="5"/>
+    <text x="166" y="128" text-anchor="middle" class="label white">h<tspan baseline-shift="sub" font-size="13">1</tspan></text>
+    <rect class="state" x="260" y="90" width="72" height="60" rx="5"/>
+    <text x="296" y="128" text-anchor="middle" class="label white">h<tspan baseline-shift="sub" font-size="13">2</tspan></text>
+    <rect class="state" x="390" y="90" width="72" height="60" rx="5"/>
+    <text x="426" y="128" text-anchor="middle" class="label white">h<tspan baseline-shift="sub" font-size="13">3</tspan></text>
+
+    <rect class="input" x="130" y="210" width="72" height="60" rx="5"/>
+    <text x="166" y="306" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">1</tspan></text>
+    <rect class="input" x="260" y="210" width="72" height="60" rx="5"/>
+    <text x="296" y="306" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">2</tspan></text>
+    <rect class="input" x="390" y="210" width="72" height="60" rx="5"/>
+    <text x="426" y="306" text-anchor="middle" class="label">x<tspan baseline-shift="sub" font-size="13">3</tspan></text>
+
+    <rect class="loss" x="390" y="0" width="72" height="60" rx="5"/>
+    <text x="426" y="-12" text-anchor="middle" class="label">L(theta)</text>
+
+    <path class="arrow" d="M72 120H130"/><text x="94" y="108" class="small">W</text>
+    <path class="arrow" d="M202 120H260"/><text x="224" y="108" class="small">W</text>
+    <path class="arrow" d="M332 120H390"/><text x="354" y="108" class="small">W</text>
+    <path class="arrow" d="M166 210V151"/><text x="180" y="184" class="small">U</text>
+    <path class="arrow" d="M296 210V151"/><text x="310" y="184" class="small">U</text>
+    <path class="arrow" d="M426 210V151"/><text x="440" y="184" class="small">U</text>
+    <path class="arrow" d="M426 90V61"/>
+
+    <path class="grad" d="M390 32C324 46 328 80 332 105"/>
+    <path class="grad" d="M390 32C238 42 224 76 202 108"/>
+    <path class="grad" d="M390 32C150 38 108 74 72 108"/>
+    <text x="505" y="118" class="small" fill="#dc2626">loss gradient flows backward</text>
+  </g>
+
+  <g transform="translate(120,410)">
+    <circle class="hub" cx="290" cy="58" r="38"/>
+    <text x="290" y="67" text-anchor="middle" class="label white">W</text>
+    <circle class="stateLight" cx="50" cy="58" r="36"/><text x="50" y="66" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">0</tspan></text>
+    <circle class="stateLight" cx="170" cy="58" r="36"/><text x="170" y="66" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">1</tspan></text>
+    <circle class="stateLight" cx="410" cy="58" r="36"/><text x="410" y="66" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">2</tspan></text>
+    <circle class="stateLight" cx="530" cy="58" r="36"/><text x="530" y="66" text-anchor="middle" class="label">h<tspan baseline-shift="sub" font-size="13">3</tspan></text>
+    <path class="thin" d="M86 58H134"/>
+    <path class="thin" d="M206 58H252"/>
+    <path class="thin" d="M328 58H374"/>
+    <path class="thin" d="M446 58H494"/>
+    <path class="thin" d="M290 20C184 -46 74 -14 52 20"/>
+    <path class="thin" d="M290 20C231 -28 182 -16 170 22"/>
+    <path class="thin" d="M290 20C352 -28 402 -16 410 22"/>
+    <text x="290" y="118" text-anchor="middle" class="hint">One matrix W is reused, so its gradient is the sum of contributions from every transition.</text>
+  </g>
+</svg>

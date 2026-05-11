@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Centering · Eigenvectors · SVD</span><span class="cn-only">中心化 · Eigenvectors · SVD</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_9.pdf" target="_blank">📄 Lecture 9</a>
         <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a>
-        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw2_sol.pdf" target="_blank">📝 hw2_sol</a>
+        <a class="ref-chip lecture" href="https://www.geeksforgeeks.org/data-analysis/principal-component-analysis-pca/" target="_blank">🔗 GeeksforGeeks PCA</a></div>
     </div>
 
 <div class="en-only">
@@ -62,6 +63,21 @@
   <div class="callout intuition">
     <div class="head">Two equivalent motivations</div>
     <p><b>Variance view:</b> choose directions where projected data spreads out the most. <b>Reconstruction view:</b> choose a low-dimensional subspace so projecting down and reconstructing back loses as little squared distance as possible. These two views lead to the same principal components.</p>
+  </div>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/pca-colour-compression.svg" alt="PCA compression intuition from many colours to a few dominant colours" loading="lazy" />
+      <figcaption>PCA can be used as compression: many correlated pixel or feature values are summarized by a smaller number of dominant components. The simplified image is not identical to the original, but it keeps the strongest patterns.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/pca-2d-to-1d-projection.svg" alt="PCA projection from two dimensions onto the first principal component" loading="lazy" />
+      <figcaption>For a 2D cloud, PC1 is the direction with the largest variance. Projecting every point onto PC1 turns each point into one coordinate while preserving the main spread of the data.</figcaption>
+    </figure>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Reading the PCA visuals</div>
+    <p>The colour diagram is a compression metaphor: PCA keeps the dominant directions of variation and discards weaker detail. The Radius-Area diagram is the exam picture: if the data varies much more along PC1 than PC2, then reducing from 2D to 1D by keeping PC1 loses relatively little information.</p>
+    <p class="example-source">Reference: <a href="https://www.geeksforgeeks.org/data-analysis/principal-component-analysis-pca/" target="_blank">GeeksforGeeks, Principal Component Analysis (PCA)</a>.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -192,6 +208,21 @@
       <div class="callout intuition">
         <div class="head">两种等价动机</div>
         <p><b>Variance view:</b> 选择投影后 spread 最大的方向。<b>Reconstruction view:</b> 选择一个低维 subspace，让点投影过去再重建回来时 squared distance loss 最小。两种理解最后得到同一组 principal components。</p>
+      </div>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/pca-colour-compression.svg" alt="PCA compression intuition from many colours to a few dominant colours" loading="lazy" />
+          <figcaption>第一张图可以理解成 compression：很多 correlated pixel / feature values 被少数 dominant components 概括。压缩后的图不可能完全等于原图，但会保留最主要的 variation pattern。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/pca-2d-to-1d-projection.svg" alt="PCA projection from two dimensions onto the first principal component" loading="lazy" />
+          <figcaption>第二张图是考试最常见的 PCA 直觉：PC1 是 data spread 最大的方向。把 2D 点投影到 PC1 后，每个点只剩一个 coordinate，但保留了主要 variance。</figcaption>
+        </figure>
+      </div>
+      <div class="callout intuition">
+        <div class="head">这两张图怎么读</div>
+        <p>颜色图强调 “keep dominant variation, discard weaker detail”；Radius-Area 图强调 “choose PC1 because variance along PC1 is larger than PC2”。所以 PCA 的降维不是随机删 feature，而是换一组 axes 后保留最有信息量的方向。</p>
+        <p class="example-source">参考：<a href="https://www.geeksforgeeks.org/data-analysis/principal-component-analysis-pca/" target="_blank">GeeksforGeeks, Principal Component Analysis (PCA)</a>。</p>
       </div>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>

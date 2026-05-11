@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Chain rule · Computation graph</span><span class="cn-only">Chain rule · 计算图</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/backpropagation-in-neural-network/" target="_blank" rel="noopener">🔗 GeeksforGeeks</a></div>
     </div>
 
 <div class="en-only">
@@ -58,8 +59,14 @@
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
-  <p>Imagine every operation leaves a tiny receipt during the forward pass: “I multiplied these two numbers,” or “I summed this vector.” Backprop walks backward through those receipts and asks: if the final loss changed a little, how much blame should this earlier value get?</p>
+  <p>Imagine every operation leaves a tiny receipt during the forward pass: "I multiplied these two numbers," or "I summed this vector." Backprop walks backward through those receipts and asks: if the final loss changed a little, how much blame should this earlier value get?</p>
   <p>The important habit is mechanical: cache forward values, start from the loss, and move backward one local derivative at a time.</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/backpropagation-weight-updates.svg" alt="Backpropagation diagram showing forward activations and backward gradient arrows for weight updates" loading="lazy" />
+      <figcaption><b>How to read this picture.</b> The black arrows are the forward pass: inputs flow through hidden layers to produce output $o$. The purple curved arrows are the backward pass: the loss gradient starts near the output, moves back layer by layer, and tells each weight how much it should change. Reference: <a href="https://www.geeksforgeeks.org/machine-learning/backpropagation-in-neural-network/" target="_blank" rel="noopener">GeeksforGeeks backpropagation overview</a>.</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Backprop is efficient because it reuses partial derivatives. A parameter can influence the loss through many downstream paths; reverse-mode autodiff accumulates all those contributions into one gradient field.</p>
@@ -205,6 +212,12 @@
       <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
       <p>可以把 forward 想成每一步操作都留了一张“小票”：这里做了乘法，那里做了 sum，这里过了 ReLU。Backward 就是从最后的 loss 倒着翻小票，问：如果 loss 变大一点点，前面这个数应该背多少锅？</p>
       <p>关键习惯很机械：先缓存 forward values，从 loss 开始，倒着一次处理一个 local derivative。</p>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/backpropagation-weight-updates.svg" alt="Backpropagation 中 forward activations 和 backward gradients 更新 weights 的图" loading="lazy" />
+          <figcaption><b>怎么看这张图.</b> 黑色箭头是 forward pass：input $a,b,c,d$ 经过 hidden layers，最后得到 output $o$。紫色弧线是 backward pass：loss 的 gradient 从 output 附近开始，一层层往回传，告诉每条 weight 应该往哪个方向调、调多少。参考：<a href="https://www.geeksforgeeks.org/machine-learning/backpropagation-in-neural-network/" target="_blank" rel="noopener">GeeksforGeeks backpropagation overview</a>。</figcaption>
+        </figure>
+      </div>
 
       <h3 class="section-orange">3. Core Intuition</h3>
       <p>Backprop 高效，是因为它复用中间梯度。一个参数可能通过很多路径影响 loss；reverse-mode autodiff 会把这些路径上的贡献全部累加到同一个 <code>.grad</code> 里。</p>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1220 430" role="img" aria-labelledby="title desc">
+  <title id="title">Annotated temporal-difference value update</title>
+  <desc id="desc">A temporal-difference update for a state-value function with colored underlines explaining the new value, old estimate, learning rate, reward, discounted next-state value, TD target, and subtracted old estimate.</desc>
+  <defs>
+    <style>
+      .formula{font:italic 48px Georgia,'Times New Roman',serif;fill:#111827}
+      .label{font:700 27px Arial,sans-serif}
+      .small{font:700 18px Arial,sans-serif;fill:#475569}
+      .green{fill:#5aa143}.blue{fill:#3b74d7}.red{fill:#e95f65}.orange{fill:#ef9637}.purple{fill:#a4487d}.teal{fill:#408895}
+      .uGreen{stroke:#5aa143}.uBlue{stroke:#3b74d7}.uRed{stroke:#e95f65}.uOrange{stroke:#ef9637}.uPurple{stroke:#a4487d}.uTeal{stroke:#408895}
+      .underline{stroke-width:9;stroke-linecap:square}
+      .box{fill:#f8fafc;stroke:#e2e8f0;stroke-width:1.2}
+    </style>
+  </defs>
+  <rect width="1220" height="430" fill="#f8fafc"/>
+  <rect class="box" x="18" y="18" width="1184" height="394" rx="16"/>
+  <text x="610" y="55" text-anchor="middle" class="small">Temporal-Difference value update</text>
+
+  <text x="40" y="132" class="formula">V(S<tspan baseline-shift="sub" font-size="30">t</tspan>)</text>
+  <text x="174" y="132" class="formula">←</text>
+  <text x="238" y="132" class="formula">V(S<tspan baseline-shift="sub" font-size="30">t</tspan>)</text>
+  <text x="374" y="132" class="formula">+</text>
+  <text x="434" y="132" class="formula">α</text>
+  <text x="482" y="132" class="formula">[</text>
+  <text x="515" y="132" class="formula">R<tspan baseline-shift="sub" font-size="30">t+1</tspan></text>
+  <text x="634" y="132" class="formula">+</text>
+  <text x="685" y="132" class="formula">γV(S<tspan baseline-shift="sub" font-size="30">t+1</tspan>)</text>
+  <text x="905" y="132" class="formula">−</text>
+  <text x="960" y="132" class="formula">V(S<tspan baseline-shift="sub" font-size="30">t</tspan>)</text>
+  <text x="1096" y="132" class="formula">]</text>
+
+  <line x1="31" y1="165" x2="170" y2="165" class="underline uGreen"/>
+  <line x1="238" y1="165" x2="372" y2="165" class="underline uBlue"/>
+  <line x1="431" y1="165" x2="475" y2="165" class="underline uRed"/>
+  <line x1="514" y1="165" x2="634" y2="165" class="underline uOrange"/>
+  <line x1="684" y1="165" x2="897" y2="165" class="underline uPurple"/>
+  <line x1="958" y1="165" x2="1088" y2="165" class="underline uBlue"/>
+  <line x1="508" y1="286" x2="895" y2="286" class="underline uTeal"/>
+
+  <text x="32" y="224" class="label green">New value</text>
+  <text x="32" y="258" class="label green">of state t</text>
+
+  <text x="241" y="224" class="label blue">Former estimate</text>
+  <text x="241" y="258" class="label blue">of state t</text>
+
+  <text x="412" y="224" class="label red">Learning</text>
+  <text x="412" y="258" class="label red">rate</text>
+
+  <text x="520" y="224" class="label orange">Reward</text>
+
+  <text x="705" y="224" class="label purple">Discounted value</text>
+  <text x="705" y="258" class="label purple">of next state</text>
+
+  <text x="964" y="224" class="label blue">Old estimate</text>
+  <text x="964" y="258" class="label blue">subtracted</text>
+
+  <text x="704" y="350" class="label teal">TD target</text>
+  <text x="610" y="388" text-anchor="middle" class="small">Bracket = TD error: target minus old estimate. The update moves the old value a fraction α toward that target.</text>
+</svg>

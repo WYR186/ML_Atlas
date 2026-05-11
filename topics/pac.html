@@ -40,7 +40,9 @@
       <div class="subtitle"><span class="en-only">n ≥ (1/ε)(ln|F|+ln(1/δ))</span><span class="cn-only">n ≥ (1/ε)(ln|F|+ln(1/δ))</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_22.pdf" target="_blank">📄 Lecture 22</a>
         <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
-        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw5_sol.pdf" target="_blank">📝 hw5_sol</a>
+        <a class="ref-chip book" href="https://www.geeksforgeeks.org/machine-learning/understanding-pac-learning-theoretical-foundations-and-practical-applications-in-machine-learning/" target="_blank" rel="noopener">🔗 GFG PAC</a>
+        <a class="ref-chip book" href="https://medium.com/faqk-like-socrates/what-is-the-definition-and-intuition-behind-pac-learning-16339acc8346" target="_blank" rel="noopener">🔗 Medium PAC</a></div>
     </div>
 
 <div class="en-only">
@@ -67,6 +69,12 @@
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>PAC is a promise with two knobs. Turn $\epsilon$ down and you demand a more accurate learner. Turn $\delta$ down and you demand more confidence. Both demands cost more samples.</p>
   <p>ERM is the natural student strategy: among all allowed explanations, pick the one that makes the fewest mistakes on the homework. PAC theory asks when that homework performance actually predicts exam performance.</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/pac-sample-complexity.svg" alt="PAC learning sample complexity depends on examples, error tolerance, failure probability, and hypothesis class complexity" loading="lazy" />
+      <figcaption><b>Sample-complexity picture.</b> $m$ or $n$ is the number of training examples. $\epsilon$ is the tolerated true error, $\delta$ is the allowed failure probability, and $|\mathcal H|$ is the size of the hypothesis class. The page sometimes writes $\mathcal F$ instead of $\mathcal H$; both mean the candidate model class. References: <a href="https://www.geeksforgeeks.org/machine-learning/understanding-pac-learning-theoretical-foundations-and-practical-applications-in-machine-learning/" target="_blank" rel="noopener">GeeksforGeeks PAC overview</a> and <a href="https://medium.com/faqk-like-socrates/what-is-the-definition-and-intuition-behind-pac-learning-16339acc8346" target="_blank" rel="noopener">Medium PAC intuition</a>.</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>For one fixed classifier, training error concentrates around true error. The hard part is that the learner chooses a classifier after seeing data. We therefore need a uniform guarantee over the whole class, usually paid for by a complexity term such as $\log|\mathcal{F}|$ or VC dimension.</p>
@@ -228,6 +236,12 @@
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
   <p>PAC 像一个带两个旋钮的承诺：$\epsilon$ 越小，你要求答案越准；$\delta$ 越小，你要求翻车概率越低。两个旋钮拧紧都会增加样本需求。</p>
   <p>ERM 就像学生在允许的所有解释里，选一个最能解释作业题的答案。PAC theory 问的是：作业做得好，什么时候能说明考试也会好？</p>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/pac-sample-complexity.svg" alt="PAC learning 的 sample complexity 取决于 examples、error tolerance、failure probability 和 hypothesis class complexity" loading="lazy" />
+      <figcaption><b>怎么看这张图.</b> $m$ 或 $n$ 表示 training examples 数量；$\epsilon$ 是允许的 true error，越小代表越严格；$\delta$ 是 failure probability，越小代表越有把握；$|\mathcal H|$ 是 hypothesis class 的大小。图里写 $\mathcal H$，本页很多地方写 $\mathcal F$，它们都表示候选模型集合。参考：<a href="https://www.geeksforgeeks.org/machine-learning/understanding-pac-learning-theoretical-foundations-and-practical-applications-in-machine-learning/" target="_blank" rel="noopener">GeeksforGeeks PAC overview</a> 和 <a href="https://medium.com/faqk-like-socrates/what-is-the-definition-and-intuition-behind-pac-learning-16339acc8346" target="_blank" rel="noopener">Medium PAC intuition</a>。</figcaption>
+    </figure>
+  </div>
 
   <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
   <p>对固定 classifier，training error 会集中到 true error 附近。难点是 learner 会看完数据再挑 $\hat f$，所以需要对整个 class 同时成立的 uniform guarantee。</p>

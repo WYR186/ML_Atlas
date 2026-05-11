@@ -60,6 +60,21 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>The SVM dual depends on data only through $x_i^\top x_j$. If we replace $x$ by $\phi(x)$, every dot product becomes $\phi(x_i)^\top\phi(x_j)$. Kernel trick says: compute that number directly as $k(x_i,x_j)$.</p>
   <p>Polynomial kernels add interaction features. RBF kernels measure local similarity: nearby points have large kernel values, far points have values near zero. Smaller bandwidth makes the classifier more local and more flexible.</p>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/kernel-lift-2d-3d.svg" alt="Kernel lifting diagram showing a circular two-dimensional pattern becoming separable by a plane in feature space" loading="lazy" />
+      <figcaption><b>Nonlinear in input space, linear in feature space.</b> The left panel shows a center-vs-outside pattern that a straight line cannot separate. After a kernel-style lift, the same points can be separated by a flat plane in a higher-dimensional feature space.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/kernel-rbf-decision-surface.svg" alt="RBF kernel diagram showing a center cluster lifted into a hill with a flat decision boundary" loading="lazy" />
+      <figcaption><b>RBF as a similarity hill.</b> Points near the center become high on the lifted surface, while far-away ring points stay low. A flat cut in lifted space becomes a curved decision boundary in the original plane.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to read the first figure.</b> The red circular region is not separable by one line in 2D. The lift adds a nonlinear coordinate, so a plane can split red from purple after mapping.</div>
+    <div><b>How to read the second figure.</b> RBF kernels act like local similarity: points close to a prototype have large $k(x,x')$, so they rise together; distant points have kernel values near 0 and remain low.</div>
+    <div><b>Formula connection.</b> The separating plane is still linear in $\phi(x)$, but the page only needs $k(x,x')=\phi(x)^\top\phi(x')$. That is exactly why kernels fit naturally into the SVM dual.</div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -198,6 +213,21 @@
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>SVM dual 中数据只通过 $x_i^\top x_j$ 出现。若把 $x$ 换成 $\phi(x)$，所有 dot product 都变成 $\phi(x_i)^\top\phi(x_j)$。Kernel trick 就是直接用 $k(x_i,x_j)$ 代替这个数。</p>
       <p>Polynomial kernel 会加入 interaction features；RBF kernel 更像 local similarity：距离近 kernel 大，距离远 kernel 接近 0。Bandwidth 越小，边界越局部、越灵活。</p>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/kernel-lift-2d-3d.svg" alt="Kernel lifting 示意图：二维圆形模式在 feature space 中被平面分开" loading="lazy" />
+          <figcaption><b>原空间 nonlinear，feature space 里 linear.</b> 左图的 center-vs-outside pattern 用一条直线分不开；经过 kernel-style lift 后，同一批点可以在高维 feature space 中被一个平面切开。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/kernel-rbf-decision-surface.svg" alt="RBF kernel 示意图：中心簇被 lift 成山丘并用平面分开" loading="lazy" />
+          <figcaption><b>RBF 像 similarity hill.</b> 离中心近的点 kernel value 大，会被 lift 到高处；外圈远点 kernel value 接近 0，留在低处。高维里的平面切割，投回原空间就变成曲线边界。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>第一张图怎么读：</b> 红色圆形区域在 2D 里不是 linearly separable；lift 加了 nonlinear coordinate 后，就能用一个 plane 分开红点和紫点。</div>
+        <div><b>第二张图怎么读：</b> RBF kernel 表示 local similarity：离某个中心越近，$k(x,x')$ 越大，所以一起“升高”；远处点相似度接近 0，就留在低处。</div>
+        <div><b>和公式怎么连：</b> 分割面在 $\phi(x)$ 里依旧是 linear 的，但我们不需要显式写 $\phi$，只用 $k(x,x')=\phi(x)^\top\phi(x')$。这就是 kernel 能直接塞进 SVM dual 的原因。</div>
+      </div>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">

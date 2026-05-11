@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Positional encoding in a Transformer</title>
+  <desc id="desc">A sentence flows through a Transformer after token embeddings are combined with position vectors P1 through P8. The diagram shows that repeated words such as coffee get different position labels, and attention can connect He back to John.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#111827"/>
+    </marker>
+    <marker id="softArrow" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#b45309"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .label { font-size: 18px; font-weight: 700; fill: #334155; }
+      .small { font-size: 14px; fill: #475569; }
+      .word { font-size: 22px; font-weight: 700; fill: #111827; }
+      .pos { font-size: 19px; font-weight: 800; fill: #0f172a; }
+      .hint { font-size: 16px; font-weight: 700; fill: #92400e; }
+    </style>
+  </defs>
+
+  <rect width="960" height="520" rx="18" fill="#f8fafc"/>
+  <text x="480" y="46" text-anchor="middle" font-size="34" font-weight="800" fill="#0f172a">Positional Encoding in Transformer</text>
+  <text x="480" y="76" text-anchor="middle" class="small">Input vector at each slot: token embedding + position vector</text>
+
+  <g id="top-tokens">
+    <text x="70" y="116" class="label">Token embeddings</text>
+    <g>
+      <rect x="78" y="136" width="88" height="46" rx="6" fill="#fecaca"/>
+      <text x="122" y="166" text-anchor="middle" class="word">John</text>
+    </g>
+    <g>
+      <rect x="181" y="136" width="88" height="46" rx="6" fill="#f5d0fe"/>
+      <text x="225" y="166" text-anchor="middle" class="word">likes</text>
+    </g>
+    <g>
+      <rect x="284" y="136" width="100" height="46" rx="6" fill="#e9d5ff"/>
+      <text x="334" y="166" text-anchor="middle" class="word">coffee.</text>
+    </g>
+    <g>
+      <rect x="399" y="136" width="88" height="46" rx="6" fill="#fecaca"/>
+      <text x="443" y="166" text-anchor="middle" class="word">He</text>
+    </g>
+    <g>
+      <rect x="502" y="136" width="88" height="46" rx="6" fill="#dbeafe"/>
+      <text x="546" y="166" text-anchor="middle" class="word">went</text>
+    </g>
+    <g>
+      <rect x="605" y="136" width="88" height="46" rx="6" fill="#ccfbf1"/>
+      <text x="649" y="166" text-anchor="middle" class="word">to</text>
+    </g>
+    <g>
+      <rect x="708" y="136" width="100" height="46" rx="6" fill="#ecfccb"/>
+      <text x="758" y="166" text-anchor="middle" class="word">coffee</text>
+    </g>
+    <g>
+      <rect x="823" y="136" width="88" height="46" rx="6" fill="#fef3c7"/>
+      <text x="867" y="166" text-anchor="middle" class="word">cafe.</text>
+    </g>
+  </g>
+
+  <g stroke="#111827" stroke-width="1.8" marker-end="url(#arrow)">
+    <line x1="122" y1="184" x2="122" y2="224"/>
+    <line x1="225" y1="184" x2="225" y2="224"/>
+    <line x1="334" y1="184" x2="334" y2="224"/>
+    <line x1="443" y1="184" x2="443" y2="224"/>
+    <line x1="546" y1="184" x2="546" y2="224"/>
+    <line x1="649" y1="184" x2="649" y2="224"/>
+    <line x1="758" y1="184" x2="758" y2="224"/>
+    <line x1="867" y1="184" x2="867" y2="224"/>
+  </g>
+
+  <rect x="64" y="224" width="832" height="76" rx="10" fill="#d9f3d0" stroke="#9acd8f"/>
+  <text x="480" y="272" text-anchor="middle" font-size="34" font-weight="800" fill="#0f172a">Transformer block</text>
+
+  <g stroke="#111827" stroke-width="1.8" marker-end="url(#arrow)">
+    <line x1="122" y1="300" x2="122" y2="346"/>
+    <line x1="225" y1="300" x2="225" y2="346"/>
+    <line x1="334" y1="300" x2="334" y2="346"/>
+    <line x1="443" y1="300" x2="443" y2="346"/>
+    <line x1="546" y1="300" x2="546" y2="346"/>
+    <line x1="649" y1="300" x2="649" y2="346"/>
+    <line x1="758" y1="300" x2="758" y2="346"/>
+    <line x1="867" y1="300" x2="867" y2="346"/>
+  </g>
+
+  <g id="positions">
+    <text x="70" y="334" class="label">Position vectors</text>
+    <g class="pos">
+      <text x="122" y="334" text-anchor="middle">P1</text>
+      <text x="225" y="334" text-anchor="middle">P2</text>
+      <text x="334" y="334" text-anchor="middle">P3</text>
+      <text x="443" y="334" text-anchor="middle">P4</text>
+      <text x="546" y="334" text-anchor="middle">P5</text>
+      <text x="649" y="334" text-anchor="middle">P6</text>
+      <text x="758" y="334" text-anchor="middle">P7</text>
+      <text x="867" y="334" text-anchor="middle">P8</text>
+    </g>
+  </g>
+
+  <g id="contextual-tokens">
+    <text x="70" y="388" class="label">Contextualized outputs</text>
+    <g>
+      <rect x="78" y="402" width="88" height="46" rx="6" fill="#fecaca"/>
+      <text x="122" y="432" text-anchor="middle" class="word">John</text>
+    </g>
+    <g>
+      <rect x="181" y="402" width="88" height="46" rx="6" fill="#f5d0fe"/>
+      <text x="225" y="432" text-anchor="middle" class="word">likes</text>
+    </g>
+    <g>
+      <rect x="284" y="402" width="100" height="46" rx="6" fill="#e9d5ff"/>
+      <text x="334" y="432" text-anchor="middle" class="word">coffee.</text>
+    </g>
+    <g>
+      <rect x="399" y="402" width="88" height="46" rx="6" fill="#fecaca"/>
+      <text x="443" y="432" text-anchor="middle" class="word">He</text>
+    </g>
+    <g>
+      <rect x="502" y="402" width="88" height="46" rx="6" fill="#dbeafe"/>
+      <text x="546" y="432" text-anchor="middle" class="word">went</text>
+    </g>
+    <g>
+      <rect x="605" y="402" width="88" height="46" rx="6" fill="#ccfbf1"/>
+      <text x="649" y="432" text-anchor="middle" class="word">to</text>
+    </g>
+    <g>
+      <rect x="708" y="402" width="100" height="46" rx="6" fill="#ecfccb"/>
+      <text x="758" y="432" text-anchor="middle" class="word">coffee</text>
+    </g>
+    <g>
+      <rect x="823" y="402" width="88" height="46" rx="6" fill="#fef3c7"/>
+      <text x="867" y="432" text-anchor="middle" class="word">cafe.</text>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#b45309" stroke-width="2.3" stroke-dasharray="6 5" marker-end="url(#softArrow)">
+    <path d="M443 400 C404 360 196 360 134 400"/>
+  </g>
+  <text x="291" y="374" text-anchor="middle" class="hint">attention can learn: He refers to John</text>
+
+  <g fill="none" stroke="#2563eb" stroke-width="2.3" stroke-dasharray="6 5">
+    <path d="M334 452 C386 494 704 494 758 452"/>
+  </g>
+  <text x="546" y="488" text-anchor="middle" font-size="16" font-weight="700" fill="#1d4ed8">same word, different slots: coffee at P3 vs P7</text>
+</svg>
