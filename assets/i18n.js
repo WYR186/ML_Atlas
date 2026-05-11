@@ -121,8 +121,9 @@ function alignSliderThumb(sw) {
   if (!active || !thumb) return;
   const swRect = sw.getBoundingClientRect();
   const btnRect = active.getBoundingClientRect();
+  const thumbLeft = parseFloat(window.getComputedStyle(thumb).left) || 0;
   thumb.style.width = btnRect.width + "px";
-  thumb.style.transform = `translateX(${btnRect.left - swRect.left}px)`;
+  thumb.style.transform = `translateX(${btnRect.left - swRect.left - thumbLeft}px)`;
 }
 
 function langTopOffset() {
