@@ -63,7 +63,20 @@
   <p>Feature engineering does not change the core method. A quadratic curve is still “linear regression” after replacing $x$ by $\phi(x)=(x^2,x,1)$. The model is linear in $w$, even if it is nonlinear in the original input.</p>
   <p>Lecture 4 also shows why this is not the right loss for classification: MSE keeps penalizing examples that are already confidently correct.</p>
 
-  <h3 class="section-purple">4. Key Equations</h3>
+  <h3 class="section-gray" id="linear-regression-visual-guide-en">4. Visual Reading Guide</h3>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/linear-regression-fit-line.svg" alt="Linear regression concept card showing continuous prediction and a best-fit line" loading="lazy" />
+      <figcaption><b>Read the picture as a regression model.</b> The output is a real number, so the line is trying to approximate a continuous target, not choose between classes.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Continuous target.</b> The prediction $\hat y$ can be any real value, such as price, height, temperature, or score.</div>
+    <div><b>Best-fit line.</b> Training moves the line so vertical residuals $\hat y-y$ are small overall, usually by minimizing squared error.</div>
+    <div><b>Exam contrast.</b> Do not interpret this raw line output as a probability. For classification, logistic regression adds a sigmoid and a classification loss.</div>
+  </div>
+
+  <h3 class="section-purple">5. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula" id="eq-linear-regression-design-matrix-objective">
       <div class="head">Design-matrix objective</div>
@@ -429,7 +442,7 @@
     </div>
   </div>
 
-  <h3 class="section-gray">5. Worked Examples</h3>
+  <h3 class="section-gray">6. Worked Examples</h3>
   <div class="callout example">
     <div class="head">Example A · Building the matrix form</div>
     <div class="example-source">Source: Lecture 4, linear model with bias.</div>
@@ -446,7 +459,7 @@
     <p>When $X\in\mathbb{R}^{n\times d}$ has full row rank and $d\ge n$, every target $Y$ can be fit exactly. There may be infinitely many $w$ values, differing by null-space vectors. Gradient descent from $w_0=0$ stays in the row space of $X$ and converges to the exact solution with the smallest Euclidean norm.</p>
   </div>
 
-  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <h3 class="section-yellow">7. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>Translate first.</b> Identify whether the problem uses $Xw$ or $X^\top w$ notation, then write dimensions next to every matrix.</div>
     <div><b>For a closed form,</b> write the objective, compute the gradient, set it to zero, then solve the normal equation.</div>
@@ -454,7 +467,7 @@
     <div><b>For rank questions,</b> ask whether $X^\top X$ is invertible, whether $Xw=Y$ is solvable, and whether the solution is unique.</div>
   </div>
 
-  <h3 class="section-red">7. Common Mistakes</h3>
+  <h3 class="section-red">8. Common Mistakes</h3>
   <ul>
     <li>Forgetting the bias column of ones when the model includes an intercept.</li>
     <li>Writing $(X^\top X)^{-1}$ when the matrix may be singular or ill-conditioned.</li>
@@ -471,7 +484,7 @@
     </ul>
   </div>
 
-  <h3 class="section-yellow">8. Exam Focus</h3>
+  <h3 class="section-yellow">9. Exam Focus</h3>
   <ul>
     <li>Derive the normal equation from the MSE objective.</li>
     <li>Explain the Gaussian-noise / MLE interpretation of squared loss.</li>
@@ -482,7 +495,7 @@
     <li>State why linear regression is awkward for classification: outliers, masking, and non-probability scores.</li>
   </ul>
 
-  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <h3 class="section-yellow">10. Quick Checklist</h3>
   <ul>
     <li>I can write the model $\hat y=w^\top\phi(x)$.</li>
     <li>I can derive $X^\top Xw=X^\top Y$ from squared loss.</li>
@@ -514,7 +527,20 @@
       <p>Polynomial regression 本质也没变：把 $x$ 换成 $\phi(x)=(x^2,x,1)$ 后，模型对参数 $w$ 仍然是 linear 的。</p>
       <p>Lecture 4 还强调：用 linear regression 做 classification 会出问题，因为 MSE 会继续惩罚已经分得很对的 easy examples。</p>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <h3 class="section-gray" id="linear-regression-visual-guide-cn">4. Visual Reading Guide · 看图理解</h3>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/linear-regression-fit-line.svg" alt="Linear regression 概念图：连续值预测和 best-fit line" loading="lazy" />
+          <figcaption><b>把这张图当成 regression model 看。</b> 输出是一个 real number，所以这条线是在逼近连续目标值，不是在两个类别之间做选择。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>连续目标：</b> 预测值 $\hat y$ 可以是任意实数，比如 price、height、temperature、score。</div>
+        <div><b>Best-fit line：</b> 训练就是移动这条线，让整体 vertical residuals $\hat y-y$ 尽量小，通常用 squared error 衡量。</div>
+        <div><b>考试对比：</b> 不能把 raw line output 当 probability。分类任务通常要用 logistic regression：加 sigmoid，再配 classification loss。</div>
+      </div>
+
+      <h3 class="section-purple">5. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">MSE objective</div>
@@ -880,7 +906,7 @@
         </div>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <h3 class="section-gray">6. Worked Examples · 代表性例题</h3>
       <div class="callout example">
         <div class="head">Example A · 写成矩阵形式</div>
         <div class="example-source">来源：Lecture 4，带 bias 的一维线性模型。</div>
@@ -897,7 +923,7 @@
         <p>当 $X\in\mathbb{R}^{n\times d}$ 满行秩且 $d\ge n$ 时，任意 $Y$ 都能被 exact fit。解可能有无穷多个，它们相差一个 null-space vector。从 $w_0=0$ 开始的 gradient descent 会留在 row space 里，最后选出 Euclidean norm 最小的那个解。</p>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <h3 class="section-yellow">7. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>先看 notation。</b> 题里是 $Xw$ 还是 $X^\top w$？先把 shape 写在旁边。</div>
         <div><b>闭式解题型：</b> 写 objective → 求 gradient → 令 0 → 解 normal equation。</div>
@@ -905,7 +931,7 @@
         <div><b>Rank / invertibility：</b> 问自己 $X^\top X$ 是否可逆、$Xw=Y$ 是否有解、解是否唯一。</div>
       </div>
 
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <h3 class="section-red">8. Common Mistakes · 常见错误</h3>
       <ul>
         <li>模型有 intercept 却忘记加一列全 1 的 bias feature。</li>
         <li>不检查 invertibility 就直接写 $(X^\top X)^{-1}$。</li>
@@ -922,7 +948,7 @@
         </ul>
       </div>
 
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <h3 class="section-yellow">9. Exam Focus · 考试重点</h3>
       <ul>
         <li>会从 MSE objective 推 normal equation。</li>
         <li>会说明 squared loss 的 Gaussian-noise / MLE 解释。</li>
@@ -933,7 +959,7 @@
         <li>会说明 linear regression 用于 classification 的问题：outliers、masking、non-probability scores。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <h3 class="section-yellow">10. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能写出 $\hat y=w^\top\phi(x)$。</li>
         <li>我能从 squared loss 推出 $X^\top Xw=X^\top Y$。</li>

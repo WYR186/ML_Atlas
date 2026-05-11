@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560" role="img" aria-labelledby="title desc">
+  <title id="title">Logistic regression concept card</title>
+  <desc id="desc">Logistic regression predicts categorical classes using a sigmoid S-curve for classification problems.</desc>
+  <rect width="560" height="560" fill="#f8fafc"/>
+  <text x="280" y="58" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#050505">Logistic Regression</text>
+  <rect x="58" y="110" width="444" height="405" rx="34" fill="#d9f0d0"/>
+  <g font-family="Inter, Arial, sans-serif" font-size="25" fill="#111827">
+    <text x="104" y="170">•</text><text x="137" y="170">Predicts categorical classes</text>
+    <text x="104" y="214">•</text><text x="137" y="214">Uses sigmoid S-curve</text>
+    <text x="104" y="258">•</text><text x="137" y="258">Solves classification problems</text>
+  </g>
+  <rect x="118" y="310" width="325" height="160" fill="#ffffff"/>
+  <defs>
+    <marker id="axisArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#050505"/>
+    </marker>
+  </defs>
+  <line x1="164" y1="438" x2="405" y2="438" stroke="#050505" stroke-width="4" marker-end="url(#axisArrow)"/>
+  <line x1="164" y1="438" x2="164" y2="345" stroke="#050505" stroke-width="4" marker-end="url(#axisArrow)"/>
+  <text x="150" y="340" font-family="Inter, Arial, sans-serif" font-size="30" fill="#050505">y</text>
+  <text x="413" y="449" font-family="Inter, Arial, sans-serif" font-size="30" fill="#050505">x</text>
+  <path d="M166 426 C214 426 230 412 244 385 C257 358 276 330 336 327" fill="none" stroke="#15906c" stroke-width="4" stroke-linecap="round"/>
+</svg>

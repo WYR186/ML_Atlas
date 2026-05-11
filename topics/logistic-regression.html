@@ -62,7 +62,20 @@
   <p>Linear regression with MSE keeps pulling on easy examples even after they are classified correctly. Logistic loss mostly cares about the margin $y\,w^\top\phi(x)$: if the margin is large and positive, the loss is tiny; if it is negative, the loss grows quickly.</p>
   <p>The model is probabilistic. Under the i.i.d. assumption, maximizing the likelihood of all labels is equivalent to minimizing negative log-likelihood. There is usually no closed form, so Lecture 5 uses gradient descent.</p>
 
-  <h3 class="section-purple">4. Key Equations</h3>
+  <h3 class="section-gray" id="logistic-regression-visual-guide-en">4. Visual Reading Guide</h3>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/logistic-regression-sigmoid.svg" alt="Logistic regression concept card showing categorical prediction and a sigmoid S-curve" loading="lazy" />
+      <figcaption><b>Read the picture as a classifier.</b> The line-like score is converted through the S-curve into a probability, then thresholded into a categorical label.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Categorical output.</b> Logistic regression predicts a class label, usually by estimating $P(y=1\mid x)$ and thresholding at $0.5$.</div>
+    <div><b>Sigmoid role.</b> The S-curve turns any real-valued logit into a number between $0$ and $1$, so it can be read as probability.</div>
+    <div><b>Decision boundary.</b> The probability curve is non-linear, but the boundary is still where the linear score equals $0$.</div>
+  </div>
+
+  <h3 class="section-purple">5. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula" id="eq-logistic-regression-sigmoid">
       <div class="head">Sigmoid</div>
@@ -665,7 +678,7 @@
     </div>
   </div>
 
-  <h3 class="section-gray">5. Worked Examples</h3>
+  <h3 class="section-gray">6. Worked Examples</h3>
   <div class="callout example">
     <div class="head">Example A · Why the boundary is still linear</div>
     <div class="example-source">Source: Lecture 5, probability-threshold slide.</div>
@@ -682,7 +695,7 @@
     <p>Stacking examples gives $H=X^\top B X$ with nonnegative diagonal $B$. For any vector $v$, $v^\top H v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$. Therefore logistic loss is convex, so local minima are global minima.</p>
   </div>
 
-  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <h3 class="section-yellow">7. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>Identify the label convention.</b> Use $\log(1+\exp(-y s))$ for $y\in\{-1,+1\}$ and binary cross-entropy for $y\in\{0,1\}$.</div>
     <div><b>For probability questions,</b> write the sigmoid first, then threshold at 0.5 if classification is required.</div>
@@ -693,7 +706,7 @@
     <div><b>For XOR,</b> a single logistic-regression boundary cannot solve it. You need nonlinear features or a hidden layer such as an MLP.</div>
   </div>
 
-  <h3 class="section-red">7. Common Mistakes</h3>
+  <h3 class="section-red">8. Common Mistakes</h3>
   <ul>
     <li>Calling logistic regression nonlinear because sigmoid is nonlinear. The decision boundary is still linear in $\phi(x)$.</li>
     <li>Mixing $y\in\{0,1\}$ and $y\in\{-1,+1\}$ formulas without converting.</li>
@@ -702,7 +715,7 @@
     <li>Forgetting that perfectly separable data makes unregularized MLE chase infinite weights.</li>
   </ul>
 
-  <h3 class="section-yellow">8. Exam Focus</h3>
+  <h3 class="section-yellow">9. Exam Focus</h3>
   <ul>
     <li>Write the sigmoid probability model and NLL objective.</li>
     <li>Explain why logistic loss fixes the MSE-for-classification issue.</li>
@@ -712,7 +725,7 @@
     <li>Know the log-odds interpretation, the softmax multiclass extension, and why log-sum-exp is used for numerical stability.</li>
   </ul>
 
-  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <h3 class="section-yellow">10. Quick Checklist</h3>
   <ul>
     <li>I can move between score, probability, and label prediction.</li>
     <li>I can write $\log(1+\exp(-ys))$ without looking it up.</li>
@@ -743,7 +756,20 @@
       <p>MSE 会一直拉扯 easy examples，即使它们已经分类正确。Logistic loss 主要看 margin $y\,w^\top\phi(x)$：margin 很大且为正时 loss 很小；margin 为负时 loss 快速变大。</p>
       <p>从概率角度看，样本 i.i.d. 时，最大化整份 dataset 的 likelihood 等价于最小化 negative log-likelihood。一般没有 closed form，所以用 gradient descent。</p>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <h3 class="section-gray" id="logistic-regression-visual-guide-cn">4. Visual Reading Guide · 看图理解</h3>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/logistic-regression-sigmoid.svg" alt="Logistic regression 概念图：分类预测和 sigmoid S-curve" loading="lazy" />
+          <figcaption><b>把这张图当成 classifier 看。</b> 模型先算一个 linear score，再通过 S-curve 变成 probability，最后用 threshold 变成 categorical label。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>分类输出：</b> Logistic regression 预测 class label，通常先估 $P(y=1\mid x)$，再用 $0.5$ threshold 分类。</div>
+        <div><b>Sigmoid 作用：</b> S 曲线把任意 real-valued logit 压到 $0$ 到 $1$ 之间，因此可以解释成 probability。</div>
+        <div><b>Decision boundary：</b> Probability curve 是非线性的，但 boundary 仍然是 linear score 等于 $0$ 的地方。</div>
+      </div>
+
+      <h3 class="section-purple">5. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Sigmoid</div>
@@ -1346,7 +1372,7 @@
         </div>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <h3 class="section-gray">6. Worked Examples · 代表性例题</h3>
       <div class="callout example">
         <div class="head">Example A · 为什么边界仍然线性</div>
         <div class="example-source">来源：Lecture 5，概率阈值部分。</div>
@@ -1363,7 +1389,7 @@
         <p>把样本堆叠后 $H=X^\top B X$，其中 $B$ 的对角元非负。对任意 $v$，$v^\top H v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$。所以 logistic loss 是 convex，local minimum 就是 global minimum。</p>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <h3 class="section-yellow">7. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>先看 label convention。</b> $y\in\{-1,+1\}$ 用 $\log(1+\exp(-ys))$；$y\in\{0,1\}$ 用 binary cross-entropy。</div>
         <div><b>概率题：</b> 先写 sigmoid，再根据 0.5 threshold 做分类。</div>
@@ -1374,7 +1400,7 @@
         <div><b>XOR：</b> 单个 logistic-regression boundary 解不了 XOR；需要 nonlinear features 或 MLP 这样的 hidden layer。</div>
       </div>
 
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <h3 class="section-red">8. Common Mistakes · 常见错误</h3>
       <ul>
         <li>因为 sigmoid 非线性就说 logistic regression 的边界非线性；其实 boundary 在 $\phi(x)$ 空间仍是 linear。</li>
         <li>把 $y\in\{0,1\}$ 和 $y\in\{-1,+1\}$ 的公式混着用。</li>
@@ -1383,7 +1409,7 @@
         <li>忘记 perfectly separable data 会让 unregularized MLE 追逐无限大的 weights。</li>
       </ul>
 
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <h3 class="section-yellow">9. Exam Focus · 考试重点</h3>
       <ul>
         <li>会写 sigmoid probability model 和 NLL objective。</li>
         <li>会解释 logistic loss 如何修复 MSE classification 的问题。</li>
@@ -1393,7 +1419,7 @@
         <li>知道 log-odds interpretation、softmax multiclass extension，以及 log-sum-exp 为什么用于数值稳定。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <h3 class="section-yellow">10. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能在 score、probability、label prediction 之间转换。</li>
         <li>我能默写 $\log(1+\exp(-ys))$。</li>

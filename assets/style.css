@@ -1246,6 +1246,9 @@ html[data-theme="dark"] .toc-problem-link:hover {
   gap: 16px;
   margin: 16px 0;
 }
+.visual-grid-single {
+  grid-template-columns: minmax(0, 620px);
+}
 .topic-figure {
   margin: 0;
 }
