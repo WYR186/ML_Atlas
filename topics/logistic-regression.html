@@ -241,21 +241,41 @@
           <div class="head">Sigmoid</div>
           <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
           <p><b>这个公式在做什么？</b> 把任意 real-valued logit $z$ 压成 class 1 probability。记住 $\sigma(0)=0.5$，以及导数 $\sigma'(z)=\sigma(z)(1-\sigma(z))$。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $z$ 是任意 real-valued logit，几乎一定是 $z=w^\top\phi(x)$（或 $w^\top x+b$）；$\sigma(z)\in(0,1)$ 是预测的 positive class 概率；$e^{-z}$ 是分母里的指数项。</p>
+            <p><b>怎么理解.</b> S 形曲线把任意 score 压到 $(0,1)$。$\sigma(0)=0.5$；$z$ 大正 → 1；$z$ 大负 → 0。两端 saturate —— 这就是 "极度自信" 的预测梯度变小的原因（深网 vanishing-gradient 来源之一）。</p>
+            <p><b>怎么用.</b> 先算线性 score，再代入 $\sigma$；阈值 0.5 分类等价于看 $z>0$。背下导数 $\sigma'(z)=\sigma(z)(1-\sigma(z))$ —— 它让 logistic regression 梯度和 sigmoid backprop 都塌得很干净。</p>
+          </details>
         </div>
         <div class="callout formula">
           <div class="head">Logit / log-odds</div>
           <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
           <p><b>这个公式在做什么？</b> 说明 logistic regression 对 log-odds 是线性的，而不是对 probability 线性。令 $p=0.5$ 时 log-odds 为 0，所以边界是线性的。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $p=p(y=1\mid x)$ 是模型给的 class-1 概率；$p/(1-p)$ 是正负类的 <b>odds</b>；左边 $\log(p/(1-p))$ 就是 <b>logit</b>（$\sigma$ 的反函数）；$w$ 是权重，$b$ 是 bias。</p>
+            <p><b>怎么理解.</b> Logistic regression 对 <i>log-odds</i> 是线性的，<i>不</i>对 raw probability 线性。某个特征 $j$ 加 1，log-odds 就移动 $w_j$ —— 所以 $w_j$ 有个干净的解读："odds-multiplier" 等于 $e^{w_j}$。</p>
+            <p><b>怎么用.</b> 题目问 "为什么 boundary 是线性"，把 $p=0.5$ 代入 —— log-odds = $\log 1=0$，所以 boundary 恰是 $w^\top\phi(x)+b=0$。从 log-odds 回到 probability 用 $\sigma$。</p>
+          </details>
         </div>
         <div class="callout formula">
           <div class="head">Decision boundary</div>
           <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
           <p><b>这个公式在做什么？</b> 把 probability threshold 变成 sign test：score 大于 0 预测正类，小于 0 预测负类。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $p(y=1\mid x)$ 是模型对 class $+1$ 预测的概率；$w$ 是学到的权重向量；$\phi(x)$ 是 feature representation（普通 logistic 是 identity）；$w^\top\phi(x)$ 是线性 score。</p>
+            <p><b>怎么理解.</b> Boundary 就是模型 "完全不确定" 的轨迹 —— 正负类概率打平在 $0.5$。Sigmoid 单调，所以打平正好对应 score 为 $0$。Boundary 在 feature space 仍是 linear，尽管 probability curve 非线性 —— 这就是为什么 logistic regression 仍称为 <b>linear classifier</b>。</p>
+            <p><b>怎么用.</b> 分类时算 $w^\top\phi(x)$：正数预测 $+1$，负数预测 $-1$。要画 boundary 就解 $w^\top\phi(x)+b=0$ —— 二维普通 logistic 下是一条直线。</p>
+          </details>
         </div>
         <div class="callout formula">
           <div class="head">NLL / log loss</div>
           <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
           <p><b>这个公式在做什么？</b> 用 logistic loss 训练二分类器：margin 错或不够大就罚得多。这是 $y\in\{-1,+1\}$ 的写法。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $D$ 是 training set；$y_i\in\{-1,+1\}$ 是标签；$w^\top\phi(x_i)$ 是 score；$y_i w^\top\phi(x_i)$ 是 <b>signed margin</b>；$\log(1+e^{-z})$ 是 <b>softplus</b>，也就是 $\max(0,-z)$ 的光滑近似。</p>
+            <p><b>怎么理解.</b> 自信且对（margin 大正）→ loss $\approx 0$；自信但错（margin 为负）→ loss 大致按 $|z|$ 线性增长。永远非负，凸又可微，SGD 收敛干净。它来自 i.i.d. Bernoulli likelihood 取最大化后再 $-\log$。</p>
+            <p><b>怎么用.</b> 对所有 training example 求和后用 gradient descent 最小化；加 L2 正则 $\tfrac{\lambda}{2}\|w\|^2$ 即 ridge logistic。注意不要和 $\{0,1\}$ 的 BCE 形式混用，除非先转换标签（$y_{01}=(y_{\pm 1}+1)/2$）。</p>
+          </details>
         </div>
         <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy-cn">
           <div class="head">Binary cross-entropy (BCE)</div>
