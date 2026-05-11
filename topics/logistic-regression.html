@@ -282,26 +282,51 @@
           <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
           <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
           <p><b>这个公式在做什么？</b> 这是 $y\in\{0,1\}$ 版本的 NLL：真实类概率越高 loss 越小，自信但错会被重罚。配合 logit 时梯度简化成 $\hat y-y$。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $y\in\{0,1\}$ 是真实标签；$\hat y=\sigma(z)\in(0,1)$ 是 logit $z$ 对应的预测 class-1 概率；数据集形式里 $\mu_n=\sigma(w^\top x_n)$；两个 $\log$ 项互斥 —— 每个样本只有一项激活。</p>
+            <p><b>怎么理解.</b> $y=1$ 时只剩 $-\log\hat y$（$\hat y$ 太小就罚）；$y=0$ 时只剩 $-\log(1-\hat y)$（$\hat y$ 太大就罚）。自信但错 → 罚趋于无穷。和上一条 ±1 NLL 在标签转换后是同一个 loss；这是所有 deep learning library 用的形式。</p>
+            <p><b>怎么用.</b> 任意 sigmoid 输出二分类器（logistic regression、单 sigmoid 输出 MLP、HW3 两层网）的标准 loss。配合 logit 时梯度漂亮塌成 $\partial\mathcal{L}/\partial z=\hat y-y$。代码上为数值稳定使用 fused <code>BCEWithLogitsLoss</code>（内部用 softplus 形式，避免 $\log(\sigma(z))$ 的下溢）。</p>
+          </details>
         </div>
         <div class="callout formula">
           <div class="head">Gradient descent</div>
           <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
           <p><b>这个公式在做什么？</b> 给出 iterative training step：沿着 loss gradient 的反方向更新，因为 logistic regression 一般没有 normal equation closed form。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $w_t$ 是当前权重向量；$\alpha>0$ 是 learning rate / step size；$\nabla f(w_t)$ 是 logistic objective $f$ 在 $w_t$ 处的梯度 —— 最陡 <i>上升</i> 方向（前面的负号让它变下降）。</p>
+            <p><b>怎么理解.</b> $\alpha$ 大走得快，但易 overshoot 最小值；$\alpha$ 小则更安全但慢。Logistic regression 没有 closed-form 解（与 linear regression 的 normal equation 不同），所以必须迭代；好在 loss 凸，GD 从任意起点都能收敛到 global minimum。</p>
+            <p><b>怎么用.</b> 每轮：(i) 算 $\mu_i=\sigma(w^\top x_i)$，(ii) 形成 $\nabla L(w)=\sum_i(\mu_i-y_i)x_i$（下一条），(iii) 更新 $w$。$\alpha$ 用 line search、指数 schedule 或 Lipschitz 安全值 $1/L$（其中 $L=\tfrac14\sigma_{\max}(X^\top X)$）。</p>
+          </details>
         </div>
         <div class="callout formula">
           <div class="head">Gradient and IRLS</div>
           <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
           <p><b>这个公式在做什么？</b> 展示 gradient 的核心形状：probability error 乘 input。IRLS / Newton 会再利用 curvature，步子更聪明但更贵。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $\nabla L$ 是 $\{0,1\}$ NLL 的梯度；$\mu_i\in(0,1)$ 是样本 $i$ 的预测 class-1 概率；$(\mu_i-y_i)$ 是 <b>residual</b>（预测 − 真实），落在 $[-1,1]$。</p>
+            <p><b>怎么理解.</b> 漂亮的 "probability error 乘 input" 形状 —— 直接对应 linear regression 的 normal-equation residual $X^\top(\hat y-y)$，只是预测被 $\sigma$ 映射过。矩阵形式 $\nabla L(w)=X^\top(\mu-y)$。</p>
+            <p><b>怎么用.</b> 直接代入 mini-batch SGD。<b>IRLS</b>（Iteratively Reweighted Least Squares）/ Newton 把这条梯度与下一条 Hessian $X^\top BX$ 配合，做拟二阶步 $w_{t+1}=w_t-(X^\top B X)^{-1}X^\top(\mu-y)$ —— 收敛只要 $O(\log\log(1/\epsilon))$ 轮，但每步要解 $O(d^3)$ 的矩阵方程，所以只有 $d$ 中等时才划算。</p>
+          </details>
         </div>
         <div class="callout formula wide">
           <div class="head">Convexity check ($y\in\{0,1\}$ form)</div>
           <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
           <p><b>这个公式在做什么？</b> 用 Hessian 说明 logistic loss 是 convex：$B$ 的对角元非负，所以 $X^\top B X$ 是 PSD；满足 rank 条件时 local minimum 就是 global minimum。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $X$ 是 design matrix，每行 $x_i^\top$；$p_i=\sigma(w^\top x_i)$ 是样本 $i$ 的预测概率；$B$ 对角，元素 $p_i(1-p_i)\in[0,\tfrac14]$ —— 单样本曲率权重（$p_i=0.5$ 时取最大 0.25，$p_i\to 0$ 或 1 时趋于 0）。</p>
+            <p><b>怎么理解.</b> 每个 $p_i(1-p_i)$ 非负，所以 $B\succeq 0$（PSD）。由 sandwich identity（见 <a href="linear-algebra.html#sandwich">linear-algebra 页</a>），$X^\top BX$ 也 PSD，所以 Hessian 处处 PSD → loss 全局凸。被 saturated 的样本（$p_i$ 接近 0 或 1）几乎不贡献曲率 —— 这就是为什么 "已经分类很自信的 easy example" 不会再拉扯最优点。</p>
+            <p><b>怎么用.</b> 证凸时展开 $v^\top\nabla^2 L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$。所以 local minimum = global minimum；当 $X$ 满列秩且至少一个 $p_i\in(0,1)$ 时最优点唯一。这个 Hessian 也是上一条 IRLS / Newton 的二阶曲率项。</p>
+          </details>
         </div>
         <div class="callout formula wide">
           <div class="head">Softmax extension</div>
           <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
           <p><b>这个公式在做什么？</b> 把 sigmoid 推广到多分类：每个 class 一个 score，归一化成总和为 1 的 probabilities。计算时用 log-sum-exp 保稳定。</p>
+          <details class="formula-detail"><summary>📖 符号、直觉与用法</summary>
+            <p><b>符号.</b> $C$ 是类别数；$w_c$ 是每类一个的权重向量（共 $C$ 个）；分子 $\exp(w_c^\top x)$ 是未归一化的 class-$c$ score；分母把输出归一化到和为 1。</p>
+            <p><b>怎么理解.</b> Sigmoid 的多分类推广。Logit 越大，分到的 probability mass 指数级越多；$C=2$ 经过参数化平移 $w=w_1-w_0$ 退化回 sigmoid。注意模型 over-parameterized —— 给每个 $w_c$ 加同一个常数概率不变，所以一般固定 $w_C=0$ 去掉这个冗余。</p>
+            <p><b>怎么用.</b> 用 multi-class cross-entropy $-\sum_c y_c\log\hat y_c$（one-hot $y$）训练；logits 处的梯度仍是 $\hat y - y$ —— 与 binary BCE 同样的 "预测减真实" 干净恒等式。代码里减去 $\max_j z_j$ 再 exp 防溢出，或直接用 fused log-sum-exp / <code>CrossEntropyLoss</code>。</p>
+          </details>
         </div>
       </div>
 
