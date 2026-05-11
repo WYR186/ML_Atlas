@@ -68,41 +68,29 @@
     <div class="callout formula">
       <div class="head">Design-matrix objective</div>
       <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w \in \mathbb{R}^d$: weight vector being optimized — one weight per feature; $X \in \mathbb{R}^{n \times d}$: design matrix; row $i$ is feature vector $x_i^\top$; $Y \in \mathbb{R}^n$: vector of target values $(y_1, \ldots, y_n)^\top$; $Xw \in \mathbb{R}^n$: vector of predictions $(\hat{y}_1, \ldots, \hat{y}_n)^\top$; $\|\cdot\|_2^2$: squared L2 norm — sum of squared entries; $\frac{1}{2}$: convenience factor; cancels with the 2 from differentiating the square</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Geometrically: project $Y$ onto the column space of $X$. Squared error penalizes large residuals quadratically, so it's sensitive to outliers but mathematically clean — convex, differentiable, and unique-minimum whenever $X^\top X$ is invertible.</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Stack training inputs into rows of $X$, targets into $Y$. Find $w$ that minimizes the sum of squared residuals (predicted minus true). Solve in closed form via the normal equation when $d$ is small, or via gradient descent when $d$ is large. To include a bias term, prepend a column of 1's to $X$ and treat it as one more component of $w$.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Fits $w$ by making the prediction vector $Xw$ as close as possible to the target vector $Y$ under squared error.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gradient</div>
       <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\nabla_w$: gradient with respect to $w$; same shape as $w$ (a $d$-vector); $Xw - Y \in \mathbb{R}^n$: residual vector — predictions minus targets; $X^\top \in \mathbb{R}^{d \times n}$: transpose of the design matrix; $X^\top(Xw - Y)$: column-by-column inner product of features against the residual</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> $X^\top r$ measures how much each feature column 'explains' the leftover error. If a feature is positively correlated with the residual, increasing its weight reduces error — that's exactly the direction the negative gradient points.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Plug into gradient descent: $w_{t+1} = w_t - \alpha\,X^\top(Xw_t - Y)$. Set the gradient to zero for the closed-form solution. The $j$-th component $[X^\top r]_j$ tells you how to nudge weight $j$ to reduce error, where $r = Xw - Y$ is the residual.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Measures how each feature is correlated with the residuals. Use it for gradient descent, or set it to zero to derive the closed form.</p>
     </div>
     <div class="callout formula">
       <div class="head">Normal equation</div>
       <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w^*$: optimal weight vector — the minimizer; $X^\top X \in \mathbb{R}^{d \times d}$: Gram matrix — symmetric, positive-semidefinite; $(X^\top X)^{-1}$: inverse of the Gram matrix; exists iff $X$ has linearly independent columns ($\mathrm{rank}(X)=d$); $X^\top Y \in \mathbb{R}^d$: feature-target correlation vector</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> 'Stop where the gradient is zero.' The condition $X^\top(Xw - Y) = 0$ says the residual is orthogonal to every feature column — geometrically, $Xw^*$ is the projection of $Y$ onto the column space of $X$, and the leftover $Y - Xw^*$ has zero correlation with any feature.</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Set the gradient $X^\top(Xw - Y) = 0$, rearrange. The first form is the linear system to <b>solve</b> (don't actually invert the matrix in code — use `np.linalg.solve` or a Cholesky factorization for stability and speed); the second form is the explicit formula. If $X^\top X$ is singular (e.g. $n &lt; d$ or duplicated features), use ridge regression instead.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Gives the closed-form least-squares solution when $X^\top X$ is invertible. Geometrically, the residual becomes orthogonal to every feature column.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gaussian-noise / MLE view</div>
       <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
       <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\varepsilon^{(i)}$ is observation noise; $\sigma^2$ is the noise variance; $p(Y\mid X;w,\sigma^2)$ is the likelihood of the observed targets under the linear-Gaussian model.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Squared loss is not just an arbitrary penalty: it is the negative log-likelihood that falls out when the residuals are assumed Gaussian with constant variance.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In a conceptual proof, write the Gaussian likelihood, take logs, drop constants independent of $w$, and the remaining optimization is exactly least squares.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Explains why squared loss appears naturally: under Gaussian residual noise, minimizing MSE is the same as maximum likelihood estimation.</p>
     </div>
     <div class="callout formula">
       <div class="head">Ridge regularization</div>
       <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda \ge 0$: regularization strength (a hyperparameter); $\|w\|_2^2$: $\sum_j w_j^2$ — sum of squared weights; $\frac{\lambda}{2}\|w\|_2^2$: penalty term that shrinks weights toward 0; $I \in \mathbb{R}^{d \times d}$: identity matrix; $X^\top X + \lambda I$: always invertible when $\lambda &gt; 0$ (positive-definite)</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Two pressures fighting: 'fit the data well' vs. 'keep weights small.' Small weights → smoother model → less overfitting and a stable solution even when $X^\top X$ is singular. Bayesian view: ridge $=$ MAP estimate under a Gaussian prior $w \sim \mathcal{N}(0, \frac{1}{\lambda} I)$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Add the L2 penalty to the OLS objective. Pick $\lambda$ via cross-validation: small $\lambda \approx$ OLS, large $\lambda \approx$ all-zero weights. The closed-form solution just adds $\lambda I$ to the Gram matrix before inverting. <b>Standardize features first</b> — without it, weights with naturally large scales get over-penalized.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>Lasso contrast.</b> Lasso replaces $\|w\|_2^2$ by $\|w\|_1$ and can set some weights exactly to zero, so it acts like feature selection. Larger $\lambda$ usually increases bias but lowers variance.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Adds an L2 penalty that shrinks weights, stabilizes singular or ill-conditioned problems, and trades a bit more bias for lower variance.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Lasso contrast.</b> Lasso uses an L1 penalty instead, so it can set weights exactly to zero.</p>
     </div>
   </div>
 
@@ -196,41 +184,29 @@
         <div class="callout formula">
           <div class="head">MSE objective</div>
           <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w \in \mathbb{R}^d$: 待优化的权重向量 —— 每个特征一个权重；$X \in \mathbb{R}^{n \times d}$: 设计矩阵；第 $i$ 行是特征向量 $x_i^\top$；$Y \in \mathbb{R}^n$: 目标值向量 $(y_1, \ldots, y_n)^\top$；$Xw \in \mathbb{R}^n$: 预测值向量 $(\hat{y}_1, \ldots, \hat{y}_n)^\top$；$\|\cdot\|_2^2$: L2 范数的平方 —— 各项平方求和；$\frac{1}{2}$: 方便因子；与平方求导出来的 2 相消</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 几何上：把 $Y$ 投影到 $X$ 的列空间上。平方误差对大残差是二次惩罚，对 outlier 敏感，但数学上很干净 —— 凸、可导、当 $X^\top X$ 可逆时有唯一最小值。</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把训练输入堆成 $X$ 的行、目标堆成 $Y$。找让残差平方和（预测 − 真实）最小的 $w$。$d$ 小时走 normal equation 闭式解，$d$ 大、数据多时走 gradient descent。要加 bias，在 $X$ 前面加一列全 1，把它当成 $w$ 的一个分量。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 找一组 $w$，让预测向量 $Xw$ 尽量贴近目标向量 $Y$；误差用 squared loss 衡量。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gradient</div>
           <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\nabla_w$: 对 $w$ 求梯度；与 $w$ 同形状（$d$ 维向量）；$Xw - Y \in \mathbb{R}^n$: 残差向量 —— 预测 − 真实；$X^\top \in \mathbb{R}^{d \times n}$: 设计矩阵的转置；$X^\top(Xw - Y)$: 各列特征与残差的内积</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $X^\top r$ 衡量每个特征列与残余误差的相关程度。某个特征与残差正相关 → 增大它的权重能降低误差 —— 这正是负梯度的方向。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 代入 gradient descent: $w_{t+1} = w_t - \alpha\,X^\top(Xw_t - Y)$。或令梯度等于 0 得到闭式解。第 $j$ 个分量 $[X^\top r]_j$ 告诉你 "怎样调整第 $j$ 个权重才能减小误差"（$r = Xw - Y$ 是残差）。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 衡量每个 feature 和 residuals 的相关程度；可用于 gradient descent，也可令它为 0 推出 closed form。</p>
         </div>
         <div class="callout formula">
           <div class="head">Normal equation</div>
           <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w^*$: 最优权重向量 —— 使目标函数最小的解；$X^\top X \in \mathbb{R}^{d \times d}$: Gram 矩阵 —— 对称、半正定；$(X^\top X)^{-1}$: Gram 矩阵的逆；当且仅当 $X$ 列线性无关（即满列秩 $\mathrm{rank}(X) = d$）时存在；$X^\top Y \in \mathbb{R}^d$: 特征与目标的相关向量</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "梯度为 0 处停下"。条件 $X^\top(Xw - Y) = 0$ 表示残差与每个特征列正交 —— 几何上 $Xw^*$ 是 $Y$ 在 $X$ 列空间上的投影，残差 $Y - Xw^*$ 与任何特征都不再相关。</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 令梯度 $X^\top(Xw - Y) = 0$ 整理即可。第一个形式是要<b>解</b>的线性方程组（代码里别真的求逆，用 `np.linalg.solve` 或 Cholesky 既稳定又快）；第二个形式是显式解。当 $X^\top X$ 奇异（如 $n &lt; d$ 或特征重复）时，改用 ridge regression。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 给出 least-squares 的闭式解，前提是 $X^\top X$ 可逆；几何上 residual 会与每个 feature column 正交。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gaussian noise / MLE 视角</div>
           <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
           <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\varepsilon^{(i)}$ 是 observation noise；$\sigma^2$ 是 noise variance；$p(Y\mid X;w,\sigma^2)$ 是 linear-Gaussian model 下观察到这些 targets 的 likelihood。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Squared loss 不是随便选的惩罚项：如果假设 residuals 是 constant-variance Gaussian noise，那么 least squares 正好等价于最大化 likelihood。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 概念证明题里，先写 Gaussian likelihood，取 log，丢掉与 $w$ 无关的常数，剩下的 optimization 就是最小化 $\|Y-Xw\|_2^2$。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 解释 squared loss 从哪里来：如果 residual noise 是 Gaussian，最小化 MSE 就等价于 maximum likelihood estimation。</p>
         </div>
         <div class="callout formula">
           <div class="head">Ridge regularization</div>
           <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda \ge 0$: 正则强度（超参数）；$\|w\|_2^2$: $\sum_j w_j^2$ —— 权重平方和；$\frac{\lambda}{2}\|w\|_2^2$: 把权重拉向 0 的惩罚项；$I \in \mathbb{R}^{d \times d}$: 单位矩阵；$X^\top X + \lambda I$: $\lambda &gt; 0$ 时一定可逆（正定）</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 两股力在拔河："拟合好数据" vs. "权重不要太大"。权重小 → 模型更平滑 → 减少过拟合，且即使 $X^\top X$ 奇异也能有稳定解。Bayesian 视角：ridge $=$ 在 Gaussian prior $w \sim \mathcal{N}(0, \frac{1}{\lambda} I)$ 下的 MAP 估计。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在 OLS 目标里加上 L2 惩罚项。$\lambda$ 用 cross-validation 选：$\lambda$ 小 ≈ OLS，$\lambda$ 大 ≈ 全 0 解。闭式解就是在反矩阵前给 Gram 矩阵加 $\lambda I$。<b>先做特征标准化</b> —— 否则尺度天然大的权重会被惩罚得过狠。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>Lasso 对比.</b> Lasso 把 $\|w\|_2^2$ 换成 $\|w\|_1$，可能把某些 weights 直接压成 0，所以有 feature selection 的效果。$\lambda$ 越大，通常 bias 增加、variance 降低。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 加 L2 penalty 来 shrink weights，让奇异或病态问题更稳定，同时用更高一点 bias 换更低 variance。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>Lasso 对比.</b> Lasso 用 L1 penalty，因此可以把部分 weights 直接压成 0。</p>
         </div>
       </div>
 
