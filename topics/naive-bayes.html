@@ -51,6 +51,13 @@
     <p>Generative classifier: model P(X, Y) by factoring P(Y) and P(X | Y) under the assumption that, given Y, the features are conditionally independent.</p>
   </div>
 
+  <div class="callout formula">
+    <div class="head">Bayes' rule foundation</div>
+    <div class="eq">$$ P(Y\mid X)=\frac{P(X\mid Y)P(Y)}{P(X)} $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $P(Y)$ is the prior, $P(X\mid Y)$ is the likelihood, $P(Y\mid X)$ is the posterior, and $P(X)$ is the evidence.</p>
+    <p style="font-size:13px;margin:4px 0 0;"><b>Exam read.</b> Classification asks for the class with the largest posterior. Since $P(X)$ is shared by every candidate class, MAP prediction only needs to compare $P(X\mid Y=y)P(Y=y)$ across labels.</p>
+  </div>
+
   <h3>Factorization + MAP prediction</h3>
   <div class="cols2">
     <div class="callout formula"><div class="head">Conditional independence</div>
@@ -59,6 +66,7 @@
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once the class $Y$ is known, Naive Bayes pretends the features stop interacting with each other. The large joint likelihood becomes a product of one-feature likelihoods.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Estimate each $P(X_j\mid Y=y)$ separately inside each class. For discrete features, count and smooth; for continuous features, fit a 1-D distribution such as a Gaussian.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Why it matters.</b> For binary features and binary labels, the full class-conditional table needs about $2(2^d-1)$ free parameters. The naive factorization cuts this to about $2d$, which avoids the sparse-combination problem in high dimension.</p>
     </div>
     <div class="callout formula"><div class="head">MAP decision</div>
       <div class="eq">$$ \hat{y}=\arg\max_y P(Y=y)\prod_j P(X_j\mid y) $$</div>
@@ -75,13 +83,38 @@
     </div>
   </div>
 
+  <h3>Training estimates</h3>
+  <div class="cols2">
+    <div class="callout formula"><div class="head">MLE by counting</div>
+      <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_y$ counts training examples with label $y$, $n$ is the training-set size, and $c(X_j=1,Y=y)$ counts examples where feature $j$ is active inside class $y$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> For discrete Bernoulli features, training is maximum likelihood estimation by counts: estimate a class prior and one feature probability per class-feature pair.</p>
+    </div>
+    <div class="callout formula"><div class="head">Laplace smoothing</div>
+      <div class="eq">$$ \hat p_{j,y}=\frac{c_{j,y}+\lambda}{c_y+\lambda |X_j|},\qquad \lambda>0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_{j,y}$ is the count for a particular value of feature $j$ in class $y$; $|X_j|$ is the number of possible values for that feature.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The pseudo-count prevents a never-seen feature value from assigning probability 0 and wiping out the entire product at prediction time.</p>
+    </div>
+  </div>
+
   <h3>Gaussian Naive Bayes</h3>
   <div class="callout formula">
     <div class="head">Each feature is Gaussian per class</div>
     <div class="eq">$$ P(X_j\mid Y=y)=\mathcal{N}(X_j;\,\mu_{y,j},\,\sigma_{y,j}^2) $$</div>
     <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{N}(X_j;\mu_{y,j},\sigma_{y,j}^2)$ is a one-dimensional Gaussian density for feature $j$ in class $y$. $\mu_{y,j}$ is that class-feature mean; $\sigma_{y,j}^2$ is its variance.</p>
     <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For continuous data, each class gets its own little bell curve for each feature. A test value is more likely under a class if it lies near that class's mean with reasonable variance.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Estimate $\mu_{y,j}$ and $\sigma_{y,j}^2$ from training examples with label $y$, then plug the Gaussian density into the MAP log score. When all classes <b>share the same per-feature variance</b>, the quadratic terms cancel and the decision boundary is linear.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Estimate $\mu_{y,j}$ and $\sigma_{y,j}^2$ from training examples with label $y$, then plug the Gaussian density into the MAP log score. When all classes <b>share the same per-feature variance</b>, the quadratic terms cancel and the decision boundary is linear.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Special case.</b> If priors and variances are equal, GNB chooses the class whose mean vector is closest to the test point, using Euclidean distance.</p>
+  </div>
+
+  <div class="callout">
+    <div class="head">Model properties</div>
+    <ul>
+      <li><b>Supervised:</b> estimates all probabilities from labeled examples.</li>
+      <li><b>Parametric:</b> after training it keeps fixed counts/probabilities, or Gaussian means and variances.</li>
+      <li><b>Generative:</b> models the joint distribution $P(X,Y)=P(Y)P(X\mid Y)$, not only the boundary.</li>
+      <li><b>Often linear for binary classification:</b> Bernoulli NB and shared-variance GNB lead to a linear log-odds score.</li>
+    </ul>
   </div>
 
   <div class="callout warn">
@@ -98,6 +131,7 @@
       <li>Write the conditional-independence formula and the MAP rule.</li>
       <li>Explain when GNB has a linear boundary (shared variance).</li>
       <li>Justify log-space inference.</li>
+      <li>Compare it with KNN and logistic regression: NB is parametric and generative; KNN stores data and is non-parametric; logistic regression directly optimizes conditional likelihood $P(Y\mid X)$.</li>
     </ul>
   </div>
 </section>
@@ -111,6 +145,13 @@
         <p>生成式分类器：建模 $P(X,Y)$（即 $P(Y)$ 与 $P(X|Y)$）。<b>核心假设</b>：给定 $Y$ 时各特征条件独立。</p>
       </div>
 
+      <div class="callout formula">
+        <div class="head">Bayes rule 基础</div>
+        <div class="eq">$$ P(Y\mid X)=\frac{P(X\mid Y)P(Y)}{P(X)} $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $P(Y)$ 是 prior；$P(X\mid Y)$ 是 likelihood；$P(Y\mid X)$ 是 posterior；$P(X)$ 是 evidence。</p>
+        <p style="font-size:13px;margin:4px 0 0;"><b>考试读法.</b> 分类就是找 posterior 最大的类别。因为 $P(X)$ 对所有候选 class 相同，MAP 预测只需比较各个 label 的 $P(X\mid Y=y)P(Y=y)$。</p>
+      </div>
+
       <h3>因子分解 + MAP 预测</h3>
       <div class="cols2">
         <div class="callout formula"><div class="head">条件独立分解</div>
@@ -119,6 +160,7 @@
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦知道类别 $Y$，Naive Bayes 就假设 features 之间“不再互相影响”。于是一个高维联合 likelihood 被拆成很多一维 likelihood 的乘积。</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在每个 class 内分别估计 $P(X_j\mid Y=y)$。离散 feature 用计数加 smoothing；连续 feature 常拟合一维 Gaussian。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>为什么有用.</b> 对 binary features 和 binary labels，完整 class-conditional 表大约需要 $2(2^d-1)$ 个自由参数；Naive factorization 把它降到约 $2d$，高维时不必等待每一种 feature combination 都在训练集中出现。</p>
         </div>
         <div class="callout formula"><div class="head">MAP 决策</div>
           <div class="eq">$$ \hat{y}=\arg\max_y \;P(Y=y)\prod_{j} P(X_j\mid Y=y) $$</div>
@@ -135,13 +177,38 @@
         </div>
       </div>
 
+      <h3>训练估计</h3>
+      <div class="cols2">
+        <div class="callout formula"><div class="head">MLE = 计数</div>
+          <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_y$ 是 label 为 $y$ 的训练样本数；$n$ 是训练集大小；$c(X_j=1,Y=y)$ 是 class $y$ 内第 $j$ 个 binary feature 激活的样本数。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 对离散 Bernoulli features，训练就是 maximum likelihood estimation by counting：估一个 class prior，再估每个 class-feature pair 的条件概率。</p>
+        </div>
+        <div class="callout formula"><div class="head">Laplace smoothing</div>
+          <div class="eq">$$ \hat p_{j,y}=\frac{c_{j,y}+\lambda}{c_y+\lambda |X_j|},\qquad \lambda>0 $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_{j,y}$ 是 class $y$ 中 feature $j$ 某个取值的 count；$|X_j|$ 是该 feature 可能取值数。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> pseudo-count 防止训练集中没出现过的 feature value 被估成 0，从而在 prediction 时把整串 likelihood product 直接归零。</p>
+        </div>
+      </div>
+
       <h3>Gaussian Naive Bayes</h3>
       <div class="callout formula">
         <div class="head">假设每个 $X_j\mid Y$ 高斯</div>
         <div class="eq">$$ P(X_j\mid Y=y)=\mathcal{N}\!\big(X_j\,;\,\mu_{y,j},\sigma_{y,j}^2\big) $$</div>
         <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{N}(X_j;\mu_{y,j},\sigma_{y,j}^2)$ 是类别 $y$ 下第 $j$ 个 feature 的一维 Gaussian density；$\mu_{y,j}$ 是 mean；$\sigma_{y,j}^2$ 是 variance。</p>
         <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 对连续 feature，每个 class 都给每个 feature 拟合一条小钟形曲线。测试值越靠近该 class 的 mean，且方差解释得合理，likelihood 越高。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先用训练集中 $Y=y$ 的样本估 $\mu_{y,j}$ 和 $\sigma_{y,j}^2$，再把 Gaussian density 代入 MAP log score。若 <b>所有类共享同一方差 $\sigma_j^2$</b>，二次项会抵消，GNB 决策边界为 <b>线性</b>。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先用训练集中 $Y=y$ 的样本估 $\mu_{y,j}$ 和 $\sigma_{y,j}^2$，再把 Gaussian density 代入 MAP log score。若 <b>所有类共享同一方差 $\sigma_j^2$</b>，二次项会抵消，GNB 决策边界为 <b>线性</b>。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>特例.</b> 如果 class priors 和 variances 都相同，GNB 会选 mean vector 离 test point 最近的 class，本质是在比 Euclidean distance。</p>
+      </div>
+
+      <div class="callout">
+        <div class="head">模型属性</div>
+        <ul>
+          <li><b>Supervised:</b> 需要 labeled data 来估概率。</li>
+          <li><b>Parametric:</b> 训练后只保留固定数量的 counts/probabilities，或 Gaussian 的 means/variances。</li>
+          <li><b>Generative:</b> 建模 joint distribution $P(X,Y)=P(Y)P(X\mid Y)$，不只是学 decision boundary。</li>
+          <li><b>常见情形下是 linear classifier:</b> binary Bernoulli NB 和 shared-variance GNB 都会给出 linear log-odds score。</li>
+        </ul>
       </div>
 
       <div class="callout warn">
@@ -158,6 +225,7 @@
           <li>写出 NB 条件独立公式 + MAP 预测式。</li>
           <li>解释 GNB 何时是线性边界（共享方差）。</li>
           <li>解释为什么用 log-space。</li>
+          <li>会和 KNN / Logistic Regression 对比：NB 是 parametric + generative；KNN 保存训练数据、non-parametric；Logistic Regression 直接优化 conditional likelihood $P(Y\mid X)$。</li>
         </ul>
       </div>
 
