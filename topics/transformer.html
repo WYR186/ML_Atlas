@@ -39,7 +39,8 @@
       <h1>🔮 <span class="en-only">Transformer</span><span class="cn-only">Transformer</span></h1>
       <div class="subtitle"><span class="en-only">LN + MHA + FFN + Residual</span><span class="cn-only">LN + MHA + FFN + Residual</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_16.pdf" target="_blank">📄 Lecture 16</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/machine-learning/getting-started-with-transformers/" target="_blank" rel="noopener">🔗 GeeksforGeeks Transformer</a></div>
     </div>
 
 <div class="en-only">
@@ -71,8 +72,25 @@
   </div>
 </section>
 
+<section class="topic lesson-section visual-section" id="transformer-visual-en">
+  <h2>4. Visual Reading Guide</h2>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/transformer-encoder-decoder.svg" alt="Transformer encoder-decoder architecture with attention, feed-forward blocks, positional encoding, linear head, and softmax" loading="lazy" />
+      <figcaption><b>Read the picture bottom-up, then left-to-right.</b> Tokens become embeddings, positional encoding adds order information, encoder layers build contextual representations, and decoder layers use masked attention plus encoder-decoder attention before the final softmax.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Encoder side.</b> Inputs pass through embedding plus positional encoding, then repeated self-attention and feed-forward sublayers with residual Add &amp; Norm.</div>
+    <div><b>Decoder side.</b> Previous output tokens enter through masked self-attention, so each position can only look backward during generation.</div>
+    <div><b>Cross-attention.</b> The decoder's middle attention block reads encoder outputs; this is where target tokens consult the source sequence.</div>
+    <div><b>Output head.</b> Linear maps decoder states to vocabulary logits, and softmax converts logits into next-token probabilities.</div>
+    <div><b>Reference.</b> Additional architecture context: <a href="https://www.geeksforgeeks.org/machine-learning/getting-started-with-transformers/" target="_blank" rel="noopener">GeeksforGeeks Getting Started with Transformers</a>.</div>
+  </div>
+</section>
+
 <section class="topic lesson-section equations" id="transformer-equations-en">
-  <h2>4. Key Equations</h2>
+  <h2>5. Key Equations</h2>
   <h3>Block skeleton</h3>
   <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
   <div class="study-box">
@@ -92,7 +110,7 @@
 </section>
 
 <section class="topic lesson-section examples" id="transformer-examples-en">
-  <h2>5. Worked Examples</h2>
+  <h2>6. Worked Examples</h2>
   <h3>HW4 §2.4.1: attention block parameters</h3>
   <p class="source-note">Source: HW4 §2.4, paraphrased.</p>
   <p>Standard multi-head attention has $W_Q,W_K,W_V,W_O$. Even though there are $N$ heads, their head dimensions sum to $D$, so each projection is $D\times D$. Total: $4D^2$.</p>
@@ -106,7 +124,7 @@
 </section>
 
 <section class="topic lesson-section tips-section" id="transformer-tips-en">
-  <h2>6. Problem-Solving Tips</h2>
+  <h2>7. Problem-Solving Tips</h2>
   <ol>
     <li>For architecture questions, name the path: token embedding plus position, repeated decoder blocks, LM head.</li>
     <li>For parameter counts, write matrix shapes first. Most mistakes disappear once shapes are explicit.</li>
@@ -117,7 +135,7 @@
 </section>
 
 <section class="topic lesson-section mistakes" id="transformer-mistakes-en">
-  <h2>7. Common Mistakes</h2>
+  <h2>8. Common Mistakes</h2>
   <ul class="mini-list">
     <li>Multiplying MHA parameters by $N$ after already using full $D\times D$ projection matrices.</li>
     <li>Counting positional encoding as trainable when the problem says sinusoidal or "no learned positional embeddings."</li>
@@ -127,7 +145,7 @@
 </section>
 
 <section class="topic lesson-section exam-section" id="transformer-exam-en">
-  <h2>8. Exam Focus</h2>
+  <h2>9. Exam Focus</h2>
   <ul class="mini-list">
     <li>Know the decoder block parts: LN, masked MHA, FFN, residual connections.</li>
     <li>Know why residuals and LayerNorm make deep stacks trainable.</li>
@@ -138,7 +156,7 @@
 </section>
 
 <section class="topic lesson-section checklist-section" id="transformer-checklist-en">
-  <h2>9. Quick Checklist</h2>
+  <h2>10. Quick Checklist</h2>
   <ul class="mini-list">
     <li>Attention mixes across tokens.</li>
     <li>FFN transforms each token independently.</li>
@@ -180,8 +198,25 @@
   </div>
 </section>
 
+<section class="topic lesson-section visual-section" id="transformer-visual-cn">
+  <h2>4. Visual Reading Guide / 看图理解</h2>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/transformer-encoder-decoder.svg" alt="Transformer encoder-decoder 架构图：attention、feed-forward、positional encoding、linear head 和 softmax" loading="lazy" />
+      <figcaption><b>这张图先自下而上读，再左右联动。</b> Tokens 先变成 embeddings，positional encoding 加入顺序信息；encoder 建 source 表示，decoder 用 masked attention 和 encoder-decoder attention 生成输出。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Encoder side：</b> Inputs 经过 embedding + positional encoding，然后反复经过 self-attention、feed-forward，以及 residual Add &amp; Norm。</div>
+    <div><b>Decoder side：</b> Previous output tokens 先进入 masked self-attention，所以生成第 $t$ 个 token 时不能偷看未来 token。</div>
+    <div><b>Cross-attention：</b> Decoder 中间的 attention block 会读取 encoder outputs；这一步就是 target tokens 去查询 source sequence。</div>
+    <div><b>Output head：</b> Linear 把 decoder states 映射成 vocabulary logits，softmax 再把 logits 变成 next-token probabilities。</div>
+    <div><b>参考链接：</b> 如果想看整体架构语境，可以看 <a href="https://www.geeksforgeeks.org/machine-learning/getting-started-with-transformers/" target="_blank" rel="noopener">GeeksforGeeks Getting Started with Transformers</a>。</div>
+  </div>
+</section>
+
 <section class="topic lesson-section equations" id="transformer-equations-cn">
-  <h2>4. 核心公式 / Key Equations</h2>
+  <h2>5. 核心公式 / Key Equations</h2>
   <h3>Block skeleton</h3>
   <div class="eq">$$ X' = X + \mathrm{MHA}(\mathrm{LN}(X)),\qquad X_{\text{out}}=X' + \mathrm{FFN}(\mathrm{LN}(X')) $$</div>
   <div class="study-box">
@@ -201,7 +236,7 @@
 </section>
 
 <section class="topic lesson-section examples" id="transformer-examples-cn">
-  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h2>6. 例题讲解 / Worked Examples</h2>
   <h3>HW4 §2.4.1：attention block 参数量</h3>
   <p class="source-note">出处：HW4 §2.4，题意转述。</p>
   <p>标准 multi-head attention 有 $W_Q,W_K,W_V,W_O$。虽然有 $N$ 个 heads，但所有 head 维度加起来还是 $D$，所以每个 projection 都是 $D\times D$。总量：$4D^2$。</p>
@@ -215,7 +250,7 @@
 </section>
 
 <section class="topic lesson-section tips-section" id="transformer-tips-cn">
-  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <h2>7. 解题技巧 / Problem-Solving Tips</h2>
   <ol>
     <li>架构题先按路径说：token embedding + position，然后重复 decoder blocks，最后 LM head。</li>
     <li>参数量题先写矩阵 shape，shape 写对基本就不乱。</li>
@@ -226,7 +261,7 @@
 </section>
 
 <section class="topic lesson-section mistakes" id="transformer-mistakes-cn">
-  <h2>7. 常见错误 / Common Mistakes</h2>
+  <h2>8. 常见错误 / Common Mistakes</h2>
   <ul class="mini-list">
     <li>已经用 $D\times D$ projection 之后，又额外乘 head 数 $N$。</li>
     <li>题目说 sinusoidal / no learned positional embeddings 时，还把 PE 当 trainable parameters。</li>
@@ -236,7 +271,7 @@
 </section>
 
 <section class="topic lesson-section exam-section" id="transformer-exam-cn">
-  <h2>8. 考试重点 / Exam Focus</h2>
+  <h2>9. 考试重点 / Exam Focus</h2>
   <ul class="mini-list">
     <li>知道 decoder block 组成：LN、masked MHA、FFN、residual connections。</li>
     <li>能解释 residual 和 LayerNorm 为什么让深层网络更好训练。</li>
@@ -247,7 +282,7 @@
 </section>
 
 <section class="topic lesson-section checklist-section" id="transformer-checklist-cn">
-  <h2>9. 速记清单 / Quick Checklist</h2>
+  <h2>10. 速记清单 / Quick Checklist</h2>
   <ul class="mini-list">
     <li>Attention 负责跨 token 混合。</li>
     <li>FFN 负责每个 token 自己加工。</li>

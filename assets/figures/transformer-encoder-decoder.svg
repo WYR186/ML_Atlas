@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 980" role="img" aria-labelledby="title desc">
+  <title id="title">Transformer encoder-decoder architecture</title>
+  <desc id="desc">A Transformer diagram showing input embeddings and positional encoding into an encoder layer, decoder embeddings and positional encoding into a decoder layer, cross-attention from encoder to decoder, and linear plus softmax output probabilities.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#111827"/>
+    </marker>
+    <style>
+      .title { font: 700 25px Arial, sans-serif; fill: #111827; }
+      .label { font: 600 22px Arial, sans-serif; fill: #111827; }
+      .small { font: 600 16px Arial, sans-serif; fill: #111827; }
+      .tiny { font: 500 13px Arial, sans-serif; fill: #111827; }
+      .box { stroke: #111827; stroke-width: 1.5; rx: 8; }
+      .layer { fill: #eef9e9; stroke: #111827; stroke-width: 1.4; rx: 10; }
+      .embed { fill: #f7def7; }
+      .attn { fill: #f8def8; }
+      .ffn { fill: #fff2d6; }
+      .norm { fill: #ffffdf; }
+      .linear { fill: #d6f1fb; }
+      .softmax { fill: #e6ddff; }
+      .wire { stroke: #111827; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .skip { stroke: #111827; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .circle { fill: #ffffff; stroke: #111827; stroke-width: 1.4; }
+      .wave { stroke: #111827; stroke-width: 1.4; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="760" height="980" fill="#f8fafc"/>
+
+  <text x="455" y="42" text-anchor="middle" class="title">Output</text>
+  <text x="455" y="70" text-anchor="middle" class="title">Probabilities</text>
+  <line x1="455" y1="105" x2="455" y2="78" class="wire"/>
+  <rect x="370" y="105" width="170" height="40" class="box softmax"/>
+  <text x="455" y="131" text-anchor="middle" class="label">Softmax</text>
+  <line x1="455" y1="180" x2="455" y2="145" class="wire"/>
+  <rect x="370" y="180" width="170" height="40" class="box linear"/>
+  <text x="455" y="206" text-anchor="middle" class="label">Linear</text>
+  <line x1="455" y1="255" x2="455" y2="220" class="wire"/>
+
+  <text x="78" y="572" text-anchor="middle" class="title">Encoder</text>
+  <text x="78" y="600" text-anchor="middle" class="title">layer</text>
+  <text x="694" y="490" text-anchor="middle" class="title">Decoder</text>
+  <text x="694" y="518" text-anchor="middle" class="title">layer</text>
+
+  <rect x="90" y="365" width="245" height="360" class="layer"/>
+  <rect x="385" y="255" width="245" height="470" class="layer"/>
+
+  <rect x="135" y="385" width="160" height="40" class="box norm"/>
+  <text x="215" y="411" text-anchor="middle" class="label">Add &amp; Norm</text>
+  <rect x="135" y="435" width="160" height="40" class="box ffn"/>
+  <text x="215" y="461" text-anchor="middle" class="label">Feed Forward</text>
+  <line x1="215" y1="525" x2="215" y2="475" class="wire"/>
+  <rect x="135" y="555" width="160" height="40" class="box norm"/>
+  <text x="215" y="581" text-anchor="middle" class="label">Add &amp; Norm</text>
+  <rect x="135" y="605" width="160" height="70" class="box attn"/>
+  <text x="215" y="632" text-anchor="middle" class="label">Multi-Head</text>
+  <text x="215" y="660" text-anchor="middle" class="label">Attention</text>
+
+  <path d="M135 405 H112 V512 H135" class="skip"/>
+  <path d="M135 575 H112 V636 H135" class="skip"/>
+  <path d="M178 675 V699 H252 V675" class="skip"/>
+
+  <rect x="415" y="275" width="160" height="40" class="box norm"/>
+  <text x="495" y="301" text-anchor="middle" class="label">Add &amp; Norm</text>
+  <rect x="415" y="325" width="160" height="40" class="box ffn"/>
+  <text x="495" y="351" text-anchor="middle" class="label">Feed Forward</text>
+  <line x1="495" y1="405" x2="495" y2="365" class="wire"/>
+  <rect x="415" y="425" width="160" height="40" class="box norm"/>
+  <text x="495" y="451" text-anchor="middle" class="label">Add &amp; Norm</text>
+  <rect x="415" y="475" width="160" height="70" class="box attn"/>
+  <text x="495" y="502" text-anchor="middle" class="label">Multi-Head</text>
+  <text x="495" y="530" text-anchor="middle" class="label">Attention</text>
+  <line x1="495" y1="585" x2="495" y2="545" class="wire"/>
+  <rect x="415" y="605" width="160" height="40" class="box norm"/>
+  <text x="495" y="631" text-anchor="middle" class="label">Add &amp; Norm</text>
+  <rect x="415" y="655" width="160" height="70" class="box attn"/>
+  <text x="495" y="681" text-anchor="middle" class="label">Masked Multi-</text>
+  <text x="495" y="710" text-anchor="middle" class="label">Head Attention</text>
+
+  <path d="M575 295 H605 V345 H575" class="skip"/>
+  <path d="M575 445 H605 V510 H575" class="skip"/>
+  <path d="M575 625 H605 V690 H575" class="skip"/>
+  <path d="M458 725 V749 H532 V725" class="skip"/>
+  <path d="M432 545 C432 575 410 585 395 585" class="skip"/>
+  <path d="M558 545 C602 570 612 665 575 705" class="skip"/>
+
+  <path d="M295 405 H360 V510 H415" class="wire"/>
+  <path d="M215 385 V365 H360 V510 H415" class="wire"/>
+  <path d="M215 605 V585 H360 V510 H415" class="wire"/>
+
+  <line x1="495" y1="255" x2="495" y2="220" class="wire"/>
+
+  <line x1="215" y1="365" x2="215" y2="735" class="wire"/>
+  <rect x="130" y="820" width="170" height="65" class="box embed"/>
+  <text x="215" y="847" text-anchor="middle" class="label">Input</text>
+  <text x="215" y="874" text-anchor="middle" class="label">Embedding</text>
+  <line x1="215" y1="820" x2="215" y2="792" class="wire"/>
+  <line x1="215" y1="940" x2="215" y2="885" class="wire"/>
+  <text x="215" y="965" text-anchor="middle" class="label">Inputs</text>
+
+  <circle cx="150" cy="760" r="24" class="circle"/>
+  <path d="M130 760 C138 740 158 740 170 760 S192 780 200 760" class="wave"/>
+  <circle cx="215" cy="760" r="18" class="circle"/>
+  <line x1="202" y1="760" x2="228" y2="760" stroke="#111827" stroke-width="1.8"/>
+  <line x1="215" y1="747" x2="215" y2="773" stroke="#111827" stroke-width="1.8"/>
+  <text x="72" y="756" text-anchor="middle" class="label">Positional</text>
+  <text x="72" y="782" text-anchor="middle" class="label">Encoding</text>
+
+  <rect x="410" y="820" width="170" height="65" class="box embed"/>
+  <text x="495" y="847" text-anchor="middle" class="label">Output</text>
+  <text x="495" y="874" text-anchor="middle" class="label">Embedding</text>
+  <line x1="495" y1="820" x2="495" y2="792" class="wire"/>
+  <line x1="495" y1="940" x2="495" y2="885" class="wire"/>
+  <text x="495" y="958" text-anchor="middle" class="label">Outputs</text>
+  <text x="495" y="976" text-anchor="middle" class="tiny">(tokens from previous step)</text>
+
+  <circle cx="430" cy="760" r="18" class="circle"/>
+  <line x1="417" y1="760" x2="443" y2="760" stroke="#111827" stroke-width="1.8"/>
+  <line x1="430" y1="747" x2="430" y2="773" stroke="#111827" stroke-width="1.8"/>
+  <circle cx="495" cy="760" r="24" class="circle"/>
+  <path d="M475 760 C483 740 503 740 515 760 S537 780 545 760" class="wave"/>
+  <text x="660" y="756" text-anchor="middle" class="label">Positional</text>
+  <text x="660" y="782" text-anchor="middle" class="label">Encoding</text>
+
+  <line x1="495" y1="655" x2="495" y2="792" class="wire"/>
+  <line x1="215" y1="605" x2="215" y2="792" class="wire"/>
+</svg>
