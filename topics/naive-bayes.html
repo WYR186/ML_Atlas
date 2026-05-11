@@ -57,6 +57,11 @@
     <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $P(Y)$ is the prior, $P(X\mid Y)$ is the likelihood, $P(Y\mid X)$ is the posterior, and $P(X)$ is the evidence.</p>
     <p style="font-size:13px;margin:4px 0 0;"><b>Exam read.</b> Classification asks for the class with the largest posterior. Since $P(X)$ is shared by every candidate class, MAP prediction only needs to compare $P(X\mid Y=y)P(Y=y)$ across labels.</p>
   </div>
+  <div class="callout example">
+    <div class="head">Spam-filter reading</div>
+    <p>For email classification, $X$ can be the words in the email and $Y$ can be spam vs. normal. $P(\text{spam})=0.3$ is a prior: before reading the email, 30% of messages are spam. $P(\text{contains "free"}\mid\text{spam})$ is a likelihood: among spam emails, how often does the word "free" appear?</p>
+    <p>The posterior $P(\text{spam}\mid\text{contains "free"})$ is what the classifier actually wants. Evidence $P(X)$ says how common the observed features are overall, but it is the same denominator for every label, so it disappears in the $\arg\max$ comparison.</p>
+  </div>
 
   <h3>Factorization + MAP prediction</h3>
   <div class="cols2">
@@ -64,6 +69,7 @@
       <div class="eq">$$ P(X_1,\ldots,X_d\mid Y)=\prod_{j=1}^{d} P(X_j\mid Y) $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X_1,\ldots,X_d$ are the $d$ feature variables. $Y$ is the class label. $P(X_1,\ldots,X_d\mid Y)$ is the joint class-conditional likelihood. $\prod_{j=1}^{d}$ means multiply one factor for each feature.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once the class $Y$ is known, Naive Bayes pretends the features stop interacting with each other. The large joint likelihood becomes a product of one-feature likelihoods.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>Email example.</b> If $X_1$ means "has free," $X_2$ means "has money," and $X_3$ means "has click," then NB approximates $P(X_1,X_2,X_3\mid Y=\text{spam})$ as $P(X_1\mid Y)P(X_2\mid Y)P(X_3\mid Y)$.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Estimate each $P(X_j\mid Y=y)$ separately inside each class. For discrete features, count and smooth; for continuous features, fit a 1-D distribution such as a Gaussian.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>Why it matters.</b> For binary features and binary labels, the full class-conditional table needs about $2(2^d-1)$ free parameters. The naive factorization cuts this to about $2d$, which avoids the sparse-combination problem in high dimension.</p>
@@ -95,6 +101,17 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_{j,y}$ is the count for a particular value of feature $j$ in class $y$; $|X_j|$ is the number of possible values for that feature.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The pseudo-count prevents a never-seen feature value from assigning probability 0 and wiping out the entire product at prediction time.</p>
     </div>
+  </div>
+
+  <h3>Discrete NB calculation template</h3>
+  <div class="callout exam">
+    <div class="head">Use this on hand-computation problems</div>
+    <ol>
+      <li><b>Count priors:</b> estimate $P(Y=y)$ from how often each label appears in the training set.</li>
+      <li><b>Count likelihoods:</b> inside each class, estimate $P(X_j=x_j\mid Y=y)$ for the feature values in the test example.</li>
+      <li><b>Score each class:</b> compute $\mathrm{score}(y)=P(Y=y)\prod_j P(X_j=x_j\mid Y=y)$.</li>
+      <li><b>Pick the largest:</b> compare scores across labels. If products are tiny, compare log scores instead.</li>
+    </ol>
   </div>
 
   <h3>Gaussian Naive Bayes</h3>
@@ -151,6 +168,11 @@
         <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $P(Y)$ 是 prior；$P(X\mid Y)$ 是 likelihood；$P(Y\mid X)$ 是 posterior；$P(X)$ 是 evidence。</p>
         <p style="font-size:13px;margin:4px 0 0;"><b>考试读法.</b> 分类就是找 posterior 最大的类别。因为 $P(X)$ 对所有候选 class 相同，MAP 预测只需比较各个 label 的 $P(X\mid Y=y)P(Y=y)$。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Spam 邮件例子</div>
+        <p>做邮件分类时，$X$ 可以是这封邮件里的 words，$Y$ 是 spam vs. normal。$P(\text{spam})=0.3$ 是 prior：还没看邮件内容时，整体上 30% 邮件是 spam。$P(\text{contains "free"}\mid\text{spam})$ 是 likelihood：如果邮件已经是 spam，它包含 "free" 的概率。</p>
+        <p>真正想要的是 posterior，例如 $P(\text{spam}\mid\text{contains "free"})$。Evidence $P(X)$ 表示这些 features 本身出现的概率；但分类比较不同 labels 时，分母相同，所以 $\arg\max$ 里可以扔掉。</p>
+      </div>
 
       <h3>因子分解 + MAP 预测</h3>
       <div class="cols2">
@@ -158,6 +180,7 @@
           <div class="eq">$$ P(X_1,\ldots,X_d\mid Y)=\prod_{j=1}^{d} P(X_j\mid Y) $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X_1,\ldots,X_d$ 是 $d$ 个 feature variables；$Y$ 是 class label；$P(X_1,\ldots,X_d\mid Y)$ 是给定类别后的联合 likelihood；$\prod_{j=1}^{d}$ 表示对每个 feature 的一项连乘。</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦知道类别 $Y$，Naive Bayes 就假设 features 之间“不再互相影响”。于是一个高维联合 likelihood 被拆成很多一维 likelihood 的乘积。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>邮件例子.</b> 若 $X_1$ 表示 has "free"，$X_2$ 表示 has "money"，$X_3$ 表示 has "click"，NB 会把 $P(X_1,X_2,X_3\mid Y=\text{spam})$ 近似拆成 $P(X_1\mid Y)P(X_2\mid Y)P(X_3\mid Y)$。</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在每个 class 内分别估计 $P(X_j\mid Y=y)$。离散 feature 用计数加 smoothing；连续 feature 常拟合一维 Gaussian。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>为什么有用.</b> 对 binary features 和 binary labels，完整 class-conditional 表大约需要 $2(2^d-1)$ 个自由参数；Naive factorization 把它降到约 $2d$，高维时不必等待每一种 feature combination 都在训练集中出现。</p>
@@ -189,6 +212,17 @@
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_{j,y}$ 是 class $y$ 中 feature $j$ 某个取值的 count；$|X_j|$ 是该 feature 可能取值数。</p>
           <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> pseudo-count 防止训练集中没出现过的 feature value 被估成 0，从而在 prediction 时把整串 likelihood product 直接归零。</p>
         </div>
+      </div>
+
+      <h3>离散 NB 计算模板</h3>
+      <div class="callout exam">
+        <div class="head">手算题按这个顺序来</div>
+        <ol>
+          <li><b>数 prior:</b> 从训练集中每个 label 出现次数估 $P(Y=y)$。</li>
+          <li><b>数 likelihood:</b> 在每个 class 内，统计测试样本对应的 feature values，估 $P(X_j=x_j\mid Y=y)$。</li>
+          <li><b>算 class score:</b> 对每个类别算 $\mathrm{score}(y)=P(Y=y)\prod_j P(X_j=x_j\mid Y=y)$。</li>
+          <li><b>选最大:</b> 比较不同 labels 的 score；如果概率乘积太小，就改比 log score。</li>
+        </ol>
       </div>
 
       <h3>Gaussian Naive Bayes</h3>
