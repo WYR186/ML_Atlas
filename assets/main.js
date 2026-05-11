@@ -92,8 +92,9 @@ function setupSearch() {
   };
 
   const apply = (q) => {
-    // Legacy cards (Block detail pages).
-    document.querySelectorAll(".node, .section-node").forEach(n => {
+    // Legacy cards (Block detail pages). Scoped to `a.node` so we
+    // don't accidentally dim Mermaid's SVG `<g class="node">`.
+    document.querySelectorAll("a.node, .section-node").forEach(n => {
       if (!q) { n.style.opacity = "1"; return; }
       n.style.opacity = n.textContent.toLowerCase().includes(q) ? "1" : "0.25";
     });
