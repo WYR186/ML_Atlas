@@ -91,7 +91,7 @@
 
   <h3>Training estimates</h3>
   <div class="cols2">
-    <div class="callout formula"><div class="head">MLE by counting</div>
+    <div class="callout formula"><div class="head">Maximum likelihood estimation (MLE) by counting</div>
       <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_y$ counts training examples with label $y$, $n$ is the training-set size, and $c(X_j=1,Y=y)$ counts examples where feature $j$ is active inside class $y$.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> For discrete Bernoulli features, training is maximum likelihood estimation by counts: estimate a class prior and one feature probability per class-feature pair.</p>
@@ -202,10 +202,10 @@
 
       <h3>训练估计</h3>
       <div class="cols2">
-        <div class="callout formula"><div class="head">MLE = 计数</div>
+        <div class="callout formula"><div class="head">Maximum likelihood estimation (MLE) = 计数</div>
           <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_y$ 是 label 为 $y$ 的训练样本数；$n$ 是训练集大小；$c(X_j=1,Y=y)$ 是 class $y$ 内第 $j$ 个 binary feature 激活的样本数。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 对离散 Bernoulli features，训练就是 maximum likelihood estimation by counting：估一个 class prior，再估每个 class-feature pair 的条件概率。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 对离散 Bernoulli features，训练就是 maximum likelihood estimation (MLE) by counting：估一个 class prior，再估每个 class-feature pair 的条件概率。</p>
         </div>
         <div class="callout formula"><div class="head">Laplace smoothing</div>
           <div class="eq">$$ \hat p_{j,y}=\frac{c_{j,y}+\lambda}{c_y+\lambda |X_j|},\qquad \lambda>0 $$</div>
