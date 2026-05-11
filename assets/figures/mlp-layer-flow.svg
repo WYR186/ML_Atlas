@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">Multi-layer perceptron layer flow</title>
+  <desc id="desc">A feedforward MLP with three input nodes, three hidden nodes, and two output nodes connected by weighted arrows.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#111827"/>
+    </marker>
+    <style>
+      .label { font: 700 26px Arial, sans-serif; fill: #111827; }
+      .small { font: 500 22px Arial, sans-serif; fill: #111827; }
+      .wire { stroke: #111827; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .node { fill: #cfe8c8; stroke: #b9d9b1; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect width="800" height="450" fill="#f8fafc"/>
+
+  <text x="22" y="58" class="label">inputs</text>
+  <text x="698" y="88" class="label">Outputs</text>
+
+  <line x1="46" y1="78" x2="105" y2="78" class="wire"/>
+  <line x1="46" y1="190" x2="105" y2="190" class="wire"/>
+  <line x1="46" y1="303" x2="105" y2="303" class="wire"/>
+
+  <circle cx="145" cy="78" r="38" class="node"/>
+  <circle cx="145" cy="190" r="38" class="node"/>
+  <circle cx="145" cy="303" r="38" class="node"/>
+
+  <circle cx="385" cy="78" r="38" class="node"/>
+  <circle cx="385" cy="190" r="38" class="node"/>
+  <circle cx="385" cy="303" r="38" class="node"/>
+
+  <circle cx="665" cy="128" r="38" class="node"/>
+  <circle cx="665" cy="245" r="38" class="node"/>
+
+  <g opacity="0.94">
+    <line x1="183" y1="78" x2="347" y2="78" class="wire"/>
+    <line x1="183" y1="78" x2="347" y2="190" class="wire"/>
+    <line x1="183" y1="78" x2="347" y2="303" class="wire"/>
+
+    <line x1="183" y1="190" x2="347" y2="78" class="wire"/>
+    <line x1="183" y1="190" x2="347" y2="190" class="wire"/>
+    <line x1="183" y1="190" x2="347" y2="303" class="wire"/>
+
+    <line x1="183" y1="303" x2="347" y2="78" class="wire"/>
+    <line x1="183" y1="303" x2="347" y2="190" class="wire"/>
+    <line x1="183" y1="303" x2="347" y2="303" class="wire"/>
+
+    <line x1="423" y1="78" x2="627" y2="128" class="wire"/>
+    <line x1="423" y1="78" x2="627" y2="245" class="wire"/>
+    <line x1="423" y1="190" x2="627" y2="128" class="wire"/>
+    <line x1="423" y1="190" x2="627" y2="245" class="wire"/>
+    <line x1="423" y1="303" x2="627" y2="128" class="wire"/>
+    <line x1="423" y1="303" x2="627" y2="245" class="wire"/>
+  </g>
+
+  <line x1="703" y1="128" x2="760" y2="128" class="wire"/>
+  <line x1="703" y1="245" x2="760" y2="245" class="wire"/>
+
+  <text x="78" y="382" class="small">Input Layer</text>
+  <text x="315" y="382" class="small">Hidden Layer</text>
+  <text x="575" y="382" class="small">Output Layer</text>
+</svg>

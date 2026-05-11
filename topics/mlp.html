@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Learned features · ReLU · Softmax</span><span class="cn-only">学习 feature · ReLU · Softmax</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_10.pdf" target="_blank">📄 Lecture 10</a>
         <a class="ref-chip hw" href="../HW/hw3.pdf" target="_blank">📝 hw3</a>
-        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a></div>
+        <a class="ref-chip hw" href="../HW/hw3_sol.pdf" target="_blank">📝 hw3_sol</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/deep-learning/multi-layer-perceptron-learning-in-tensorflow/" target="_blank" rel="noopener">🔗 GeeksforGeeks MLP</a></div>
     </div>
 
 <div class="en-only">
@@ -62,7 +63,21 @@
   <p>Depth lets the model reuse features hierarchically. Width gives more hidden units to carve the input space. Universal approximation says a sufficiently wide nonlinear network can approximate continuous functions on compact domains.</p>
   <p>For exams, remember the constructive story: one hidden layer with at least two nonlinear units can solve XOR by first building useful logic features, then letting the output layer linearly combine those features.</p>
 
-  <h3 class="section-purple">4. Key Equations</h3>
+  <h3 class="section-gray" id="mlp-visual-guide-en">4. Visual Reading Guide</h3>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/mlp-layer-flow.svg" alt="MLP layer diagram with input, hidden, and output layers" loading="lazy" />
+      <figcaption><b>Read the picture from left to right.</b> Inputs are copied into hidden units through weighted edges; hidden activations become the features that the output layer combines into predictions.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Input layer.</b> These nodes hold the raw feature vector $x$. They usually do not learn parameters; they just feed values forward.</div>
+    <div><b>Hidden layer.</b> Each hidden unit receives many weighted inputs, adds a bias, then applies a nonlinearity. This is where the network builds learned features.</div>
+    <div><b>Output layer.</b> The final units turn hidden features into logits, probabilities, or regression values depending on the task.</div>
+    <div><b>Reference.</b> Additional implementation context: <a href="https://www.geeksforgeeks.org/deep-learning/multi-layer-perceptron-learning-in-tensorflow/" target="_blank" rel="noopener">GeeksforGeeks MLP learning in TensorFlow</a>.</div>
+  </div>
+
+  <h3 class="section-purple">5. Key Equations</h3>
   <div class="callout formula">
     <div class="head">Forward pass, layer by layer</div>
     <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
@@ -111,7 +126,7 @@
     </div>
   </div>
 
-  <h3 class="section-gray">5. Worked Examples</h3>
+  <h3 class="section-gray">6. Worked Examples</h3>
   <div class="callout example">
     <div class="head">Example A · Why linear layers alone do not help</div>
     <div class="example-source">Source: Lecture 10, neural networks as iterated linear prediction.</div>
@@ -133,7 +148,7 @@
     <p>On $[0,1]$, split the interval into many small pieces and linearly interpolate $x^2$. ReLU units can build piecewise-linear functions, so enough breakpoints approximate the curve to any desired accuracy.</p>
   </div>
 
-  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <h3 class="section-yellow">7. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>Always track shapes.</b> If $x\in\mathbb R^d$ and hidden size is $h$, then $W^{(1)}\in\mathbb R^{h\times d}$.</div>
     <div><b>When asked why nonlinearity matters,</b> show that linear-after-linear collapses to one linear map.</div>
@@ -142,7 +157,7 @@
     <div><b>For classification loss,</b> identify whether the output is binary sigmoid or multiclass softmax.</div>
   </div>
 
-  <h3 class="section-red">7. Common Mistakes</h3>
+  <h3 class="section-red">8. Common Mistakes</h3>
   <ul>
     <li>Forgetting that without activations, depth adds no nonlinear power.</li>
     <li>Writing ReLU as $\max(1,z)$ instead of $\max(0,z)$.</li>
@@ -152,7 +167,7 @@
     <li>Thinking the learned parameters are unique; hidden units can often be permuted, and some networks have sign or scaling symmetries that represent the same function.</li>
   </ul>
 
-  <h3 class="section-yellow">8. Exam Focus</h3>
+  <h3 class="section-yellow">9. Exam Focus</h3>
   <ul>
     <li>Write a two-layer forward pass with correct dimensions.</li>
     <li>State width, depth, and the $n_{\text{out}}\times n_{\text{in}}$ weight-matrix convention.</li>
@@ -164,7 +179,7 @@
     <li>Explain mini-batch SGD at a high level.</li>
   </ul>
 
-  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <h3 class="section-yellow">10. Quick Checklist</h3>
   <ul>
     <li>I can write $z=Wx+b$ and $a=\sigma(z)$ layer by layer.</li>
     <li>I know linear layers without activation collapse.</li>
@@ -195,7 +210,21 @@
       <p>Depth 让模型复用 hierarchical features；width 提供更多 hidden units 来切分输入空间。Universal approximation 说足够宽的 nonlinear network 能在 compact domain 上逼近 continuous functions。</p>
       <p>考试里要会讲 construction story：一个 hidden layer，至少两个 nonlinear units，就能先造出有用的 logic features，再由 output layer 线性组合来解决 XOR。</p>
 
-      <h3 class="section-purple">4. 关键公式</h3>
+      <h3 class="section-gray" id="mlp-visual-guide-cn">4. Visual Reading Guide · 看图理解</h3>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/mlp-layer-flow.svg" alt="MLP 层结构图：input layer、hidden layer、output layer" loading="lazy" />
+          <figcaption><b>这张图要从左往右读。</b> Input values 通过带权重的边送进 hidden units；hidden activations 变成中间 features，再由 output layer 组合成最终预测。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>Input layer：</b> 这些节点只是承载原始 feature vector $x$，通常不学习参数，只负责把数值往后传。</div>
+        <div><b>Hidden layer：</b> 每个 hidden unit 都会接收多个 weighted inputs，加 bias，再过 nonlinearity；这里就是 MLP 学 feature 的地方。</div>
+        <div><b>Output layer：</b> 最后一层把 hidden features 变成 logits、probabilities 或 regression values，取决于任务类型。</div>
+        <div><b>参考链接：</b> 如果想看 TensorFlow 实现语境，可以看 <a href="https://www.geeksforgeeks.org/deep-learning/multi-layer-perceptron-learning-in-tensorflow/" target="_blank" rel="noopener">GeeksforGeeks MLP learning in TensorFlow</a>。</div>
+      </div>
+
+      <h3 class="section-purple">5. 关键公式</h3>
       <div class="callout formula">
         <div class="head">Forward pass：一层一层往前算</div>
         <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
@@ -244,7 +273,7 @@
         </div>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <h3 class="section-gray">6. Worked Examples · 代表性例题</h3>
       <div class="callout example">
         <div class="head">Example A · 只有 linear layers 没用</div>
         <div class="example-source">来源：Lecture 10，neural networks as iterated linear prediction。</div>
@@ -266,7 +295,7 @@
         <p>在 $[0,1]$ 上把区间切成很多小段，用 piecewise-linear interpolation 逼近 $x^2$。ReLU units 可以拼出 piecewise-linear functions，所以 breakpoints 足够多时误差可小于任意 $\epsilon$。</p>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <h3 class="section-yellow">7. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>永远追踪 shapes。</b> 若 $x\in\mathbb R^d$，hidden size 是 $h$，则 $W^{(1)}\in\mathbb R^{h\times d}$。</div>
         <div><b>解释 nonlinearity：</b> 直接展示 linear-after-linear 会 collapse 成一个 linear map。</div>
@@ -275,7 +304,7 @@
         <div><b>分类 loss：</b> 先判断是 binary sigmoid 还是 multiclass softmax。</div>
       </div>
 
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <h3 class="section-red">8. Common Mistakes · 常见错误</h3>
       <ul>
         <li>忘记没有 activation 时，depth 不增加 nonlinear power。</li>
         <li>把 ReLU 写成 $\max(1,z)$，正确是 $\max(0,z)$。</li>
@@ -285,7 +314,7 @@
         <li>以为 learned parameters 唯一；hidden units 可以 permutation，有些网络还存在 sign / scaling symmetries，导致不同参数表示同一个 function。</li>
       </ul>
 
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <h3 class="section-yellow">9. Exam Focus · 考试重点</h3>
       <ul>
         <li>会写 two-layer forward pass 并检查 dimensions。</li>
         <li>会说明 width、depth，以及 $n_{\text{out}}\times n_{\text{in}}$ 的 weight-matrix convention。</li>
@@ -297,7 +326,7 @@
         <li>能高层解释 mini-batch SGD。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <h3 class="section-yellow">10. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能逐层写 $z=Wx+b$ 和 $a=\sigma(z)$。</li>
         <li>我知道没有 activation 的 linear layers 会 collapse。</li>
