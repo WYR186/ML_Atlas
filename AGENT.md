@@ -127,6 +127,17 @@ What is NOT acceptable in CN mode:
 
 A two-button switch in the topbar (segmented control with a sliding thumb), order **fixed**: `EN | CN` left → right. Thumb is positioned with JS via `getBoundingClientRect()` of the active button — no fragile percentage math. CSS `[data-active="..."]` rules give a fallback before JS runs. See `assets/i18n.js` `alignSliderThumb()`.
 
+**Thumb geometry — load-bearing math.** The `.lang-thumb` is `position: absolute` with `left: 3px` so it sits flush with the container's `padding: 3px` rest position. `alignSliderThumb()` translates the thumb so its **left edge** lands on the active button's left edge:
+
+```js
+const thumbLeft = parseFloat(getComputedStyle(thumb).left) || 0;
+thumb.style.transform = `translateX(${btnRect.left - swRect.left - thumbLeft}px)`;
+```
+
+The `- thumbLeft` term cancels the resting `left: 3px` so the transform is measured **from the thumb's actual painted position**, not from the container's padding-box. Drop that subtraction and the thumb lands 3px right of the active button — the green pill appears off-centre (text not on the pill's centre). Don't "fix" the visual mismatch with a CSS `translateX(-Npx)` nudge; fix `alignSliderThumb` if you ever touch it.
+
+Buttons are flex-centred with `display: inline-flex; align-items: center; justify-content: center; height: 28px; line-height: 1` so EN's Latin metrics and 中's CJK em-square both land on the same geometric centre. No `letter-spacing` — adding tracking shifts the optical centre back off and you start chasing pixel nudges again.
+
 Language switching must preserve the user's viewport position. `assets/i18n.js` captures the visible topic heading / anchor before changing `data-lang`, then restores the corresponding heading to the same screen position after the DOM visibility changes. Do not remove this behavior or replace it with a raw `applyLang()` call from the language buttons; switching EN / CN should feel stationary, not like the page jumped.
 
 ### Bilingual content patterns
@@ -435,3 +446,4 @@ When the user asks to "update content" without naming a section, infer from this
 - **Adding chips for course-org metadata to the algorithm index filter** — the user has explicitly trimmed the filter taxonomy to ML-knowledge axes (paradigm / task / family). Block / Group is already the section heading; difficulty is already the colored dot. Don't add them back as filter chips.
 - **Hard-coding lecture / hw chips on a topic page** — they're now derived from `topics-data.js` (`lectures` + `hw` arrays) and rendered automatically. Update the data file, not the HTML.
 - **Forgetting to add a new page to all five nav menus** — `index.html`, `algorithms.html`, `cheatsheet.html`, `problems.html`, `resources.html`, plus all 37 `topics/*.html`. The nav uses relative paths (`../algorithms.html` from a topic page, `algorithms.html` from a top-level page). When adding a nav link, do it on every page or it'll feel inconsistent on the pages that miss it.
+- **"Fixing" lang-switch off-centre text with a CSS `translateX(-Npx)` nudge** — the bug is in JS, not CSS. `alignSliderThumb()` must subtract the thumb's resting `left` from the translate value (`btnRect.left - swRect.left - thumbLeft`); without that subtraction the thumb lands 3px right of the active button and the green pill *looks* off-centre. See "Toggle component" above.
