@@ -36,21 +36,37 @@ html.lang-preserve-scroll {
   transition: transform 0.22s cubic-bezier(.2,.8,.2,1);
   pointer-events: none;
 }
-.lang-switch[data-active="en"]    .lang-thumb { transform: translateX(0%); }
-.lang-switch[data-active="cn"]    .lang-thumb { transform: translateX(100%); }
+/* Optical-centering nudge: the theoretical centre puts the thumb
+   slightly to the right of where the glyph mass sits. Shift the
+   thumb 2px left in both states so the EN / 中 text sits visually
+   in the middle of the green pill. */
+.lang-switch[data-active="en"]    .lang-thumb { transform: translateX(-2px); }
+.lang-switch[data-active="cn"]    .lang-thumb { transform: translateX(calc(100% - 2px)); }
 .lang-switch button {
   position: relative;
   z-index: 1;
   flex: 1;
-  min-width: 44px;
-  padding: 6px 14px;
+  /* Flex-center both axes so EN and 中 sit on the exact geometric
+     centre of each pill. Plain <button> centering uses baseline +
+     leading which makes Latin glyphs (no descenders) look low and
+     CJK em-square glyphs look slightly different — the user sees
+     this as "text out of bounds". `line-height:1` removes the
+     leading so the glyph box hugs the box centre. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 24px;
+  padding: 0 14px;
+  line-height: 1;
   border: 0;
   background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   transition: color 0.18s ease;
 }
