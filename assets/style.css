@@ -1240,6 +1240,37 @@ html[data-theme="dark"] .toc-problem-link:hover {
   border-left: 2px solid var(--border);
   padding-left: 12px;
 }
+.visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.topic-figure {
+  margin: 0;
+}
+.topic-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.topic-figure figcaption {
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.visual-notes {
+  margin-top: 14px;
+}
+@media (max-width: 760px) {
+  .visual-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .equation-page {
   max-width: 1500px;

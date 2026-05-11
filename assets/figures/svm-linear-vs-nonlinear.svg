@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" role="img" aria-labelledby="title desc">
+  <title id="title">Linear SVM compared with non-linear SVM</title>
+  <desc id="desc">Left panel shows a straight linear SVM boundary. Right panel shows a circular non-linear boundary separating an inner class from an outer class.</desc>
+  <rect width="800" height="400" fill="#f8fafc"/>
+  <line x1="400" y1="40" x2="400" y2="360" stroke="#111827" stroke-width="1.3"/>
+
+  <g font-family="Inter, Arial, sans-serif" fill="#050505">
+    <text x="128" y="77" font-size="29" font-weight="800">Linear SVM</text>
+    <text x="478" y="77" font-size="29" font-weight="800">Non-Linear SVM</text>
+  </g>
+
+  <defs>
+    <marker id="axisArrow2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <g>
+    <line x1="66" y1="348" x2="328" y2="348" stroke="#111827" stroke-width="2.2" marker-end="url(#axisArrow2)"/>
+    <line x1="66" y1="348" x2="66" y2="119" stroke="#111827" stroke-width="2.2" marker-end="url(#axisArrow2)"/>
+    <line x1="94" y1="194" x2="300" y2="271" stroke="#111827" stroke-width="2.2"/>
+    <text x="87" y="140" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#111827">Category B</text>
+    <text x="232" y="323" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#111827">Category A</text>
+
+    <g fill="#25964f" stroke="#1f7d42" stroke-width="1">
+      <circle cx="102" cy="226" r="9"/>
+      <circle cx="121" cy="266" r="9"/>
+      <circle cx="141" cy="241" r="9"/>
+      <circle cx="162" cy="298" r="9"/>
+      <circle cx="165" cy="270" r="9"/>
+      <circle cx="194" cy="288" r="9"/>
+      <circle cx="204" cy="254" r="9"/>
+      <circle cx="241" cy="273" r="9"/>
+    </g>
+    <g fill="#d9efd2">
+      <rect x="110" y="158" width="17" height="17"/>
+      <rect x="138" y="179" width="17" height="17"/>
+      <rect x="169" y="195" width="17" height="17"/>
+      <rect x="182" y="137" width="17" height="17"/>
+      <rect x="194" y="170" width="17" height="17"/>
+      <rect x="213" y="122" width="17" height="17"/>
+      <rect x="230" y="137" width="17" height="17"/>
+      <rect x="239" y="198" width="17" height="17"/>
+      <rect x="255" y="166" width="17" height="17"/>
+      <rect x="270" y="226" width="17" height="17"/>
+    </g>
+  </g>
+
+  <g>
+    <rect x="369" y="153" width="64" height="64" fill="#e5e7eb"/>
+    <text x="386" y="193" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800" fill="#050505">Vs</text>
+  </g>
+
+  <g>
+    <line x1="472" y1="358" x2="762" y2="358" stroke="#111827" stroke-width="2.2" marker-end="url(#axisArrow2)"/>
+    <line x1="472" y1="358" x2="472" y2="101" stroke="#111827" stroke-width="2.2" marker-end="url(#axisArrow2)"/>
+    <circle cx="600" cy="215" r="78" fill="none" stroke="#111827" stroke-width="1.5"/>
+    <text x="545" y="178" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#111827">Category B</text>
+    <text x="660" y="306" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#111827">Category A</text>
+
+    <g fill="#25964f" stroke="#1f7d42" stroke-width="1">
+      <circle cx="492" cy="138" r="10"/>
+      <circle cx="528" cy="146" r="10"/>
+      <circle cx="567" cy="115" r="10"/>
+      <circle cx="612" cy="133" r="10"/>
+      <circle cx="648" cy="132" r="10"/>
+      <circle cx="667" cy="183" r="10"/>
+      <circle cx="704" cy="215" r="10"/>
+      <circle cx="646" cy="262" r="10"/>
+      <circle cx="657" cy="329" r="10"/>
+      <circle cx="618" cy="329" r="10"/>
+      <circle cx="574" cy="309" r="10"/>
+      <circle cx="541" cy="297" r="10"/>
+      <circle cx="495" cy="295" r="10"/>
+      <circle cx="502" cy="250" r="10"/>
+      <circle cx="495" cy="209" r="10"/>
+    </g>
+    <g fill="#d9efd2">
+      <rect x="552" y="191" width="20" height="20"/>
+      <rect x="586" y="197" width="20" height="20"/>
+      <rect x="620" y="199" width="20" height="20"/>
+      <rect x="533" y="216" width="20" height="20"/>
+      <rect x="568" y="235" width="20" height="20"/>
+      <rect x="601" y="231" width="20" height="20"/>
+    </g>
+  </g>
+</svg>

@@ -64,7 +64,24 @@
   <p>Soft-margin SVM turns this into a practical classifier by trading off margin size against violations through $C$ or $\lambda$.</p>
   <p>Duality is not a cosmetic rewrite: it exposes the classifier as a weighted sum of training examples, which is why the next topic can replace inner products with kernels.</p>
 
-  <h3 class="section-purple">4. Key Equations</h3>
+  <h3 class="section-gray" id="svm-visual-guide-en">4. Visual Reading Guide</h3>
+  <div class="visual-grid">
+    <figure class="topic-figure">
+      <img src="../assets/figures/svm-margin-lines.svg" alt="SVM margin diagram with three parallel lines and support vectors" loading="lazy" />
+      <figcaption><b>Max-margin picture.</b> L2 is the decision boundary; L1 and L3 are the two support hyperplanes. SVM chooses the middle line so the closest blue and red points are as far away as possible.</figcaption>
+    </figure>
+    <figure class="topic-figure">
+      <img src="../assets/figures/svm-linear-vs-nonlinear.svg" alt="Comparison of a linear SVM boundary and a non-linear circular SVM boundary" loading="lazy" />
+      <figcaption><b>Linear vs. non-linear.</b> A linear SVM draws a hyperplane in the current feature space. A non-linear SVM gets a curved boundary in the original input space by using a feature map or kernel.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>How to read L1/L2/L3.</b> The center line L2 is where $w^\top x+b=0$. The outer lines are $w^\top x+b=1$ and $w^\top x+b=-1$; points touching them are support vectors.</div>
+    <div><b>Why the arrows are perpendicular.</b> Margin is geometric distance to a hyperplane, so it is measured along the normal direction $w$, not horizontally or vertically in the plot.</div>
+    <div><b>Why kernels matter.</b> The right picture is still a linear separator after mapping into feature space; it only looks curved when projected back to the original $x_1,x_2$ plane.</div>
+  </div>
+
+  <h3 class="section-purple">5. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Signed distance / margin</div>
@@ -104,7 +121,7 @@
     <p>The kernel trick replaces $\phi(x)^\top\phi(x')$ with $k(x,x')$, so the dual only needs similarities. For RBF, very small $\sigma$ makes similarity extremely local, so predictions start to resemble a nearest-support-vector rule.</p>
   </div>
 
-  <h3 class="section-gray">5. Worked Examples</h3>
+  <h3 class="section-gray">6. Worked Examples</h3>
   <div class="callout example">
     <div class="head">Example A · Hinge loss by hand</div>
     <div class="example-source">Source: Lecture 6 hinge-loss formulation.</div>
@@ -121,7 +138,7 @@
     <p>Deriving the dual introduces multipliers for the margin and nonnegative-slack constraints. Stationarity gives $w=\sum_i\alpha_i y_i x_i$ and $C-\alpha_i-\mu_i=0$, so $0\le\alpha_i\le C$. Compared with hard-margin SVM, the box constraint is what allows controlled violations.</p>
   </div>
 
-  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <h3 class="section-yellow">7. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>Start with the margin score.</b> Compute $t=yf(x)$ before deciding correctness, hinge loss, or slack behavior.</div>
     <div><b>For hard margin,</b> write constraints $y_i f(x_i)\ge 1$ and objective $\frac12\|w\|^2$.</div>
@@ -130,7 +147,7 @@
     <div><b>Always scale features.</b> SVM is margin-distance based, so a feature measured on a huge numerical scale can dominate the boundary.</div>
   </div>
 
-  <h3 class="section-red">7. Common Mistakes</h3>
+  <h3 class="section-red">8. Common Mistakes</h3>
   <ul>
     <li>Confusing functional margin $y_i f(x_i)$ with geometric margin $y_i f(x_i)/\|w\|$.</li>
     <li>Forgetting that the scale of $w,b$ must be fixed before writing the hard-margin primal.</li>
@@ -139,7 +156,7 @@
     <li>Treating SVM scores as probabilities. A standard SVM outputs a signed score and hard label; probability estimates require a calibration step such as Platt scaling.</li>
   </ul>
 
-  <h3 class="section-yellow">8. Exam Focus</h3>
+  <h3 class="section-yellow">9. Exam Focus</h3>
   <ul>
     <li>Derive the hard-margin primal from the max-margin objective.</li>
     <li>Convert soft-margin constraints into hinge loss.</li>
@@ -150,7 +167,7 @@
     <li>Know the practical traps: feature scaling, support-vector prediction cost, and non-probability outputs.</li>
   </ul>
 
-  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <h3 class="section-yellow">10. Quick Checklist</h3>
   <ul>
     <li>I can explain max-margin in words and formulas.</li>
     <li>I can write hard-margin and soft-margin SVM objectives.</li>
@@ -182,7 +199,24 @@
       <p>Soft-margin SVM 用 $C$ 或 $\lambda$ 在 large margin 和 violations 之间做 trade-off。</p>
       <p>Duality 不只是换个写法：它把 classifier 暴露成 training examples 的 weighted sum，所以下一页 kernel method 才能把 inner product 换成 kernel。</p>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <h3 class="section-gray" id="svm-visual-guide-cn">4. Visual Reading Guide · 看图理解</h3>
+      <div class="visual-grid">
+        <figure class="topic-figure">
+          <img src="../assets/figures/svm-margin-lines.svg" alt="SVM 三条平行线和 support vectors 的 margin 图" loading="lazy" />
+          <figcaption><b>Max-margin 图.</b> L2 是 decision boundary；L1 和 L3 是两条 support hyperplanes。SVM 会把中间那条线放到“走廊”最宽的位置，让最近的蓝点和红点都尽量远。</figcaption>
+        </figure>
+        <figure class="topic-figure">
+          <img src="../assets/figures/svm-linear-vs-nonlinear.svg" alt="Linear SVM 和 Non-linear SVM 的边界对比图" loading="lazy" />
+          <figcaption><b>Linear vs. non-linear.</b> Linear SVM 在当前 feature space 里画 hyperplane；non-linear SVM 通过 feature map 或 kernel，让原始输入平面里看到的 boundary 变成曲线。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>L1/L2/L3 怎么读：</b> 中间的 L2 是 $w^\top x+b=0$；外侧两条是 $w^\top x+b=1$ 和 $w^\top x+b=-1$。碰到外侧线的最近点就是 support vectors。</div>
+        <div><b>为什么箭头是斜着的：</b> Margin 是点到 hyperplane 的几何距离，所以沿着法向量 $w$ 的方向量，不是沿横轴或纵轴量。</div>
+        <div><b>Kernel 为什么有用：</b> 右图在原始 $x_1,x_2$ 平面里看起来是曲线；但在映射后的 feature space 里，它仍然可以是一个 linear separator。</div>
+      </div>
+
+      <h3 class="section-purple">5. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Signed distance / margin · 有符号距离</div>
@@ -222,7 +256,7 @@
         <p>Kernel trick 的作用是把 $\phi(x)^\top\phi(x')$ 替换成 $k(x,x')$，dual 里只需要算相似度，不需要真的展开高维坐标。RBF 的 $\sigma$ 很小时，相似度会变得非常 local，预测会有点像只看最近 support vector 的规则。</p>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <h3 class="section-gray">6. Worked Examples · 代表性例题</h3>
       <div class="callout example">
         <div class="head">Example A · 手算 hinge loss</div>
         <div class="example-source">来源：Lecture 6，hinge-loss formulation。</div>
@@ -239,7 +273,7 @@
         <p>推 dual 时，对 margin constraint 和 $\xi_i\ge0$ 分别加 Lagrange multipliers。Stationarity 给出 $w=\sum_i\alpha_i y_i x_i$ 和 $C-\alpha_i-\mu_i=0$，所以 $0\le\alpha_i\le C$。相比 hard-margin，多出来的 box constraint 就是允许可控 violations 的数学形式。</p>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <h3 class="section-yellow">7. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>先算 margin score。</b> 无论判断对错、hinge loss 还是 slack，都先算 $t=yf(x)$。</div>
         <div><b>Hard-margin：</b> 写 constraints $y_i f(x_i)\ge 1$ 和 objective $\frac12\|w\|^2$。</div>
@@ -248,7 +282,7 @@
         <div><b>一定要 feature scaling。</b> SVM 是按 margin distance 做判断，数值尺度特别大的 feature 会主导 boundary。</div>
       </div>
 
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <h3 class="section-red">8. Common Mistakes · 常见错误</h3>
       <ul>
         <li>把 functional margin $y_i f(x_i)$ 和 geometric margin $y_i f(x_i)/\|w\|$ 混掉。</li>
         <li>忘记先固定 $w,b$ 的 scale，就直接写 hard-margin primal。</li>
@@ -257,7 +291,7 @@
         <li>把 SVM score 当 probability。标准 SVM 输出 signed score / hard label；要概率需要 Platt scaling 这类 calibration。</li>
       </ul>
 
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <h3 class="section-yellow">9. Exam Focus · 考试重点</h3>
       <ul>
         <li>会从 max-margin objective 推 hard-margin primal。</li>
         <li>会把 soft-margin constraints 转成 hinge loss。</li>
@@ -268,7 +302,7 @@
         <li>记住 practical traps：feature scaling、support-vector prediction cost、非 probability 输出。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <h3 class="section-yellow">10. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能用文字和公式解释 max-margin。</li>
         <li>我能写 hard-margin 和 soft-margin SVM objectives。</li>
