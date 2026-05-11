@@ -232,7 +232,9 @@ function setupEquationSourceAnchors() {
 }
 
 function topicEquationSheetUrl() {
-  const mainScript = document.querySelector('script[src$="assets/main.js"], script[src$="/main.js"]');
+  const mainScript = Array.from(document.scripts).find(script =>
+    /(?:^|\/)assets\/main\.js(?:\?|$)|(?:^|\/)main\.js(?:\?|$)/.test(script.src || script.getAttribute("src") || "")
+  );
   if (mainScript && mainScript.src) return new URL("equation-sheet.js", mainScript.src).href;
   return new URL(location.pathname.includes("/topics/") ? "../assets/equation-sheet.js" : "assets/equation-sheet.js", location.href).href;
 }
