@@ -52,9 +52,9 @@
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>Fix a hypothesis class $\mathcal{F}$, such as linear classifiers, decision trees, kernels, or neural networks. For any learned predictor $f\in\mathcal{F}$, its test error can be decomposed into three conceptual pieces.</p>
   <ul>
-    <li><b>Bayes error:</b> noise inherent in the data distribution.</li>
-    <li><b>Approximation error:</b> the best function inside $\mathcal{F}$ may still be worse than the Bayes rule.</li>
-    <li><b>Estimation error:</b> the learned $f$ may be worse than the best function in $\mathcal{F}$ because training data is finite.</li>
+    <li><b>Bayes error:</b> noise inherent in the data distribution, such as overlapping class distributions. This is the irreducible floor.</li>
+    <li><b>Approximation error:</b> the best function inside $\mathcal{F}$ may still be worse than the Bayes rule. This depends on the expressiveness of $\mathcal{F}$, not directly on sample size $n$.</li>
+    <li><b>Estimation error:</b> the learned $f$ may be worse than the best function in $\mathcal{F}$ because training data is finite. ERM optimizes empirical risk, which is only an estimate of true risk.</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -63,6 +63,7 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>A richer model class can represent more patterns, so approximation error tends to decrease. But if the dataset size is fixed, a richer class is easier to overfit, so estimation error can increase.</p>
   <p>This is the theory version of the bias-variance style trade-off: simple class means underfitting risk; overly rich class means generalization risk.</p>
+  <p>As sample size $n$ grows, estimation error usually shrinks for a fixed class. As complexity grows, estimation error can grow because there are more hypotheses that may accidentally look good on a finite sample.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
@@ -82,8 +83,14 @@
       <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ is the smallest true error achievable by any predictor in $\mathcal{F}$.</li>
       <li>$\epsilon_\mu^*$ is Bayes error, the best possible error if there were no restriction to $\mathcal{F}$.</li>
     </ul>
-    <p><b>How to read it.</b> the equality adds and subtracts the same best-in-class error. The first gap asks how far the learned $f$ is from the best member of $\mathcal{F}$. The second gap asks how far the best member of $\mathcal{F}$ is from Bayes optimal. The last term is irreducible noise.</p>
-    <p><b>How to use.</b> more data mainly shrinks estimation error for fixed $\mathcal{F}$; a richer $\mathcal{F}$ can shrink approximation error but may make estimation harder; changing only the learner cannot remove Bayes error.</p>
+    <p><b>How to read it.</b> The equality adds and subtracts the same best-in-class error. The first gap asks how far the learned $f$ is from the best member of $\mathcal{F}$. The second gap asks how far the best member of $\mathcal{F}$ is from Bayes optimal. The last term is irreducible noise.</p>
+    <p><b>How to use.</b> More data mainly shrinks estimation error for fixed $\mathcal{F}$; a richer $\mathcal{F}$ can shrink approximation error but may make estimation harder; changing only the learner cannot remove Bayes error.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Squared-loss cousin: bias, variance, noise</div>
+    <div class="eq">$$ \mathbb{E}\big[(\hat f(x)-y)^2\big]=\mathrm{Bias}(\hat f(x))^2+\mathrm{Var}(\hat f(x))+\mathrm{Noise} $$</div>
+    <p><b>How to read it.</b> For regression with squared loss, the same diagnosis appears as bias, variance, and noise. Noise parallels Bayes error; bias roughly tracks model-class mismatch; variance tracks how much the learned predictor changes across training sets.</p>
+    <p><b>How to use.</b> Do not confuse the two decompositions algebraically. Error decomposition is written with a fixed hypothesis class $\mathcal{F}$ and true risk; bias-variance-noise is an expectation over possible training sets under squared loss.</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
@@ -98,7 +105,7 @@
       </ul>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This names the ideal predictor inside the chosen hypothesis class. It is the benchmark for estimation error, even though the learner does not know it directly.</p>
 
-      <p><b>How to use.</b> compare your learned model to $f_{\mathcal{F}}^*$ when a question asks about finite-sample learning gap.</p>
+      <p><b>How to use.</b> Compare your learned model to $f_{\mathcal{F}}^*$ when a question asks about finite-sample learning gap.</p>
     </div>
     <div class="callout formula">
       <div class="head">Learned predictor</div>
@@ -112,7 +119,7 @@
       </ul>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This says the actual predictor is the output of an algorithm applied to a finite random dataset, so it can change when the sample changes.</p>
 
-      <p><b>How to use.</b> when $\mathcal{D}$ changes, $\hat f$ can change; that is why estimation error is a finite-sample issue.</p>
+      <p><b>How to use.</b> When $\mathcal{D}$ changes, $\hat f$ can change; that is why estimation error is a finite-sample issue.</p>
     </div>
   </div>
   <div class="callout">
@@ -121,6 +128,14 @@
       <div><b>If sample size changes:</b> focus on estimation error, because $\hat f$ has more or less data to find the best member of $\mathcal{F}$.</div>
       <div><b>If the model class changes:</b> focus on approximation error, because the best-in-class benchmark itself may move.</div>
       <div><b>If the label noise or distribution changes:</b> focus on Bayes error, because the irreducible lower bound changed.</div>
+    </div>
+  </div>
+  <div class="callout exam">
+    <div class="head">Diagnosis guide</div>
+    <div class="mini-list">
+      <div><b>High training error:</b> suspect high approximation error / underfitting. Increase model complexity, add useful features, or switch to a richer $\mathcal{F}$.</div>
+      <div><b>Low training error but high validation error:</b> suspect high estimation error / overfitting. Add data, regularize, or simplify $\mathcal{F}$.</div>
+      <div><b>Both training and test error hit the same floor:</b> the remaining gap may be Bayes error from label noise or overlapping classes.</div>
     </div>
   </div>
 
@@ -147,9 +162,10 @@
   <ol>
     <li>Ask whether the issue comes from data noise, model expressiveness, or finite samples.</li>
     <li>More data usually points to estimation error.</li>
-    <li>A larger model class usually points to approximation error going down and estimation error risk going up.</li>
+    <li>A larger model class usually points to approximation error going down and estimation error risk going up, especially when VC dimension / parameter count increases faster than data.</li>
     <li>Changing the data-generating distribution can change Bayes error.</li>
     <li>Do not call approximation error overfitting; overfitting is usually an estimation/generalization problem.</li>
+    <li>Use train-vs-validation behavior to decide whether to collect more data or change the model class.</li>
   </ol>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -166,6 +182,8 @@
     <li>Know which term changes when $\mathcal{F}$ becomes more expressive.</li>
     <li>Know which term decreases with more samples for fixed $\mathcal{F}$.</li>
     <li>Explain the approximation-estimation trade-off in words.</li>
+    <li>Connect high training error to underfitting and low-train/high-test error to overfitting.</li>
+    <li>Recognize how bias-variance-noise under squared loss parallels, but is not identical to, the three-term true-risk split.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -175,6 +193,7 @@
     <li>Estimation error = finite-data learning gap.</li>
     <li>More expressive class: approximation down, estimation risk up.</li>
     <li>More data: estimation down, Bayes/approximation unchanged.</li>
+    <li>High train error means try richer $\mathcal{F}$; low train but high validation means regularize, simplify, or collect data.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -187,9 +206,9 @@
   <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
   <p>固定一个 hypothesis class $\mathcal{F}$，比如 linear classifier、decision tree、kernel machine 或 neural network。对任意学出来的 $f\in\mathcal{F}$，test error 可以分成三块：</p>
   <ul>
-    <li><b>Bayes error</b>：数据分布本身的噪声，不可消除。</li>
-    <li><b>Approximation error</b>：$\mathcal{F}$ 里最好的函数仍然不够接近 Bayes rule。</li>
-    <li><b>Estimation error</b>：训练数据有限，算法没有找到 $\mathcal{F}$ 里真实最好的函数。</li>
+    <li><b>Bayes error</b>：数据分布本身的噪声，比如 class distributions 重叠；这是不可消除的理论下界。</li>
+    <li><b>Approximation error</b>：$\mathcal{F}$ 里最好的函数仍然不够接近 Bayes rule；它由 $\mathcal{F}$ 的 expressiveness 决定，不直接由样本量 $n$ 决定。</li>
+    <li><b>Estimation error</b>：训练数据有限，学到的 $f$ 没有达到 $\mathcal{F}$ 内真实最优；ERM 最小化的是 empirical risk，而它只是 true risk 的估计。</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
@@ -198,6 +217,7 @@
   <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
   <p>模型类越强，能表达的函数越多，approximation error 往往更小。但训练集大小固定时，模型越灵活也越容易追着样本噪声跑，estimation error 风险会变大。</p>
   <p>这就是 theory 版本的 underfitting / overfitting trade-off：太简单会表达不足，太复杂会泛化不稳。</p>
+  <p>当 sample size $n$ 变大，固定 $\mathcal{F}$ 下 estimation error 通常下降；当 complexity 变大，可选 hypotheses 更多，有限样本上“碰巧训练误差低”的坏模型也更多，estimation risk 会上升。</p>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="callout formula">
@@ -217,8 +237,14 @@
       <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ 是 $\mathcal{F}$ 内能达到的最小 true error。</li>
       <li>$\epsilon_\mu^*$ 是 Bayes error，也就是不限制在 $\mathcal{F}$ 时的理论最低错误。</li>
     </ul>
-    <p><b>怎么理解.</b>这个等式本质是加减同一个 best-in-class error。第一项看学出来的 $f$ 离 $\mathcal{F}$ 内最优还有多远；第二项看 $\mathcal{F}$ 内最优离 Bayes optimal 还有多远；最后一项是数据本身噪声。</p>
-    <p><b>怎么用.</b>固定 $\mathcal{F}$ 时加数据主要降低 estimation error；换更强的 $\mathcal{F}$ 可能降低 approximation error，但 estimation 更难；只换算法不能消掉 Bayes error。</p>
+    <p><b>怎么理解.</b> 这个等式本质是加减同一个 best-in-class error。第一项看学出来的 $f$ 离 $\mathcal{F}$ 内最优还有多远；第二项看 $\mathcal{F}$ 内最优离 Bayes optimal 还有多远；最后一项是数据本身噪声。</p>
+    <p><b>怎么用.</b> 固定 $\mathcal{F}$ 时加数据主要降低 estimation error；换更强的 $\mathcal{F}$ 可能降低 approximation error，但 estimation 更难；只换算法不能消掉 Bayes error。</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Squared-loss 对照：bias, variance, noise</div>
+    <div class="eq">$$ \mathbb{E}\big[(\hat f(x)-y)^2\big]=\mathrm{Bias}(\hat f(x))^2+\mathrm{Var}(\hat f(x))+\mathrm{Noise} $$</div>
+    <p><b>怎么理解.</b> 对 squared loss regression，同类诊断常写成 bias、variance、noise。Noise 对应 Bayes error 这种 irreducible part；bias 大致对应模型类不够贴近真函数；variance 衡量不同 training sets 下学出的 predictor 波动有多大。</p>
+    <p><b>怎么用.</b> 不要把两套公式机械等同。Error decomposition 固定 hypothesis class $\mathcal{F}$ 写 true risk；bias-variance-noise 是 squared loss 下对 training-set randomness 取 expectation。</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
@@ -231,9 +257,9 @@
         <li>$\arg\min$ 返回的是“让误差最小的函数”，不是最小误差数值本身。</li>
         <li>星号表示 optimal，下标 $\mathcal{F}$ 表示“只在这个 class 里面最优”。</li>
       </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这是选定 $\mathcal{F}$ 后的理论最佳模型，是 estimation error 的参照物；真实训练算法通常不知道它，只能用有限数据去靠近。</p>
 
-      <p><b>怎么用.</b>题目问有限样本学习差距时，把实际学到的 $\hat f$ 和 $f_{\mathcal{F}}^*$ 比。</p>
+      <p><b>怎么用.</b> 题目问有限样本学习差距时，把实际学到的 $\hat f$ 和 $f_{\mathcal{F}}^*$ 比。</p>
     </div>
     <div class="callout formula">
       <div class="head">Learned predictor</div>
@@ -245,9 +271,9 @@
         <li>$\mathcal{A}$ 是 learning algorithm，比如 ERM、SVM training、tree induction。</li>
         <li>$\hat f$ 上面的 hat 表示它依赖数据；训练集换了，$\hat f$ 可能也会变。</li>
       </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 实际 predictor 是 learning algorithm 在一个有限随机训练集上的输出；换一份 $\mathcal{D}$，$\hat f$ 可能就变。</p>
 
-      <p><b>怎么用.</b>只要 predictor 是从有限 $\mathcal{D}$ 里学出来的，就要考虑 estimation error。</p>
+      <p><b>怎么用.</b> 只要 predictor 是从有限 $\mathcal{D}$ 里学出来的，就要考虑 estimation error。</p>
     </div>
   </div>
   <div class="callout">
@@ -256,6 +282,14 @@
       <div><b>如果 sample size 变了：</b>优先看 estimation error，因为 $\hat f$ 有更多或更少数据去接近 $\mathcal{F}$ 内最优。</div>
       <div><b>如果 model class 变了：</b>优先看 approximation error，因为 best-in-class benchmark 本身可能变了。</div>
       <div><b>如果 label noise / distribution 变了：</b>优先看 Bayes error，因为不可消除的理论下界变了。</div>
+    </div>
+  </div>
+  <div class="callout exam">
+    <div class="head">诊断指南</div>
+    <div class="mini-list">
+      <div><b>Training error 很高：</b>优先怀疑 high approximation error / underfitting。解法是增加 model complexity、加有效 features，或换更强的 $\mathcal{F}$。</div>
+      <div><b>Training error 很低但 validation/test error 很高：</b>优先怀疑 high estimation error / overfitting。解法是加数据、regularization，或简化 $\mathcal{F}$。</div>
+      <div><b>Train/test 都降到同一个下界附近：</b>剩下部分可能来自 Bayes error，比如 label noise 或 class overlap。</div>
     </div>
   </div>
 
@@ -282,9 +316,10 @@
   <ol>
     <li>先判断问题来自 data noise、model expressiveness，还是 finite samples。</li>
     <li>“更多数据”通常对应 estimation error。</li>
-    <li>“更强模型类”通常让 approximation error 下降，但 estimation risk 上升。</li>
+    <li>“更强模型类”通常让 approximation error 下降，但 estimation risk 上升，尤其是 VC dimension / 参数量相对数据增长太快时。</li>
     <li>改变数据生成分布才可能改变 Bayes error。</li>
     <li>不要把 approximation error 叫 overfitting；overfitting 通常是 estimation / generalization 问题。</li>
+    <li>用 training-vs-validation behavior 判断是该收集更多数据，还是该换模型类。</li>
   </ol>
 
   <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -301,6 +336,8 @@
     <li>知道 $\mathcal{F}$ 更 expressive 时哪些项变化。</li>
     <li>知道固定 $\mathcal{F}$ 时更多 samples 主要降低 estimation error。</li>
     <li>能用文字解释 approximation-estimation trade-off。</li>
+    <li>能把 high training error 对应到 underfitting，把 low-train/high-test error 对应到 overfitting。</li>
+    <li>能识别 squared loss 下的 bias-variance-noise 与三项 true-risk 分解的相似处和区别。</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -310,6 +347,7 @@
     <li>Estimation error = 有限数据导致的学习差距。</li>
     <li>模型类更强：approximation 下降，estimation 风险上升。</li>
     <li>数据更多：estimation 下降，Bayes / approximation 不变。</li>
+    <li>Train error 高就考虑更强 $\mathcal{F}$；train 低但 validation 高就 regularize、简化模型或加数据。</li>
   </ul>
 </section>
 
