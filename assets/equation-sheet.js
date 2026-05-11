@@ -5281,7 +5281,7 @@
                     <div class="equation-title">${esc(item.title)}</div>
                     ${item.source ? `<a class="equation-source" href="${esc(item.source)}"><span class="en-only">Source</span><span class="cn-only">出处</span></a>` : ""}
                   </div>
-                  <div class="equation-math">${esc(item.eq).replace(/\n/g, "<br />")}</div>
+                  <div class="equation-math">${esc(item.eq).replace(/\\n(?![a-zA-Z])/g, "<br />").replace(/\n/g, "<br />")}</div>
                   ${explainHtml(item)}
                 </div>
               `).join("")}
