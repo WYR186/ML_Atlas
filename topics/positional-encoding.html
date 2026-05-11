@@ -46,12 +46,14 @@
 <section class="topic lesson-section concept" id="pe-concept-en">
   <h2>1. Concept Understanding</h2>
   <p class="topic-lede">Positional encoding injects sequence order into a Transformer. Self-attention by itself sees a set of token vectors, so the model needs extra information telling it which token came first, second, third, and so on.</p>
-  <p>Lecture 16 introduces positional information as the missing ingredient that lets self-attention handle word order instead of treating tokens as an unordered set.</p>
+  <p>Formally, plain self-attention is permutation equivariant: if you permute the input token vectors, the outputs permute in the same way. That is useful symmetry for sets, but a sentence needs word order.</p>
+  <p>Lecture 16 introduces positional information as the missing ingredient that lets self-attention handle word order instead of treating tokens as an unordered set. The fix is to add a position vector $r_n$ to each token embedding $x_n$ before the first Transformer block, so each layer receives both token identity and location.</p>
 </section>
 
 <section class="topic lesson-section plain" id="pe-plain-en">
   <h2>2. Plain-English Explanation</h2>
   <p>Think of token embeddings as words written on identical sticky notes. Without position, shuffling the notes can look too similar to the model. Positional encoding writes a small coordinate mark on every sticky note: "this is position 0", "this is position 1", and so on.</p>
+  <p>That matters because word order changes meaning: "good, not bad" and "bad, not good" contain nearly the same words, but the order flips the message.</p>
   <p>Sinusoidal positional encoding uses waves of different frequencies. Low-frequency waves change slowly and help with broad location; high-frequency waves change quickly and help distinguish nearby positions.</p>
 </section>
 
@@ -60,19 +62,36 @@
   <p>The sine/cosine design is useful because shifting position by $k$ becomes a rotation in each 2-D frequency pair. That means the model can learn relative distance patterns like "look two tokens back" using linear operations on the positional features.</p>
   <div class="study-box">
     <p>This is the key bridge to HW4 §2.1: $PE(pos+k)$ can be written as a linear function of $PE(pos)$, and the dot product between two positional encodings depends only on their distance $k$.</p>
+    <p>Because sine and cosine values stay in $[-1,1]$, the positional signal is bounded. In high dimensions, token embeddings and position vectors can be nearly orthogonal, so adding them can still preserve both "what token is this?" and "where is it?" information for later layers.</p>
   </div>
 </section>
 
 <section class="topic lesson-section equations" id="pe-equations-en">
   <h2>4. Key Equations</h2>
+  <h3>Add position to token embeddings</h3>
+  <div class="eq">$$ u_n=x_n+r_n $$</div>
+  <div class="study-box">
+    <p><b>Symbols.</b> $x_n$ is the token embedding at position $n$; $r_n$ is the positional encoding vector for that position; $u_n$ is the vector sent into the first Transformer block.</p>
+    <p><b>How to read it.</b> The Transformer usually adds position and token vectors coordinate by coordinate rather than concatenating them. Both live in the same $d_{\text{model}}$-dimensional space.</p>
+    <p><b>How to use.</b> In architecture questions, place this addition before the first self-attention layer.</p>
+  </div>
   <h3>Sinusoidal positional encoding</h3>
   <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
   <div class="study-box">
     <p><b>Symbols.</b> $pos$ is the token position; $i$ indexes a sine/cosine frequency pair; $2i$ and $2i+1$ are the even and odd coordinates; $d_{\text{model}}$ is the embedding width. Let $\omega_i=10000^{-2i/d_{\text{model}}}$, so the pair is $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$.</p>
-    <p><b>How to read it.</b> Each position gets a vector whose even coordinates are sine waves and whose odd coordinates are cosine waves. Different coordinate pairs use different frequencies, so the vector carries both coarse and fine position information.</p>
+    <p><b>How to read it.</b> Each position gets a vector whose even coordinates are sine waves and whose odd coordinates are cosine waves. Different coordinate pairs use different frequencies, so the vector carries both coarse and fine position information and acts like a distinguishable fingerprint over the intended sequence range. This fixed sinusoidal scheme has zero learnable parameters.</p>
     <p><b>How to use.</b> For coordinate questions, plug in $pos$ and $i$. For proof questions, rewrite the denominator as $\omega_i$ first so the trig identities are readable.</p>
   </div>
   <h3>Shift by $k$</h3>
+  <div class="eq">$$
+\begin{bmatrix} PE(pos+k,2i) \\ PE(pos+k,2i+1) \end{bmatrix}
+=
+\begin{bmatrix}
+\cos(k\omega_i) & \sin(k\omega_i) \\
+-\sin(k\omega_i) & \cos(k\omega_i)
+\end{bmatrix}
+\begin{bmatrix} PE(pos,2i) \\ PE(pos,2i+1) \end{bmatrix}
+$$</div>
   <div class="eq">$$ \begin{aligned}
 PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
 PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
@@ -89,6 +108,13 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <p><b>How to read it.</b> The similarity between two positional encodings depends only on their distance $pos_2-pos_1$, not their absolute locations.</p>
     <p><b>How to use.</b> Pair sine with sine and cosine with cosine at the same frequency, then use $\sin a\sin b+\cos a\cos b=\cos(b-a)$.</p>
   </div>
+  <h3>Learned positional embeddings</h3>
+  <div class="eq">$$ r_n \in \mathbb{R}^{d_{\text{model}}}\quad\text{is learned for }n=1,\ldots,N $$</div>
+  <div class="study-box">
+    <p><b>Symbols.</b> $r_n$ is a trainable position vector; $N$ is the maximum sequence length configured during training.</p>
+    <p><b>How to read it.</b> Learned position embeddings give each position its own parameter vector, as in many BERT- or ViT-style models.</p>
+    <p><b>How to use.</b> Use learned embeddings when sequence length is fixed or bounded. Sinusoidal PE is easier to evaluate beyond trained lengths because the formula is defined for any $pos$.</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="pe-examples-en">
@@ -96,6 +122,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <h3>HW4 §2.1.1: write the formula</h3>
   <p class="source-note">Source: HW4 §2.1, paraphrased.</p>
   <p>For every frequency index $i$, put sine in the even coordinate and cosine in the odd coordinate. The denominator $10000^{2i/d_{\text{model}}}$ sets the wavelength.</p>
+  <h3>Quick hand calculation: $pos=1$, $d_{\text{model}}=2$</h3>
+  <p>There is only one frequency pair, $i=0$, so $\omega_0=10000^0=1$. The encoding is $PE(1)=(\sin 1,\cos 1)\approx(0.8415,0.5403)$.</p>
   <h3>HW4 §2.1.2: prove the linear shift property</h3>
   <p>Use the angle-addition identities:</p>
   <div class="eq">$$ \sin((pos+k)\omega)=\sin(pos\omega)\cos(k\omega)+\cos(pos\omega)\sin(k\omega) $$</div>
@@ -112,6 +140,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>Group coordinates in pairs: $(2i,2i+1)$ is one sine/cosine pair.</li>
     <li>Use angle-addition identities, not induction, for $PE(pos+k)$.</li>
     <li>For dot products, pair sine with sine and cosine with cosine at the same frequency.</li>
+    <li>For architecture questions, say PE is added to input embeddings before the first self-attention layer.</li>
+    <li>For learned-vs-sinusoidal questions, compare parameters and length extrapolation.</li>
   </ol>
 </section>
 
@@ -122,6 +152,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>Writing the shift coefficients as functions of $pos$. They should depend on $k$ and frequency only.</li>
     <li>Claiming self-attention naturally knows order. It does not without positional information.</li>
     <li>Forgetting that the dot-product proof sums over every frequency pair.</li>
+    <li>Thinking learned positional embeddings automatically extrapolate to unseen sequence lengths. They are learned only for configured positions unless extended or adapted.</li>
+    <li>Forgetting that sinusoidal PE is fixed and has no learnable parameters.</li>
   </ul>
 </section>
 
@@ -129,9 +161,11 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <h2>8. Exam Focus</h2>
   <ul class="mini-list">
     <li>Memorize the two PE equations.</li>
+    <li>Know the input step $u_n=x_n+r_n$.</li>
     <li>Be able to show $PE(pos+k)$ is a 2-D rotation applied to $PE(pos)$ for each frequency.</li>
     <li>Be able to prove $PE(pos_1)^\top PE(pos_2)$ depends only on relative offset.</li>
     <li>Explain in one sentence why Transformers need positional encoding.</li>
+    <li>Contrast fixed sinusoidal PE with learned positional embeddings.</li>
   </ul>
 </section>
 
@@ -143,6 +177,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>$\omega_i=10000^{-2i/d_{\text{model}}}$.</li>
     <li>Shift by $k$ equals a rotation depending on $k$.</li>
     <li>Dot product depends on relative distance, not absolute position.</li>
+    <li>Sinusoidal PE is fixed, bounded, and parameter-free.</li>
+    <li>Learned PE is flexible but tied to trained positions.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -151,12 +187,14 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
 <section class="topic lesson-section concept" id="pe-concept-cn">
   <h2>1. 概念理解 / Concept Understanding</h2>
   <p class="topic-lede">Positional encoding 的作用是把序列顺序注入 Transformer。Self-attention 本身更像在看一堆 token 向量，如果不额外告诉它位置，它很难区分“谁在前，谁在后”。</p>
-  <p>Lecture 16 里，positional information 是 self-attention 能处理词序的关键：不加位置，模型更像在处理 unordered set。</p>
+  <p>更正式地说，plain self-attention 是 permutation equivariant：如果把输入 token vectors 打乱，输出也会按同样方式被打乱。这个性质适合 set，但句子必须知道 word order。</p>
+  <p>Lecture 16 里，positional information 是 self-attention 能处理词序的关键：不加位置，模型更像在处理 unordered set。实际做法是在第一个 Transformer block 之前，把 position vector $r_n$ 加到 token embedding $x_n$ 上，让每个输入向量同时带有 token identity 和 location。</p>
 </section>
 
 <section class="topic lesson-section plain" id="pe-plain-cn">
   <h2>2. 大白话理解 / Plain-English Explanation</h2>
   <p>可以把 token embedding 想成写着单词的便利贴。如果不标位置，把便利贴打乱以后，模型看到的东西可能差不多。Positional encoding 就是在每张便利贴上写一个小坐标：“我是第 0 个”“我是第 1 个”。</p>
+  <p>这很关键，因为 word order 会改变意思：比如 “good, not bad” 和 “bad, not good” 单词几乎一样，但顺序一换，语义就反过来了。</p>
   <p>sin/cos 版本用了很多不同频率的波。低频变化慢，帮助模型知道大概位置；高频变化快，帮助区分相邻位置。</p>
 </section>
 
@@ -165,19 +203,36 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <p>sin/cos 好用，是因为位置平移 $k$ 后，每一对二维坐标只是在做一个 rotation。也就是说，模型可以用线性操作学到“往前看两个 token”这种相对位置规律。</p>
   <div class="study-box">
     <p>这正是 HW4 §2.1 的核心：$PE(pos+k)$ 是 $PE(pos)$ 的线性函数；两个 positional encoding 的 dot product 只和距离 $k$ 有关。</p>
+    <p>因为 sine / cosine 的值都在 $[-1,1]$，positional signal 是 bounded 的。在高维空间里，token embedding 和 position vector 往往可以近似 orthogonal，所以即使两者相加，后续层仍然能分开处理“是什么 token”和“在什么位置”。</p>
   </div>
 </section>
 
 <section class="topic lesson-section equations" id="pe-equations-cn">
   <h2>4. 核心公式 / Key Equations</h2>
+  <h3>把 position 加到 token embedding</h3>
+  <div class="eq">$$ u_n=x_n+r_n $$</div>
+  <div class="study-box">
+    <p><b>符号.</b> $x_n$ 是第 $n$ 个位置的 token embedding；$r_n$ 是该位置的 positional encoding vector；$u_n$ 是送进第一个 Transformer block 的输入向量。</p>
+    <p><b>怎么理解.</b> 这里通常不是把 token 和 position 拼接起来，而是逐坐标相加。两者都在同一个 $d_{\text{model}}$ 维空间里。</p>
+    <p><b>怎么用.</b> 问 architecture 时，要说 positional encoding 加在 input embeddings 上，位置是在 first self-attention layer 之前。</p>
+  </div>
   <h3>Sinusoidal positional encoding</h3>
   <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
   <div class="study-box">
     <p><b>符号.</b> $pos$ 是 token 位置；$i$ 是 frequency pair 的编号；$2i$ 和 $2i+1$ 是偶数/奇数坐标；$d_{\text{model}}$ 是 embedding width。记 $\omega_i=10000^{-2i/d_{\text{model}}}$，每一对坐标就是 $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$。</p>
-    <p><b>怎么理解.</b> 每个位置会得到一个向量：偶数维是 sine wave，奇数维是 cosine wave。不同维度用不同频率，所以既能表示粗略位置，也能区分相邻位置。</p>
+    <p><b>怎么理解.</b> 每个位置会得到一个向量：偶数维是 sine wave，奇数维是 cosine wave。不同维度用不同频率，所以既能表示粗略位置，也能区分相邻位置，在常用序列长度范围内像一个可区分的 fingerprint。这个 fixed sinusoidal scheme 没有 learnable parameters。</p>
     <p><b>怎么用.</b> 算具体坐标时直接代 $pos,i$。证明题里先定义 $\omega_i$，公式会短很多。</p>
   </div>
   <h3>平移 $k$</h3>
+  <div class="eq">$$
+\begin{bmatrix} PE(pos+k,2i) \\ PE(pos+k,2i+1) \end{bmatrix}
+=
+\begin{bmatrix}
+\cos(k\omega_i) & \sin(k\omega_i) \\
+-\sin(k\omega_i) & \cos(k\omega_i)
+\end{bmatrix}
+\begin{bmatrix} PE(pos,2i) \\ PE(pos,2i+1) \end{bmatrix}
+$$</div>
   <div class="eq">$$ \begin{aligned}
 PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
 PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
@@ -194,6 +249,13 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <p><b>怎么理解.</b> 两个位置编码的相似度只看距离 $pos_2-pos_1$，不看它们具体出现在句子第几个位置。</p>
     <p><b>怎么用.</b> 同一个 frequency 下，把 sine 和 sine、cosine 和 cosine 配对，然后用 $\sin a\sin b+\cos a\cos b=\cos(b-a)$。</p>
   </div>
+  <h3>Learned positional embeddings</h3>
+  <div class="eq">$$ r_n \in \mathbb{R}^{d_{\text{model}}}\quad\text{is learned for }n=1,\ldots,N $$</div>
+  <div class="study-box">
+    <p><b>符号.</b> $r_n$ 是 trainable position vector；$N$ 是训练时设定的 maximum sequence length。</p>
+    <p><b>怎么理解.</b> Learned positional embedding 会给每个位置单独学一个参数向量，BERT / ViT 这类模型里很常见。</p>
+    <p><b>怎么用.</b> 当 sequence length 固定或有明确上限时，learned PE 很常见；sinusoidal PE 因为公式对任意 $pos$ 都有定义，所以更容易 extrapolate 到训练长度之外。</p>
+  </div>
 </section>
 
 <section class="topic lesson-section examples" id="pe-examples-cn">
@@ -201,6 +263,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <h3>HW4 §2.1.1：写公式</h3>
   <p class="source-note">出处：HW4 §2.1，题意转述。</p>
   <p>每个 frequency index $i$ 对应两个维度：偶数维放 sine，奇数维放 cosine。分母 $10000^{2i/d_{\text{model}}}$ 控制 wavelength。</p>
+  <h3>快速手算：$pos=1$, $d_{\text{model}}=2$</h3>
+  <p>这时只有一个 frequency pair，$i=0$，所以 $\omega_0=10000^0=1$。位置编码就是 $PE(1)=(\sin 1,\cos 1)\approx(0.8415,0.5403)$。</p>
   <h3>HW4 §2.1.2：证明平移是线性变换</h3>
   <p>直接用三角和角公式：</p>
   <div class="eq">$$ \sin((pos+k)\omega)=\sin(pos\omega)\cos(k\omega)+\cos(pos\omega)\sin(k\omega) $$</div>
@@ -217,6 +281,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>把 $(2i,2i+1)$ 当成一组 sine/cosine 坐标。</li>
     <li>证明 $PE(pos+k)$ 时用三角和角公式，不要绕远。</li>
     <li>做 dot product 时，同一频率的 sine 和 cosine 配对看。</li>
+    <li>架构题里记住：PE 加在 input embeddings 上，位置在 first self-attention layer 之前。</li>
+    <li>比较 learned vs sinusoidal 时，抓住 parameters 和 length extrapolation。</li>
   </ol>
 </section>
 
@@ -227,6 +293,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>把平移系数写成 $pos$ 的函数。正确系数只依赖 $k$ 和 frequency。</li>
     <li>以为 self-attention 天然知道顺序。没有 positional information 时它不知道。</li>
     <li>dot product 证明时忘了对所有 frequency pair 求和。</li>
+    <li>以为 learned positional embeddings 会自动泛化到没见过的 sequence length；通常它只覆盖训练时配置的位置。</li>
+    <li>忘记 sinusoidal PE 是 fixed function，没有 learnable parameters。</li>
   </ul>
 </section>
 
@@ -234,9 +302,11 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <h2>8. 考试重点 / Exam Focus</h2>
   <ul class="mini-list">
     <li>会默写两条 PE 公式。</li>
+    <li>知道 input step 是 $u_n=x_n+r_n$。</li>
     <li>会证明每个 frequency pair 下，$PE(pos+k)$ 是对 $PE(pos)$ 的 rotation。</li>
     <li>会证明 $PE(pos_1)^\top PE(pos_2)$ 只依赖 relative offset。</li>
     <li>能用一句话解释 Transformer 为什么需要 positional encoding。</li>
+    <li>能比较 fixed sinusoidal PE 和 learned positional embeddings。</li>
   </ul>
 </section>
 
@@ -248,6 +318,8 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
     <li>$\omega_i=10000^{-2i/d_{\text{model}}}$。</li>
     <li>平移 $k$ = 旋转，旋转角和 $k$ 有关。</li>
     <li>dot product 只依赖相对距离。</li>
+    <li>Sinusoidal PE 是 fixed、bounded、parameter-free。</li>
+    <li>Learned PE 更灵活，但绑定训练时的位置范围。</li>
   </ul>
 </section>
 </div><!--/cn-only-->

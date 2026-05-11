@@ -52,8 +52,10 @@
   <div class="callout">
     <div class="head">Formal definitions and the problem they solve</div>
     <p>A <b>random variable</b> $X$ assigns a number to each outcome of a random experiment, and its <b>distribution</b> $P(X=x)$ tells you how often each value occurs. Two variables also have a <b>joint distribution</b> $P(X_1, X_2)$ over all pairs.</p>
-    <p>From there, four ideas matter for ML:</p>
+    <p>From there, six ideas matter for ML:</p>
     <ul>
+      <li><b>Sum rule / marginalization</b>: eliminate a variable by summing or integrating it out of the joint distribution.</li>
+      <li><b>Product rule / chain rule</b>: build a joint distribution from conditional pieces.</li>
       <li><b>Conditional probability</b>: $P(A\mid B)=P(A,B)/P(B)$ — the probability of $A$ once we know $B$ happened.</li>
       <li><b>Independence</b>: $P(A,B)=P(A)P(B)$ — knowing one does not change the other.</li>
       <li><b>Conditional independence</b>: $P(A,B\mid C)=P(A\mid C)\,P(B\mid C)$ — the apparent link between $A$ and $B$ disappears once $C$ is known.</li>
@@ -82,6 +84,20 @@
 
   <h3>4. Key Equations</h3>
   <div class="cols2">
+
+    <div class="callout formula"><div class="head">Sum Rule / Marginalization</div>
+      <div class="eq">$$ p(x)=\sum_y p(x,y)\qquad\text{or}\qquad p(x)=\int p(x,y)\,dy $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $p(x,y)$ is a joint distribution. $y$ is the variable you want to remove. Use a sum for discrete $Y$ and an integral for continuous $Y$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The marginal probability of $x$ collects all ways $x$ can occur together with any value of $y$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to compute evidence in Bayes' rule, remove nuisance variables, or turn a joint table into a lower-dimensional table.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Product Rule / Chain Rule</div>
+      <div class="eq">$$ p(x,y)=p(y\mid x)p(x),\qquad p(x_{1:D})=\prod_{i=1}^{D}p(x_i\mid x_{1:i-1}) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x_{1:D}$ means $(x_1,\ldots,x_D)$. The first term in the product is $p(x_1)$ because there are no previous variables.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A joint probability can be built by choosing variables one at a time and conditioning on what has already been chosen.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to factor graphical models, derive Bayes' rule, or write a likelihood for several dependent variables.</p>
+    </div>
 
     <div class="callout formula"><div class="head">Conditional Probability</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
@@ -118,11 +134,27 @@
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use whenever you need $P(B)$ but only have the conditionals — the most common use is filling in the denominator of Bayes' rule.</p>
     </div>
 
-    <div class="callout formula"><div class="head">Expectation & Variance</div>
-      <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ is a random variable. $\mathbb{E}[X]$ is the <b>mean</b>. $\mathrm{Var}(X)$ is the <b>variance</b> (a measure of spread). Square root of variance is the standard deviation.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Expectation = long-run average outcome. Variance = how far typical outcomes deviate from that average (squared, so units are unit-of-$X$ squared).</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Plug each value $x$ and its probability $P(x)$ into the sum. Continuous case: replace $\sum_x x\,P(x)$ with $\int x\,p(x)\,dx$ against the density $p$. Variance shortcut: $\mathbb{E}[X^2]-(\mathbb{E}[X])^2$ is usually faster than $\mathbb{E}[(X-\mu)^2]$.</p>
+    <div class="callout formula"><div class="head">Moments: Expectation, Variance, Covariance</div>
+      <div class="eq">$$ \mathbb{E}[f(X)]=\sum_x p(x)f(x)\quad\text{or}\quad \int p(x)f(x)\,dx $$</div>
+      <div class="eq">$$ \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2,\qquad \mathrm{Cov}(X,Y)=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f(X)$ is any function of the random variable. Variance measures spread around the mean. Covariance measures whether two variables tend to move together.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Expectation is a probability-weighted average; variance is average squared spread; covariance is positive when large $X$ tends to come with large $Y$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> For hand problems, compute $\mathbb{E}[X]$, $\mathbb{E}[X^2]$, and $\mathbb{E}[XY]$ separately, then plug into the shortcut formulas.</p>
+    </div>
+
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Standard Distributions</div>
+      <div class="eq">$$ \mathrm{Bernoulli}(x;\mu)=\mu^x(1-\mu)^{1-x},\qquad \mathrm{Binomial}(m;N,\mu)=\binom{N}{m}\mu^m(1-\mu)^{N-m} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Bernoulli models one binary trial $x\in\{0,1\}$ with success probability $\mu$. Binomial models $m$ successes in $N$ independent Bernoulli trials.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Bernoulli is one coin flip; Binomial is the count of heads after many independent flips.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Bernoulli for binary labels/features and Binomial for counts of successes. Logistic regression and Bernoulli NB both rely on this binary-event likelihood idea.</p>
+    </div>
+
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Multivariate Gaussian and Empirical Distribution</div>
+      <div class="eq">$$ \mathcal{N}(x;\mu,\Sigma)=\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left[-\frac12(x-\mu)^\top\Sigma^{-1}(x-\mu)\right] $$</div>
+      <div class="eq">$$ p_{\mathrm{emp}}(x)=\frac1n\sum_{i=1}^{n}\delta(x-x_i) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mu$ is the mean vector, $\Sigma$ is the covariance matrix, and $\delta(\cdot)$ is a Dirac delta spike at a training point.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Gaussian density is controlled by center and covariance; equal-density surfaces are ellipsoids. The empirical distribution puts equal mass on observed samples.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Gaussians for continuous data, Gaussian NB, PCA/covariance intuition, and noise models. Use the empirical distribution to express "training data as a distribution"; it is a sum of point masses. The Central Limit Theorem explains why sums of many independent effects often look approximately Gaussian.</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes Factorization (preview)</div>
@@ -164,6 +196,12 @@
     <p>This works because the table is small. With 100 binary features the table would have $2^{100}\approx 10^{30}$ rows — far more than people on Earth — and most cells would be empty. That is the curse of dimensionality (Lecture 2 p. 17–18).</p>
   </div>
 
+  <div class="callout example">
+    <div class="head">Example 5 · Zero covariance is not independence</div>
+    <p>Let $X\sim U[-1,1]$ and $Y=X^2$. Then $Y$ is completely determined by $X$, so the variables are dependent. But $\mathrm{Cov}(X,Y)=\mathbb{E}[X^3]-\mathbb{E}[X]\mathbb{E}[X^2]=0-0=0$.</p>
+    <p>Lesson: uncorrelated only means zero linear covariance. It does not rule out nonlinear dependence.</p>
+  </div>
+
   <h3>6. Problem-Solving Tips</h3>
   <div class="callout tips">
     <div class="head">How to attack a probability question</div>
@@ -172,6 +210,8 @@
       <li><b>If $P(B)$ is missing</b>, expand it with the law of total probability.</li>
       <li><b>For "$A\perp B$ given $C$?"</b>, compute $P(A\mid B,C)$ and $P(A\mid C)$ on a tiny table — equal iff conditionally independent.</li>
       <li><b>For ML classification</b>, write $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$ and $\arg\max_y$.</li>
+      <li><b>For MLE questions</b>, write the likelihood $p(D\mid\theta)$, take logs, and choose the parameter that makes the observed data most probable.</li>
+      <li><b>For distribution questions</b>, identify the data type: binary event → Bernoulli, success count → Binomial, continuous vector → Gaussian, observed samples as a distribution → empirical Dirac spikes.</li>
       <li><b>Sanity check</b>: try extreme priors (e.g. $P(B\mid A)=1$, $P(B\mid \neg A)=0$); if your formula does not give the obvious answer, you dropped a term.</li>
     </ol>
   </div>
@@ -185,6 +225,8 @@
       <li>Treating independence and conditional independence as the same thing — Example 3 is the textbook counterexample.</li>
       <li>Dropping the prior in Bayes (base-rate neglect).</li>
       <li>Using "$\propto$" but forgetting to normalize at the end.</li>
+      <li>Saying "uncorrelated" means "independent." Zero covariance only rules out linear co-movement, not nonlinear dependence.</li>
+      <li>Forgetting explaining away: conditioning on a common child can make two independent causes dependent.</li>
       <li>Multiplying conditionals when variables are not conditionally independent — the NB factorization is an <i>assumption</i>, not a free identity.</li>
     </ul>
   </div>
@@ -194,9 +236,13 @@
     <div class="head">What you must walk in able to do</div>
     <ul>
       <li>Write the five core formulas (conditional, Bayes, independence, conditional independence, total probability) from memory in 30 seconds.</li>
+      <li>Use the sum rule and product rule to marginalize or factor a joint distribution.</li>
       <li>Compute $P(A\mid B)$ by hand from $P(A), P(B\mid A), P(B\mid \neg A)$, showing the total-probability expansion.</li>
+      <li>Compute expectation, variance, and covariance using shortcut formulas.</li>
+      <li>Recognize Bernoulli, Binomial, Gaussian, and empirical distributions from the data description.</li>
       <li>Recognize conditional independence in a graphical / NB problem and write the factorization.</li>
       <li>Map "posterior $\propto$ likelihood × prior" onto the variables in a word problem.</li>
+      <li>Explain MLE as choosing parameters that maximize the probability of the observed data.</li>
       <li>Argue why a probability table fails in high dimensions ($2^d$ growth).</li>
     </ul>
   </div>
@@ -206,10 +252,13 @@
     <h3>Last-minute recall</h3>
     <ul>
       <li>$P(A\mid B)=P(A,B)/P(B)$ — denominator is the conditioning event.</li>
+      <li>Sum rule removes variables; product rule builds joints from conditionals.</li>
       <li>Bayes: $P(A\mid B)=P(B\mid A)P(A)/P(B)$.</li>
       <li>$P(B)=\sum_a P(B\mid A=a)P(A=a)$ when missing.</li>
       <li>Independence: $P(A,B)=P(A)P(B)$. CI: $P(A,B\mid C)=P(A\mid C)P(B\mid C)$.</li>
       <li>Independence ↮ conditional independence.</li>
+      <li>Zero covariance does not guarantee independence.</li>
+      <li>Bernoulli = one binary event; Binomial = number of successes; Gaussian = continuous ellipsoid; empirical distribution = Dirac spikes.</li>
       <li>Naive Bayes: $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$ — $2^d$ → $2d$ params.</li>
       <li>Probabilities in $[0,1]$, conditionals sum to 1 over the conditioned variable.</li>
     </ul>
@@ -225,8 +274,10 @@
   <div class="callout">
     <div class="head">正式定义与它解决的问题</div>
     <p><b>随机变量</b> $X$ 给随机试验的每个结果赋一个数值，<b>分布</b> $P(X=x)$ 描述每个值出现的频率；两个变量还有<b>联合分布</b> $P(X_1, X_2)$，记录所有取值组合。</p>
-    <p>从这里出发，ML 真正用到的核心只有四件事：</p>
+    <p>从这里出发，ML 真正用到的核心有六件事：</p>
     <ul>
+      <li><b>Sum rule / marginalization</b>：对联合分布里的某个变量求和或积分，把它消掉。</li>
+      <li><b>Product rule / chain rule</b>：用条件概率一块块搭出 joint distribution。</li>
       <li><b>条件概率</b>：$P(A\mid B)=P(A,B)/P(B)$，已知 $B$ 发生时 $A$ 的概率。</li>
       <li><b>独立</b>：$P(A,B)=P(A)P(B)$，知道其中一个不会改变另一个。</li>
       <li><b>条件独立</b>：$P(A,B\mid C)=P(A\mid C)\,P(B\mid C)$，给定 $C$ 后 $A$、$B$ 的关联消失。</li>
@@ -255,6 +306,20 @@
 
   <h3>4. 关键公式</h3>
   <div class="cols2">
+
+    <div class="callout formula"><div class="head">Sum rule / marginalization</div>
+      <div class="eq">$$ p(x)=\sum_y p(x,y)\qquad\text{or}\qquad p(x)=\int p(x,y)\,dy $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $p(x,y)$ 是 joint distribution；$y$ 是要被消掉的变量。离散 $Y$ 用 sum，连续 $Y$ 用 integral。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $x$ 的 marginal probability 把“$x$ 和所有可能 $y$ 同时出现”的情况全部加起来。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用来算 Bayes denominator / evidence、消掉 nuisance variable，或者把高维 joint table 降成低维 table。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Product rule / chain rule</div>
+      <div class="eq">$$ p(x,y)=p(y\mid x)p(x),\qquad p(x_{1:D})=\prod_{i=1}^{D}p(x_i\mid x_{1:i-1}) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x_{1:D}$ 表示 $(x_1,\ldots,x_D)$。乘积第一项其实是 $p(x_1)$，因为前面没有变量可条件化。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个 joint probability 可以按顺序生成变量：先生成第一个，再在前面变量已知的条件下生成下一个。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用于 factor graphical models、推 Bayes' rule、或者为多个 dependent variables 写 likelihood。</p>
+    </div>
 
     <div class="callout formula"><div class="head">条件概率</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
@@ -291,11 +356,27 @@
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 没给 $P(B)$ 但有条件概率时用——最常见的就是补贝叶斯公式的分母。</p>
     </div>
 
-    <div class="callout formula"><div class="head">期望与方差</div>
-      <div class="eq">$$ \mathbb{E}[X]=\sum_x x\,P(x),\quad \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X$ 是随机变量；$\mathbb{E}[X]$ 是 <b>mean</b>（均值）；$\mathrm{Var}(X)$ 是 <b>variance</b>（离散程度）；标准差是方差的平方根。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 期望 = 长期平均；方差 = 典型取值偏离均值的程度（平方过，单位是 $X$ 的平方）。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 把每个取值 $x$ 与其概率 $P(x)$ 代入求和；连续情形换成对密度 $p$ 的积分 $\int x\,p(x)\,dx$。方差的快捷算法 $\mathbb{E}[X^2]-(\mathbb{E}[X])^2$ 通常比 $\mathbb{E}[(X-\mu)^2]$ 更省事。</p>
+    <div class="callout formula"><div class="head">Moments: expectation, variance, covariance</div>
+      <div class="eq">$$ \mathbb{E}[f(X)]=\sum_x p(x)f(x)\quad\text{or}\quad \int p(x)f(x)\,dx $$</div>
+      <div class="eq">$$ \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2,\qquad \mathrm{Cov}(X,Y)=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f(X)$ 是 random variable 的任意函数；variance 衡量围绕 mean 的 spread；covariance 衡量两个变量是否一起变大/变小。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> Expectation 是按概率加权平均；variance 是平均平方偏离；covariance 为正表示大的 $X$ 往往伴随大的 $Y$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 手算时分开算 $\mathbb{E}[X]$、$\mathbb{E}[X^2]$、$\mathbb{E}[XY]$，再代入 shortcut formulas。</p>
+    </div>
+
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">常见分布 / Standard distributions</div>
+      <div class="eq">$$ \mathrm{Bernoulli}(x;\mu)=\mu^x(1-\mu)^{1-x},\qquad \mathrm{Binomial}(m;N,\mu)=\binom{N}{m}\mu^m(1-\mu)^{N-m} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Bernoulli 描述一次 binary trial，$x\in\{0,1\}$，success probability 是 $\mu$。Binomial 描述 $N$ 次 independent Bernoulli trials 中成功 $m$ 次。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Bernoulli 是一次 coin flip；Binomial 是很多次 coin flips 后 head 的数量。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> binary labels / features 用 Bernoulli；success count 用 Binomial。Logistic regression 和 Bernoulli NB 都在用 binary-event likelihood 这个思想。</p>
+    </div>
+
+    <div class="callout formula" style="grid-column:1/3;"><div class="head">Multivariate Gaussian 与 empirical distribution</div>
+      <div class="eq">$$ \mathcal{N}(x;\mu,\Sigma)=\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left[-\frac12(x-\mu)^\top\Sigma^{-1}(x-\mu)\right] $$</div>
+      <div class="eq">$$ p_{\mathrm{emp}}(x)=\frac1n\sum_{i=1}^{n}\delta(x-x_i) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mu$ 是 mean vector；$\Sigma$ 是 covariance matrix；$\delta(\cdot)$ 是集中在训练样本点上的 Dirac delta spike。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Gaussian density 由中心和协方差控制；等概率曲面是 ellipsoids。Empirical distribution 把相同质量放在每个 observed sample 上。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Continuous data、Gaussian NB、PCA/covariance intuition、noise models 常用 Gaussian；empirical distribution 用来把“训练集”写成一个 distribution。Central Limit Theorem 解释了为什么很多 independent effects 相加后近似 Gaussian。</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes 因子分解（预告）</div>
@@ -337,6 +418,12 @@
     <p>表小才能这么数。100 个二值特征的表会有 $2^{100}\approx 10^{30}$ 行，远超地球总人口；绝大多数格子是空的——这就是维度灾难（Lecture 2, p. 17–18）。</p>
   </div>
 
+  <div class="callout example">
+    <div class="head">例 5 · Zero covariance 不等于 independent</div>
+    <p>令 $X\sim U[-1,1]$，$Y=X^2$。此时 $Y$ 完全由 $X$ 决定，所以两者 dependent。但 $\mathrm{Cov}(X,Y)=\mathbb{E}[X^3]-\mathbb{E}[X]\mathbb{E}[X^2]=0-0=0$。</p>
+    <p>结论：uncorrelated 只表示 linear covariance 为 0，不代表没有 nonlinear dependence。</p>
+  </div>
+
   <h3>6. 题型与解题步骤</h3>
   <div class="callout tips">
     <div class="head">看到题怎么下手</div>
@@ -345,6 +432,8 @@
       <li><b>$P(B)$ 没给</b>就用全概率公式展开。</li>
       <li><b>“给定 $C$，$A,B$ 是否独立？”</b>列小表算 $P(A\mid B,C)$ 与 $P(A\mid C)$，相等即条件独立。</li>
       <li><b>ML 分类题</b>：写 $P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$，再 $\arg\max_y$。</li>
+      <li><b>MLE 题</b>：先写 likelihood $p(D\mid\theta)$，再取 log，最后选让 observed data probability 最大的参数。</li>
+      <li><b>分布识别题</b>：binary event → Bernoulli；success count → Binomial；continuous vector → Gaussian；把 observed samples 当 distribution → empirical Dirac spikes。</li>
       <li><b>极端情形自检</b>：取 $P(B\mid A)=1$、$P(B\mid \neg A)=0$，公式给不出明显答案就是漏了项。</li>
     </ol>
   </div>
@@ -358,6 +447,8 @@
       <li>把独立和条件独立混为一谈——例 3 是经典反例。</li>
       <li>贝叶斯里漏了先验（base-rate neglect）。</li>
       <li>用了 $\propto$ 但忘了最后归一化。</li>
+      <li>把 uncorrelated 当成 independent。Zero covariance 只能排除 linear co-movement，不能排除 nonlinear dependence。</li>
+      <li>忘记 explaining away：对共同 child 做条件化，会让两个本来 independent 的 causes 变 dependent。</li>
       <li>变量并非条件独立时强行连乘——NB 的因子分解是<i>假设</i>，不是恒等式。</li>
     </ul>
   </div>
@@ -367,9 +458,13 @@
     <div class="head">必须会的内容</div>
     <ul>
       <li>30 秒内默写五条核心公式：条件、贝叶斯、独立、条件独立、全概率。</li>
+      <li>会用 sum rule 和 product rule 对 joint distribution 做 marginalization / factorization。</li>
       <li>给 $P(A), P(B\mid A), P(B\mid \neg A)$ 手算 $P(A\mid B)$，含全概率展开过程。</li>
+      <li>会用 shortcut formulas 算 expectation、variance、covariance。</li>
+      <li>能根据题意识别 Bernoulli、Binomial、Gaussian、empirical distribution。</li>
       <li>能在图模型 / NB 题里识别条件独立并写出因子分解。</li>
       <li>把 “posterior $\propto$ likelihood × prior” 落到具体变量上。</li>
+      <li>能解释 MLE：选择让 observed data probability 最大的参数。</li>
       <li>能解释概率表为何在高维失效（$2^d$ 增长）。</li>
     </ul>
   </div>
@@ -379,10 +474,13 @@
     <h3>最后一刻能默</h3>
     <ul>
       <li>$P(A\mid B)=P(A,B)/P(B)$，分母是被条件的事件。</li>
+      <li>Sum rule 用来消变量；product rule 用 conditionals 搭 joint。</li>
       <li>贝叶斯：$P(A\mid B)=P(B\mid A)P(A)/P(B)$。</li>
       <li>$P(B)=\sum_a P(B\mid A=a)P(A=a)$，没给时自己展开。</li>
       <li>独立：$P(A,B)=P(A)P(B)$；条件独立：$P(A,B\mid C)=P(A\mid C)P(B\mid C)$。</li>
       <li>独立 ↮ 条件独立。</li>
+      <li>Zero covariance 不保证 independence。</li>
+      <li>Bernoulli = 一次二元事件；Binomial = 成功次数；Gaussian = continuous ellipsoid；empirical distribution = Dirac spikes。</li>
       <li>Naive Bayes：$P(Y\mid X)\propto P(Y)\prod_i P(X_i\mid Y)$，$2^d \to 2d$。</li>
       <li>概率落在 $[0,1]$，被条件变量上的条件概率求和为 1。</li>
     </ul>

@@ -50,10 +50,11 @@
   <h3>1. Concept Understanding</h3>
   <div class="callout">
     <div class="head">Formal definitions and the problem they solve</div>
-    <p>Training a model = solving an optimization problem with the loss as objective. The unconstrained version (Lecture 3, p. 7) is $\min_w f(w)$; the constrained version adds inequalities $f_i(w)\le 0$ and equalities $h_j(w)=0$.</p>
-    <p>Three things matter:</p>
+    <p>Training a model = solving an optimization problem with the cost / loss as objective, often written as $\min_\theta L(\theta)$. The unconstrained version (Lecture 3, p. 7) is $\min_w f(w)$; the constrained version adds inequalities $f_i(w)\le 0$ and equalities $h_j(w)=0$.</p>
+    <p>Core things matter:</p>
     <ul>
-      <li><b>Convexity</b>: chord above the graph; equivalently, tangent below the graph; equivalently, $\nabla^2 f\succeq 0$. PD everywhere ⇒ strictly convex with a unique minimizer.</li>
+      <li><b>Stationary points</b>: $\nabla L(\theta)=0$. In non-convex landscapes this could be a local minimum, local maximum, or saddle point; the Hessian tells the local curvature.</li>
+      <li><b>Convexity</b>: a convex set contains every line segment between its points; a convex function has chord above the graph; equivalently, tangent below the graph; equivalently, $\nabla^2 f\succeq 0$. PD everywhere ⇒ strictly convex with a unique minimizer.</li>
       <li><b>Gradient descent</b>: iterate $w_{k+1}=w_k-\alpha_k\nabla f(w_k)$. For convex $f$, $\nabla f(w^*)=0$ is necessary <i>and</i> sufficient for global optimality (Lecture 3, p. 18).</li>
       <li><b>Lagrangian / duality</b>: turn constraints into penalties via $L(w,\lambda,\nu)=f_0(w)+\sum_i\lambda_if_i(w)+\sum_j\nu_jh_j(w)$ with $\lambda_i\ge 0$. The dual function $g(\lambda,\nu)=\min_w L$ gives a lower bound; under strong duality the bound is tight.</li>
     </ul>
@@ -73,6 +74,7 @@
   <div class="callout intuition">
     <div class="head">Why these ideas actually work</div>
     <p><b>Convexity is the safety net</b>. Without it, the solver may stop at a local minimum or saddle point that is much worse than the global one. With it, $\nabla f(w^*)=0$ alone is enough — no further checks needed (Lecture 3, p. 18).</p>
+    <p><b>The Hessian is the local shape report</b>. At a stationary point, positive definite curvature points upward in every direction, negative definite curvature points downward, and indefinite curvature means some directions go up while others go down — a saddle.</p>
     <p><b>The two convexity tests agree</b>. The first-order test ("graph above every tangent") and the second-order test ("$\nabla^2 f\succeq 0$ everywhere") are equivalent, but the second is usually easier because you can read PSD off the structure (e.g. $X^\top BX$).</p>
     <p><b>Gradient descent's direction is locally optimal</b>: among unit vectors, $-\nabla f(w)$ maximizes the rate of decrease. Step size matters: too large diverges, too small crawls; constant $\alpha=1/L$ (Lipschitz constant $L$) is a textbook safe choice, and Armijo line search adapts.</p>
     <p><b>The Lagrangian turns constraints into penalties</b>. If $\hat w$ violates a constraint, $\max_\lambda L(\hat w,\lambda)=+\infty$, so the outer min refuses to choose it. Inside the feasible set, $\sum_i\lambda_if_i(w)\le 0$, so $L\le f_0$ — that is exactly where the dual lower bound comes from.</p>
@@ -103,6 +105,14 @@
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Compute the Hessian; show it factors as $X^\top D X$ with $D\succeq 0$ (sandwich identity), or show its eigenvalues are non-negative. The cleanest convexity proof for differentiable losses (logistic, ridge, log-sum-exp).</p>
     </div>
 
+    <div class="callout formula"><div class="head">Stationary-point curvature test</div>
+      <div class="eq">$$ \nabla L(\theta^*)=0,\qquad H=\nabla^2L(\theta^*) $$</div>
+      <div class="eq">$$ H\succ0\Rightarrow\text{local min},\quad H\prec0\Rightarrow\text{local max},\quad H\text{ indefinite}\Rightarrow\text{saddle} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\theta^*$ is a stationary point. $H$ is the Hessian at that point. $H\succ0$ means positive definite; $H\prec0$ means negative definite; indefinite means $H$ has both positive and negative curvature directions.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> A zero gradient says the surface is flat to first order. The Hessian tells whether the flat point curves upward, downward, or both ways.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> First verify $\nabla L=0$, then inspect eigenvalues or quadratic forms $v^\top Hv$. This is a local test; it does not prove global optimality unless convexity is also known.</p>
+    </div>
+
     <div class="callout formula"><div class="head">Optimality (convex)</div>
       <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ globally optimal} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w^*$ is a stationary point (zero gradient). The implication holds <b>only when $f$ is convex</b>. For non-convex $f$, $\nabla f(w^*)=0$ is necessary but not sufficient — could be a max, saddle, or weak local min.</p>
@@ -115,6 +125,13 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_k$ is the iterate at step $k$. $\alpha_k>0$ is the step size (learning rate). $\nabla f(w_k)$ is the gradient at the current point — the direction of <i>steepest ascent</i>; the minus sign turns it into descent.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Look at the slope at your feet, take a step downhill, repeat. Step too large and you overshoot the valley; too small and progress crawls.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Initialize $w_0$, iterate the update, stop when $\|\nabla f(w_k)\|\approx 0$ or after a budget. Common step sizes: constant $\alpha=1/L$ (where $L$ is the gradient's Lipschitz constant — guaranteed safe), diminishing $\alpha_k=1/k$, or Armijo line search.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Batch / SGD / mini-batch gradient</div>
+      <div class="eq">$$ \widehat{\nabla L}_B(\theta)=\frac{1}{|B|}\sum_{i\in B}\nabla_\theta \ell_i(\theta),\qquad \theta_{t+1}=\theta_t-\eta\,\widehat{\nabla L}_B(\theta_t) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $B$ is the chosen batch of examples. $|B|$ is batch size. $\ell_i$ is the loss contribution of example $i$. $\eta$ is the learning rate.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Batch GD uses all examples, SGD uses one example, and mini-batch GD uses a small subset such as 32, 64, or 128 examples.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Large batches give steadier gradients but cost more per update. Mini-batches are the default in deep learning because they fit hardware well and their gradient noise can act like mild regularization.</p>
     </div>
 
     <div class="callout formula"><div class="head">Subgradient inequality</div>
@@ -136,6 +153,14 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_0$ = objective. $f_i\le 0$ are inequality constraints with multipliers $\lambda_i\ge 0$. $h_j=0$ are equality constraints with free-sign multipliers $\nu_j$. The multipliers are the "prices" charged per unit of constraint violation.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Don't forbid constraint violations — charge for them. If $\hat w$ violates $f_i\le 0$, the inner $\max$ pushes $\lambda_i\to+\infty$ and makes $L$ infinite, so the outer $\min$ refuses to choose $\hat w$.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Convert constrained problem $\min_w f_0$ s.t. $f_i\le 0,\ h_j=0$ into the unconstrained min-max $\min_w\max_{\lambda\ge 0,\nu}L$. KKT conditions ($\nabla_w L=0$, $\lambda_i f_i=0$, …) characterize the optimum.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">KKT conditions</div>
+      <div class="eq">$$ \nabla_wL(w^*,\lambda^*,\nu^*)=0,\quad f_i(w^*)\le0,\quad h_j(w^*)=0 $$</div>
+      <div class="eq">$$ \lambda_i^*\ge0,\qquad \lambda_i^*f_i(w^*)=0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Stationarity sets the Lagrangian gradient to zero. Primal feasibility enforces the original constraints. Dual feasibility enforces $\lambda_i\ge0$. Complementary slackness says each inequality is either active or has zero multiplier.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> At an optimum, the objective gradient is balanced by constraint gradients, and inactive constraints have no price.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Write these four groups when solving constrained optimization by hand. For convex problems with a constraint qualification, KKT conditions are also sufficient.</p>
     </div>
 
     <div class="callout formula"><div class="head">Primal vs Dual</div>
@@ -185,6 +210,14 @@
     <p>(d) The dual always has the same solution as the primal — <b>False</b>: only the optimal <i>values</i> match (under strong duality); the variables live in different spaces (Lecture 3, p. 33).</p>
   </div>
 
+  <div class="callout example">
+    <div class="head">Example 6 · Practical optimization connections</div>
+    <p><b>Linear regression.</b> Squared loss leads to normal equations because its gradient is linear in $w$ and its Hessian is $X^\top X\succeq0$. That is why the optimum can often be solved in closed form.</p>
+    <p><b>Logistic regression.</b> Cross-entropy is still convex for a linear model, but there is no simple closed-form $w^*$; use gradient-based methods and prove convexity with the $X^\top B X$ Hessian pattern.</p>
+    <p><b>PCA.</b> PCA is also an optimization problem: choose a direction that maximizes projected variance. The solution is the top eigenvector of the covariance matrix.</p>
+    <p><b>Early stopping.</b> Stopping based on validation loss limits how far training can move, so it behaves like implicit regularization even without adding an explicit penalty term.</p>
+  </div>
+
   <h3>6. Problem-Solving Tips</h3>
   <div class="callout tips">
     <div class="head">How to tackle an optimization problem</div>
@@ -197,6 +230,12 @@
       <li><b>Subgradient question.</b> Use $f(x)\ge f(x_0)+\langle s, x-x_0\rangle$, $s\in\partial f(x_0)$; e.g. $\partial|x|(0)=[-1,1]$.</li>
       <li><b>GD sanity check</b>: if loss diverges, halve $\alpha$; if it crawls, double it. With Lipschitz $L$, $\alpha=1/L$ is a default that always works.</li>
     </ol>
+    <div class="mini-list" style="margin-top:12px;">
+      <div><b>Batch vs SGD vs mini-batch.</b> Batch uses all data per step; SGD uses one example; mini-batch uses a small subset and is the deep-learning default because it balances stable gradients, speed, and hardware throughput.</div>
+      <div><b>Momentum.</b> Add velocity when updates zig-zag in a narrow valley; it smooths oscillation and accelerates along consistent directions.</div>
+      <div><b>Nesterov momentum.</b> Take the gradient after a look-ahead move, so the optimizer can slow down before overshooting.</div>
+      <div><b>AdaGrad / RMSProp / Adam.</b> AdaGrad shrinks rates using historical squared gradients; RMSProp uses a moving average to avoid shrinking forever; Adam combines RMSProp-style scaling with momentum and bias correction.</div>
+    </div>
   </div>
 
   <h3>7. Common Mistakes</h3>
@@ -205,7 +244,9 @@
     <ul>
       <li>Confusing PSD and PD — PSD allows zero eigenvalues, so the optimum need not be unique.</li>
       <li>Treating $\nabla f(w^*)=0$ as sufficient for non-convex $f$ — it only marks a stationary point.</li>
+      <li>Classifying a point with the Hessian before checking $\nabla f=0$ — the second-order min/max/saddle test is for stationary points.</li>
       <li>Step size too large — GD can diverge spectacularly; always check the loss decreases.</li>
+      <li>Assuming Adam, momentum, or a tiny learning rate guarantees the global optimum — optimizer choice helps the path, not the landscape.</li>
       <li>Forgetting $\lambda_i\ge 0$ on inequality multipliers (equality multipliers $\nu_j$ are free).</li>
       <li>Confusing primal and dual variables — they live in different spaces; only optimal <i>values</i> match.</li>
       <li>Asserting strong duality without justification — typically needs convexity + Slater.</li>
@@ -220,9 +261,13 @@
       <li>State the chord, first-order, and second-order definitions of convexity, and switch between them.</li>
       <li>Use $\nabla^2 f\succeq 0$ to prove logistic, log-sum-exp, ridge, etc. convex.</li>
       <li>Recognize $X^\top BX\succeq 0$ via the sandwich trick.</li>
+      <li>Classify stationary points from Hessian eigenvalues: PD local min, ND local max, indefinite saddle.</li>
       <li>Write one step of gradient descent and explain step-size trade-offs.</li>
+      <li>Distinguish batch GD, SGD, mini-batch GD, momentum, Nesterov, AdaGrad, RMSProp, and Adam.</li>
       <li>Set up the Lagrangian for a constrained problem, then derive the dual via the four-step recipe.</li>
+      <li>Write the KKT condition groups: stationarity, primal feasibility, dual feasibility, complementary slackness.</li>
       <li>State weak duality and distinguish from strong duality.</li>
+      <li>Hand-derive gradients / Hessians for simple linear and logistic losses; know PCA as variance maximization and early stopping as implicit regularization.</li>
       <li>Know the four T/F items in HW1 §4.5 — they recur on quizzes.</li>
     </ul>
   </div>
@@ -233,14 +278,19 @@
     <ul>
       <li>Convex ⇔ chord above graph ⇔ tangent below graph ⇔ Hessian PSD.</li>
       <li>Convex $f$: $\nabla f(w^*)=0\Rightarrow$ global minimum.</li>
+      <li>Stationary point: check $\nabla L=0$, then use Hessian signs for local shape.</li>
       <li>GD: $w_{k+1}=w_k-\alpha\nabla f(w_k)$; $\alpha=1/L$ safe.</li>
+      <li>Batch / SGD / mini-batch differ by how many examples estimate the gradient.</li>
+      <li>Momentum smooths velocity; Nesterov looks ahead; Adam = momentum + adaptive second moment + bias correction.</li>
       <li>$H=X^\top BX\succeq 0$ when $B\succeq 0$ — logistic loss convex.</li>
       <li>Norms, log-sum-exp, exp, non-negative weighted sums of convex are convex.</li>
       <li>Lagrangian: $L=f_0+\sum\lambda_if_i+\sum\nu_jh_j$, $\lambda_i\ge 0$.</li>
+      <li>KKT = stationarity + feasibility + $\lambda_i\ge0$ + complementary slackness.</li>
       <li>Dual $g(\lambda,\nu)=\min_w L$; problem $\max_{\lambda\ge 0,\nu} g$.</li>
       <li>Weak duality: $\min\max L\ge\max\min L$ (always).</li>
       <li>Strong duality: equality, typically convex + Slater.</li>
       <li>Subgradient: $f(x)\ge f(x_0)+\langle s,x-x_0\rangle$, $s\in\partial f(x_0)$.</li>
+      <li>PCA maximizes projected variance; early stopping is implicit regularization.</li>
     </ul>
   </div>
 </section>
@@ -253,10 +303,11 @@
   <h3>1. 概念理解</h3>
   <div class="callout">
     <div class="head">正式定义与它解决的问题</div>
-    <p>训练模型 = 解“以损失为目标”的优化问题。无约束版本（Lecture 3, p. 7）是 $\min_w f(w)$；有约束版本再加上 $f_i(w)\le 0$ 与 $h_j(w)=0$。</p>
-    <p>真正要掌握三件事：</p>
+    <p>训练模型 = 解“以 cost / loss 为目标”的优化问题，常写成 $\min_\theta L(\theta)$。无约束版本（Lecture 3, p. 7）是 $\min_w f(w)$；有约束版本再加上 $f_i(w)\le 0$ 与 $h_j(w)=0$。</p>
+    <p>真正要掌握这些核心点：</p>
     <ul>
-      <li><b>凸性</b>：弦在图像上方，等价于切线在图像下方，等价于 $\nabla^2 f\succeq 0$。处处 PD ⇒ 严格凸、唯一极小。</li>
+      <li><b>Stationary points</b>：$\nabla L(\theta)=0$。非凸 landscape 里它可能是 local minimum、local maximum 或 saddle point；Hessian 负责判断局部曲率。</li>
+      <li><b>凸性</b>：convex set 内任意两点连线仍在集合里；convex function 的弦在图像上方，等价于切线在图像下方，等价于 $\nabla^2 f\succeq 0$。处处 PD ⇒ 严格凸、唯一极小。</li>
       <li><b>梯度下降</b>：$w_{k+1}=w_k-\alpha_k\nabla f(w_k)$。凸 $f$ 下，$\nabla f(w^*)=0$ 既必要也充分（Lecture 3, p. 18）。</li>
       <li><b>Lagrangian / 对偶</b>：把约束化为罚金，$L(w,\lambda,\nu)=f_0+\sum_i\lambda_if_i+\sum_j\nu_jh_j$，$\lambda_i\ge 0$。对偶函数 $g(\lambda,\nu)=\min_w L$ 给出下界；强对偶时下界取等。</li>
     </ul>
@@ -276,6 +327,7 @@
   <div class="callout intuition">
     <div class="head">这些概念为何有效</div>
     <p><b>凸性是安全网</b>。没有它，优化器可能停在比全局还差很多的局部 / 鞍点；有它，$\nabla f(w^*)=0$ 就够了，不需要再补条件（Lecture 3, p. 18）。</p>
+    <p><b>Hessian 是局部形状报告</b>。在 stationary point 上，positive definite 表示各方向都向上弯，negative definite 表示各方向都向下弯，indefinite 表示有的方向上升、有的方向下降，也就是 saddle。</p>
     <p><b>判凸的两条等价路径</b>：一阶（图像在每条切平面上方）与二阶（$\nabla^2 f\succeq 0$）等价；二阶通常更好用，因为可以从结构（如 $X^\top BX$）直接读出 PSD。</p>
     <p><b>梯度下降的方向是局部最优</b>：单位向量中 $-\nabla f(w)$ 让一阶 Taylor 下降率最大。步长很关键：太大发散，太小爬慢；常数 $\alpha=1/L$（Lipschitz $L$）是教科书安全选择，Armijo 线搜索自适应。</p>
     <p><b>Lagrangian 把约束变成罚金</b>。若 $\hat w$ 违约，$\max_\lambda L(\hat w,\lambda)=+\infty$，外层 min 就不会选它；可行域内 $\sum_i\lambda_if_i(w)\le 0$，所以 $L\le f_0$——对偶下界由此而来。</p>
@@ -306,6 +358,14 @@
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 算 Hessian，凑成 $X^\top D X$（$D\succeq 0$）用夹心恒等式，或证特征值非负。可微损失（logistic、ridge、log-sum-exp）的最干净凸性证法。</p>
     </div>
 
+    <div class="callout formula"><div class="head">Stationary-point curvature test</div>
+      <div class="eq">$$ \nabla L(\theta^*)=0,\qquad H=\nabla^2L(\theta^*) $$</div>
+      <div class="eq">$$ H\succ0\Rightarrow\text{local min},\quad H\prec0\Rightarrow\text{local max},\quad H\text{ indefinite}\Rightarrow\text{saddle} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\theta^*$ 是 stationary point；$H$ 是该点的 Hessian。$H\succ0$ 表示 positive definite，$H\prec0$ 表示 negative definite；indefinite 表示同时有正曲率方向和负曲率方向。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 梯度为 0 只说明一阶看起来平；Hessian 才告诉你这个平点是碗底、山顶，还是马鞍。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先确认 $\nabla L=0$，再看 $H$ 的 eigenvalues 或二次型 $v^\top Hv$。这是局部判定；只有再知道 convexity 时，local min 才能升级成 global min。</p>
+    </div>
+
     <div class="callout formula"><div class="head">凸优化的最优性</div>
       <div class="eq">$$ \nabla f(w^*)=0 \;\Rightarrow\; w^* \text{ 全局最优} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w^*$ 是驻点（梯度为 0）。这条蕴含<b>只在 $f$ 凸时</b>成立；非凸时 $\nabla f(w^*)=0$ 必要但不充分——可能是极大、鞍点或弱局部极小。</p>
@@ -318,6 +378,13 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_k$ 第 $k$ 步的迭代；$\alpha_k>0$ 步长（learning rate）；$\nabla f(w_k)$ 当前点的梯度——<i>最陡上升</i>方向，前面的负号让它变成下降。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 看脚下的坡度，朝下坡走一步，重复。步太大会冲出山谷；太小爬蜗牛。</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 初始化 $w_0$，反复迭代，$\|\nabla f(w_k)\|\approx 0$ 或达预算时停。常用步长：常数 $\alpha=1/L$（$L$ 为梯度的 Lipschitz 常数，安全）；递减 $\alpha_k=1/k$；或 Armijo 线搜索。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Batch / SGD / mini-batch gradient</div>
+      <div class="eq">$$ \widehat{\nabla L}_B(\theta)=\frac{1}{|B|}\sum_{i\in B}\nabla_\theta \ell_i(\theta),\qquad \theta_{t+1}=\theta_t-\eta\,\widehat{\nabla L}_B(\theta_t) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $B$ 是本轮抽到的 batch；$|B|$ 是 batch size；$\ell_i$ 是第 $i$ 个样本贡献的 loss；$\eta$ 是 learning rate。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> Batch GD 用全体样本，SGD 用一个样本，mini-batch GD 用一小批样本（如 32、64、128）来估计真实梯度。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 大 batch 梯度更稳但每步更贵；mini-batch 是 deep learning 默认选择，因为计算效率高，且梯度噪声有轻微 regularization 效果。</p>
     </div>
 
     <div class="callout formula"><div class="head">次梯度不等式</div>
@@ -339,6 +406,14 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f_0$ 目标；$f_i\le 0$ 不等式约束、对应乘子 $\lambda_i\ge 0$；$h_j=0$ 等式约束、对应乘子 $\nu_j$ 自由号；乘子是"违约金"。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 不禁止违约，而是收费。$\hat w$ 违 $f_i\le 0$ 时内层 $\max$ 把 $\lambda_i\to+\infty$，$L$ 变正无穷，外层 $\min$ 自然不会选它。</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 把有约束 $\min_w f_0$ s.t. $f_i\le 0,\ h_j=0$ 化为无约束 $\min_w\max_{\lambda\ge 0,\nu}L$。KKT 条件（$\nabla_w L=0$、$\lambda_i f_i=0$、…）刻画最优。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">KKT conditions</div>
+      <div class="eq">$$ \nabla_wL(w^*,\lambda^*,\nu^*)=0,\quad f_i(w^*)\le0,\quad h_j(w^*)=0 $$</div>
+      <div class="eq">$$ \lambda_i^*\ge0,\qquad \lambda_i^*f_i(w^*)=0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Stationarity 让 Lagrangian 对 $w$ 的梯度为 0；primal feasibility 要满足原约束；dual feasibility 要求 $\lambda_i\ge0$；complementary slackness 表示每个不等式约束要么 active，要么乘子为 0。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 最优点处，目标函数想走的方向被约束的法向量“抵住”了；没贴边的约束不收费。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 手算 constrained optimization 时先写这四组条件。若问题是 convex 且满足约束限定，KKT 不只是必要条件，也足够推出最优。</p>
     </div>
 
     <div class="callout formula"><div class="head">原始 vs 对偶</div>
@@ -388,6 +463,14 @@
     <p>(d) 对偶问题总是与原始有相同的解——<b>错</b>：只有最优<i>值</i>相等（强对偶下），变量在不同空间（Lecture 3, p. 33）。</p>
   </div>
 
+  <div class="callout example">
+    <div class="head">例 6 · Practical optimization connections</div>
+    <p><b>Linear regression.</b> Squared loss 的 gradient 对 $w$ 是线性的，Hessian 是 $X^\top X\succeq0$，所以能推出 normal equations，很多情况下可闭式求解。</p>
+    <p><b>Logistic regression.</b> Cross-entropy 在线性模型下仍是 convex，但通常没有简单闭式 $w^*$；训练靠 gradient-based methods，凸性证明看 $X^\top B X$ 结构。</p>
+    <p><b>PCA.</b> PCA 本质也是 optimization：找一个方向让投影方差最大，解就是 covariance matrix 的最大特征值对应 eigenvector。</p>
+    <p><b>Early stopping.</b> 用 validation loss 决定何时停，会限制训练能走多远，所以它是一种 implicit regularization，不一定要显式加 penalty。</p>
+  </div>
+
   <h3>6. 题型与解题步骤</h3>
   <div class="callout tips">
     <div class="head">看到题怎么下手</div>
@@ -400,6 +483,12 @@
       <li><b>“次梯度题”</b>：$f(x)\ge f(x_0)+\langle s,x-x_0\rangle$，$s\in\partial f(x_0)$；$\partial|x|(0)=[-1,1]$。</li>
       <li><b>GD 自检</b>：发散就把 $\alpha$ 减半；爬得慢就放大；Lipschitz $L$ 已知时 $\alpha=1/L$ 默认安全。</li>
     </ol>
+    <div class="mini-list" style="margin-top:12px;">
+      <div><b>Batch vs SGD vs mini-batch：</b>Batch 每步用全数据；SGD 每步用一个样本；mini-batch 用小批量，是深度学习默认，因为梯度稳定性、速度和硬件吞吐比较均衡。</div>
+      <div><b>Momentum：</b>狭长山谷里更新会来回摆，velocity 能平滑震荡，并沿持续一致的方向加速。</div>
+      <div><b>Nesterov momentum：</b>先“预看”当前 velocity 会把你带到哪里，再在那里算梯度，目的是减少 overshooting。</div>
+      <div><b>AdaGrad / RMSProp / Adam：</b>AdaGrad 用历史梯度平方缩小 learning rate；RMSProp 用 moving average 避免一直缩到太小；Adam = RMSProp 式自适应缩放 + momentum + bias correction。</div>
+    </div>
   </div>
 
   <h3>7. 常见错误</h3>
@@ -408,7 +497,9 @@
     <ul>
       <li>PSD 与 PD 混淆——PSD 允许 0 特征值，最优可能不唯一。</li>
       <li>非凸时把 $\nabla f(w^*)=0$ 当充分——它只标驻点。</li>
+      <li>还没检查 $\nabla f=0$ 就用 Hessian 判局部极值——二阶 min/max/saddle 判定先要求 stationary。</li>
       <li>步长过大——GD 可能爆，每步检查损失是否下降。</li>
+      <li>以为 Adam、momentum 或很小 learning rate 能保证全局最优——optimizer 改善搜索路径，不改变非凸 landscape 本身。</li>
       <li>忘了 $\lambda_i\ge 0$（等式乘子 $\nu_j$ 自由）。</li>
       <li>原始变量与对偶变量混为一谈——只有最优<i>值</i>相等。</li>
       <li>无凭据声称强对偶——通常需要凸 + Slater。</li>
@@ -423,9 +514,13 @@
       <li>能默写并互换凸的三种定义（弦 / 一阶 / 二阶）。</li>
       <li>用 $\nabla^2 f\succeq 0$ 证 logistic、log-sum-exp、岭等的凸性。</li>
       <li>用夹心法识别 $X^\top BX\succeq 0$（$B\succeq 0$）。</li>
+      <li>会用 Hessian 特征值分类 stationary points：PD local min，ND local max，indefinite saddle。</li>
       <li>写一步 GD 并解释步长权衡。</li>
+      <li>能区分 batch GD、SGD、mini-batch GD、momentum、Nesterov、AdaGrad、RMSProp、Adam。</li>
       <li>会写有约束问题的 Lagrangian，并按四步配方推导对偶。</li>
+      <li>会写 KKT 四组条件：stationarity、primal feasibility、dual feasibility、complementary slackness。</li>
       <li>会陈述弱对偶并区分强对偶。</li>
+      <li>会手推简单 linear / logistic loss 的 gradient 与 Hessian；知道 PCA 是最大化方差，early stopping 是 implicit regularization。</li>
       <li>HW1 §4.5 那四条判断题反复出现，每条都要会论证。</li>
     </ul>
   </div>
@@ -436,14 +531,19 @@
     <ul>
       <li>凸 ⇔ 弦在图像上方 ⇔ 切线在图像下方 ⇔ Hessian PSD。</li>
       <li>凸 $f$：$\nabla f(w^*)=0\Rightarrow$ 全局最优。</li>
+      <li>Stationary point：先确认 $\nabla L=0$，再用 Hessian 符号判断局部形状。</li>
       <li>GD：$w_{k+1}=w_k-\alpha\nabla f(w_k)$，$\alpha=1/L$ 安全。</li>
+      <li>Batch / SGD / mini-batch 的区别是用多少样本估计 gradient。</li>
+      <li>Momentum 平滑 velocity；Nesterov 先 look ahead；Adam = momentum + adaptive second moment + bias correction。</li>
       <li>$H=X^\top BX\succeq 0$（$B\succeq 0$）—— logistic 损失凸。</li>
       <li>范数、log-sum-exp、指数、凸函数的非负加权和都是凸。</li>
       <li>Lagrangian：$L=f_0+\sum\lambda_if_i+\sum\nu_jh_j$，$\lambda_i\ge 0$。</li>
+      <li>KKT = stationarity + feasibility + $\lambda_i\ge0$ + complementary slackness。</li>
       <li>对偶 $g(\lambda,\nu)=\min_w L$；$\max_{\lambda\ge 0,\nu} g$。</li>
       <li>弱对偶：$\min\max L\ge\max\min L$（恒成立）。</li>
       <li>强对偶：等号（凸 + Slater 通常成立）。</li>
       <li>次梯度：$f(x)\ge f(x_0)+\langle s,x-x_0\rangle$，$s\in\partial f(x_0)$。</li>
+      <li>PCA 最大化投影方差；early stopping 是隐式 regularization。</li>
     </ul>
   </div>
 </section>

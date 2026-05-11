@@ -50,7 +50,7 @@
   <p class="topic-lede">Lecture 21 starts learning theory by asking what error is unavoidable even before we choose KNN, SVM, trees, or neural networks. The answer is the Bayes error: the best possible test error allowed by the data distribution itself.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>The <b>Bayes classifier</b> is the decision rule that minimizes population 0-1 classification error. It knows the true conditional probability $\eta(x)=\Pr(Y=1\mid X=x)$, so at each $x$ it simply predicts the more likely label.</p>
+  <p>The <b>Bayes classifier</b> is the decision rule that minimizes population 0-1 classification error. It is the theoretical gold standard for predictive performance: if a model cannot beat it, no classifier can. It knows the true conditional probability $\eta(x)=\Pr(Y=1\mid X=x)$, so at each $x$ it simply predicts the more likely label.</p>
   <p>The <b>Bayes error</b> $\epsilon_\mu^*$ is the error achieved by that ideal classifier. It depends only on the unknown distribution $\mu$, not on the learning algorithm or sample size.</p>
   <ul>
     <li>If labels are deterministic given $x$, the Bayes error can be 0.</li>
@@ -69,6 +69,14 @@
     <li><b>Distribution noise:</b> even the Bayes classifier may make errors.</li>
     <li><b>Learning error:</b> our actual algorithm may fail to approach the Bayes classifier.</li>
   </ul>
+  <div class="callout">
+    <div class="head">Connections to familiar models</div>
+    <div class="mini-list">
+      <div><b>Naive Bayes:</b> a generative model that tries to approximate the Bayes decision rule by estimating class priors and likelihoods, then adding a conditional-independence assumption.</div>
+      <div><b>KNN:</b> nearest-neighbor methods are judged against the Bayes error floor; a classical result says the asymptotic 1-NN error is at most twice the Bayes rate.</div>
+      <div><b>Regression:</b> the squared-loss version of the same idea appears below: the Bayes predictor is the conditional expectation $\mathbb{E}[Y\mid X]$.</div>
+    </div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -127,7 +135,9 @@
     <div>
       <h4>Example 3 · Two Gaussian classes</h4>
       <p class="example-source">Source: HW5, Section 1.2.</p>
-      <p>With $X\mid Y=0\sim\mathcal{N}(-\mu,\sigma^2)$ and $X\mid Y=1\sim\mathcal{N}(\mu,\sigma^2)$, compare the posterior-weighted densities. The decision boundary is a threshold; class imbalance shifts that threshold toward the less frequent class.</p>
+      <p>With $X\mid Y=0\sim\mathcal{N}(-\mu,\sigma^2)$, $X\mid Y=1\sim\mathcal{N}(\mu,\sigma^2)$, and prior $\lambda=\Pr(Y=1)$, compare likelihood times prior. Taking log posterior odds gives a linear threshold:</p>
+      <div class="eq">$$ \tau=-\frac{\sigma^2}{2\mu}\log\!\left(\frac{\lambda}{1-\lambda}\right) $$</div>
+      <p>Predict class 1 when $x\ge \tau$. Here $\tau$ is the boundary, $\mu$ is the symmetric class mean magnitude, $\sigma^2$ is the shared variance, and $\lambda$ is the class-1 prior. If $\lambda&gt;0.5$, then $\tau$ moves left, so the classifier favors class 1.</p>
     </div>
   </div>
 
@@ -155,6 +165,7 @@
     <li>Explain why Bayes error measures irreducible noise.</li>
     <li>Derive the Gaussian threshold from log posterior odds.</li>
     <li>For regression, know $f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X]$ and Bayes error $\mathbb{E}\operatorname{Var}(Y\mid X)$.</li>
+    <li>Compare Bayes classifier with Naive Bayes and KNN at the concept level.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -163,6 +174,7 @@
     <li>Local Bayes error is the smaller posterior probability.</li>
     <li>Deterministic labels give Bayes error 0.</li>
     <li>Pure random binary labels give Bayes error 0.5.</li>
+    <li>Shared-variance Gaussian class-conditionals give a linear threshold.</li>
     <li>Bayes error is a lower bound, not a training algorithm.</li>
   </ul>
 </section>
@@ -174,7 +186,7 @@
   <p class="topic-lede">Lecture 21 先问一个很底层的问题：在讨论 KNN、SVM、tree、neural network 谁更好之前，数据本身允许的最低错误率是多少？这个最低理论下界就是 Bayes error。</p>
 
   <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
-  <p><b>Bayes classifier</b> 是在真实分布下最小化 0-1 分类错误的理想规则。它知道 $\eta(x)=\Pr(Y=1\mid X=x)$，所以每个 $x$ 上都预测 posterior probability 更大的类别。</p>
+  <p><b>Bayes classifier</b> 是在真实分布下最小化 0-1 分类错误的理想规则，也是 predictive performance 的理论 gold standard：如果它都做不到，任何 classifier 都做不到。它知道 $\eta(x)=\Pr(Y=1\mid X=x)$，所以每个 $x$ 上都预测 posterior probability 更大的类别。</p>
   <p><b>Bayes error</b> $\epsilon_\mu^*$ 是这个理想分类器仍然会犯的错误。它只由数据分布 $\mu$ 决定，不由算法、模型大小、训练集大小决定。</p>
   <ul>
     <li>如果 $x$ 完全决定 label，Bayes error 可以是 0。</li>
@@ -193,38 +205,46 @@
     <li><b>distribution noise</b>：数据本身不可预测的部分。</li>
     <li><b>learning error</b>：我们的模型没有学到理想规则的部分。</li>
   </ul>
+  <div class="callout">
+    <div class="head">和常见模型的关系</div>
+    <div class="mini-list">
+      <div><b>Naive Bayes:</b> 是一种 generative model，通过估计 prior 和 likelihood 来近似 Bayes rule，但额外假设 features conditionally independent given label。</div>
+      <div><b>KNN:</b> nearest-neighbor 方法通常拿 Bayes error 当理论下界；经典结论是样本无限多时，1-NN 的错误率不超过 Bayes rate 的两倍。</div>
+      <div><b>Regression:</b> 同一个 Bayes optimal 思想在 squared loss 下变成下面的公式：最优 predictor 是 conditional expectation $\mathbb{E}[Y\mid X]$。</div>
+    </div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
     <div class="callout formula">
       <h4>二分类 Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$X$ 是输入特征 random variable；$x$ 是一个具体观测到的 feature value。$Y\in\{0,1\}$ 是真实 label。$\eta(x)=\Pr(Y=1\mid X=x)$ 表示看到 $x$ 之后 class 1 的 posterior probability；$f_{\text{Bayes}}(x)$ 是 optimal rule 给出的预测。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>$\frac12$ 阈值就是 uncertainty 下的 majority vote：class 1 至少和 class 0 一样可能，就预测 1。它是在 0-1 loss 下逐点最优的 classifier；固定一个 $x$ 后，选 posterior 更大的类，较小 posterior 就是 unavoidable local error。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>$X$ 是输入特征 random variable；$x$ 是一个具体观测到的 feature value。$Y\in\{0,1\}$ 是真实 label。$\eta(x)=\Pr(Y=1\mid X=x)$ 表示看到 $x$ 之后 class 1 的 posterior probability；$f_{\text{Bayes}}(x)$ 是 optimal rule 给出的预测。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>$\frac12$ 阈值就是 uncertainty 下的 majority vote：class 1 至少和 class 0 一样可能，就预测 1。它是在 0-1 loss 下逐点最优的 classifier；固定一个 $x$ 后，选 posterior 更大的类，较小 posterior 就是 unavoidable local error。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>比较 $\Pr(Y=1\mid X=x)$ 和 $\Pr(Y=0\mid X=x)=1-\eta(x)$。例如 $\eta(x)=0.73$ 就预测 1；$\eta(x)=0.41$ 就预测 0。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用：</b>比较 $\Pr(Y=1\mid X=x)$ 和 $\Pr(Y=0\mid X=x)=1-\eta(x)$。例如 $\eta(x)=0.73$ 就预测 1；$\eta(x)=0.41$ 就预测 0。</p>
     </div>
     <div class="callout formula">
       <h4>Bayes error</h4>
       <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$\epsilon_\mu^*$ 是真实分布 $\mu$ 下能达到的最小 true error。$\mathbb{E}_X[\cdot]$ 表示按 $X$ 的 marginal distribution 做平均。$\min\{\eta(X),1-\eta(X)\}$ 选的是 Bayes rule 没有预测的那个 label 的概率。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>它是“平均不可避免错误”。Posterior 接近 0 或 1 时标签很确定，local error 小；接近 0.5 时类别本身模糊，最优 classifier 也容易错。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>如果 $X$ 是离散的，就算 $\sum_x \Pr(X=x)\min\{\eta(x),1-\eta(x)\}$；如果 $X$ 连续，就把求和换成对 $X$ density 的 integral。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>$\epsilon_\mu^*$ 是真实分布 $\mu$ 下能达到的最小 true error。$\mathbb{E}_X[\cdot]$ 表示按 $X$ 的 marginal distribution 做平均。$\min\{\eta(X),1-\eta(X)\}$ 选的是 Bayes rule 没有预测的那个 label 的概率。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>它是“平均不可避免错误”。Posterior 接近 0 或 1 时标签很确定，local error 小；接近 0.5 时类别本身模糊，最优 classifier 也容易错。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用：</b>如果 $X$ 是离散的，就算 $\sum_x \Pr(X=x)\min\{\eta(x),1-\eta(x)\}$；如果 $X$ 连续，就把求和换成对 $X$ density 的 integral。</p>
     </div>
     <div class="callout formula">
       <h4>等价形式</h4>
       <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$|2\eta(X)-1|$ 是离“抛硬币”有多远的 confidence margin。若 $\eta(X)=0.5$，margin 为 0；若 $\eta(X)=0$ 或 $1$，margin 为 1。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>从最糟的二分类不确定性 $\frac12$ 出发，再减去 certainty。Posterior 越确定，绝对值项越大，Bayes error 越低。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>$|2\eta(X)-1|$ 是离“抛硬币”有多远的 confidence margin。若 $\eta(X)=0.5$，margin 为 0；若 $\eta(X)=0$ 或 $1$，margin 为 1。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>从最糟的二分类不确定性 $\frac12$ 出发，再减去 certainty。Posterior 越确定，绝对值项越大，Bayes error 越低。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>题目如果给的是 posterior 的确定程度，或需要做代数化简，用这个形式更顺手。它与 min 形式等价，因为任意 $p\in[0,1]$ 都有 $\min(p,1-p)=\frac12-\frac12|2p-1|$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用：</b>题目如果给的是 posterior 的确定程度，或需要做代数化简，用这个形式更顺手。它与 min 形式等价，因为任意 $p\in[0,1]$ 都有 $\min(p,1-p)=\frac12-\frac12|2p-1|$。</p>
     </div>
     <div class="callout formula">
       <h4>平方损失回归</h4>
       <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b>$f_{\text{Bayes}}(X)$ 是 squared loss 下的最优预测函数；$\mathbb{E}[Y\mid X]$ 是 conditional mean，即给定同一个输入 $X$ 时 $Y$ 的平均值；$\operatorname{Var}(Y\mid X)$ 是知道 $X$ 后仍然剩下的随机波动。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b>Squared loss 下，一个条件分布最好的单点代表是 mean。围绕 mean 剩下的随机噪声无法从 $X$ 学出来，所以它的 conditional variance 成为 Bayes error。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b>先找 conditional mean 作为预测；再计算或读出 conditional variance，对它取平均就是不可消除的 squared-loss error。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>$f_{\text{Bayes}}(X)$ 是 squared loss 下的最优预测函数；$\mathbb{E}[Y\mid X]$ 是 conditional mean，即给定同一个输入 $X$ 时 $Y$ 的平均值；$\operatorname{Var}(Y\mid X)$ 是知道 $X$ 后仍然剩下的随机波动。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>Squared loss 下，一个条件分布最好的单点代表是 mean。围绕 mean 剩下的随机噪声无法从 $X$ 学出来，所以它的 conditional variance 成为 Bayes error。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用：</b>先找 conditional mean 作为预测；再计算或读出 conditional variance，对它取平均就是不可消除的 squared-loss error。</p>
     </div>
   </div>
   <div class="callout">
@@ -251,7 +271,9 @@
     <div>
       <h4>例 3 · 两个 Gaussian class</h4>
       <p class="example-source">出处：HW5, Section 1.2。</p>
-      <p>$X\mid Y=0$ 和 $X\mid Y=1$ 是均值相反、方差相同的 Gaussian。做法是比较 posterior-weighted density，也就是 likelihood × prior。取 log 后会得到一个关于 $x$ 的 threshold；class imbalance 会把 threshold 推向较少见的类别。</p>
+      <p>若 $X\mid Y=0\sim\mathcal{N}(-\mu,\sigma^2)$，$X\mid Y=1\sim\mathcal{N}(\mu,\sigma^2)$，并且 $\lambda=\Pr(Y=1)$，做法是比较 likelihood × prior。取 log posterior odds 后得到线性 threshold：</p>
+      <div class="eq">$$ \tau=-\frac{\sigma^2}{2\mu}\log\!\left(\frac{\lambda}{1-\lambda}\right) $$</div>
+      <p>当 $x\ge\tau$ 时预测 class 1。这里 $\tau$ 是 decision boundary，$\mu$ 是对称均值的大小，$\sigma^2$ 是 shared variance，$\lambda$ 是 class 1 prior。若 $\lambda&gt;0.5$，$\tau$ 会向左移动，所以 classifier 更偏向预测 class 1。</p>
     </div>
   </div>
 
@@ -279,6 +301,7 @@
     <li>会解释 Bayes error 是 irreducible noise。</li>
     <li>会从 log posterior odds 推 Gaussian threshold。</li>
     <li>回归题记住 $f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X]$ 与 $\mathbb{E}\operatorname{Var}(Y\mid X)$。</li>
+    <li>能从概念上区分 Bayes classifier、Naive Bayes 和 KNN。</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -287,6 +310,7 @@
     <li>局部 Bayes error = 较小 posterior probability。</li>
     <li>deterministic label ⇒ Bayes error 0。</li>
     <li>纯随机二分类 label ⇒ Bayes error 0.5。</li>
+    <li>shared-variance Gaussian class-conditionals ⇒ linear threshold。</li>
     <li>Bayes error 是 lower bound，不是算法。</li>
   </ul>
 </section>

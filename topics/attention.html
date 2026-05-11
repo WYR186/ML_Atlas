@@ -50,6 +50,8 @@
     <li><b>Query</b> is what the current token is looking for.</li>
     <li><b>Key</b> is the searchable index attached to each candidate token.</li>
     <li><b>Value</b> is the content returned after the search.</li>
+    <li><b>Self-attention</b> uses queries, keys, and values from the same sequence, so tokens can contextualize each other.</li>
+    <li><b>Cross-attention</b> uses queries from one sequence and keys/values from another, as in encoder-decoder models.</li>
     <li><b>Masked self-attention</b> is the decoder-only version used by LLMs: future positions are blocked so training matches left-to-right generation.</li>
   </ul>
 </section>
@@ -63,8 +65,9 @@
 <section class="topic lesson-section intuition-section" id="attention-intuition-en">
   <h2>3. Core Intuition</h2>
   <p>Attention works because it avoids compressing the entire past into one fixed hidden state. Every layer can build a fresh routing pattern: syntax heads may follow nearby words, semantic heads may follow topic words, and causal heads may only read from the past.</p>
+  <p>Compared with an RNN, attention gives any two tokens a direct communication path inside one layer. That removes the old bottleneck where information had to squeeze through a long chain of hidden states.</p>
   <div class="study-box">
-    <p><b>Why multiple heads?</b> A single head has one attention distribution. Multi-head attention gives the model several distributions in parallel, so one representation can combine different relationships before the next layer processes it.</p>
+    <p><b>Why multiple heads?</b> A single head has one attention distribution. Multi-head attention gives the model several distributions in parallel, often over different representation subspaces, so one head might follow syntax while another follows topic or long-range reference.</p>
   </div>
 </section>
 
@@ -80,7 +83,7 @@
   <h3>Scaled dot-product attention</h3>
   <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> If there are $T$ tokens, $Q,K\in\mathbb{R}^{T\times d_k}$ and $V\in\mathbb{R}^{T\times d_v}$. Entry $(i,j)$ of $QK^\top$ is how much token $i$ attends to token $j$. The $\sqrt{d_k}$ factor prevents high-dimensional dot products from making softmax too peaky.</p>
+    <p><b>Symbols.</b> If there are $T$ tokens, $Q,K\in\mathbb{R}^{T\times d_k}$ and $V\in\mathbb{R}^{T\times d_v}$. Entry $(i,j)$ of $QK^\top$ is how much token $i$ attends to token $j$. The $\sqrt{d_k}$ factor prevents high-dimensional dot products from growing too large, which would make softmax too peaky and shrink useful gradients.</p>
     <p><b>How to read it.</b> This is the same idea in matrix form for many tokens at once. $QK^\top$ produces all query-key scores; row-wise softmax makes each row an attention distribution; multiplying by $V$ averages the value vectors for every token.</p>
     <p><b>How to use.</b> Check matrix shapes first: $(T\times d_k)(d_k\times T)=T\times T$, then $(T\times T)(T\times d_v)=T\times d_v$. For a small example, compute one row at a time.</p>
   </div>
@@ -132,6 +135,7 @@
   <ul class="mini-list">
     <li>Be able to write and explain $\mathrm{softmax}(QK^\top/\sqrt{d_k})V$.</li>
     <li>Be able to compute a small attention output by hand.</li>
+    <li>Distinguish self-attention from cross-attention by where $Q,K,V$ come from.</li>
     <li>Know why causal masking is required for decoder-only language models.</li>
     <li>Know the robustness story behind multi-head attention from HW4 §2.3.</li>
   </ul>
@@ -142,6 +146,7 @@
   <ul class="mini-list">
     <li>Query asks; key matches; value returns content.</li>
     <li>Softmax weights sum to 1.</li>
+    <li>Self-attention uses one sequence; cross-attention connects two sequences.</li>
     <li>Large logit gap means the output is close to one value vector.</li>
     <li>Mask before softmax.</li>
     <li>Multiple heads let the model attend in several ways at once.</li>
@@ -157,6 +162,8 @@
     <li><b>Query</b>：当前 token 想找什么。</li>
     <li><b>Key</b>：每个候选 token 的索引标签，用来和 query 匹配。</li>
     <li><b>Value</b>：真正被读回来的内容。</li>
+    <li><b>Self-attention</b>：$Q,K,V$ 都来自同一个 sequence，让句子内部的 tokens 互相看上下文。</li>
+    <li><b>Cross-attention</b>：query 来自一个 sequence，key/value 来自另一个 sequence，常见于 encoder-decoder。</li>
     <li><b>Masked self-attention</b>：decoder-only LLM 用的版本，未来位置会被挡住，保证训练和从左到右生成一致。</li>
   </ul>
 </section>
@@ -170,8 +177,9 @@
 <section class="topic lesson-section intuition-section" id="attention-intuition-cn">
   <h2>3. 核心直觉 / Core Intuition</h2>
   <p>Attention 有效，是因为它不用把整段历史硬塞进一个固定 hidden state。每一层都能重新决定“我现在该看哪里”：有的 head 看邻近词，有的 head 看主题词，有的 head 只看过去。</p>
+  <p>和 RNN 相比，attention 让任意两个 token 在一层里就能直接通信，不需要信息沿着很长的 hidden-state 链条一点点传过去，所以更少 bottleneck，也更适合并行计算。</p>
   <div class="study-box">
-    <p><b>为什么要 multi-head?</b> 单个 head 只有一种 attention distribution。多头就是让模型同时开几条检索通道，分别学不同关系，然后把结果拼起来给下一层。</p>
+    <p><b>为什么要 multi-head?</b> 单个 head 只有一种 attention distribution。多头就是让模型同时开几条检索通道，通常在不同 representation subspaces 里看关系：一个 head 可以看 syntax，另一个看 topic 或 long-range reference。</p>
   </div>
 </section>
 
@@ -187,7 +195,7 @@
   <h3>Scaled dot-product attention</h3>
   <div class="eq">$$ \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V $$</div>
   <div class="study-box">
-    <p><b>符号.</b> 若序列长度是 $T$，则 $Q,K\in\mathbb{R}^{T\times d_k}$，$V\in\mathbb{R}^{T\times d_v}$。$QK^\top$ 的第 $(i,j)$ 项表示 token $i$ 对 token $j$ 的注意力 logit。$\sqrt{d_k}$ 用来防止高维 dot product 过大，让 softmax 不至于过度饱和。</p>
+    <p><b>符号.</b> 若序列长度是 $T$，则 $Q,K\in\mathbb{R}^{T\times d_k}$，$V\in\mathbb{R}^{T\times d_v}$。$QK^\top$ 的第 $(i,j)$ 项表示 token $i$ 对 token $j$ 的注意力 logit。$\sqrt{d_k}$ 用来防止高维 dot product 过大，否则 softmax 会过度尖锐，很多位置的 gradient 会变小。</p>
     <p><b>怎么理解.</b> 这是把单个 query 公式批量化。$QK^\top$ 一次性算出所有 token 之间的匹配分数；row-wise softmax 把每一行变成 attention distribution；再乘 $V$ 得到每个 token 读回来的内容。</p>
     <p><b>怎么用.</b> 先检查 shape：$(T\times d_k)(d_k\times T)=T\times T$，再乘 $(T\times d_v)$ 得到 $T\times d_v$。小题可以逐行算 softmax。</p>
   </div>
@@ -239,6 +247,7 @@
   <ul class="mini-list">
     <li>会写并解释 $\mathrm{softmax}(QK^\top/\sqrt{d_k})V$。</li>
     <li>会手算一个小 attention 例子。</li>
+    <li>会按 $Q,K,V$ 的来源区分 self-attention 和 cross-attention。</li>
     <li>知道 decoder-only language model 为什么必须 causal mask。</li>
     <li>能讲清 HW4 §2.3 里的 multi-head robustness 直觉。</li>
   </ul>
@@ -249,6 +258,7 @@
   <ul class="mini-list">
     <li>Query 提问，Key 匹配，Value 返回内容。</li>
     <li>softmax 权重总和为 1。</li>
+    <li>Self-attention 看同一个 sequence；cross-attention 连接两个 sequences。</li>
     <li>logit 差距很大时，输出接近某一个 value。</li>
     <li>mask before softmax。</li>
     <li>multi-head = 同时用多种方式看上下文。</li>

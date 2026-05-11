@@ -60,8 +60,9 @@
   <p>That sticky note is $h^{(t)}$. The update rule is the same every time, like the same reading habit applied word after word.</p>
 
   <h3 class="section-orange">3. Core Intuition</h3>
-  <p>The hidden state creates a path for information to flow from earlier inputs to later outputs. Parameter sharing is what makes the model scalable: the recurrence learned from one position can be reused at every other position.</p>
+  <p>The hidden state creates a path for information to flow from earlier inputs to later outputs. Parameter sharing is what makes the model scalable: the recurrence learned from one position can be reused at every other position, and it lets the model handle sequence lengths it never saw during training.</p>
   <p>The downside is also visible from the unrolled graph. A long sequence becomes a very deep computation graph, and the same recurrent Jacobian appears repeatedly in gradients. Repeated multiplication is the source of vanishing and exploding gradients.</p>
+  <p>In encoder-decoder setups (e.g. machine translation), the entire input sequence is squeezed into a single fixed-size hidden state before decoding begins — the <b>information bottleneck</b> that later motivated attention.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
@@ -98,10 +99,12 @@
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <ul>
-    <li>First identify whether the problem is one-to-one, one-to-many, many-to-one, or many-to-many.</li>
+    <li>First identify whether the problem is one-to-one, one-to-many, many-to-one, or many-to-many. Then separately ask whether it is <b>aligned</b> (output length = input length, one $y^{(t)}$ per $x^{(t)}$, e.g. POS tagging) or <b>unaligned</b> (lengths differ, e.g. machine translation — needs an encoder-decoder).</li>
     <li>Draw the unrolled graph before differentiating. Put one copy of the state update at each time step.</li>
     <li>Mark shared parameters with the same symbol at every step; their gradients add across time.</li>
     <li>For BPTT, compute local derivatives, then multiply along paths and sum over every path that reaches the shared parameter.</li>
+    <li><b>Teacher forcing</b> during training: feed the ground-truth $y^{(t)}$ as the input at step $t+1$ instead of the model's own noisy prediction. This keeps the recurrence on the data distribution while the model is still bad at predicting.</li>
+    <li><b>Gradient clipping</b> for exploding gradients: cap $\|\nabla\|$ at some threshold before the optimizer step. A heuristic — it tames explosion but does <i>not</i> fix the vanishing side.</li>
   </ul>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -117,6 +120,8 @@
     <li>Write the generic RNN equations and explain parameter sharing.</li>
     <li>Unroll a short RNN and compute a BPTT derivative by hand.</li>
     <li>Explain why classical RNNs struggle with long-term dependencies.</li>
+    <li>Describe <b>bidirectional RNNs</b>: run one forward pass and one backward pass and concatenate $h^{\rightarrow}_t,\, h^{\leftarrow}_t$ at each step so each output sees both past and future context.</li>
+    <li>Explain why RNNs are <b>not easily parallelizable</b>: $h^{(t)}$ depends on $h^{(t-1)}$, so time steps must run sequentially — Transformers replace the recurrence with self-attention precisely to break this bottleneck.</li>
     <li>Connect RNN weaknesses to the motivation for LSTM/GRU and later self-attention.</li>
   </ul>
 
@@ -148,8 +153,9 @@
       <p>这张便利贴就是 $h^{(t)}$。更新便利贴的方法每一步都一样，这就是 parameter sharing。</p>
 
       <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
-      <p>hidden state 给早期输入到后期输出开了一条信息通道。参数共享让模型能处理任意长度序列：在位置 3 学到的“如何更新记忆”，位置 30 也能用。</p>
+      <p>hidden state 给早期输入到后期输出开了一条信息通道。参数共享让模型能处理任意长度序列：在位置 3 学到的“如何更新记忆”，位置 30 也能用，甚至训练时没见过的长度也能跑。</p>
       <p>麻烦也来自这里。把 RNN 在时间上 unroll 之后，长序列就是很深的计算图；梯度会反复乘相似的 Jacobian，于是容易 vanishing / exploding。</p>
+      <p>在 encoder-decoder 结构里（例如机器翻译），整个输入序列要被压缩成一个固定大小的 hidden state 再开始解码 —— 这就是后来推动 attention 出现的 <b>information bottleneck</b>。</p>
 
       <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
@@ -186,10 +192,12 @@
 
       <h3 class="section-yellow">6. 解题技巧 / Problem-Solving Tips</h3>
       <ul>
-        <li>先判断任务类型：one-to-one、one-to-many、many-to-one、many-to-many。</li>
+        <li>先判断任务类型：one-to-one、one-to-many、many-to-one、many-to-many。再单独问一句：是 <b>aligned</b>（输出长度 = 输入长度，每个 $x^{(t)}$ 对一个 $y^{(t)}$，例如 POS tagging）还是 <b>unaligned</b>（长度不同，例如机器翻译 —— 需要 encoder-decoder）。</li>
         <li>求导前先画 unrolled graph，每个时间步一份状态更新。</li>
         <li>共享参数要用同一个符号标出来；它在多个时间步的梯度要累加。</li>
         <li>做 BPTT 时，先写 local derivative，再沿路径相乘、对路径求和。</li>
+        <li>训练时用 <b>teacher forcing</b>：把 ground truth $y^{(t)}$ 直接当作下一步的输入，而不是用模型自己噪声很大的 prediction。这样在模型还预测不准的早期阶段，循环不会跑偏。</li>
+        <li>梯度炸了用 <b>gradient clipping</b>：在 optimizer step 之前把 $\|\nabla\|$ 限制在阈值之内。这是经验做法，只能压制 exploding，<i>不能</i> 解决 vanishing。</li>
       </ul>
 
       <h3 class="section-red">7. 常见错误 / Common Mistakes</h3>
@@ -205,6 +213,8 @@
         <li>能写 RNN 通用公式，并解释 parameter sharing。</li>
         <li>能 unroll 短 RNN，手算一个 BPTT derivative。</li>
         <li>能解释 long-term dependency 为什么难学。</li>
+        <li>能讲 <b>bidirectional RNN</b>：一条正向、一条反向，每步把 $h^{\rightarrow}_t,\, h^{\leftarrow}_t$ 拼起来，让输出同时看到过去和未来 context。</li>
+        <li>能说清 RNN <b>难并行</b> 的原因：$h^{(t)}$ 依赖 $h^{(t-1)}$，时间步必须串行；Transformer 用 self-attention 取代递归就是为了打破这个瓶颈。</li>
         <li>能把 RNN 的弱点连接到 LSTM/GRU 和 self-attention 的动机。</li>
       </ul>
 

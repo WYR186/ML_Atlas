@@ -1372,12 +1372,20 @@ html[data-theme="dark"] .toc-problem-link:hover {
   font-size: 13px;
   line-height: 1.55;
   padding-bottom: 2px;
-  /* Don't scroll horizontally — MathJax is told to line-break long
-     display equations (chtml.displayOverflow: linebreak); any rare
-     overflow shrinks down rather than spilling off-screen. */
-  overflow-x: clip;
+  /* MathJax is configured with `displayOverflow: linebreak` to wrap
+     long display equations, but some constructions (e.g., joined by
+     \qquad) don't expose a soft break point and slip past the card
+     edge. Fall back to a horizontal scrollbar instead of silently
+     clipping the right side. */
+  overflow-x: auto;
   overflow-wrap: anywhere;
   min-width: 0;
+}
+/* Slim scrollbar matching the page palette. */
+.equation-math::-webkit-scrollbar { height: 6px; }
+.equation-math::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
 }
 /* MathJax containers inside .equation-math: never wider than the card,
    stay block-level so they wrap onto new lines instead of side-by-side. */
@@ -1694,6 +1702,27 @@ mark { background: #fef3c7; padding: 1px 3px; border-radius: 3px; }
   background: transparent;
   font-size: 14px;
   margin-top: 4px;
+}
+
+/* Mermaid subgraph titles (📐 Foundations / 🧮 Classical Supervised / …)
+   default to ~12px which looks lost next to the topic cards. Bump
+   them so the group "chapter" labels read at a glance. Selector
+   covers Mermaid v10's foreignObject-rendered cluster label AND any
+   <text>-based fallback. */
+.mermaid-view svg .cluster-label .nodeLabel,
+.mermaid-view svg .cluster-label foreignObject *,
+.mermaid-view svg .cluster-label foreignObject span,
+.mermaid-view svg .cluster > text {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+/* Root + topic node labels — keep them at a comfortable size too so
+   the visual rhythm against the bigger subgraph titles still works. */
+.mermaid-view svg .label foreignObject *,
+.mermaid-view svg .nodeLabel {
+  font-size: 14.5px;
+  font-weight: 600;
 }
 .mermaid-toolbar {
   display: flex;

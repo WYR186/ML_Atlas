@@ -38,110 +38,372 @@
       <div class="crumbs"><a href="../index.html" data-i18n="crumbs.roadmap">路线图</a> / <span class="cn-only">🧮 经典监督学习</span><span class="en-only">🧮 Classical Supervised</span> / KNN</div>
       <h1>🧮 <span class="en-only">KNN</span><span class="cn-only">K-近邻</span></h1>
       <div class="subtitle"><span class="en-only">Memory-based · Distance</span><span class="cn-only">记忆型分类器 · 距离表</span></div>
-      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
+      <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_1.pdf" target="_blank">📄 Lecture 1</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
-        <a class="ref-chip hw" href="../HW/hw2.pdf" target="_blank">📝 hw2</a></div>
+        <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
 
 <div class="en-only">
 <section class="topic" id="knn-en">
   <h2>🟧 KNN — K-Nearest Neighbors</h2>
+
+  <h3 class="section-blue">1. Concept Understanding</h3>
   <div class="callout">
-    <div class="head">🧠 Intuition</div>
-    <p>"Nearby points carry similar labels." Supervised, non-parametric, can produce highly nonlinear decision boundaries.</p>
-  </div>
-
-  <h3>Prediction rules</h3>
-  <div class="cols2">
-    <div class="callout formula"><div class="head">Classification (majority vote)</div>
-      <div class="eq">$$ \hat{y}(x)=\mathrm{mode}\{y_i:\ x_i \in \mathcal{N}_k(x)\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\hat{y}(x)$: predicted label for query point $x$； $x$: query / test input we want to classify； $k$: number of neighbors to consider (hyperparameter)； $\mathcal{N}_k(x)$: set of the $k$ training points closest to $x$； $y_i$: known label of training point $x_i$； $\mathrm{mode}$: majority vote — the most-frequent label in the set</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> KNN is a 'lazy learner' — there is no training, only a lookup. The prediction asks 'what do my $k$ closest historical neighbors say?' and goes with the majority. The whole method assumes that nearby points share labels, so accuracy depends entirely on whether the distance metric makes sense for your features.</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each test point $x$, compute its distance to every training sample, sort and pick the $k$ smallest; the most-frequent label among those $k$ neighbors is the prediction. Choose $k$ via cross-validation — small $k$ overfits noise, large $k$ over-smooths the boundary.</p>
-    </div>
-    <div class="callout formula"><div class="head">Regression (mean)</div>
-      <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\hat{y}(x)$: predicted real-valued target for $x$； $y_i \in \mathbb{R}$: real-valued target of training point $x_i$； $\mathcal{N}_k(x)$: the $k$ nearest training points to $x$ (same as classification)； $\frac{1}{k}\sum$: sum the $k$ neighbor targets, then divide by $k$ — the average</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Regression KNN is just a local average. The prediction is 'the typical target value seen near $x$.' It works well when the underlying function is roughly continuous and you have enough samples to densely cover the input space.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Same neighbor-finding step as classification, but instead of voting, average the neighbors' target values. A common variant weights each neighbor by $1/d(x, x_i)$ so closer neighbors influence the prediction more.</p>
-    </div>
-    <div class="callout formula" style="grid-column:1/3;"><div class="head">Euclidean distance</div>
-      <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d} (x_j-x_{ij})^2} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x \in \mathbb{R}^d$: query point with $d$ feature components $x_1, \dots, x_d$； $x_i \in \mathbb{R}^d$: the $i$-th training point with components $x_{i1}, \dots, x_{id}$； $j$: feature index — the sum runs over all $d$ features； $\|\cdot\|_2$: L2 (Euclidean) norm</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Geometric 'ruler distance' — the straight-line length between two points in $d$-dimensional space. The squared per-coordinate gap means large per-feature differences hurt much more than small ones, which is why feature scale matters so much.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute the squared difference per feature, sum across features, take the square root. Standardize features first (subtract mean, divide by std) — otherwise a feature on a larger numerical scale (e.g. salary in dollars vs age in years) dominates the distance. Common alternatives: Manhattan ($L_1$), cosine, Mahalanobis.</p>
-    </div>
-  </div>
-
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfall 1 · Feature scaling</div>
-    <p>KNN is distance-based, so a feature with a large numerical range dominates. Standardize (zero mean, unit variance) or normalize to [0, 1] before training.</p>
-  </div>
-  <div class="callout warn">
-    <div class="head">⚠️ Pitfall 2 · Curse of dimensionality</div>
-    <p>In high dimensions the volume grows exponentially with d, so a fixed number of "neighbors" must come from a much larger radius. Distance concentration: the nearest and farthest points get arbitrarily close in relative distance.</p>
-  </div>
-
-  <div class="callout exam">
-    <div class="head">✅ Exam focus</div>
+    <div class="head">Formal definition and the problem it solves</div>
+    <p>KNN is a <b>memory-based</b>, supervised, non-parametric learning algorithm. There is no parameter fitting at training time — the algorithm just stores the entire training set. At prediction time it looks up the $k$ training points closest to the query and aggregates their labels.</p>
+    <p>Two prediction rules, depending on the task:</p>
     <ul>
-      <li>Numerical KNN: list distances, sort, take top-k, vote — handle ties per the problem's rule.</li>
-      <li>Concept: explain why KNN degrades in high dimensions.</li>
+      <li><b>Classification.</b> 1-NN assigns the test point $x$ the label of its single closest training sample (the induced decision boundary is the <b>Voronoi tessellation</b>). $k$-NN takes a <b>majority vote</b> over the $k$ nearest neighbors. As a probability statement: $p(y=c\mid x, \mathcal{D})=\tfrac{1}{k}\sum_{n\in \mathcal{N}_k(x)} \mathbb{I}(y_n=c)$.</li>
+      <li><b>Regression.</b> Predict the <b>mean</b> of the $k$ nearest neighbors' target values. A weighted variant uses $1/d(x,x_i)$ so that closer neighbors count more.</li>
     </ul>
+    <p>It solves "give me a fast, transparent baseline that needs no model assumptions." Because all the work happens at query time, KNN is also called a <b>lazy learner</b>.</p>
+  </div>
+
+  <h3 class="section-orange">2. Plain-English Explanation</h3>
+  <div class="callout intuition">
+    <div class="head">Without formulas first</div>
+    <p>Imagine you've moved to a new neighborhood and want to guess whether your house has good Wi-Fi. The simplest possible strategy: ask your $k$ closest neighbors, and go with whatever most of them say. That's literally KNN classification.</p>
+    <p>For regression, replace "vote" with "average" — instead of asking "good or bad?", ask "what speed do you get?" and report the mean of their answers.</p>
+    <p>The catch is that "closest" depends entirely on which ruler you use. If you measure distance in feet, the neighbor across the street wins; if you measure it in number of intervening trees, a different neighbor wins. So picking the right distance metric — and putting all the features on a comparable scale — is the whole game.</p>
+  </div>
+
+  <h3 class="section-orange">3. Core Intuition</h3>
+  <div class="callout intuition">
+    <div class="head">Why the method actually works</div>
+    <p><b>Nearby points carry similar labels.</b> If the underlying function $y=f(x)$ is reasonably smooth and the training set is dense, a query point's neighbors will share its label / target almost everywhere. KNN bets on exactly that smoothness.</p>
+    <p><b>Lazy learning has no bias.</b> Because there's no model class to fit into, KNN can carve out arbitrarily complex decision regions — there is no "linear assumption" to violate. The Voronoi diagram of 1-NN is a piecewise-linear partition built directly from the data.</p>
+    <p><b>It pays the price at inference.</b> Predict-time cost is $O(nd)$ per query (compute distance to every training point), and you must keep the entire training set in memory. Training cost is technically zero, but search structures like <b>kd-tree</b> or <b>locality-sensitive hashing (LSH)</b> are needed to make it tractable on large datasets.</p>
+    <p><b>Bayes-error connection.</b> As $n\to\infty$, the asymptotic error of 1-NN is at most <b>twice</b> the Bayes error (the optimal classifier's error). That's a striking guarantee for an algorithm that does no training.</p>
+    <p><b>$k$ controls the bias / variance trade-off.</b> $k=1$ has zero training error and a jagged boundary (high variance, overfits noise); large $k$ smooths the boundary (high bias, may underfit). Pick $k$ by cross-validation.</p>
+  </div>
+
+  <h3 class="section-purple">4. Key Equations</h3>
+  <div class="cols2">
+    <div class="callout formula" id="eq-knn-classification">
+      <div class="head">Classification (majority vote)</div>
+      <div class="eq">$$ \hat{y}(x)=\arg\max_{c}\;\frac{1}{k}\sum_{n\in \mathcal{N}_k(x,\mathcal{D})} \mathbb{I}(y_n=c) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\hat{y}(x)$: predicted label for query point $x$. $\mathcal{N}_k(x,\mathcal{D})$: indices of the $k$ training points closest to $x$. $\mathbb{I}(\cdot)$: indicator (1 if the statement is true, 0 otherwise). $c$: a class label. The fraction is the empirical class probability inside the neighborhood.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> "What fraction of my $k$ neighbors are class $c$?" — pick the class with the highest fraction. Ties on $\arg\max$ are broken by problem-specific rules (random pick, smaller class, smaller distance sum).</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute distances to all training points, sort, take the top-$k$, count labels, return the most frequent. For 1-NN this collapses to "return the label of the single nearest neighbor." Choose $k$ by cross-validation.</p>
+    </div>
+
+    <div class="callout formula" id="eq-knn-regression">
+      <div class="head">Regression (mean)</div>
+      <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i \qquad\text{or}\qquad \hat y(x)=\frac{\sum_i w_i y_i}{\sum_i w_i},\ \ w_i=\frac{1}{d(x,x_i)} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_i\in\mathbb{R}$: real-valued target of training point $x_i$; $w_i$: optional inverse-distance weight (closer neighbors weighted more). The unweighted form is the plain arithmetic mean.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> "Predict the average target value seen near $x$." Local averaging — works whenever the target is roughly smooth in feature space.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Same neighbor lookup as classification; replace voting with averaging. $k=1$ regression is rarely a good idea — it just echoes the nearest training point's noisy target.</p>
+    </div>
+
+    <div class="callout formula" id="eq-knn-euclidean" style="grid-column:1/3;">
+      <div class="head">Euclidean ($L_2$) distance</div>
+      <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d}(x_j-x_{ij})^2} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x\in\mathbb{R}^d$: query point; $x_i\in\mathbb{R}^d$: the $i$-th training point; $j$: feature index, summed across all $d$ features; $\|\cdot\|_2$: Euclidean / $L_2$ norm.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Straight-line ruler distance in $d$-dimensional feature space. The squaring inside the sum amplifies large per-feature gaps, which is exactly why feature scale dominates everything.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Square per-coordinate differences, sum, take the square root. <b>Always standardize features first</b> (zero mean, unit variance), or a high-magnitude feature like "salary in dollars" will swamp a low-magnitude one like "age in years." Common alternatives when $L_2$ doesn't fit your geometry: Manhattan ($L_1$), cosine, Mahalanobis.</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. Worked Examples</h3>
+
+  <div class="callout example">
+    <div class="head">Example 1 · HW1 §1.1 — 3D KNN by hand</div>
+    <p>Dataset $\mathcal{D}=\{(x^{(i)}, y^{(i)})\}_{i=1}^{7}$ in $\mathbb{R}^3$. Query $q=(3,2,4)$. Compute Euclidean distances and predict the label for $k=1$ and $k=3$ (break ties arbitrarily).</p>
+    <p>Three of the seven points (the rest follow the same pattern):</p>
+    <ul>
+      <li>$x^{(4)}=(4,3,2),\ y^{(4)}=1$</li>
+      <li>$x^{(5)}=(3,2,2),\ y^{(5)}=2$</li>
+      <li>$x^{(7)}=(2,0,2),\ y^{(7)}=1$</li>
+    </ul>
+    <p><b>Step 1 — Euclidean distances.</b></p>
+    <div class="eq">$$ \|q-x^{(4)}\|_2=\sqrt{(3-4)^2+(2-3)^2+(4-2)^2}=\sqrt{1+1+4}=\sqrt{6}\approx 2.45 $$</div>
+    <div class="eq">$$ \|q-x^{(5)}\|_2=\sqrt{0+0+4}=2 $$</div>
+    <div class="eq">$$ \|q-x^{(7)}\|_2=\sqrt{1+4+4}=3 $$</div>
+    <p><b>Step 2 — sort & pick neighbors.</b> The single nearest is $x^{(5)}$ (distance $2$). The three nearest are $\{x^{(5)}, x^{(4)}, x^{(7)}\}$ with labels $\{2,1,1\}$.</p>
+    <p><b>Step 3 — predict.</b></p>
+    <ul>
+      <li>$k=1$: return $y^{(5)}=\mathbf{2}$.</li>
+      <li>$k=3$: majority of $\{2,1,1\}$ is $\mathbf{1}$.</li>
+    </ul>
+    <p>The whole exam template is exactly these three steps — distances, sort, vote.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 2 · Curse of dimensionality (HW1 §1.2 setup)</div>
+    <p>Let $X_1,\dots,X_n,q\stackrel{\text{iid}}{\sim}\mathrm{Unif}([0,1]^d)$. Per coordinate, $\mathbb{E}(X_{ij}-q_j)^2=\tfrac16$, so $\mathbb{E}\|X_i-q\|^2=d/6$. Variance is $O(d)$, so by Chebyshev the relative spread $\sqrt{\mathrm{Var}}/\mathbb{E}\to 0$ as $d\to\infty$. All neighbor distances concentrate around the same value — and the ratio $R_{(1)}/R_{(n)}$ of nearest to farthest neighbor distance approaches $1$. "Nearest" stops carrying information.</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">Example 3 · Classification vs regression rule comparison</div>
+    <p>Same $k=3$ neighborhood with neighbor outputs $\{2, 1, 1\}$.</p>
+    <ul>
+      <li><b>Classification</b> (treating $\{1,2\}$ as discrete labels): mode is $1$ → predict $\hat y=1$.</li>
+      <li><b>Regression</b> (treating them as real-valued targets): mean is $(2+1+1)/3=4/3$ → predict $\hat y\approx 1.33$.</li>
+      <li><b>Inverse-distance weighted regression</b> with weights $w=(1/2, 1/\sqrt6, 1/3)$: $\hat y=\sum w_iy_i/\sum w_i\approx 1.32$.</li>
+    </ul>
+    <p>Same $k$, same neighbors — the prediction rule changes everything.</p>
+  </div>
+
+  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <div class="callout tips">
+    <div class="head">How to attack a KNN question</div>
+    <ol>
+      <li><b>Build the distance table first.</b> One row per training point, one column per feature, plus a final $\|\cdot\|_2$ column. Sort it once and read off the top-$k$.</li>
+      <li><b>Know your label convention.</b> Discrete labels → vote. Real-valued targets → average.</li>
+      <li><b>Always standardize before computing distances</b> (subtract the per-feature mean, divide by std). If the problem doesn't say to, mention you would normally do it.</li>
+      <li><b>Tie handling.</b> Even-$k$ binary classification and equal-distance ties happen; obey whatever rule the problem gives ("break arbitrarily," "smaller index wins," etc.).</li>
+      <li><b>Pick $k$ by cross-validation</b>; in conceptual questions explain the bias-variance trade-off ($k\!\uparrow$: smoother + higher bias; $k\!\downarrow$: jagged + higher variance).</li>
+      <li><b>For high-dim arguments,</b> invoke distance concentration (Example 2) and conclude "nearest-neighbor relations become unreliable."</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. Common Mistakes</h3>
+  <div class="callout danger">
+    <div class="head">Easy ways to lose points</div>
+    <ul>
+      <li>Forgetting to standardize features → a single high-magnitude feature dominates every distance.</li>
+      <li>Using the squared distance $\|x-x_i\|_2^2$ when the question asks for $\|x-x_i\|_2$ — the ranking is the same, but reported distances differ.</li>
+      <li>Calling KNN "linear" or "parametric." It is non-linear and non-parametric; complexity grows with $n$.</li>
+      <li>Confusing KNN with k-means. KNN is supervised and remembers labeled training points; k-means is unsupervised and learns $K$ centroids.</li>
+      <li>Reporting "no training cost" as if KNN were free — the prediction cost is $O(nd)$ per query and you must store all of $\mathcal{D}$.</li>
+      <li>Assuming small $k$ is always better. $k=1$ memorizes noise; very small $k$ has high variance.</li>
+      <li>Believing KNN works fine in high dimensions — it doesn't, because of distance concentration.</li>
+      <li>Treating KNN regression with $k=1$ as a serious choice — the prediction inherits whatever noise was on the single nearest target.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. Exam Focus</h3>
+  <div class="callout exam-yellow">
+    <div class="head">What you must walk in able to do</div>
+    <ul>
+      <li>Numerical KNN by hand: build the distance table, sort, take the top $k$, vote (or average).</li>
+      <li>State the three properties: <b>supervised</b>, <b>non-parametric</b>, <b>non-linear</b> decision boundary.</li>
+      <li>Name the two scaling failure modes: <b>feature-scale dominance</b> (fix with standardization) and <b>curse of dimensionality / distance concentration</b> (no fix — switch methods or reduce dimension).</li>
+      <li>Cite the asymptotic guarantee: 1-NN error $\le 2\times$ Bayes error as $n\to\infty$.</li>
+      <li>Explain how $k$ controls bias / variance and the role of the Voronoi tessellation at $k=1$.</li>
+      <li>Be ready to compare classification vs regression: discrete vote vs continuous average; same neighbor lookup, different aggregation.</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <div class="checklist yellow">
+    <h3>Last-minute recall</h3>
+    <ul>
+      <li>Lazy learner: zero training cost, $O(nd)$ per query, store all of $\mathcal{D}$.</li>
+      <li>Classification: $\arg\max_c \tfrac{1}{k}\sum_{n\in\mathcal{N}_k}\mathbb{I}(y_n=c)$. Regression: $\tfrac{1}{k}\sum y_i$ (or inverse-distance weighted).</li>
+      <li>Distance: $\|x-x_i\|_2=\sqrt{\sum_j (x_j-x_{ij})^2}$. Standardize features first.</li>
+      <li>$k=1$ ⇒ zero training error, jagged Voronoi boundary, high variance.</li>
+      <li>$k\uparrow$ ⇒ smoother boundary, higher bias.</li>
+      <li>1-NN asymptotic error $\le 2\,\epsilon^*_{\text{Bayes}}$.</li>
+      <li>Curse of dimensionality: nearest / farthest distance ratio $\to 1$ as $d\to\infty$.</li>
+      <li>Speedups: kd-tree (low-d), LSH (high-d).</li>
+    </ul>
+  </div>
+
+  <h3 class="section-blue">Bonus · Classification vs Regression at a glance</h3>
+  <div class="callout">
+    <div class="head">Side-by-side comparison</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:8px 6px;">Aspect</th>
+          <th style="text-align:left;padding:8px 6px;">KNN Classification</th>
+          <th style="text-align:left;padding:8px 6px;">KNN Regression</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Output type</b></td><td style="padding:8px 6px;">Discrete label</td><td style="padding:8px 6px;">Continuous value</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Aggregation</b></td><td style="padding:8px 6px;">Majority vote over $k$ neighbors</td><td style="padding:8px 6px;">Mean (or inverse-distance weighted) over $k$ neighbors</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$k=1$ behavior</b></td><td style="padding:8px 6px;">Zero training error; Voronoi-tessellation boundary</td><td style="padding:8px 6px;">Echoes one noisy target; rarely a good choice</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Distance metric</b></td><td style="padding:8px 6px;">Usually $L_2$ (after standardization)</td><td style="padding:8px 6px;">Usually $L_2$ (after standardization)</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Decision surface</b></td><td style="padding:8px 6px;">Piecewise nonlinear (Voronoi-like)</td><td style="padding:8px 6px;">Locally constant (step function)</td></tr>
+        <tr><td style="padding:8px 6px;"><b>Complexity vs $k$</b></td><td style="padding:8px 6px;">Higher when $k$ is small (model more flexible)</td><td style="padding:8px 6px;">Higher when $k$ is small (model more flexible)</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="knn">
-      <h2><span class="icon">🟧</span> KNN · K-Nearest Neighbors</h2>
-      <div class="callout">
-        <div class="head">🧠 直觉 / Intuition</div>
-        <p>“相似样本应有相似标签” — Similar points have similar labels.</p>
-        <p style="font-size:13px;color:var(--text-soft);margin:0;">监督 / Supervised · 非参数 / Non-parametric · 可产生非线性边界。</p>
-      </div>
+  <h2>🟧 KNN · K-近邻算法</h2>
 
-      <h3>预测规则 / Prediction rule</h3>
-      <div class="cols2">
-        <div class="callout formula"><div class="head">分类 · Majority Vote</div>
-          <div class="eq">$$ \hat{y}(x)=\mathrm{mode}\{y_i:\ x_i \in \mathcal{N}_k(x)\} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\hat{y}(x)$: 对查询点 $x$ 的预测标签；$x$: 待分类的查询样本；$k$: 考虑的最近邻个数（超参数）；$\mathcal{N}_k(x)$: 训练集中距 $x$ 最近的 $k$ 个样本；$y_i$: 训练点 $x_i$ 的已知标签；$\mathrm{mode}$: 众数 —— 集合中出现最多的标签</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> KNN 是 lazy learner —— 没有训练，只是查表。预测就是问 "离我最近的 $k$ 个历史样本是什么类别？" 然后投票决定。它假设 "近邻点应该有相似标签"，所以效果完全取决于距离度量是否对你的特征有意义。</p>
+  <h3 class="section-blue">1. 概念理解</h3>
+  <div class="callout">
+    <div class="head">正式定义与它解决的问题</div>
+    <p>KNN 是一种 <b>memory-based</b> 的 supervised、non-parametric 学习算法。训练时不拟合任何参数 —— 算法只是把整个训练集存下来；预测时查找离 query 最近的 $k$ 个训练样本，并对它们的标签做聚合。</p>
+    <p>两种预测规则，按任务区分：</p>
+    <ul>
+      <li><b>分类 / Classification.</b> 1-NN 把测试点 $x$ 直接赋成最近邻的标签（诱导出的 decision boundary 称为 <b>Voronoi tessellation</b>）。$k$-NN 在前 $k$ 个最近邻里 <b>majority vote</b>。写成概率形式：$p(y=c\mid x, \mathcal{D})=\tfrac{1}{k}\sum_{n\in\mathcal{N}_k(x)} \mathbb{I}(y_n=c)$。</li>
+      <li><b>回归 / Regression.</b> 预测最近 $k$ 个邻居的目标值的 <b>mean</b>。加权变体用 $1/d(x,x_i)$，让更近的邻居权重更大。</li>
+    </ul>
+    <p>它解决的问题是 "给我一个无需模型假设、解释力强的快速 baseline"。因为所有计算都发生在 query 时，KNN 又称为 <b>lazy learner</b>。</p>
+  </div>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个测试点 $x$，计算它到所有训练样本的距离，排序取最小的 $k$ 个；这 $k$ 个邻居中出现最多的标签就是预测结果。$k$ 用 cross-validation 选 —— $k$ 太小会过拟合噪声，$k$ 太大会把决策边界过度平滑。</p>
-        </div>
-        <div class="callout formula"><div class="head">回归 · Average</div>
-          <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\hat{y}(x)$: 对 $x$ 的实数预测值；$y_i \in \mathbb{R}$: 训练点 $x_i$ 的实数目标值；$\mathcal{N}_k(x)$: $x$ 的 $k$ 个最近训练点（与分类相同）；$\frac{1}{k}\sum$: 对 $k$ 个邻居的目标值求和后除以 $k$ —— 即平均</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 回归型 KNN 就是局部平均：预测值是 "$x$ 附近样本目标值的代表"。当真实函数大致连续、训练样本能稠密覆盖输入空间时效果好。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 找邻居的步骤与分类一致；但不再投票，而是把 $k$ 个邻居的目标值取平均。常见变体是用 $1/d(x, x_i)$ 加权，让更近的邻居权重更大。</p>
-        </div>
-        <div class="callout formula" style="grid-column:1/3;"><div class="head">Euclidean Distance</div>
-          <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d}(x_j-x_{ij})^2} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x \in \mathbb{R}^d$: $d$ 维查询点，分量为 $x_1, \dots, x_d$；$x_i \in \mathbb{R}^d$: 第 $i$ 个训练点，分量为 $x_{i1}, \dots, x_{id}$；$j$: 特征下标 —— 对全部 $d$ 个特征求和；$\|\cdot\|_2$: L2 范数（欧氏范数）</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 几何上的 "直尺距离" —— $d$ 维空间中两点的直线长度。每个维度差的平方把大差异放大、小差异变小，所以特征尺度对它影响很大。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每个特征算差的平方，对所有特征求和后开方。先做特征标准化（减均值、除标准差） —— 否则数值范围大的特征（如以美元计的工资 vs. 以年计的年龄）会主导距离。常见替代：Manhattan ($L_1$)、cosine、Mahalanobis。</p>
-        </div>
-      </div>
+  <h3 class="section-orange">2. 大白话理解</h3>
+  <div class="callout intuition">
+    <div class="head">不看公式先懂大概</div>
+    <p>想象你刚搬到一个新小区，想猜自家房子的 Wi-Fi 好不好。最朴素的策略：问 $k$ 个最近的邻居，按多数人的回答下结论 —— 这就是 KNN classification 的字面写照。</p>
+    <p>回归就把 "投票" 换成 "平均" —— 不再问 "好 / 坏"，而是问 "你测速多少 Mbps"，把他们的回答平均一下作为自己的预测。</p>
+    <p>关键点：所谓 "最近" 完全取决于你用什么尺子。用 "英尺" 量是马路对面那家，用 "中间隔了多少棵树" 量又会换人。所以选对距离度量、把所有 feature 放到可比的 scale —— 才是 KNN 的全部诀窍。</p>
+  </div>
 
-      <div class="callout warn">
-        <div class="head">⚠️ 高频考点 1 · Feature Scaling</div>
-        <p>KNN 基于距离，数值范围更大的特征会“主导”距离 → 必须标准化（均值 0 方差 1）或归一化（0–1）。</p>
-      </div>
-      <div class="callout warn">
-        <div class="head">⚠️ 高频考点 2 · Curse of Dimensionality</div>
-        <p>维度升高时空间体积指数增长，要找到足够邻居就要扩到很大半径，邻居不再“局部”。常考表述：<b>高维下最近点与最远点距离差别变小（distance concentration），最近邻概念变弱</b>。</p>
-      </div>
+  <h3 class="section-orange">3. 核心直觉</h3>
+  <div class="callout intuition">
+    <div class="head">这个方法为何有效</div>
+    <p><b>近邻点带相似标签.</b> 如果真函数 $y=f(x)$ 足够光滑、训练集足够稠密，那么 query 的邻居在绝大多数地方会与它共享标签 / 目标值。KNN 押注的就是这条 smoothness 假设。</p>
+    <p><b>Lazy learning 没有 model bias.</b> 不存在要被违反的 "linear assumption"，KNN 可以切出任意复杂的 decision region。1-NN 的 Voronoi 图就是直接由数据切出来的 piecewise-linear 划分。</p>
+    <p><b>代价在 inference.</b> 每个 query 要 $O(nd)$（对每个训练点都算距离），且必须把整个训练集留在内存。"训练时间为 0" 是事实，但要在大数据集上跑通，得用 <b>kd-tree</b>（低维）或 <b>locality-sensitive hashing (LSH)</b>（高维）来加速搜索。</p>
+    <p><b>Bayes-error 关联.</b> $n\to\infty$ 时 1-NN 的 asymptotic error 不超过 <b>Bayes error 的两倍</b>。一个完全不训练的算法能给出这种保证，已经相当惊艳。</p>
+    <p><b>$k$ 控制 bias / variance trade-off.</b> $k=1$ 训练 error 为 0，边界很碎、variance 高（容易拟合 noise）；$k$ 大边界平滑、bias 高（可能 underfit）。$k$ 用 cross-validation 选。</p>
+  </div>
 
-      <div class="callout exam">
-        <div class="head">✅ Exam focus / 解题技巧</div>
-        <ul>
-          <li>计算题：先列距离表，排序选前 $k$ 个；遇平票按题目规则。</li>
-          <li>概念题：高维 KNN 失效的统计直觉（distance concentration）。</li>
-        </ul>
-      </div>
-    </section>
+  <h3 class="section-purple">4. 关键公式</h3>
+  <div class="cols2">
+    <div class="callout formula" id="eq-knn-classification-cn">
+      <div class="head">Classification（多数投票）</div>
+      <div class="eq">$$ \hat{y}(x)=\arg\max_{c}\;\frac{1}{k}\sum_{n\in \mathcal{N}_k(x,\mathcal{D})} \mathbb{I}(y_n=c) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\hat{y}(x)$：对 query 点 $x$ 的预测标签；$\mathcal{N}_k(x,\mathcal{D})$：训练集中距 $x$ 最近的 $k$ 个点的下标；$\mathbb{I}(\cdot)$：indicator，命题为真取 1 否则取 0；$c$：某个类别；分式即 "邻域里类别 $c$ 的经验概率"。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "我的 $k$ 个邻居里，类别 $c$ 占多大比例？" —— 选比例最大的那个类别。$\arg\max$ 出现 tie 时按题目规则（随机选 / 选下标小的 / 距离和小的）打破。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 算到所有训练点的距离 → 排序 → 取前 $k$ 个 → 数标签 → 取众数。1-NN 退化成 "返回最近邻的标签"。$k$ 用 cross-validation 选。</p>
+    </div>
+
+    <div class="callout formula" id="eq-knn-regression-cn">
+      <div class="head">Regression（求平均）</div>
+      <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i \qquad\text{或}\qquad \hat y(x)=\frac{\sum_i w_i y_i}{\sum_i w_i},\ \ w_i=\frac{1}{d(x,x_i)} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_i\in\mathbb{R}$：训练点 $x_i$ 的实数目标；$w_i$：可选 inverse-distance weight（越近权重越大）。无权重形式就是普通 arithmetic mean。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "预测 $x$ 附近样本目标的平均值"。Local averaging —— 真实函数在 feature space 中近似平滑时效果好。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 找邻居的步骤与 classification 完全一致，把 vote 换成 average 即可。$k=1$ regression 通常不可取 —— 它直接把最近邻那一个点的 noisy target 抄过来。</p>
+    </div>
+
+    <div class="callout formula" id="eq-knn-euclidean-cn" style="grid-column:1/3;">
+      <div class="head">Euclidean ($L_2$) 距离</div>
+      <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d}(x_j-x_{ij})^2} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x\in\mathbb{R}^d$：query 点；$x_i\in\mathbb{R}^d$：第 $i$ 个训练点；$j$：feature 下标，对所有 $d$ 个 feature 求和；$\|\cdot\|_2$：Euclidean / $L_2$ norm。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $d$ 维 feature space 里的 "直尺距离"。逐 coordinate 做平方会把大差异放大、小差异压缩，所以 feature scale 对它影响极大。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 逐分量算差的平方 → 求和 → 开方。<b>先把 feature 标准化</b>（mean=0, var=1），否则一个量级大的 feature（如 "工资按美元计算" vs. "年龄按年计算"）会把距离吞掉。常见替代：Manhattan ($L_1$)、cosine、Mahalanobis。</p>
+    </div>
+  </div>
+
+  <h3 class="section-gray">5. 例题精解</h3>
+
+  <div class="callout example">
+    <div class="head">例 1 · HW1 §1.1 —— 三维 KNN 手算</div>
+    <p>数据集 $\mathcal{D}=\{(x^{(i)}, y^{(i)})\}_{i=1}^{7}$ 在 $\mathbb{R}^3$。query $q=(3,2,4)$。算 Euclidean 距离，给出 $k=1$ 与 $k=3$ 的预测（tie 任意打破）。</p>
+    <p>七个点中的三个（其余同理）：</p>
+    <ul>
+      <li>$x^{(4)}=(4,3,2),\ y^{(4)}=1$</li>
+      <li>$x^{(5)}=(3,2,2),\ y^{(5)}=2$</li>
+      <li>$x^{(7)}=(2,0,2),\ y^{(7)}=1$</li>
+    </ul>
+    <p><b>Step 1 —— 算 Euclidean 距离.</b></p>
+    <div class="eq">$$ \|q-x^{(4)}\|_2=\sqrt{(3-4)^2+(2-3)^2+(4-2)^2}=\sqrt{1+1+4}=\sqrt{6}\approx 2.45 $$</div>
+    <div class="eq">$$ \|q-x^{(5)}\|_2=\sqrt{0+0+4}=2 $$</div>
+    <div class="eq">$$ \|q-x^{(7)}\|_2=\sqrt{1+4+4}=3 $$</div>
+    <p><b>Step 2 —— 排序选邻居.</b> 最近邻是 $x^{(5)}$（距离 $2$）。前三近邻是 $\{x^{(5)}, x^{(4)}, x^{(7)}\}$，标签为 $\{2,1,1\}$。</p>
+    <p><b>Step 3 —— 给出预测.</b></p>
+    <ul>
+      <li>$k=1$：返回 $y^{(5)}=\mathbf{2}$。</li>
+      <li>$k=3$：$\{2,1,1\}$ 的多数 = $\mathbf{1}$。</li>
+    </ul>
+    <p>整个考试模板就是这三步 —— 算距离、排序、投票。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 2 · 维度灾难（HW1 §1.2 设置）</div>
+    <p>设 $X_1,\dots,X_n,q\stackrel{\text{iid}}{\sim}\mathrm{Unif}([0,1]^d)$。逐 coordinate $\mathbb{E}(X_{ij}-q_j)^2=\tfrac16$，所以 $\mathbb{E}\|X_i-q\|^2=d/6$。Variance 为 $O(d)$，由 Chebyshev 得相对 spread $\sqrt{\mathrm{Var}}/\mathbb{E}\to 0$（$d\to\infty$）。所有邻居距离都集中到同一个值 —— 而最近 / 最远邻居距离的比 $R_{(1)}/R_{(n)}$ 趋于 $1$。"最近" 这个概念彻底失效。</p>
+  </div>
+
+  <div class="callout example">
+    <div class="head">例 3 · Classification vs Regression 规则对比</div>
+    <p>同一个 $k=3$ 邻域，邻居输出 $\{2, 1, 1\}$。</p>
+    <ul>
+      <li><b>Classification</b>（把 $\{1,2\}$ 当离散标签）：mode 为 $1$ → $\hat y=1$。</li>
+      <li><b>Regression</b>（把它们当实数目标）：mean 为 $(2+1+1)/3=4/3$ → $\hat y\approx 1.33$。</li>
+      <li><b>Inverse-distance weighted regression</b>，权重 $w=(1/2, 1/\sqrt6, 1/3)$：$\hat y=\sum w_iy_i/\sum w_i\approx 1.32$。</li>
+    </ul>
+    <p>同样的 $k$、同样的邻居 —— 切换 prediction rule，结果完全不同。</p>
+  </div>
+
+  <h3 class="section-yellow">6. 题型与解题步骤</h3>
+  <div class="callout tips">
+    <div class="head">看到题怎么下手</div>
+    <ol>
+      <li><b>先列距离表.</b> 一行一个训练点，一列一个 feature，最后一列填 $\|\cdot\|_2$。排序一次，前 $k$ 个直接读出来。</li>
+      <li><b>分清 label 类型.</b> 离散标签 → 投票；实数目标 → 取平均。</li>
+      <li><b>距离前永远先标准化</b>（每个 feature 减 mean、除 std）。即便题目没要求，也要在答题时点一句 "正常会先做 standardization"。</li>
+      <li><b>Tie handling.</b> 偶数 $k$ 二分类、距离相等都会出 tie；按题目规则（"任意" / "下标小者优先" / "距离和小者优先"）即可。</li>
+      <li><b>$k$ 用 cross-validation 选</b>；概念题里要会讲 bias / variance trade-off（$k\!\uparrow$：更平滑、bias 高；$k\!\downarrow$：更碎、variance 高）。</li>
+      <li><b>高维论证</b> 要用 distance concentration（例 2），结论是 "nearest-neighbor 关系不再可靠"。</li>
+    </ol>
+  </div>
+
+  <h3 class="section-red">7. 常见错误</h3>
+  <div class="callout danger">
+    <div class="head">容易丢分的地方</div>
+    <ul>
+      <li>忘记标准化 → 单个量级大的 feature 主导整个距离。</li>
+      <li>题目要 $\|x-x_i\|_2$ 时却写成 squared distance $\|x-x_i\|_2^2$ —— 排序结果一样，但报告的距离值不对。</li>
+      <li>把 KNN 称为 "linear" 或 "parametric"。它是 non-linear 且 non-parametric，复杂度随 $n$ 增长。</li>
+      <li>把 KNN 和 k-means 混淆。KNN 是 supervised，保存 labeled training points；k-means 是 unsupervised，学习 $K$ 个 centroids。</li>
+      <li>把 "训练成本 = 0" 当作 KNN 没代价 —— prediction 阶段每个 query $O(nd)$，且必须保留全部 $\mathcal{D}$ 在内存。</li>
+      <li>"$k$ 越小越好" 是错的 —— $k=1$ 把噪声也背下来；$k$ 太小 variance 高。</li>
+      <li>认为 KNN 在高维一样能用 —— distance concentration 让它失效。</li>
+      <li>把 KNN regression 的 $k=1$ 当作正经选项 —— 它会把最近邻一个点的 noise 直接搬过来。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">8. 考试重点</h3>
+  <div class="callout exam-yellow">
+    <div class="head">必须会的内容</div>
+    <ul>
+      <li>手算 KNN：列距离表、排序、取前 $k$、投票（或求平均）。</li>
+      <li>说出三条性质：<b>supervised</b>、<b>non-parametric</b>、<b>non-linear</b> decision boundary。</li>
+      <li>说出两种 scaling 失败模式：<b>feature-scale dominance</b>（用 standardization 解决）与 <b>curse of dimensionality / distance concentration</b>（无解 —— 换方法或先降维）。</li>
+      <li>引用 asymptotic 保证：$n\to\infty$ 时 1-NN error $\le 2\times$ Bayes error。</li>
+      <li>解释 $k$ 如何控制 bias / variance；$k=1$ 时 Voronoi tessellation 的角色。</li>
+      <li>能比较 classification vs regression：离散投票 vs 连续平均；找邻居一致，aggregation 不同。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-yellow">9. 速记清单</h3>
+  <div class="checklist yellow">
+    <h3>最后一刻能默</h3>
+    <ul>
+      <li>Lazy learner：训练成本 0、每 query $O(nd)$、需要存全部 $\mathcal{D}$。</li>
+      <li>Classification：$\arg\max_c \tfrac{1}{k}\sum_{n\in\mathcal{N}_k}\mathbb{I}(y_n=c)$。Regression：$\tfrac{1}{k}\sum y_i$（或 inverse-distance 加权）。</li>
+      <li>距离：$\|x-x_i\|_2=\sqrt{\sum_j (x_j-x_{ij})^2}$；先标准化。</li>
+      <li>$k=1$ ⇒ 训练 error 0，Voronoi 边界，variance 高。</li>
+      <li>$k\uparrow$ ⇒ 边界更平滑、bias 升高。</li>
+      <li>1-NN asymptotic error $\le 2\,\epsilon^*_{\text{Bayes}}$。</li>
+      <li>维度灾难：$d\to\infty$ 时 nearest / farthest 距离比 $\to 1$。</li>
+      <li>加速：kd-tree（低维）、LSH（高维）。</li>
+    </ul>
+  </div>
+
+  <h3 class="section-blue">附录 · Classification vs Regression 一览</h3>
+  <div class="callout">
+    <div class="head">总结对比表</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:8px 6px;">维度</th>
+          <th style="text-align:left;padding:8px 6px;">KNN Classification</th>
+          <th style="text-align:left;padding:8px 6px;">KNN Regression</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>输出类型</b></td><td style="padding:8px 6px;">离散标签 (discrete label)</td><td style="padding:8px 6px;">连续数值 (continuous value)</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>聚合方式</b></td><td style="padding:8px 6px;">$k$ 个邻居的 majority vote</td><td style="padding:8px 6px;">$k$ 个邻居的 mean（或 inverse-distance 加权）</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$k=1$ 的行为</b></td><td style="padding:8px 6px;">训练 error = 0，Voronoi tessellation 边界</td><td style="padding:8px 6px;">直接复制一个 noisy target，通常不可取</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>距离度量</b></td><td style="padding:8px 6px;">通常 $L_2$（先 standardize）</td><td style="padding:8px 6px;">通常 $L_2$（先 standardize）</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>决策面</b></td><td style="padding:8px 6px;">分段非线性（Voronoi-like）</td><td style="padding:8px 6px;">局部常数 (locally constant) 阶梯函数</td></tr>
+        <tr><td style="padding:8px 6px;"><b>复杂度 vs $k$</b></td><td style="padding:8px 6px;">$k$ 越小模型越复杂</td><td style="padding:8px 6px;">$k$ 越小模型越复杂</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
 
 </div><!--/cn-only-->
@@ -171,23 +433,20 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
+        const isH2 = el.tagName === 'H2';
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;
         a.textContent = el.textContent.replace(/\s+/g, ' ').trim();
         a.style.color = 'var(--text-soft)';
         a.style.fontSize = '13px';
+        if (!isH2) { a.style.paddingLeft = '10px'; a.style.fontSize = '12px'; }
         li.appendChild(a);
         ul.appendChild(li);
       });

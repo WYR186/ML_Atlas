@@ -54,7 +54,7 @@
   <ul>
     <li><b>Bayes error:</b> noise inherent in the data distribution, such as overlapping class distributions. This is the irreducible floor.</li>
     <li><b>Approximation error:</b> the best function inside $\mathcal{F}$ may still be worse than the Bayes rule. This depends on the expressiveness of $\mathcal{F}$, not directly on sample size $n$.</li>
-    <li><b>Estimation error:</b> the learned $f$ may be worse than the best function in $\mathcal{F}$ because training data is finite. ERM optimizes empirical risk, which is only an estimate of true risk.</li>
+    <li><b>Estimation error:</b> the learned $f$ may be worse than the best function in $\mathcal{F}$ because training data is finite. ERM optimizes empirical risk, which is only an estimate of true risk. PAC sample-complexity results are mainly designed to control this term.</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -126,6 +126,7 @@
     <div class="head">How to apply it in questions</div>
     <div class="mini-list">
       <div><b>If sample size changes:</b> focus on estimation error, because $\hat f$ has more or less data to find the best member of $\mathcal{F}$.</div>
+      <div><b>If the question mentions PAC, VC dimension, or sample complexity:</b> it is usually asking how many samples are needed to control estimation/generalization error.</div>
       <div><b>If the model class changes:</b> focus on approximation error, because the best-in-class benchmark itself may move.</div>
       <div><b>If the label noise or distribution changes:</b> focus on Bayes error, because the irreducible lower bound changed.</div>
     </div>
@@ -179,8 +180,10 @@
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
     <li>Be able to write the three-term decomposition.</li>
+    <li>Explain that Bayes error is the irreducible lower bound inside the decomposition.</li>
     <li>Know which term changes when $\mathcal{F}$ becomes more expressive.</li>
     <li>Know which term decreases with more samples for fixed $\mathcal{F}$.</li>
+    <li>Connect PAC and VC bounds to estimation error, not approximation error or Bayes error.</li>
     <li>Explain the approximation-estimation trade-off in words.</li>
     <li>Connect high training error to underfitting and low-train/high-test error to overfitting.</li>
     <li>Recognize how bias-variance-noise under squared loss parallels, but is not identical to, the three-term true-risk split.</li>
@@ -191,6 +194,7 @@
     <li>Bayes error = irreducible noise.</li>
     <li>Approximation error = model class too limited.</li>
     <li>Estimation error = finite-data learning gap.</li>
+    <li>PAC / VC sample complexity controls estimation error.</li>
     <li>More expressive class: approximation down, estimation risk up.</li>
     <li>More data: estimation down, Bayes/approximation unchanged.</li>
     <li>High train error means try richer $\mathcal{F}$; low train but high validation means regularize, simplify, or collect data.</li>
@@ -208,7 +212,7 @@
   <ul>
     <li><b>Bayes error</b>：数据分布本身的噪声，比如 class distributions 重叠；这是不可消除的理论下界。</li>
     <li><b>Approximation error</b>：$\mathcal{F}$ 里最好的函数仍然不够接近 Bayes rule；它由 $\mathcal{F}$ 的 expressiveness 决定，不直接由样本量 $n$ 决定。</li>
-    <li><b>Estimation error</b>：训练数据有限，学到的 $f$ 没有达到 $\mathcal{F}$ 内真实最优；ERM 最小化的是 empirical risk，而它只是 true risk 的估计。</li>
+    <li><b>Estimation error</b>：训练数据有限，学到的 $f$ 没有达到 $\mathcal{F}$ 内真实最优；ERM 最小化的是 empirical risk，而它只是 true risk 的估计。PAC sample complexity 主要控制的就是这一项。</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
@@ -228,7 +232,7 @@
     +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
     +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
     $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>下面的 bullet list 逐项解释公式里的变量。</p>
 
     <ul>
       <li>$\epsilon_\mu(f)$ 是 predictor $f$ 在真实数据分布 $\mu$ 下的 true/test error。</li>
@@ -237,49 +241,50 @@
       <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ 是 $\mathcal{F}$ 内能达到的最小 true error。</li>
       <li>$\epsilon_\mu^*$ 是 Bayes error，也就是不限制在 $\mathcal{F}$ 时的理论最低错误。</li>
     </ul>
-    <p><b>怎么理解.</b> 这个等式本质是加减同一个 best-in-class error。第一项看学出来的 $f$ 离 $\mathcal{F}$ 内最优还有多远；第二项看 $\mathcal{F}$ 内最优离 Bayes optimal 还有多远；最后一项是数据本身噪声。</p>
-    <p><b>怎么用.</b> 固定 $\mathcal{F}$ 时加数据主要降低 estimation error；换更强的 $\mathcal{F}$ 可能降低 approximation error，但 estimation 更难；只换算法不能消掉 Bayes error。</p>
+    <p><b>怎么理解：</b>这个等式本质是加减同一个 best-in-class error。第一项看学出来的 $f$ 离 $\mathcal{F}$ 内最优还有多远；第二项看 $\mathcal{F}$ 内最优离 Bayes optimal 还有多远；最后一项是数据本身噪声。</p>
+    <p><b>怎么用：</b>固定 $\mathcal{F}$ 时加数据主要降低 estimation error；换更强的 $\mathcal{F}$ 可能降低 approximation error，但 estimation 更难；只换算法不能消掉 Bayes error。</p>
   </div>
   <div class="callout formula">
     <div class="head">Squared-loss 对照：bias, variance, noise</div>
     <div class="eq">$$ \mathbb{E}\big[(\hat f(x)-y)^2\big]=\mathrm{Bias}(\hat f(x))^2+\mathrm{Var}(\hat f(x))+\mathrm{Noise} $$</div>
-    <p><b>怎么理解.</b> 对 squared loss regression，同类诊断常写成 bias、variance、noise。Noise 对应 Bayes error 这种 irreducible part；bias 大致对应模型类不够贴近真函数；variance 衡量不同 training sets 下学出的 predictor 波动有多大。</p>
-    <p><b>怎么用.</b> 不要把两套公式机械等同。Error decomposition 固定 hypothesis class $\mathcal{F}$ 写 true risk；bias-variance-noise 是 squared loss 下对 training-set randomness 取 expectation。</p>
+    <p><b>怎么理解：</b>对 squared loss regression，同类诊断常写成 bias、variance、noise。Noise 对应 Bayes error 这种 irreducible part；bias 大致对应模型类不够贴近真函数；variance 衡量不同 training sets 下学出的 predictor 波动有多大。</p>
+    <p><b>怎么用：</b>不要把两套公式机械等同。Error decomposition 固定 hypothesis class $\mathcal{F}$ 写 true risk；bias-variance-noise 是 squared loss 下对 training-set randomness 取 expectation。</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Best-in-class predictor</div>
       <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>下面的 bullet list 逐项解释公式里的变量。</p>
 
       <ul>
         <li>$f_{\mathcal{F}}^*$ 是 $\mathcal{F}$ 内 true error 最小的某个 predictor。</li>
         <li>$\arg\min$ 返回的是“让误差最小的函数”，不是最小误差数值本身。</li>
         <li>星号表示 optimal，下标 $\mathcal{F}$ 表示“只在这个 class 里面最优”。</li>
       </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这是选定 $\mathcal{F}$ 后的理论最佳模型，是 estimation error 的参照物；真实训练算法通常不知道它，只能用有限数据去靠近。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>这是选定 $\mathcal{F}$ 后的理论最佳模型，是 estimation error 的参照物；真实训练算法通常不知道它，只能用有限数据去靠近。</p>
 
-      <p><b>怎么用.</b> 题目问有限样本学习差距时，把实际学到的 $\hat f$ 和 $f_{\mathcal{F}}^*$ 比。</p>
+      <p><b>怎么用：</b>题目问有限样本学习差距时，把实际学到的 $\hat f$ 和 $f_{\mathcal{F}}^*$ 比。</p>
     </div>
     <div class="callout formula">
       <div class="head">Learned predictor</div>
       <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号：</b>下面的 bullet list 逐项解释公式里的变量。</p>
 
       <ul>
         <li>$\mathcal{D}$ 是 training set。</li>
         <li>$\mathcal{A}$ 是 learning algorithm，比如 ERM、SVM training、tree induction。</li>
         <li>$\hat f$ 上面的 hat 表示它依赖数据；训练集换了，$\hat f$ 可能也会变。</li>
       </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 实际 predictor 是 learning algorithm 在一个有限随机训练集上的输出；换一份 $\mathcal{D}$，$\hat f$ 可能就变。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解：</b>实际 predictor 是 learning algorithm 在一个有限随机训练集上的输出；换一份 $\mathcal{D}$，$\hat f$ 可能就变。</p>
 
-      <p><b>怎么用.</b> 只要 predictor 是从有限 $\mathcal{D}$ 里学出来的，就要考虑 estimation error。</p>
+      <p><b>怎么用：</b>只要 predictor 是从有限 $\mathcal{D}$ 里学出来的，就要考虑 estimation error。</p>
     </div>
   </div>
   <div class="callout">
     <div class="head">题目里怎么套</div>
     <div class="mini-list">
       <div><b>如果 sample size 变了：</b>优先看 estimation error，因为 $\hat f$ 有更多或更少数据去接近 $\mathcal{F}$ 内最优。</div>
+      <div><b>如果题目提 PAC、VC dimension 或 sample complexity：</b>通常是在问需要多少样本来控制 estimation / generalization error。</div>
       <div><b>如果 model class 变了：</b>优先看 approximation error，因为 best-in-class benchmark 本身可能变了。</div>
       <div><b>如果 label noise / distribution 变了：</b>优先看 Bayes error，因为不可消除的理论下界变了。</div>
     </div>
@@ -333,8 +338,10 @@
   <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
   <ul>
     <li>会默写三项 error decomposition。</li>
+    <li>会说明 Bayes error 在分解里是不可消除的 lower bound。</li>
     <li>知道 $\mathcal{F}$ 更 expressive 时哪些项变化。</li>
     <li>知道固定 $\mathcal{F}$ 时更多 samples 主要降低 estimation error。</li>
+    <li>能把 PAC / VC bounds 对应到 estimation error，而不是 approximation error 或 Bayes error。</li>
     <li>能用文字解释 approximation-estimation trade-off。</li>
     <li>能把 high training error 对应到 underfitting，把 low-train/high-test error 对应到 overfitting。</li>
     <li>能识别 squared loss 下的 bias-variance-noise 与三项 true-risk 分解的相似处和区别。</li>
@@ -345,6 +352,7 @@
     <li>Bayes error = irreducible noise。</li>
     <li>Approximation error = 模型类太弱。</li>
     <li>Estimation error = 有限数据导致的学习差距。</li>
+    <li>PAC / VC sample complexity 控制的是 estimation error。</li>
     <li>模型类更强：approximation 下降，estimation 风险上升。</li>
     <li>数据更多：estimation 下降，Bayes / approximation 不变。</li>
     <li>Train error 高就考虑更强 $\mathcal{F}$；train 低但 validation 高就 regularize、简化模型或加数据。</li>

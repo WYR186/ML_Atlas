@@ -50,9 +50,10 @@
 
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>An auto-encoder has two parts. The encoder maps the original input into a code, and the decoder maps the code back into the input space. Training minimizes the mismatch between the original input and the reconstruction.</p>
+  <p>The output is mainly a training target; the representation is the useful product. Some notes write the hidden code as $h=f(x)$ and the reconstruction as $r=g(h)$, while this page uses $z$ and $\hat{x}$ for the same roles.</p>
   <ul>
-    <li><b>Encoder:</b> turns $x$ into a learned representation $z$.</li>
-    <li><b>Decoder:</b> turns $z$ into a reconstruction $\hat{x}$.</li>
+    <li><b>Encoder:</b> turns $x$ into a learned representation $h$ or $z$.</li>
+    <li><b>Decoder:</b> turns the code into a reconstruction $r$ or $\hat{x}$.</li>
     <li><b>Loss:</b> measures how different $\hat{x}$ is from $x$.</li>
   </ul>
 
@@ -62,9 +63,19 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>A useful auto-encoder is not just a copying machine. It works when the architecture or regularization prevents exact memorization, so the code $z$ captures stable factors such as shape, stroke style, topic, or semantic content.</p>
+  <div class="callout tip">
+    <div class="head">How to avoid the identity shortcut</div>
+    <p><b>Undercomplete AE:</b> the code dimension is smaller than the input dimension, $M&lt;D$, so the network must perform dimensionality reduction.</p>
+    <p><b>Overcomplete AE:</b> the code dimension is larger than the input dimension, $M&gt;D$, so the model needs regularization such as sparsity, denoising, or contraction. Otherwise it can simply memorize the identity function.</p>
+  </div>
   <div class="callout intuition">
     <div class="head">Connection to PCA</div>
-    <p>A linear, undercomplete auto-encoder behaves like PCA: it learns a low-dimensional subspace that preserves as much reconstruction information as possible. Nonlinear activations let the model learn curved manifolds instead of only flat subspaces.</p>
+    <p>A linear, undercomplete auto-encoder with squared reconstruction loss learns to span the same subspace as PCA. It does not have to learn the exact same basis vectors, but the subspace is the PCA subspace. Nonlinear activations make deep AEs a nonlinear generalization of PCA, able to model curved manifolds instead of only flat subspaces.</p>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Manifold view</div>
+    <p>Auto-encoders exploit the assumption that high-dimensional data often lies near a low-dimensional manifold. The encoder learns coordinates on or near that manifold, and latent interpolation can give smooth transitions because nearby codes usually decode to nearby reconstructions.</p>
+    <p>A standard deterministic AE is still not a full generator: random latent noise may decode poorly because the decoder was trained mostly on codes produced by the encoder. VAEs add a prior over latent space so sampling becomes part of the model.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -72,7 +83,7 @@
     <div class="callout formula">
       <div class="head">Encoder / decoder</div>
       <div class="eq">$$ z=f_\phi(x),\qquad \hat{x}=g_\theta(z) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: Original input, such as an image or feature vector.； $f_\phi$: Encoder network with trainable parameters $\phi$.； $z$: Latent code, embedding, or bottleneck representation.； $g_\theta$: Decoder network with trainable parameters $\theta$.； $\hat{x}$: Reconstructed version of the input.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: Original input, such as an image or feature vector; $f_\phi$: Encoder network with trainable parameters $\phi$; $z$ or $h$: Latent code, embedding, or bottleneck representation; $g_\theta$: Decoder network with trainable parameters $\theta$; $\hat{x}$ or $r$: Reconstructed version of the input.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The encoder compresses; the decoder tests whether the compressed code kept enough information to rebuild the input.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute $z=f_\phi(x)$ first, then decode $\hat{x}=g_\theta(z)$. The code $z$ can be used as a learned feature vector after training.</p>
@@ -81,9 +92,19 @@
       <div class="head">Reconstruction loss</div>
       <div class="eq">$$ \min_{\theta,\phi}\;\mathcal{L}_{rec}(x,\hat{x}) $$</div>
       <div class="eq">$$ \mathcal{L}_{rec}=\|x-\hat{x}\|_2^2\quad\text{(MSE)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{L}_{rec}$: Reconstruction loss; smaller means the output looks closer to the input.； $\|x-\hat{x}\|_2^2$: Squared Euclidean distance between input and reconstruction.； $\min_{\theta,\phi}$: Optimize both decoder parameters $\theta$ and encoder parameters $\phi$.； MSE: Mean squared error, often averaged over pixels/features and a minibatch.</p>
+      <div class="eq">$$ E(w)=\frac12\sum_{n=1}^N\|y(x_n,w)-x_n\|^2 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{L}_{rec}$ or $E(w)$: Reconstruction loss; $x_n$: The $n$th training input; $y(x_n,w)$: The full auto-encoder output for $x_n$, same role as $\hat{x}_n$; $w$: All network weights; $\frac12$: A convenience factor that cancels the 2 when differentiating squared error.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The loss is a copying test. With a bottleneck or regularizer, doing well on this test requires learning reusable structure rather than memorizing raw input.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each minibatch, reconstruct every input, compute squared errors, average them, then backpropagate through decoder and encoder.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each example, subtract reconstruction from input feature by feature, square, sum, then multiply by $\frac12$ if the exam uses the sum-of-squares convention. For minibatch MSE, average over examples or pixels as specified.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Regularized AE variants</div>
+      <div class="eq">$$ \mathcal{L}_{sparse}=\mathcal{L}_{rec}+\lambda\sum_j |z_j| $$</div>
+      <div class="eq">$$ \mathcal{L}_{DAE}=\mathbb{E}_{\tilde{x}\sim q(\tilde{x}\mid x)}\|g_\theta(f_\phi(\tilde{x}))-x\|_2^2 $$</div>
+      <div class="eq">$$ \mathcal{L}_{CAE}=\mathcal{L}_{rec}+\lambda\left\|\frac{\partial f_\phi(x)}{\partial x}\right\|_F^2 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda$: Strength of the regularizer; $z_j$: Activation of hidden unit $j$; $\tilde{x}$: Corrupted input sampled from noise process $q(\tilde{x}\mid x)$; $\frac{\partial f_\phi(x)}{\partial x}$: Encoder Jacobian; $\|\cdot\|_F$: Frobenius norm, the square root of the sum of squared matrix entries.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Sparse AE limits how many hidden units fire. DAE learns to map noisy points back toward clean data, which is why it is connected to the data manifold and, theoretically, the score $\nabla_x\log p(x)$. CAE penalizes sensitivity of the encoder, so small input perturbations should not change the code too much.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Identify the variant from the extra term: activation penalty means sparse AE, corrupted input with clean target means DAE, and encoder-Jacobian penalty means CAE.</p>
     </div>
   </div>
 
@@ -92,7 +113,7 @@
     <div>
       <h4>Example A · Lecture 13 reconstruction setup</h4>
       <p class="example-source">Source: Lecture 13 auto-encoder motivation, paraphrased.</p>
-      <p>If $x$ is an image, the encoder creates a smaller vector $z$. The decoder tries to reconstruct the image. Training pressure comes only from comparing $x$ and $\hat{x}$, so the representation is learned without class labels.</p>
+      <p>If $x$ is an image, the encoder creates a smaller vector $z$. The decoder tries to reconstruct the image. Training pressure comes only from comparing $x$ and $\hat{x}$, so the representation is learned without class labels. Numerically, if $x=(1,0,2)$ and $\hat{x}=(0.8,0.4,1.7)$, then $E=\frac12[(0.2)^2+(-0.4)^2+(0.3)^2]=0.145$.</p>
     </div>
     <div>
       <h4>Example B · Linear auto-encoder as PCA intuition</h4>
@@ -110,8 +131,10 @@
   <ul>
     <li>Start by identifying the input $x$, code $z$, and reconstruction $\hat{x}$.</li>
     <li>If the question asks why the representation is meaningful, point to the bottleneck or regularization.</li>
+    <li>Check whether the AE is undercomplete or overcomplete before claiming it cannot copy.</li>
     <li>For MSE, compute elementwise differences, square them, then sum or average depending on the convention.</li>
     <li>For denoising variants, remember that the model receives corrupted input but targets clean input.</li>
+    <li>For CAE, read the Jacobian penalty as "make the encoder locally insensitive."</li>
   </ul>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -120,6 +143,8 @@
     <li>Mixing up $x$ and $\hat{x}$: $x$ is the target input, while $\hat{x}$ is the model output.</li>
     <li>Calling $z$ a probability distribution. In a plain auto-encoder, $z$ is usually a deterministic code.</li>
     <li>Confusing a plain auto-encoder with a VAE. A VAE adds a probabilistic latent variable and a KL term.</li>
+    <li>Saying a plain AE can generate good samples from random noise. Its decoder is not trained to decode arbitrary random latent points.</li>
+    <li>Overstating the PCA result: a linear AE learns the PCA subspace, not necessarily the exact PCA coordinate axes.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -128,6 +153,9 @@
     <li>Explain what the reconstruction loss is minimizing.</li>
     <li>Explain why an undercomplete or regularized auto-encoder avoids trivial copying.</li>
     <li>Compare a linear auto-encoder with PCA at a high level.</li>
+    <li>Compute sum-of-squares reconstruction error by hand.</li>
+    <li>Distinguish sparse AE, denoising AE, and contractive AE from their loss terms.</li>
+    <li>Explain the manifold interpretation and why VAEs are the generative extension.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -136,6 +164,8 @@
     <li>I can explain each symbol in the reconstruction loss.</li>
     <li>I can describe how to compute the loss on a minibatch.</li>
     <li>I know why constraints are needed for useful representation learning.</li>
+    <li>I can identify sparse, denoising, and contractive regularization.</li>
+    <li>I know a standard AE is deterministic and not directly sampleable like a VAE.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -145,11 +175,12 @@
       <h2>Auto-encoder · 自编码器</h2>
       <p class="topic-lede">Auto-encoder 用“压缩再重建”的任务学习 representation。公式的核心不是复杂概率，而是：输入必须经过一个 code $z$ 才能重建，所以 $z$ 会被迫保留输入里的重要结构。</p>
 
-      <h3 class="section-blue">1. Concept Understanding</h3>
+      <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
       <p>Auto-encoder 分成 encoder 和 decoder。Encoder 把原始输入压到 latent code，decoder 再从 code 还原输入。训练目标就是让还原出来的 $\hat{x}$ 尽量接近原来的 $x$。</p>
+      <p>输出本身更多是 training target；真正想拿来用的是内部 representation。课件里有时写 $h=f(x)$、$r=g(h)$，本页用 $z$ 和 $\hat{x}$ 表示同样的 code / reconstruction 角色。</p>
       <ul>
-        <li><b>Encoder</b>：把 $x$ 变成 learned representation $z$。</li>
-        <li><b>Decoder</b>：把 $z$ 变回 reconstruction $\hat{x}$。</li>
+        <li><b>Encoder</b>：把 $x$ 变成 learned representation $h$ 或 $z$。</li>
+        <li><b>Decoder</b>：把 code 变回 reconstruction $r$ 或 $\hat{x}$。</li>
         <li><b>Loss</b>：衡量 $\hat{x}$ 和 $x$ 差多少。</li>
       </ul>
 
@@ -157,39 +188,59 @@
       <p>可以把 encoder 想成“给一整节课做压缩笔记”，decoder 想成“只看笔记把这节课复原出来”。如果笔记空间很小，就没法逐字复制，只能抓重点。</p>
       <p>所以 auto-encoder 学 representation 的关键问题是：为了重建输入，哪些信息最值得保留？</p>
 
-      <h3 class="section-orange">3. Core Intuition</h3>
+      <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>好的 auto-encoder 不应该只是复制器。它有效的前提是 architecture 或 regularization 阻止它死记硬背，让 $z$ 学到稳定因素，比如形状、笔画风格、主题或语义内容。</p>
+      <div class="callout tip">
+        <div class="head">如何避免 identity shortcut</div>
+        <p><b>Undercomplete AE：</b> code dimension 小于 input dimension，$M&lt;D$，所以网络被迫做 dimensionality reduction。</p>
+        <p><b>Overcomplete AE：</b> code dimension 大于 input dimension，$M&gt;D$，这时必须靠 sparsity、denoising、contraction 等 regularization；否则模型可能直接记住 identity function。</p>
+      </div>
       <div class="callout intuition">
         <div class="head">和 PCA 的关系</div>
-        <p>线性、undercomplete 的 auto-encoder 很像 PCA：都在找一个低维空间，尽量保留 reconstruction 所需的信息。加入 nonlinear activation 后，AE 可以学习弯曲的 manifold，而不只是平面 subspace。</p>
+        <p>线性、undercomplete AE 加 squared reconstruction loss，会学到和 PCA 相同的 subspace。注意不是说权重一定等于 PCA 的每根轴，而是 span 出来的低维空间相同。加入 nonlinear activations 后，deep AE 可以看成 nonlinear PCA，能学习弯曲的 manifold，而不只是平面 subspace。</p>
+      </div>
+      <div class="callout intuition">
+        <div class="head">Manifold view · 流形视角</div>
+        <p>AE 利用的直觉是：高维数据常常集中在一个低维 manifold 附近。Encoder 学到的是这个 manifold 上或附近的 coordinates，所以 latent space 里做 interpolation 时，decode 出来的图像往往会平滑变化。</p>
+        <p>但普通 deterministic AE 还不是完整 generative model：随机采一个 latent noise 可能 decode 得很差，因为 decoder 主要见过 encoder 产生的那些 codes。VAE 进一步给 latent space 加 prior，才把 sampling 变成模型目标的一部分。</p>
       </div>
 
-      <h3 class="section-purple">4. Key Equations</h3>
+      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
-          <div class="head">Encoder / decoder</div>
+          <div class="head">Encoder / decoder · 编码与解码</div>
           <div class="eq">$$ z=f_\phi(x),\qquad \hat{x}=g_\theta(z) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 原始输入，比如图片或 feature vector。；$f_\phi$: Encoder network，参数是 $\phi$。；$z$: Latent code / embedding / bottleneck representation。；$g_\theta$: Decoder network，参数是 $\theta$。；$\hat{x}$: 模型重建出来的输入。</p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 原始输入，比如图片或 feature vector；$f_\phi$: encoder network，参数是 $\phi$；$z$ 或 $h$: latent code / embedding / bottleneck representation；$g_\theta$: decoder network，参数是 $\theta$；$\hat{x}$ 或 $r$: 模型重建出来的输入。</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Encoder 负责压缩，decoder 检验这个压缩后的 code 是否保留了足够信息来重建输入。</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 $z=f_\phi(x)$，再 decode 得到 $\hat{x}=g_\theta(z)$。训练后，$z$ 可以当作 learned feature vector 使用。</p>
         </div>
         <div class="callout formula">
-          <div class="head">Reconstruction loss</div>
+          <div class="head">Reconstruction loss · 重建损失</div>
           <div class="eq">$$ \min_{\theta,\phi}\;\mathcal{L}_{rec}(x,\hat{x}) $$</div>
           <div class="eq">$$ \mathcal{L}_{rec}=\|x-\hat{x}\|_2^2\quad\text{(MSE)} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{L}_{rec}$: Reconstruction loss；越小表示输出越接近输入。；$\|x-\hat{x}\|_2^2$: 输入和 reconstruction 之间的 squared Euclidean distance。；$\min_{\theta,\phi}$: 同时优化 decoder 参数 $\theta$ 和 encoder 参数 $\phi$。；MSE: Mean squared error，通常会对像素/特征和 minibatch 求平均。</p>
+          <div class="eq">$$ E(w)=\frac12\sum_{n=1}^N\|y(x_n,w)-x_n\|^2 $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{L}_{rec}$ 或 $E(w)$: reconstruction loss；$x_n$: 第 $n$ 个 training input；$y(x_n,w)$: 整个 auto-encoder 对 $x_n$ 的输出，等价于 $\hat{x}_n$；$w$: 全部 network weights；$\frac12$: 方便求导时抵消 squared error 的 2。</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这个 loss 像一个“复原测试”。有 bottleneck 或 regularizer 时，想复原得好就必须学习可复用结构，而不能只死记硬背。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 minibatch，先重建所有输入，再计算 squared error，取平均，然后通过 decoder 和 encoder 做 backpropagation。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个样本，先逐 feature 算 reconstruction 和 input 的差，平方后求和；如果题目用 sum-of-squares convention，再乘 $\frac12$。如果题目写 MSE，就按要求对样本 / 像素取平均。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Regularized AE variants · 正则化变体</div>
+          <div class="eq">$$ \mathcal{L}_{sparse}=\mathcal{L}_{rec}+\lambda\sum_j |z_j| $$</div>
+          <div class="eq">$$ \mathcal{L}_{DAE}=\mathbb{E}_{\tilde{x}\sim q(\tilde{x}\mid x)}\|g_\theta(f_\phi(\tilde{x}))-x\|_2^2 $$</div>
+          <div class="eq">$$ \mathcal{L}_{CAE}=\mathcal{L}_{rec}+\lambda\left\|\frac{\partial f_\phi(x)}{\partial x}\right\|_F^2 $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda$: regularizer strength；$z_j$: 第 $j$ 个 hidden unit 的 activation；$\tilde{x}$: 从 noise process $q(\tilde{x}\mid x)$ 得到的 corrupted input；$\frac{\partial f_\phi(x)}{\partial x}$: encoder Jacobian；$\|\cdot\|_F$: Frobenius norm，也就是矩阵元素平方和再开根号。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Sparse AE 限制 hidden units 不要全都激活；DAE 把 noisy points 拉回 clean data，所以和 data manifold 有关，理论上也和 score $\nabla_x\log p(x)$ 有联系；CAE 惩罚 encoder sensitivity，希望输入小扰动不会让 code 大幅变化。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 看额外项识别类型：activation penalty 是 sparse AE；输入 corrupted、target clean 是 DAE；encoder-Jacobian penalty 是 CAE。</p>
         </div>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples</h3>
+      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
       <div class="mini-list">
         <div>
           <h4>Example A · Lecture 13 reconstruction setup</h4>
           <p class="example-source">来源：Lecture 13 auto-encoder 动机，已转述。</p>
-          <p>如果 $x$ 是图片，encoder 先生成更小的向量 $z$，decoder 再试图还原图片。训练信号只来自比较 $x$ 和 $\hat{x}$，所以不需要 class labels 也能学 representation。</p>
+          <p>如果 $x$ 是图片，encoder 先生成更小的向量 $z$，decoder 再试图还原图片。训练信号只来自比较 $x$ 和 $\hat{x}$，所以不需要 class labels 也能学 representation。数值上，若 $x=(1,0,2)$、$\hat{x}=(0.8,0.4,1.7)$，则 $E=\frac12[(0.2)^2+(-0.4)^2+(0.3)^2]=0.145$。</p>
         </div>
         <div>
           <h4>Example B · Linear auto-encoder 和 PCA</h4>
@@ -203,36 +254,45 @@
         </div>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
       <ul>
         <li>先标出 input $x$、code $z$、reconstruction $\hat{x}$。</li>
         <li>题目问 representation 为什么有意义，就回答 bottleneck 或 regularization 限制了 trivial copying。</li>
+        <li>先判断 AE 是 undercomplete 还是 overcomplete，再讨论它能不能直接 copy。</li>
         <li>算 MSE 时先逐元素相减，再平方，最后按题目要求 sum 或 average。</li>
         <li>Denoising AE 要记住：输入是 corrupted input，目标是 clean input。</li>
+        <li>CAE 里的 Jacobian penalty 可以理解成“让 encoder 在局部更不敏感”。</li>
       </ul>
 
-      <h3 class="section-red">7. Common Mistakes</h3>
+      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
       <ul>
         <li>以为所有 auto-encoder 都自动学到好特征；如果容量太大又没约束，可能只是 memorization。</li>
         <li>混淆 $x$ 和 $\hat{x}$：$x$ 是目标输入，$\hat{x}$ 是模型输出。</li>
         <li>把 $z$ 当作概率分布；plain AE 里的 $z$ 通常是 deterministic code。</li>
         <li>把 plain AE 和 VAE 混在一起；VAE 多了 probabilistic latent variable 和 KL term。</li>
+        <li>以为 plain AE 可以直接从 random noise 生成好样本；它的 decoder 没有被训练去处理任意随机 latent point。</li>
+        <li>把 PCA 结论说过头：linear AE 学到 PCA subspace，但不一定学到完全相同的 PCA coordinate axes。</li>
       </ul>
 
-      <h3 class="section-yellow">8. Exam Focus</h3>
+      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
       <ul>
         <li>能默写 $z=f_\phi(x)$ 和 $\hat{x}=g_\theta(z)$。</li>
         <li>能解释 reconstruction loss 到底在最小化什么。</li>
         <li>能说明 undercomplete / regularized AE 为什么能避免纯复制。</li>
         <li>能高层比较 linear AE 和 PCA。</li>
+        <li>会手算 sum-of-squares reconstruction error。</li>
+        <li>能根据 loss term 区分 sparse AE、denoising AE、contractive AE。</li>
+        <li>能解释 manifold interpretation，以及为什么 VAE 是 generative extension。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist</h3>
+      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能说清 encoder、decoder、code、reconstruction。</li>
         <li>我能解释 reconstruction loss 里每个符号。</li>
         <li>我知道 minibatch 上如何计算并优化这个 loss。</li>
         <li>我知道为什么需要 bottleneck 或 regularization。</li>
+        <li>我能识别 sparse、denoising、contractive regularization。</li>
+        <li>我知道 standard AE 是 deterministic，不像 VAE 那样直接可 sample。</li>
       </ul>
     </section>
 

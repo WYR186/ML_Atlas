@@ -28,6 +28,9 @@ book
 # Per-user learning state from serve.py — local only
 progress.json
 
+# Local export / snapshot bundles (cheatsheet-full.zip etc.)
+zip/
+
 # Python bytecode (serve.py imports etc.)
 __pycache__/
 *.pyc

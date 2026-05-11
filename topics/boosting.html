@@ -49,8 +49,9 @@
   <p class="topic-lede">Boosting is the sequential ensemble idea at the end of Lecture 8. AdaBoost builds a strong classifier by repeatedly adding weak classifiers that focus on the examples the current ensemble handles poorly.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>AdaBoost maintains weights over training examples. Initially all examples are equally weighted. After each weak classifier, examples that were misclassified receive more weight, so the next weak learner pays more attention to them.</p>
-  <p>The final classifier is an additive vote $F_T(x)=\sum_t \alpha_t f_t(x)$, where more accurate weak learners receive larger voting weights.</p>
+  <p>AdaBoost is a <b>sequential ensemble</b> method. It combines many weak learners, each only required to perform slightly better than random guessing, into a stronger classifier.</p>
+  <p>It maintains weights over training examples. Initially all examples are equally weighted. After each weak classifier, misclassified examples receive more weight, so the next weak learner pays more attention to them.</p>
+  <p>The final classifier is a weighted majority vote: each weak learner predicts, and the more reliable learners receive larger coefficients in the vote.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Boosting is like a tutor who keeps a mistake notebook. Every time you miss a type of question, that question gets circled, highlighted, and shown again in the next practice round.</p>
@@ -58,46 +59,80 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Bagging reduces variance by averaging independent learners. Boosting reduces bias by combining weak learners sequentially, each one correcting the current ensemble's weak spots.</p>
-  <p>AdaBoost can be derived from minimizing exponential loss. The sample weights are exactly the loss-induced emphasis on examples with low or negative margins $y_iF(x_i)$.</p>
+  <p>AdaBoost can be derived as a forward stagewise additive model that minimizes exponential loss. The sample weights are exactly the loss-induced emphasis on examples with low or negative margins $y_iF(x_i)$.</p>
+  <div class="callout">
+    <div class="head">AdaBoost.M1 loop</div>
+    <ol>
+      <li><b>Initialize.</b> Set every observation weight to $w_i^{(1)}=1/N$.</li>
+      <li><b>Fit.</b> Train weak classifier $G_m(x)$ using the current weights.</li>
+      <li><b>Measure.</b> Compute the weighted error $err_m$.</li>
+      <li><b>Trust.</b> Convert that error into a classifier weight $\alpha_m$.</li>
+      <li><b>Reweight.</b> Increase weights on mistakes, normalize, and repeat.</li>
+      <li><b>Predict.</b> Output the sign of the weighted vote.</li>
+    </ol>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Additive ensemble</div>
-      <div class="eq">$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F_t(x)$ is the ensemble score after round $t$. $F_{t-1}(x)$ is the previous score. $f_t(x)$ is the weak learner added at round $t$. $\alpha_t$ is its voting weight.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Boosting builds the final classifier one weak learner at a time. Each new term nudges the current score toward fixing current mistakes.</p>
+      <div class="eq">$$ F_m(x)=F_{m-1}(x)+\alpha_m G_m(x) $$</div>
+      <div class="eq">$$ G(x)=\operatorname{sign}\!\left(F_M(x)\right)=\operatorname{sign}\!\left(\sum_{m=1}^{M}\alpha_mG_m(x)\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F_m(x)$ is the ensemble score after round $m$. $G_m(x)$ is the weak classifier added at that round. $\alpha_m$ is that classifier's voting weight. $M$ is the total number of rounds.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> AdaBoost does not average classifiers equally. It adds a signed, weighted vote from each weak learner, then takes the sign of the final score.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a new point, compute every weak learner's prediction, multiply by its $\alpha_m$, sum them, and predict $+1$ if the sum is positive and $-1$ if it is negative.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Weighted error</div>
+      <div class="eq">$$ err_m=\frac{\sum_{i=1}^{N}w_i\,\mathbf{1}\!\left[y_i\ne G_m(x_i)\right]}{\sum_{i=1}^{N}w_i} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i$ is the current weight of example $i$. $\mathbf{1}[\cdot]$ is an indicator: 1 if the statement is true, 0 otherwise. $N$ is the number of training examples.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is the fraction of total weight placed on the examples that the current weak learner gets wrong.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Do not count mistakes equally. Add the weights of the misclassified examples, divide by total weight, then use this $err_m$ to compute $\alpha_m$.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Classifier coefficient</div>
+      <div class="eq">$$ \alpha_m=\frac12\log\frac{1-err_m}{err_m} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $err_m$ is the weighted error of weak learner $m$. $\alpha_m$ is its coefficient in the ensemble. The log compares correct weighted mass $1-err_m$ against mistaken mass $err_m$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If $err_m&lt;0.5$, then $\alpha_m&gt;0$ and the learner is trusted. If $err_m=0.5$, then $\alpha_m=0$. If $err_m&gt;0.5$, $\alpha_m&lt;0$, which effectively flips the learner's vote.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update the score after each round, then predict with $\operatorname{sign}(F_T(x))$ for binary $\{-1,+1\}$ labels.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute weighted error first, plug it into the log formula, and watch the edge cases: as $err_m\to0$, $\alpha_m$ becomes very large.</p>
     </div>
     <div class="callout formula">
       <div class="head">Exponential loss</div>
-      <div class="eq">$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $m$ is the number of training examples. $y_i\in\{-1,+1\}$ is the true label. $F(x_i)$ is the ensemble score. $y_iF(x_i)$ is the margin: positive means correct with confidence, negative means wrong.</p>
+      <div class="eq">$$ L(F)=\frac1N\sum_{i=1}^N \exp(-y_iF(x_i)) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$ is the number of training examples. $y_i\in\{-1,+1\}$ is the true label. $F(x_i)$ is the ensemble score. $y_iF(x_i)$ is the margin: positive means correct with confidence, negative means wrong.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Exponential loss punishes low or negative margins heavily, so badly handled examples dominate the next round.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If $y_iF(x_i)<0$, the example is misclassified and $\exp(-y_iF(x_i))$ is large. Those examples get more attention.</p>
     </div>
     <div class="callout formula">
       <div class="head">Example weights</div>
-      <div class="eq">$ w_i=\exp(-y_iF_{t-1}(x_i)) $</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i$ is the weight of training example $i$ before round $t$. $F_{t-1}$ is the ensemble before adding $f_t$. A larger $w_i$ means the next weak learner should care more about that example.</p>
+      <div class="eq">$$ w_i^{(m)}=\exp(-y_iF_{m-1}(x_i)) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(m)}$ is the weight of training example $i$ before round $m$. $F_{m-1}$ is the ensemble before adding $G_m$. A larger $w_i$ means the next weak learner should care more about that example.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The weight is an exponential transform of the current margin. Poorly classified points receive large weights.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Train the next weak classifier using these weights, so it focuses on examples the previous ensemble handled poorly.</p>
     </div>
-    <div class="callout formula">
-      <div class="head">Classifier coefficient</div>
-      <div class="eq">$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon_t$ is the weighted error of weak learner $t$. $\alpha_t$ is its coefficient in the ensemble. The logarithm compares correct weighted mass $1-\epsilon_t$ against mistaken mass $\epsilon_t$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Better weak learners get larger positive voting weights. A learner with error $0.5$ gets weight $0$, because it is no better than random guessing.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute weighted error, plug into the log formula, then use $\alpha_t$ in the ensemble update. If $\epsilon_t<0.5$, $\alpha_t>0$.</p>
-    </div>
     <div class="callout formula wide">
-      <div class="head">Weight update after round $t$</div>
-      <div class="eq">$ w_i^{(t+1)}\propto w_i^{(t)}\exp\!\left(-\alpha_t y_i f_t(x_i)\right) $</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(t)}$ is the old sample weight. $\alpha_t$ is the classifier weight. $y_if_t(x_i)$ equals $+1$ for a correct prediction and $-1$ for a mistake. $\propto$ means normalize afterward so weights sum to 1.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Correct predictions are multiplied by $e^{-\alpha_t}$ and shrink. Mistakes are multiplied by $e^{\alpha_t}$ and grow.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update every sample weight, normalize, then train the next weak learner on the new weighted dataset.</p>
+      <div class="head">Weight update after round $m$</div>
+      <div class="eq">$$ w_i^{(m+1)}\propto w_i^{(m)}\exp\!\left(-\alpha_m y_i G_m(x_i)\right) $$</div>
+      <div class="eq">$$ w_i\leftarrow w_i\exp\!\left(\alpha_m\mathbf{1}[y_i\ne G_m(x_i)]\right),\quad\text{normalize} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(m)}$ is the old sample weight. $\alpha_m$ is the classifier weight. $y_iG_m(x_i)$ equals $+1$ for a correct prediction and $-1$ for a mistake. $\propto$ means normalize afterward so weights sum to 1.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Correct predictions are multiplied by $e^{-\alpha_m}$ and shrink. Mistakes are multiplied by $e^{\alpha_m}$ and grow.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update every sample weight, normalize, then train the next weak learner on the new weighted dataset. If the algorithm box uses the indicator version, read it as the same operational rule: mistakes are scaled up before normalization.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Population minimizer of exponential loss</div>
+      <div class="eq">$$ f^*(x)=\frac12\log\frac{\Pr(Y=1\mid x)}{\Pr(Y=-1\mid x)} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f^*(x)$ is the best real-valued score under exponential loss. $\Pr(Y=1\mid x)$ and $\Pr(Y=-1\mid x)$ are the class posterior probabilities.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The optimal score is half of the log-odds. Positive score means class $+1$ is more likely; negative score means class $-1$ is more likely.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This explains why the sign of $F(x)$ is a classifier: the sign follows the more probable class.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Weak-edge training bound</div>
+      <div class="eq">$$ L_S(h_T)\le \exp(-2\gamma^2T) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $L_S(h_T)$ is training error after $T$ rounds. $\gamma$ is the weak learner's edge: each round has $err_t\le 1/2-\gamma$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If every weak learner beats random guessing by a fixed margin, the training error drops exponentially fast with the number of rounds.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In theory questions, state the edge assumption first, then quote the exponential decay in $T$.</p>
     </div>
   </div>
 
@@ -117,13 +152,39 @@
     <div class="example-source">Source: HW2 Problem 5.2(d-e), paraphrased.</div>
     <p>For a fixed weak classifier, the loss becomes proportional to $(1-\epsilon)e^{-\alpha}+\epsilon e^\alpha$. Setting the derivative to zero gives $e^{2\alpha}=(1-\epsilon)/\epsilon$, hence $\alpha^*=\frac12\log((1-\epsilon)/\epsilon)$.</p>
   </div>
+  <div class="callout example">
+    <div class="head">Example D · Viola-Jones face detector</div>
+    <div class="example-source">Source: Lecture 8 application context.</div>
+    <p>Viola-Jones uses AdaBoost to select useful rectangle features from a large pool of simple box filters. The exam point is not image processing detail; it is that boosting can choose and weight many weak feature tests into a fast face detector.</p>
+  </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>Identify boosting by:</b> sequential training, reweighted examples, and weighted votes.</div>
-    <div><b>When deriving AdaBoost,</b> split sums into correct and incorrect predictions.</div>
-    <div><b>Interpret $\alpha_t$ by error:</b> if $\epsilon&lt;0.5$, then $\alpha_t&gt;0$; if $\epsilon=0.5$, it contributes nothing.</div>
-    <div><b>For comparison questions,</b> mention boosting's noise sensitivity.</div>
+    <div><b>When deriving AdaBoost,</b> split sums into correct and incorrect predictions, then express the wrong side as weighted error.</div>
+    <div><b>Interpret $\alpha_m$ by error:</b> $err&lt;0.5$ means positive vote, $err=0.5$ means useless, $err&gt;0.5$ means flip or reject.</div>
+    <div><b>For theory questions,</b> mention the weak edge $\gamma$ and the exponential training-error bound.</div>
+    <div><b>For comparison questions,</b> mention boosting's noise sensitivity and its dependence on previous rounds.</div>
+  </div>
+
+  <div class="callout" style="overflow-x:auto;">
+    <div class="head">Bagging vs Boosting</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr>
+          <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Feature</th>
+          <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Bagging</th>
+          <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Boosting / AdaBoost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Execution</td><td style="padding:8px;border-bottom:1px solid var(--border);">Parallel, independent models</td><td style="padding:8px;border-bottom:1px solid var(--border);">Sequential, later models depend on earlier mistakes</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Data usage</td><td style="padding:8px;border-bottom:1px solid var(--border);">Bootstrap samples</td><td style="padding:8px;border-bottom:1px solid var(--border);">Same data with adaptive weights</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Main effect</td><td style="padding:8px;border-bottom:1px solid var(--border);">Reduces variance</td><td style="padding:8px;border-bottom:1px solid var(--border);">Often reduces bias and improves margins</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Base learner</td><td style="padding:8px;border-bottom:1px solid var(--border);">Can use deep or unstable learners</td><td style="padding:8px;border-bottom:1px solid var(--border);">Usually simple weak learners, such as stumps</td></tr>
+        <tr><td style="padding:8px;">Noise</td><td style="padding:8px;">More robust to noisy labels</td><td style="padding:8px;">More sensitive to noisy labels and outliers</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -131,14 +192,19 @@
     <li>Calling boosting parallel. It is sequential because later learners depend on earlier mistakes.</li>
     <li>Forgetting the weak learner is chosen using weighted error, not plain error.</li>
     <li>Assuming a classifier with $\epsilon&gt;0.5$ should be trusted as-is. It should be flipped or rejected.</li>
+    <li>Forgetting to normalize sample weights after the update.</li>
+    <li>Assuming more boosting rounds are always safer. More rounds increase complexity and can overfit noise.</li>
     <li>Ignoring noisy labels: boosting can chase them because their weights keep growing.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
-    <li>Explain the AdaBoost loop from weights to weak learner to reweighting.</li>
+    <li>Explain the AdaBoost.M1 loop from uniform weights to weak learner to reweighting.</li>
+    <li>Write the weighted error, classifier coefficient, weight update, and final vote formulas.</li>
     <li>Derive the factorized exponential loss.</li>
     <li>Derive $\alpha_t^*=\frac12\log((1-\epsilon_t)/\epsilon_t)$.</li>
+    <li>Know the population minimizer as half log-odds and the weak-edge training-error bound.</li>
+    <li>Remember the bias-complexity trade-off: more rounds lower approximation error but can raise estimation error.</li>
     <li>Compare bagging and boosting cleanly.</li>
   </ul>
 
@@ -146,8 +212,11 @@
   <ul>
     <li>I know boosting is sequential.</li>
     <li>I know hard examples get larger weights.</li>
-    <li>I can write $F_t=F_{t-1}+\alpha_t f_t$.</li>
+    <li>I can write the final vote $G(x)=\operatorname{sign}(\sum_m\alpha_mG_m(x))$.</li>
+    <li>I can compute $err_m$ using sample weights.</li>
     <li>I can derive or recognize the AdaBoost $\alpha_t$ formula.</li>
+    <li>I can explain why $err_m&gt;0.5$ implies a negative coefficient.</li>
+    <li>I remember Viola-Jones as an AdaBoost feature-selection application.</li>
     <li>I remember boosting is more noise-sensitive than bagging.</li>
   </ul>
 </section>
@@ -159,8 +228,9 @@
       <p class="topic-lede">Boosting 是 Lecture 8 末尾的 sequential ensemble 思想。AdaBoost 通过不断加入 weak classifiers，专门修正当前 ensemble 处理不好的样本，最后组成 strong classifier。</p>
 
       <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
-      <p>AdaBoost 会维护 training examples 的 weights。初始时每个样本同权；每加入一个 weak classifier，被错分的样本权重变大，下一轮 weak learner 会更关注它们。</p>
-      <p>最终 classifier 是 additive vote：$F_T(x)=\sum_t \alpha_t f_t(x)$。更准确的 weak learner 会有更大的 voting weight。</p>
+      <p>AdaBoost 是一种 <b>sequential ensemble</b>：把很多只比 random guessing 稍微好一点的 weak learners 组合成一个 strong classifier。</p>
+      <p>它会维护 training examples 的 weights。初始时每个样本同权；每加入一个 weak classifier，被错分的样本权重变大，下一轮 weak learner 会更关注它们。</p>
+      <p>最终 classifier 是 weighted majority vote。每个 weak learner 都投票，但更可靠的 learner 会有更大的 coefficient。</p>
 
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>Boosting 像一个拿着错题本的老师。你错过的题会被圈出来、加粗、下一轮继续练。</p>
@@ -168,46 +238,79 @@
 
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>Bagging 通过 averaging independent learners 降低 variance；Boosting 通过 sequential correction 降低 bias，让每个新 learner 盯着当前 ensemble 的弱点。</p>
-      <p>AdaBoost 可以从 exponential loss 推出来。Sample weights 本质上是在强调 margin $y_iF(x_i)$ 小或为负的样本。</p>
+      <p>AdaBoost 可以看成 forward stagewise additive model，用一轮一轮加 weak learner 的方式最小化 exponential loss。Sample weights 本质上是在强调 margin $y_iF(x_i)$ 小或为负的样本。</p>
+      <div class="callout">
+        <div class="head">AdaBoost.M1 loop</div>
+        <ol>
+          <li><b>Initialize.</b> 所有 observation weights 设成 $w_i^{(1)}=1/N$。</li>
+          <li><b>Fit.</b> 用当前 weights 训练 weak classifier $G_m(x)$。</li>
+          <li><b>Measure.</b> 计算 weighted error $err_m$。</li>
+          <li><b>Trust.</b> 把 error 转成 classifier weight $\alpha_m$。</li>
+          <li><b>Reweight.</b> 错分样本权重变大，normalize 后进入下一轮。</li>
+          <li><b>Predict.</b> 最后输出 weighted vote 的 sign。</li>
+        </ol>
+      </div>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Additive ensemble</div>
-          <div class="eq">$ F_t(x)=F_{t-1}(x)+\alpha_t f_t(x) $</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F_t(x)$ 是第 $t$ 轮后的 ensemble score；$F_{t-1}(x)$ 是加入新 learner 前的 score；$f_t(x)$ 是第 $t$ 个 weak learner；$\alpha_t$ 是它的 voting weight。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Boosting 是一轮一轮往当前 score 里加 weak learner，每一轮都在修补当前 ensemble 的薄弱点。</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每轮更新 score，二分类 $\{-1,+1\}$ 时最后用 $\operatorname{sign}(F_T(x))$ 做 prediction。</p>
+          <div class="eq">$$ F_m(x)=F_{m-1}(x)+\alpha_m G_m(x) $$</div>
+          <div class="eq">$$ G(x)=\operatorname{sign}\!\left(F_M(x)\right)=\operatorname{sign}\!\left(\sum_{m=1}^{M}\alpha_mG_m(x)\right) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F_m(x)$ 是第 $m$ 轮后的 ensemble score；$G_m(x)$ 是第 $m$ 个 weak classifier；$\alpha_m$ 是它的 voting weight；$M$ 是 boosting rounds 总数。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> AdaBoost 不是简单平均 classifiers，而是把每个 weak learner 的 signed weighted vote 加起来，最后看总分正负。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对新点 $x$，先让所有 weak learners 预测，分别乘 $\alpha_m$，求和；总和为正预测 $+1$，为负预测 $-1$。</p>
         </div>
         <div class="callout formula">
-          <div class="head">Exponential loss</div>
-          <div class="eq">$ L(F)=\frac1m\sum_{i=1}^m \exp(-y_iF(x_i)) $</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $m$ 是 training examples 数量；$y_i\in\{-1,+1\}$ 是真实 label；$F(x_i)$ 是 ensemble score；$y_iF(x_i)$ 是 margin，正值表示分类正确且有信心，负值表示错分。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Exponential loss 会特别惩罚 margin 小或为负的样本，所以这些样本会主导下一轮学习。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 $y_iF(x_i)<0$，样本被错分，$\exp(-y_iF(x_i))$ 会很大；下一轮就要更关注它。</p>
-        </div>
-        <div class="callout formula">
-          <div class="head">Example weights</div>
-          <div class="eq">$ w_i=\exp(-y_iF_{t-1}(x_i)) $</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i$ 是第 $i$ 个样本在第 $t$ 轮前的 weight；$F_{t-1}$ 是加入新 learner 前的 ensemble；weight 越大，下一轮越需要关心这个样本。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weight 是当前 margin 的 exponential transform。当前分得越差，weight 越大。</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这些 weights 训练下一轮 weak classifier，让它更努力处理之前分错或低置信度的样本。</p>
+          <div class="head">Weighted error</div>
+          <div class="eq">$$ err_m=\frac{\sum_{i=1}^{N}w_i\,\mathbf{1}\!\left[y_i\ne G_m(x_i)\right]}{\sum_{i=1}^{N}w_i} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i$ 是第 $i$ 个样本当前的 weight；$\mathbf{1}[\cdot]$ 是 indicator，条件成立为 1，否则为 0；$N$ 是 training examples 数量。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 它不是普通 error rate，而是“错分样本占了多少总权重”。难样本权重大，所以错一个难样本代价更高。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把所有错分样本的 weights 加起来，除以总 weight，再用这个 $err_m$ 计算 $\alpha_m$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Classifier coefficient</div>
-          <div class="eq">$ \alpha_t^*=\frac12\log\frac{1-\epsilon_t}{\epsilon_t} $</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\epsilon_t$ 是第 $t$ 个 weak learner 的 weighted error；$\alpha_t$ 是它在 ensemble 里的 coefficient；log 里比较的是正确权重质量 $1-\epsilon_t$ 和错误权重质量 $\epsilon_t$。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weak learner 越准，$\alpha_t$ 越大。若 $\epsilon_t=0.5$，它和 random guess 差不多，所以 $\alpha_t=0$。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 weighted error，再代入 log 公式，把 $\alpha_t$ 放进 ensemble update。若 $\epsilon_t<0.5$，则 $\alpha_t>0$。</p>
+          <div class="eq">$$ \alpha_m=\frac12\log\frac{1-err_m}{err_m} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $err_m$ 是第 $m$ 个 weak learner 的 weighted error；$\alpha_m$ 是它在 ensemble 里的 coefficient；log 里比较的是正确权重质量 $1-err_m$ 和错误权重质量 $err_m$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 若 $err_m&lt;0.5$，则 $\alpha_m&gt;0$，说明 learner 比 random guessing 好；若 $err_m=0.5$，$\alpha_m=0$；若 $err_m&gt;0.5$，$\alpha_m&lt;0$，相当于 flip 它的预测方向。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 weighted error，再代入 log。注意边界：$err_m\to0$ 时 $\alpha_m$ 会非常大。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Exponential loss</div>
+          <div class="eq">$$ L(F)=\frac1N\sum_{i=1}^N \exp(-y_iF(x_i)) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$ 是 training examples 数量；$y_i\in\{-1,+1\}$ 是真实 label；$F(x_i)$ 是 ensemble score；$y_iF(x_i)$ 是 margin，正值表示分类正确且有信心，负值表示错分。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Exponential loss 会特别惩罚 margin 小或为负的样本，所以这些样本会主导下一轮学习。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 $y_iF(x_i)<0$，样本被错分，$\exp(-y_iF(x_i))$ 会很大；下一轮就要更关注它。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Example weights</div>
+          <div class="eq">$$ w_i^{(m)}=\exp(-y_iF_{m-1}(x_i)) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(m)}$ 是第 $i$ 个样本在第 $m$ 轮前的 weight；$F_{m-1}$ 是加入新 learner 前的 ensemble；weight 越大，下一轮越需要关心这个样本。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weight 是当前 margin 的 exponential transform。当前分得越差，weight 越大。</p>
+
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这些 weights 训练下一轮 weak classifier，让它更努力处理之前分错或低置信度的样本。</p>
         </div>
         <div class="callout formula wide">
-          <div class="head">Weight update after round $t$</div>
-          <div class="eq">$ w_i^{(t+1)}\propto w_i^{(t)}\exp\!\left(-\alpha_t y_i f_t(x_i)\right) $</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(t)}$ 是旧 sample weight；$\alpha_t$ 是 classifier weight；$y_if_t(x_i)=+1$ 表示预测正确，$-1$ 表示预测错误；$\propto$ 表示更新后还要 normalize。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 预测正确时权重乘 $e^{-\alpha_t}$ 变小；预测错误时权重乘 $e^{\alpha_t}$ 变大。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新所有 sample weights，normalize 到总和为 1，再训练下一轮 weak learner。</p>
+          <div class="head">Weight update after round $m$</div>
+          <div class="eq">$$ w_i^{(m+1)}\propto w_i^{(m)}\exp\!\left(-\alpha_m y_i G_m(x_i)\right) $$</div>
+          <div class="eq">$$ w_i\leftarrow w_i\exp\!\left(\alpha_m\mathbf{1}[y_i\ne G_m(x_i)]\right),\quad\text{normalize} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(m)}$ 是旧 sample weight；$\alpha_m$ 是 classifier weight；$y_iG_m(x_i)=+1$ 表示预测正确，$-1$ 表示预测错误；$\propto$ 表示更新后还要 normalize。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 预测正确时权重乘 $e^{-\alpha_m}$ 变小；预测错误时权重乘 $e^{\alpha_m}$ 变大。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新所有 sample weights，normalize 到总和为 1，再训练下一轮 weak learner。如果 algorithm box 写成 indicator version，就按同一个操作理解：错分样本先被 scale up，再 normalize。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Population minimizer of exponential loss</div>
+          <div class="eq">$$ f^*(x)=\frac12\log\frac{\Pr(Y=1\mid x)}{\Pr(Y=-1\mid x)} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f^*(x)$ 是 exponential loss 下最优的 real-valued score；$\Pr(Y=1\mid x)$ 和 $\Pr(Y=-1\mid x)$ 是两个 class posterior probabilities。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 最优 score 是 log-odds 的一半。score 为正表示 $+1$ 更可能，为负表示 $-1$ 更可能。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这解释了为什么最终用 $\operatorname{sign}(F(x))$ 做 classifier：sign 对应 posterior 更大的类别。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Weak-edge training bound</div>
+          <div class="eq">$$ L_S(h_T)\le \exp(-2\gamma^2T) $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $L_S(h_T)$ 是 $T$ 轮后的 training error；$\gamma$ 是 weak learner 的 edge，即每轮满足 $err_t\le 1/2-\gamma$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 只要每个 weak learner 都稳定地比 random guessing 好一点，training error 就会随 rounds 指数下降。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 理论题先写 weak edge assumption，再写 error 随 $T$ 的 exponential decay。</p>
         </div>
       </div>
 
@@ -227,13 +330,39 @@
         <div class="example-source">来源：HW2 Problem 5.2(d-e)，题意转述。</div>
         <p>固定 weak classifier 后，loss 正比于 $(1-\epsilon)e^{-\alpha}+\epsilon e^\alpha$。令导数为 0 得 $e^{2\alpha}=(1-\epsilon)/\epsilon$，所以 $\alpha^*=\frac12\log((1-\epsilon)/\epsilon)$。</p>
       </div>
+      <div class="callout example">
+        <div class="head">Example D · Viola-Jones face detector</div>
+        <div class="example-source">来源：Lecture 8 application context。</div>
+        <p>Viola-Jones 用 AdaBoost 从大量 rectangle box filters 里选出有用 features。考试不需要展开图像处理细节，重点是：boosting 可以把很多简单 feature tests 选出来并加权，组成快速 face detector。</p>
+      </div>
 
       <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>识别 boosting：</b> sequential training、reweighted examples、weighted votes。</div>
-        <div><b>推 AdaBoost：</b> 把 sum 拆成 correct predictions 和 incorrect predictions 两部分。</div>
-        <div><b>解释 $\alpha_t$：</b> 若 $\epsilon&lt;0.5$，则 $\alpha_t&gt;0$；若 $\epsilon=0.5$，它基本没贡献。</div>
-        <div><b>比较题：</b> 一定提 boosting 对 noise 更敏感。</div>
+        <div><b>推 AdaBoost：</b> 把 sum 拆成 correct predictions 和 incorrect predictions，再把 wrong side 写成 weighted error。</div>
+        <div><b>解释 $\alpha_m$：</b> $err&lt;0.5$ 是 positive vote，$err=0.5$ 没贡献，$err&gt;0.5$ 要 flip 或 reject。</div>
+        <div><b>理论题：</b> 提 weak edge $\gamma$，再写 training error 的 exponential bound。</div>
+        <div><b>比较题：</b> 一定提 boosting 对 noise 更敏感，且 later models 依赖 earlier mistakes。</div>
+      </div>
+
+      <div class="callout" style="overflow-x:auto;">
+        <div class="head">Bagging vs Boosting</div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Feature</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Bagging</th>
+              <th style="text-align:left;border-bottom:1px solid var(--border);padding:8px;">Boosting / AdaBoost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Execution</td><td style="padding:8px;border-bottom:1px solid var(--border);">Parallel，models independent</td><td style="padding:8px;border-bottom:1px solid var(--border);">Sequential，后面依赖前面错在哪里</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Data usage</td><td style="padding:8px;border-bottom:1px solid var(--border);">Bootstrap samples</td><td style="padding:8px;border-bottom:1px solid var(--border);">同一批数据，但 adaptive reweighting</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Main effect</td><td style="padding:8px;border-bottom:1px solid var(--border);">主要降低 variance</td><td style="padding:8px;border-bottom:1px solid var(--border);">通常降低 bias、改善 margins</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Base learner</td><td style="padding:8px;border-bottom:1px solid var(--border);">可用较深、较不稳定的 learners</td><td style="padding:8px;border-bottom:1px solid var(--border);">通常用简单 weak learners，例如 stumps</td></tr>
+            <tr><td style="padding:8px;">Noise</td><td style="padding:8px;">对 noisy labels 更 robust</td><td style="padding:8px;">对 noisy labels / outliers 更 sensitive</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -241,14 +370,19 @@
         <li>把 boosting 说成 parallel；它是 sequential，因为后一轮依赖前一轮错误。</li>
         <li>忘记 weak learner 是按 weighted error 选择，不是 plain error。</li>
         <li>以为 $\epsilon&gt;0.5$ 的 classifier 可以直接信任；通常要 flip 或 reject。</li>
+        <li>忘记每轮 weight update 后要 normalize。</li>
+        <li>以为 boosting rounds 越多一定越安全；rounds 增多会提高 complexity，遇到 noise 可能 overfit。</li>
         <li>忽略 noisy labels：boosting 会反复追着它们，因为它们的 weights 不断变大。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
       <ul>
-        <li>能解释 AdaBoost 从 weights 到 weak learner 再到 reweighting 的循环。</li>
+        <li>能解释 AdaBoost.M1 从 uniform weights 到 weak learner 再到 reweighting 的循环。</li>
+        <li>能写 weighted error、classifier coefficient、weight update、final vote 四个公式。</li>
         <li>能推导 factorized exponential loss。</li>
         <li>能推导 $\alpha_t^*=\frac12\log((1-\epsilon_t)/\epsilon_t)$。</li>
+        <li>知道 population minimizer 是 half log-odds，也知道 weak-edge training-error bound。</li>
+        <li>记得 bias-complexity trade-off：更多 rounds 降 approximation error，但可能提高 estimation error。</li>
         <li>能清楚比较 bagging 和 boosting。</li>
       </ul>
 
@@ -256,8 +390,11 @@
       <ul>
         <li>我知道 boosting 是 sequential。</li>
         <li>我知道 hard examples 会得到更大 weights。</li>
-        <li>我能写 $F_t=F_{t-1}+\alpha_t f_t$。</li>
+        <li>我能写 final vote：$G(x)=\operatorname{sign}(\sum_m\alpha_mG_m(x))$。</li>
+        <li>我能用 sample weights 计算 $err_m$。</li>
         <li>我能识别 / 推出 AdaBoost 的 $\alpha_t$ 公式。</li>
+        <li>我能解释为什么 $err_m&gt;0.5$ 会得到 negative coefficient。</li>
+        <li>我记得 Viola-Jones 是 AdaBoost 的 feature-selection application。</li>
         <li>我记得 boosting 比 bagging 更 noise-sensitive。</li>
       </ul>
     </section>

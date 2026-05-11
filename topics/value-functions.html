@@ -53,6 +53,7 @@
   <p>A <b>state value</b> $V^\pi(s)$ asks: if the agent starts in state $s$ and follows policy $\pi$, what discounted return should it expect?</p>
   <p>An <b>action value</b> $Q^\pi(s,a)$ asks: if the agent starts in state $s$, takes action $a$ first, and then follows $\pi$, what discounted return should it expect?</p>
   <p>Policy evaluation means computing these values for a fixed policy.</p>
+  <p>These definitions assume the <b>Markov property</b>: once the current state and action are known, the future does not depend on the earlier history. If the observed state hides important information, as in a POMDP, the same Bellman equations may fail unless the state representation is expanded.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>$V(s)$ is the score of standing in a place. $Q(s,a)$ is the score of standing there and taking one specific first action.</p>
@@ -61,13 +62,21 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>The difference between $V$ and $Q$ is whether the first action is already fixed. Once the first action is fixed, the rest of the future is still controlled by the policy $\pi$.</p>
   <p>This is why value functions connect directly to Bellman equations: current value equals immediate reward plus discounted expected value of future states.</p>
+  <p>When $P(s'\mid s,a)$ and $R(s,a)$ are known, value functions can be solved with model-based dynamic programming. When the model is unknown, methods like Q-learning replace expectations with sampled transitions. In large state spaces, a table is replaced by a function approximator such as $q(s,a,w)\approx q^*(s,a)$.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula">
+      <div class="head">Discounted return recursion</div>
+      <div class="eq">$$ G_t=r_t+\gamma G_{t+1}=\sum_{k=0}^{\infty}\gamma^k r_{t+k} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> G_t: return starting at time t; r_t: reward at time t; gamma: discount factor; G_{t+1}: return from the next time step</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Today's return is today's reward plus a discounted copy of tomorrow's return.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For finite episodes, set terminal return to 0 and compute backward: last reward first, then move left through the trajectory.</p>
+    </div>
+    <div class="callout formula">
       <div class="head">State value</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^π(s): value of state s under π； E: average over random actions/transitions； γ^t r_t: discounted reward at time t； S_0=s: start from state s</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^pi(s): value of state s under policy pi; E: average over random actions/transitions; gamma^t r_t: discounted reward at time t; S_0=s: start from state s</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> V^π(s) asks: starting from state s and following policy π, how much discounted reward should I expect?</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use V to score states. Bellman backups replace a next state by its value V^π(s').</p>
@@ -75,14 +84,14 @@
     <div class="callout formula">
       <div class="head">Action value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s,A_0=a\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^π(s,a): value of action a in state s under π； A_0=a: first action is fixed to a； S_0=s: start state is s</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^pi(s,a): value of action a in state s under policy pi; A_0=a: first action is fixed to a; S_0=s: start state is s</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Q^π(s,a) asks: starting in state s, first take action a, then follow π; what return should I expect?</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Q to compare actions in the same state. A greedy policy chooses the action with largest Q.</p>
     </div>
     <div class="callout formula">
       <div class="head">Relationship under a policy</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}_{a\sim\pi(\cdot\mid s)}[Q^\pi(s,a)] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> a ~ π(·|s): sample an action from π at state s； Q^π(s,a): value of that action； E: weighted average over actions</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> a ~ pi(.|s): sample an action from pi at state s; Q^pi(s,a): value of that action; E: weighted average over actions</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> State value is the policy-weighted average of action values in that state.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to convert between V and Q. For deterministic π, it becomes V^π(s)=Q^π(s,π(s)).</p>
@@ -90,14 +99,48 @@
     <div class="callout formula">
       <div class="head">Bellman evaluation equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> R(s,a): immediate reward； s' ~ P(·|s,a): next state sampled from dynamics； γ E[V^π(s')]: discounted average future value</p>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> R(s,a): immediate reward; s' ~ P(.|s,a): next state sampled from dynamics; pi(a'|s'): next action probability under policy pi; gamma E[V^pi(s')]: discounted average future value</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Q equals immediate reward plus discounted expected value of the next state.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to evaluate a known policy: repeatedly update Q or V until both sides agree.</p>
     </div>
     <div class="callout formula wide">
+      <div class="head">Bellman optimality and value iteration</div>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a),\qquad Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s') $$</div>
+      <div class="eq">$$ Q^{(t)}(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q^{(t-1)}(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Star means optimal over all policies; the max chooses the best action; Q^(t) is the table after iteration t.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Optimal value replaces policy averaging with a max. Value iteration repeatedly applies this optimal Bellman backup until the table stabilizes.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Convergence.</b> The Bellman optimality operator is a gamma-contraction in the infinity norm, so repeated backups converge geometrically to a unique optimal fixed point when gamma &lt; 1.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Sampled Q-learning update</div>
+      <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\left[r+\gamma\max_{a'}Q(s',a')-Q(s,a)\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> alpha is the learning rate; r is the observed reward; s' is the observed next state; the bracket is the temporal-difference error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Q-learning uses one sampled transition $(s,a,r,s')$ instead of summing over the full transition model. The max target is greedy, so the method is off-policy even if data is collected with epsilon-greedy exploration.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In Q-table problems, compute the target first, subtract the old value to get the TD error, multiply by alpha, then update that single table entry.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Value bound and advantage</div>
+      <div class="eq">$$ V^*(s),\,Q^*(s,a)\le \frac{R_{\max}}{1-\gamma} $$</div>
+      <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> R_max is an upper bound on one-step reward; A^pi is the advantage of action a over the policy's average action value in state s.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The bound is the best possible geometric series of rewards. Advantage is positive when an action is better than the state baseline and negative when it is worse.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use the bound for sanity checks, and use advantage when a question asks how much better one action is than the policy's average behavior at that state.</p>
+    </div>
+    <div class="callout formula wide" id="eq-value-functions-state-bellman-expectation">
+      <div class="head">State-value Bellman expectation</div>
+      <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\Bigl[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\,V^\pi(s')\Bigr] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;">The Bellman evaluation equation written purely in terms of $V^\pi$ — the form the official RL review and most textbooks use for policy evaluation. Same content as the $Q$-form above, just with the action expectation pushed inside.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>Symbols.</b> $V^\pi(s)$: expected discounted return from state $s$ following policy $\pi$. $\pi(a\mid s)$: probability the policy chooses action $a$ in state $s$. $R(s,a)$: immediate reward. $P(s'\mid s,a)$: environment transition probability. $\gamma\in[0,1)$: discount factor. The two sums build a nested expectation — outer over actions chosen by the policy, inner over next states chosen by the dynamics.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Two layers of averaging: first weight each action by how often $\pi$ would pick it, then weight each successor state by transition probability. The bracketed term is the one-step lookahead from $(s,a)$; multiplying by $\pi(a\mid s)$ and summing gives the lookahead from $s$ alone.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> This is your <i>policy evaluation</i> equation in V-form: in tabular MDPs, repeatedly apply the right-hand side as an update until $V^\pi$ stops changing. To switch to the optimality version, replace the action sum $\sum_a\pi(a\mid s)$ with $\max_a$, giving $V^*(s)=\max_a[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')]$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>Connection to other entries.</b> Use $V^\pi(s)=\sum_a\pi(a\mid s)Q^\pi(s,a)$ to switch between $V$ and $Q$ forms; combine with the matrix form $V^\pi=R^\pi+\gamma P^\pi V^\pi$ to get a single linear system $V^\pi=(I-\gamma P^\pi)^{-1}R^\pi$ for finite MDPs.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Where it shows up.</b> Final review's policy-evaluation slide writes this exact form; HW5 §2 (Bellman backups under stochastic policy); the prerequisite for value iteration / policy iteration / DP backups in the next two pages.</p>
+    </div>
+    <div class="callout formula wide">
       <div class="head">Matrix form for finite MDPs</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi,\qquad V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^π: vector of all state values； R^π: reward vector under π； P^π: transition matrix under π； I: identity matrix</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^pi: vector of all state values; R^pi: reward vector under pi; P^pi: transition matrix under pi; I: identity matrix</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For finite states and fixed π, all Bellman equations form one linear system.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it when P^π and R^π are known: solve directly instead of iterating.</p>
     </div>
@@ -120,6 +163,11 @@
       <p class="example-source">Source: HW5, Section 2.</p>
       <p>For infinite horizon with discount, $Q^\pi(s,a)$ fixes the first transition, then averages over stochastic next states and future actions chosen by $\pi$.</p>
     </div>
+    <div>
+      <h4>Example 4 · One Q-table update</h4>
+      <p class="example-source">Source: Q-learning numerical practice, paraphrased.</p>
+      <p>Suppose $Q(s,a)=2$, observed reward $r=1$, $\gamma=0.9$, $\max_{a'}Q(s',a')=4$, and $\alpha=0.5$. The target is $1+0.9\cdot4=4.6$, the TD error is $4.6-2=2.6$, and the updated entry is $2+0.5\cdot2.6=3.3$.</p>
+    </div>
   </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
@@ -128,7 +176,10 @@
     <li>If the question fixes the first action, use $Q^\pi(s,a)$.</li>
     <li>If the policy is stochastic, average Q-values using action probabilities.</li>
     <li>For Bellman evaluation, peel off the first reward and put the rest into $V^\pi(s')$.</li>
+    <li>For a reward trajectory, compute discounted returns backward with $G_t=r_t+\gamma G_{t+1}$.</li>
     <li>For finite matrix form, identify $P^\pi$ and $R^\pi$ induced by the policy.</li>
+    <li>For model-based questions, use the sums over $P(s'\mid s,a)$. For model-free questions, expect sampled transitions and Q-learning-style TD updates.</li>
+    <li>For policy iteration, remember the loop: evaluate the current policy, improve it greedily, repeat.</li>
   </ol>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -137,14 +188,21 @@
     <li>Forgetting that $Q^\pi(s,a)$ fixes only the first action, then follows $\pi$.</li>
     <li>Using $\max_a Q^\pi(s,a)$ during policy evaluation; max belongs to optimality, not fixed-policy evaluation.</li>
     <li>Dropping the expectation over stochastic transitions.</li>
+    <li>Applying Bellman equations to an observation that is not Markov. If the state hides needed history, the value function may be ill-defined for that observation alone.</li>
+    <li>Calling Q-learning on-policy. Its target uses $\max_{a'}Q(s',a')$, so it learns a greedy target while behavior may be exploratory.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
     <li>Memorize definitions of $V^\pi$ and $Q^\pi$.</li>
     <li>Know $V^\pi(s)=\mathbb{E}_{a\sim\pi}[Q^\pi(s,a)]$.</li>
+    <li>Hand-compute discounted returns backward from the end of an episode.</li>
     <li>Derive the Bellman evaluation equation by splitting first reward plus future return.</li>
     <li>Recognize the finite MDP matrix equation $V^\pi=R^\pi+\gamma P^\pi V^\pi$.</li>
+    <li>Write Bellman optimality equations for $V^*$ and $Q^*$.</li>
+    <li>Explain value iteration convergence through the gamma-contraction idea.</li>
+    <li>Apply one or two Q-learning updates in a Q-table.</li>
+    <li>Know the value bound $R_{\max}/(1-\gamma)$ and the advantage definition $A^\pi=Q^\pi-V^\pi$.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -153,7 +211,11 @@
     <li>$Q$: state plus first action score under policy.</li>
     <li>Evaluation uses fixed $\pi$.</li>
     <li>Optimality uses max over actions.</li>
+    <li>Return recursion: $G_t=r_t+\gamma G_{t+1}$.</li>
     <li>Discounted return is the long-term target.</li>
+    <li>Model-based uses $P$ and $R$; model-free learns from samples.</li>
+    <li>Q-learning target: $r+\gamma\max_{a'}Q(s',a')$.</li>
+    <li>Markov state is the assumption behind the Bellman recursion.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -167,6 +229,7 @@
   <p><b>State value</b> $V^\pi(s)$ 问：agent 从 state $s$ 出发并遵循 policy $\pi$，期望 discounted return 是多少？</p>
   <p><b>Action value</b> $Q^\pi(s,a)$ 问：agent 从 $s$ 出发，第一步先做 action $a$，之后遵循 $\pi$，期望 discounted return 是多少？</p>
   <p><b>Policy evaluation</b> 就是固定一个 policy，然后计算这些 values。</p>
+  <p>这些定义默认满足 <b>Markov property</b>：给定当前 state 和 action 后，未来不再依赖更早的 history。如果观察值隐藏了关键信息，比如 POMDP，那么只用当前 observation 写 Bellman equation 可能不再可靠，除非把 state representation 扩充完整。</p>
 
   <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
   <p>$V(s)$ 是“站在这个位置整体前景如何？” $Q(s,a)$ 是“站在这里，如果第一步先这么走，前景如何？”</p>
@@ -175,9 +238,17 @@
   <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
   <p>$V$ 和 $Q$ 的区别只在于第一步 action 是否被固定。第一步固定之后，后面的动作仍然按 policy $\pi$ 走。</p>
   <p>这就是它们能写成 Bellman equation 的原因：当前 value = immediate reward + discounted future value。</p>
+  <p>如果 $P(s'\mid s,a)$ 和 $R(s,a)$ 已知，就是 model-based dynamic programming；如果不知道环境模型，就用 Q-learning 这类 model-free 方法从 sampled transitions 更新。状态空间很大时，通常不再存 table，而是用 function approximation，例如 $q(s,a,w)\approx q^*(s,a)$。</p>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
+    <div class="callout formula">
+      <div class="head">Discounted return recursion</div>
+      <div class="eq">$$ G_t=r_t+\gamma G_{t+1}=\sum_{k=0}^{\infty}\gamma^k r_{t+k} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> G_t: 从 t 时刻开始的 return；r_t: t 时刻 reward；γ: discount factor；G_{t+1}: 下一时刻开始的 return</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 今天的 return = 今天拿到的 reward + 打折后的明天 return。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 有限 episode 手算时，把 terminal return 设为 0，从最后一个 reward 往前倒推。</p>
+    </div>
     <div class="callout formula">
       <div class="head">State value</div>
       <div class="eq">$$ V^\pi(s)=\mathbb{E}\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid \pi,S_0=s\right] $$</div>
@@ -204,9 +275,43 @@
     <div class="callout formula">
       <div class="head">Bellman evaluation equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^\pi(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> R(s,a): 即时奖励；s' ~ P(·|s,a): 下一状态由环境转移采样；γ E[V^π(s')]: 折扣后的平均未来价值</p>
+      <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> R(s,a): 即时奖励；s' ~ P(·|s,a): 下一状态由环境转移采样；π(a'|s'): policy 在 next state 选 action a' 的概率；γ E[V^π(s')]: 折扣后的平均未来价值</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Q 等于“即时奖励 + 下一状态未来价值的折扣期望”。这是固定策略下的一步自洽方程。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用来评估已知策略：反复更新 Q 或 V，直到公式左右两边基本一致。</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Bellman optimality 与 value iteration</div>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a),\qquad Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s') $$</div>
+      <div class="eq">$$ Q^{(t)}(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'}Q^{(t-1)}(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 星号表示所有 policies 里最优；max 表示选最好的 action；Q^(t) 是第 t 次 iteration 后的 Q-table。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Optimal value 不再按 policy 平均，而是直接取最优 action。Value iteration 就是不断套这个 optimal Bellman backup，直到 table 稳定。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>收敛性.</b> Bellman optimality operator 在 infinity norm 下是 gamma-contraction，所以当 discount 小于 1 时，反复 backup 会几何收敛到唯一 optimal fixed point。</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Sampled Q-learning update</div>
+      <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\left[r+\gamma\max_{a'}Q(s',a')-Q(s,a)\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> α 是 learning rate；r 是观察到的 reward；s' 是观察到的 next state；中括号是 temporal-difference error。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Q-learning 用一个 sampled transition $(s,a,r,s')$ 代替完整 transition model 上的求和。target 里有 greedy max，所以即使数据来自 ε-greedy exploration，它学的仍是 off-policy greedy target。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Q-table 手算题里，先算 target，再减 old Q 得 TD error，乘 α，只更新当前这个 $(s,a)$ entry。</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Value bound 与 advantage</div>
+      <div class="eq">$$ V^*(s),\,Q^*(s,a)\le \frac{R_{\max}}{1-\gamma} $$</div>
+      <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> R_max 是单步 reward 的上界；A^π 是 action a 相对当前 state 平均水平的 advantage。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 上界来自最乐观的 geometric series；advantage 为正表示这个 action 比 policy 平均表现更好，为负表示更差。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 上界用于 sanity check；题目问“这个 action 比平均好多少”时，用 advantage。</p>
+    </div>
+    <div class="callout formula wide" id="eq-value-functions-state-bellman-expectation-cn">
+      <div class="head">State-value Bellman expectation（V 形式）</div>
+      <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\Bigl[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\,V^\pi(s')\Bigr] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;">完全用 $V^\pi$ 写出的 Bellman evaluation —— RL 官方 review 与多数教材在 policy evaluation 这一节就是用这种写法。和上面 $Q$ 形式的内容相同，只是把对 action 的期望推进了括号里。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>符号.</b> $V^\pi(s)$：在策略 $\pi$ 下从状态 $s$ 出发的折扣期望回报。$\pi(a\mid s)$：策略在状态 $s$ 选动作 $a$ 的概率。$R(s,a)$：即时奖励。$P(s'\mid s,a)$：环境转移概率。$\gamma\in[0,1)$：折扣因子。两个 $\sum$ 构成嵌套 expectation —— 外层对 policy 选出的 actions 平均，内层对 dynamics 转移到的 next states 平均。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 两层加权平均：先把每个动作按 $\pi$ 的选取概率加权，再把每个后续 state 按转移概率加权。中括号里的项是 $(s,a)$ 的一步前瞻；乘以 $\pi(a\mid s)$ 再求和就是 $s$ 的一步前瞻。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 这就是 V 形式的 <i>policy evaluation</i> 方程：tabular MDP 中反复用右边作为更新，直到 $V^\pi$ 不再变化。要切到 optimality 版本，把 action 求和 $\sum_a\pi(a\mid s)$ 换成 $\max_a$，得到 $V^*(s)=\max_a[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')]$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>与其他公式的关系.</b> 用 $V^\pi(s)=\sum_a\pi(a\mid s)Q^\pi(s,a)$ 在 V 与 Q 形式间切换；与 matrix form $V^\pi=R^\pi+\gamma P^\pi V^\pi$ 配合，对有限 MDP 可以一步求出 $V^\pi=(I-\gamma P^\pi)^{-1}R^\pi$。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>典型出处.</b> Final review 的 policy evaluation slide 写的就是这一行；HW5 §2（stochastic policy 下的 Bellman backup）；后面 value iteration / policy iteration / DP backup 两页的前置依赖。</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Finite MDP 的 matrix form</div>
@@ -234,6 +339,11 @@
       <p class="example-source">出处：HW5, Section 2。</p>
       <p>infinite horizon discount setting 中，$Q^\pi(s,a)$ 固定第一步 transition，之后对 stochastic next states 和 policy 选择的 future actions 做 expectation。</p>
     </div>
+    <div>
+      <h4>例 4 · 一次 Q-table update</h4>
+      <p class="example-source">出处：Q-learning 数值题练习，题意转述。</p>
+      <p>假设 $Q(s,a)=2$，观察到 reward $r=1$，$\gamma=0.9$，$\max_{a'}Q(s',a')=4$，$\alpha=0.5$。target 是 $1+0.9\cdot4=4.6$，TD error 是 $4.6-2=2.6$，新表项是 $2+0.5\cdot2.6=3.3$。</p>
+    </div>
   </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
@@ -242,7 +352,10 @@
     <li>固定第一步 action，用 $Q^\pi(s,a)$。</li>
     <li>stochastic policy 下，用 action probabilities 对 Q-values 加权平均。</li>
     <li>推 Bellman evaluation 时，把 first reward 单独拆出来，剩下写成 $V^\pi(s')$。</li>
+    <li>给一条 reward trajectory 时，用 $G_t=r_t+\gamma G_{t+1}$ 从 episode 末尾往前算 discounted returns。</li>
     <li>finite matrix form 里先找 policy-induced $P^\pi$ 和 $R^\pi$。</li>
+    <li>model-based 题用 $P(s'\mid s,a)$ 上的求和；model-free 题通常给 sampled transition，用 Q-learning / TD update。</li>
+    <li>Policy iteration 的循环是：evaluate 当前 policy，greedy improve，再重复。</li>
   </ol>
 
   <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -251,14 +364,21 @@
     <li>忘记 $Q^\pi(s,a)$ 只固定第一步 action，之后还是 follow $\pi$。</li>
     <li>policy evaluation 时用了 $\max_a Q^\pi(s,a)$；max 是 optimality，不是 fixed-policy evaluation。</li>
     <li>漏掉 stochastic transition 上的 expectation。</li>
+    <li>把非 Markov observation 直接当 state 用 Bellman equation；如果 state 缺 history，value 可能对当前 observation 本身并不 well-defined。</li>
+    <li>把 Q-learning 说成 on-policy；它的 target 用 $\max_{a'}Q(s',a')$，所以 behavior 可以探索，但 target 是 greedy。</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
   <ul>
     <li>默写 $V^\pi$ 和 $Q^\pi$ 定义。</li>
     <li>知道 $V^\pi(s)=\mathbb{E}_{a\sim\pi}[Q^\pi(s,a)]$。</li>
+    <li>能从 episode 末尾往前手算 discounted returns。</li>
     <li>能从 first reward + future return 推 Bellman evaluation equation。</li>
     <li>认识 finite MDP matrix equation：$V^\pi=R^\pi+\gamma P^\pi V^\pi$。</li>
+    <li>会写 $V^*$ 和 $Q^*$ 的 Bellman optimality equations。</li>
+    <li>能用 gamma-contraction 解释 value iteration 收敛。</li>
+    <li>会在 Q-table 里连续做 1-2 次 Q-learning update。</li>
+    <li>记住 value bound $R_{\max}/(1-\gamma)$ 和 advantage 定义 $A^\pi=Q^\pi-V^\pi$。</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -267,7 +387,11 @@
     <li>$Q$：policy 下的 state + first action score。</li>
     <li>Evaluation 固定 $\pi$。</li>
     <li>Optimality 才对 action 取 max。</li>
+    <li>Return recursion：$G_t=r_t+\gamma G_{t+1}$。</li>
     <li>长期目标是 discounted return。</li>
+    <li>Model-based 用 $P,R$；model-free 从 samples 学。</li>
+    <li>Q-learning target：$r+\gamma\max_{a'}Q(s',a')$。</li>
+    <li>Bellman recursion 背后的假设是 Markov state。</li>
   </ul>
 </section>
 </div><!--/cn-only-->

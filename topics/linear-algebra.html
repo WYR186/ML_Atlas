@@ -54,9 +54,10 @@
     <p>Linear algebra is the language for working with feature vectors, model weights, and gradients. In ML you constantly write $w^\top x$, $X^\top X$, $\nabla f$, $\nabla^2 f$ — all of those are objects this section formalizes.</p>
     <p>The handful of definitions you really need:</p>
     <ul>
-      <li><b>Vector / matrix</b>: $x\in\mathbb{R}^d$ is an ordered list; $A\in\mathbb{R}^{m\times n}$ is an operator $\mathbb{R}^n\to\mathbb{R}^m$.</li>
+      <li><b>Vector / matrix</b>: vectors are column vectors by default; $x\in\mathbb{R}^d$ is an ordered list and $x^\top$ is its row transpose. $A\in\mathbb{R}^{m\times n}$ is an operator $\mathbb{R}^n\to\mathbb{R}^m$.</li>
       <li><b>Dot product</b> $x^\top y=\sum_i x_iy_i$ — the scalar measure of similarity / projection.</li>
       <li><b>Norm</b>: $\|x\|_2=\sqrt{x^\top x}$, $\|x\|_1=\sum_i|x_i|$, $\|x\|_\infty=\max_i|x_i|$.</li>
+      <li><b>Trace / determinant</b>: $\mathrm{Tr}(A)$ adds diagonal entries; $\det(A)$ multiplies eigenvalues and tells whether a square matrix is invertible.</li>
       <li><b>Rank, column space, null space</b>: how many independent directions $A$ has, where it sends inputs, and what it sends to zero.</li>
       <li><b>Eigen / SVD</b>: $Au=\lambda u$ and $X=U\Sigma V^\top$ — the canonical "what does this matrix really do" decompositions.</li>
       <li><b>Symmetric, PSD, PD</b>: $A=A^\top$, with $x^\top Ax\ge 0$ (PSD) or $>0$ (PD) — the way we test convexity of a loss.</li>
@@ -97,8 +98,8 @@
     </div>
 
     <div class="callout formula"><div class="head">$\ell_p$ Norms</div>
-      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\|x\|_2$ is the Euclidean / L2 norm; $\|x\|_1$ is the L1 (Manhattan / taxicab) norm; $\|x\|_\infty$ is the largest absolute coordinate. All are non-negative; zero iff $x=0$.</p>
+      <div class="eq">$$ \|x\|_p=\left(\sum_i |x_i|^p\right)^{1/p},\quad \|A\|_F=\sqrt{\sum_{i,j}A_{ij}^2}=\sqrt{\mathrm{Tr}(A^\top A)} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $p\ge 1$ chooses the vector norm family. $\|x\|_2=\sqrt{x^\top x}$ is Euclidean / L2; $\|x\|_1=\sum_i|x_i|$ is L1 (Manhattan / taxicab); $\|x\|_\infty=\max_i|x_i|$ is the largest absolute coordinate. $\|A\|_F$ is the Frobenius norm, the L2 length of all matrix entries flattened into one vector.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> A norm is "length." L2 = round ball; L1 = diamond ball (corners on the axes — that's why L1 sets weights exactly to zero); $\ell_\infty$ = box.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> As regularizers ($\lambda\|w\|_2^2$ or $\lambda\|w\|_1$ added to the loss), as distances ($\|x-y\|$), or as size measures of gradients / weights. L2 is differentiable; L1 is not at zero.</p>
     </div>
@@ -110,6 +111,13 @@
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Annotate every matrix in your derivation with its shape, then trace through to verify. Useful identities: $(AB)^\top=B^\top A^\top$; $(AB)C=A(BC)$ (associative); matrix multiplication is <i>not</i> commutative.</p>
     </div>
 
+    <div class="callout formula"><div class="head">Trace & Determinant</div>
+      <div class="eq">$$ \mathrm{Tr}(ABC)=\mathrm{Tr}(BCA)=\mathrm{Tr}(CAB),\qquad \det(A)=\prod_i \lambda_i $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathrm{Tr}(A)$ is the sum of diagonal entries of a square matrix. $\det(A)$ is the determinant, defined for square matrices. $\lambda_i$ are eigenvalues of $A$, counted with multiplicity.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Trace can rotate factors cyclically, which is why matrix-calculus derivations often move terms around inside $\mathrm{Tr}(\cdot)$. The determinant is the signed volume scaling of the linear map.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> A square matrix is singular exactly when $\det(A)=0$, equivalently at least one eigenvalue is zero. In exams, use cyclic trace to rewrite a scalar into a form where the derivative with respect to the target variable is obvious.</p>
+    </div>
+
     <div class="callout formula"><div class="head">Rank-Nullity</div>
       <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathrm{Col}(A)$ = column space (subspace of $\mathbb{R}^m$ that $A$ can hit). $\mathrm{Ker}(A)$ = null space = $\{v:Av=0\}$ (subspace of $\mathbb{R}^n$ that $A$ kills). $\dim$ counts the basis size of each. $n$ is the input dimension.</p>
@@ -118,17 +126,24 @@
     </div>
 
     <div class="callout formula"><div class="head">Eigen Equation</div>
-      <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{n\times n}$ (must be square). $u$ is an <b>eigenvector</b> — a non-zero direction that $A$ leaves pointing the same way. $\lambda$ is the matching <b>eigenvalue</b> — how much $u$ gets stretched. For symmetric $A$, all $\lambda$ are real and $u$'s can be chosen orthonormal.</p>
+      <div class="eq">$$ Au=\lambda u,\qquad A=Q\Lambda Q^\top\ \text{when } A=A^\top $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{n\times n}$ (must be square). $u$ is an <b>eigenvector</b> — a non-zero direction that $A$ leaves pointing the same way. $\lambda$ is the matching <b>eigenvalue</b> — how much $u$ gets stretched. For symmetric $A$, all $\lambda$ are real and $u$'s can be chosen orthonormal; $Q$ stores those orthonormal eigenvectors and $\Lambda$ stores the eigenvalues on the diagonal.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Eigenvectors are the "natural axes" of $A$ — along them, $A$ acts like simple scalar multiplication. In the eigenbasis the matrix is diagonal, and matrix powers / inverses become elementwise.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Solve $\det(A-\lambda I)=0$ for $\lambda$, then $(A-\lambda I)u=0$ for each eigenvector. PCA: top eigenvector of the covariance matrix = direction of maximum variance.</p>
     </div>
 
     <div class="callout formula"><div class="head">Reduced SVD</div>
       <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X\in\mathbb{R}^{n\times d}$ is any matrix; $r=\mathrm{rank}(X)$. $U, V$ have orthonormal columns ($U^\top U=I$, $V^\top V=I$). $\Sigma$ is diagonal with strictly positive <b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X\in\mathbb{R}^{n\times d}$ is any real matrix, square or rectangular; $r=\mathrm{rank}(X)$. $U, V$ have orthonormal columns ($U^\top U=I$, $V^\top V=I$). $\Sigma$ is diagonal with strictly positive <b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$. Columns of $U$ are eigenvectors of $XX^\top$; columns of $V$ are eigenvectors of $X^\top X$; $\sigma_i=\sqrt{\lambda_i(X^\top X)}$.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Every matrix is "rotate ($V^\top$) → stretch along orthonormal axes ($\Sigma$) → rotate ($U$)." Singular values measure how much $X$ stretches each axis.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Pseudo-inverse: $X^+=V\Sigma^{-1}U^\top$ (works even when $X$ isn't square or invertible). Low-rank approximation: keep top-$k$ singular values to compress / denoise. PCA: $V$'s columns are principal directions, singular values squared / $n$ = variances.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Moore-Penrose pseudo-inverse: $X^\dagger=X^+=V\Sigma^{-1}U^\top$ (works even when $X$ isn't square or invertible). Low-rank approximation: keep top-$k$ singular values to compress / denoise. PCA: $V$'s columns are principal directions, singular values squared / $n$ = variances.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">PCA from Covariance</div>
+      <div class="eq">$$ \bar X=X-\mu\mathbf{1}^\top,\qquad \Sigma_x=\frac{1}{N}\bar X\bar X^\top,\qquad u_1=\arg\max_{\|u\|=1}u^\top\Sigma_xu $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Here examples are columns. $\mu$ is the sample mean vector, $\bar X$ is centered data, $\Sigma_x$ is the covariance matrix, and $u_1$ is the first principal component. If a dataset stores examples as rows, the same formula appears with transposes.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> PCA first moves the cloud so its mean is at the origin, then finds the unit direction $u$ where the projected data has maximum variance $u^\top\Sigma_xu$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Center first, compute covariance, then take eigenvectors with the largest eigenvalues. The Lagrangian for the constrained maximization $\|u\|=1$ gives $\Sigma_xu=\lambda u$, which is why PCA is an eigenvalue problem.</p>
     </div>
 
     <div class="callout formula"><div class="head">Quadratic Form & PSD</div>
@@ -136,6 +151,20 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A\in\mathbb{R}^{n\times n}$ symmetric ($A=A^\top$). The quadratic form is a scalar. <b>PSD</b> ($A\succeq 0$): $x^\top Ax\ge 0$ for all $x$. <b>PD</b> ($A\succ 0$): $x^\top Ax>0$ for all $x\ne 0$.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> $x^\top Ax$ is the "energy" of $x$ measured through $A$. PSD means the energy is never negative — geometrically, the surface $f(x)=x^\top Ax$ is a bowl (PD: strict bowl with unique bottom).</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Equivalent tests: all eigenvalues $\ge 0$ (PSD) or $>0$ (PD); $A=B^\top B$ for some $B$ (PSD); leading principal minors $>0$ (PD). Used to certify a Hessian, hence to certify a loss is convex.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Special Matrices & Gram PSD</div>
+      <div class="eq">$$ Q^\top Q=QQ^\top=I,\qquad K=XX^\top,\qquad z^\top Kz=\|X^\top z\|_2^2\ge 0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $Q$ is an orthogonal matrix. $K$ is a Gram matrix, whose entries are pairwise dot products: $K_{ij}=x_i^\top x_j$ when rows of $X$ are data vectors. $z$ is any test vector for PSD.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Orthogonal matrices are rigid rotations / reflections: they preserve lengths and angles. A Gram matrix is a table of similarities, and it is always PSD because every quadratic form becomes a squared norm.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use $Q^\top=Q^{-1}$ to simplify expressions with rotations. Use the Gram PSD proof in kernel methods and ridge regression: if a matrix can be written as $XX^\top$ or $X^\top X$, it is automatically PSD.</p>
+    </div>
+
+    <div class="callout formula"><div class="head">Quadratic Geometry</div>
+      <div class="eq">$$ (x-\mu)^\top A(x-\mu)=c,\qquad A=Q\Lambda Q^\top $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mu$ is the center, $A$ is symmetric positive definite, $c>0$ is a level-set value, $Q$ gives eigenvector directions, and $\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_d)$ gives curvature along those directions.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The level set is an ellipsoid. Eigenvectors determine the axes; larger eigenvalues mean stronger curvature, so that axis is shorter.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Axis length is proportional to $1/\sqrt{\lambda_i}$ (more exactly $\sqrt{c/\lambda_i}$). This is the geometry behind Gaussian contours, Mahalanobis distance, and quadratic loss bowls.</p>
     </div>
 
     <div class="callout formula"><div class="head">Sandwich Identity</div>
@@ -149,14 +178,14 @@
       <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Gradient $\nabla f$: column vector of partial derivatives, same length as the input. Hessian $\nabla^2 f$: matrix of second partials, symmetric for nice $f$. Jacobian $J$: rectangular for vector-valued $f:\mathbb{R}^n\to\mathbb{R}^m$, with $J_{ij}=\partial f_i/\partial x_j$.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Conventions vary, but in this course gradients are <i>columns</i>. Track shapes obsessively: a missing transpose collapses your derivation silently. The chain rule for $f:\mathbb{R}^n\to\mathbb{R}^m\to\mathbb{R}^k$ is just $J_{\text{outer}}\,J_{\text{inner}}$ — matrix multiply.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Treat them as the standard "directional derivative machinery": gradient gives the steepest-ascent direction; Hessian gives curvature; Jacobian linearizes a vector-valued map (chain rule = matrix multiply).</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Treat them as the standard "directional derivative machinery": gradient gives the steepest-ascent direction; Hessian gives curvature; Jacobian linearizes a vector-valued map (chain rule = matrix multiply). At a stationary point, a PD Hessian certifies a strict local minimum; PSD certifies local bowl-shaped curvature but may still have flat directions.</p>
     </div>
 
     <div class="callout formula"><div class="head">Useful Derivatives</div>
-      <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a\in\mathbb{R}^d$ is a constant vector; $A\in\mathbb{R}^{d\times d}$ is a constant matrix; $w$ is the variable. The gradient is taken with respect to $w$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The first formula is the multivariable analogue of $(ax)'=a$. The second is the analogue of $(ax^2)'=2ax$ — the $A+A^\top$ shows up because $w^\top Aw=w^\top A^\top w$ depends on the symmetric part of $A$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> If $A$ is symmetric, $\nabla(w^\top A w)=2Aw$ and $\nabla^2=2A$. Combine with the chain rule to differentiate any quadratic / linear loss: for OLS, $L=\tfrac12\|Xw-y\|^2$ has $\nabla L=X^\top(Xw-y)$ and $\nabla^2 L=X^\top X$.</p>
+      <div class="eq">$$ \nabla_x (w^\top x)=w,\quad \nabla_x(x^\top A x)=(A+A^\top)x $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w\in\mathbb{R}^d$ is a constant vector; $A\in\mathbb{R}^{d\times d}$ is a constant matrix; $x$ is the variable. The gradient is taken with respect to $x$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The first formula is the multivariable analogue of $(ax)'=a$. The second is the analogue of $(ax^2)'=2ax$ — the $A+A^\top$ shows up because $x^\top Ax=x^\top A^\top x$ depends on the symmetric part of $A$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> If $A$ is symmetric, $\nabla(x^\top A x)=2Ax$ and $\nabla^2=2A$. Combine with the chain rule to differentiate any quadratic / linear loss: for OLS, $L=\tfrac12\|Xw-y\|^2$ has $\nabla L=X^\top(Xw-y)$ and $\nabla^2 L=X^\top X$.</p>
     </div>
 
   </div>
@@ -197,7 +226,10 @@
       <li><b>To prove convex / PSD</b>, try to write the matrix as $B^\top B$ or $X^\top D X$ with $D\succeq 0$, then expand $v^\top(\cdot)v$ as a sum of squares.</li>
       <li><b>For "$Xw=y$ has a solution"</b>, invoke rank: full row rank ⇒ surjective ⇒ solution exists.</li>
       <li><b>For minimum-norm / SVD problems</b>, split any solution as $w=w_\infty+v$ with $v\in\mathrm{Ker}(X)$; orthogonality gives $\|w\|^2=\|w_\infty\|^2+\|v\|^2$.</li>
-      <li><b>Memorize $\nabla(a^\top w)=a$ and $\nabla(w^\top Aw)=(A+A^\top)w$</b>; everything else composes from chain rule.</li>
+      <li><b>For 2-by-2 eigen problems</b>, compute $\det(A-\lambda I)=0$, solve the quadratic for $\lambda$, then plug each $\lambda$ into $(A-\lambda I)u=0$.</li>
+      <li><b>For PCA derivations</b>, center data first, maximize $u^\top\Sigma_xu$ subject to $\|u\|=1$, and use the Lagrangian to get $\Sigma_xu=\lambda u$.</li>
+      <li><b>For linear-regression closed forms</b>, follow the data layout before memorizing: if the course writes predictions as $X^\top w$, the normal equation gives $w^*=(XX^\top)^{-1}XY$; if predictions are $Xw$, it gives $w^*=(X^\top X)^{-1}X^\top y$.</li>
+      <li><b>Memorize $\nabla_x(w^\top x)=w$ and $\nabla_x(x^\top Ax)=(A+A^\top)x$</b>; everything else composes from chain rule.</li>
       <li><b>Sanity check:</b> gradients are columns, losses are scalars, Hessians are symmetric squares. If shapes don't match, you transposed something.</li>
     </ol>
   </div>
@@ -222,11 +254,14 @@
     <ul>
       <li>Quickly infer dimensions in any backprop / linear-regression expression.</li>
       <li>Use $\nabla^2 f\succeq 0$ to argue convexity, and PD to argue uniqueness.</li>
+      <li>Compute eigenvalues/eigenvectors by hand for a 2-by-2 matrix, including the characteristic equation $\det(A-\lambda I)=0$.</li>
+      <li>Use trace cyclicity and transpose reversal: $\mathrm{Tr}(ABC)=\mathrm{Tr}(BCA)$ and $(AB)^\top=B^\top A^\top$.</li>
       <li>Prove $H=X^\top BX\succeq 0$ via the sandwich $v^\top H v=(Xv)^\top B(Xv)$.</li>
       <li>Write the SVD $X=U\Sigma V^\top$ and pseudo-inverse $X^+=V\Sigma^{-1}U^\top$.</li>
       <li>State the rank ↔ column-space ↔ solvability link for $Xw=y$.</li>
-      <li>Remember: PCA's max-variance direction = top eigenvector of the covariance matrix.</li>
-      <li>Apply $\nabla(a^\top w)=a$ and $\nabla(w^\top Aw)=(A+A^\top)w$.</li>
+      <li>Remember: PCA's max-variance direction = top eigenvector of the centered covariance matrix.</li>
+      <li>Derive the linear-regression normal equation under the course's $X$ convention.</li>
+      <li>Apply $\nabla_x(w^\top x)=w$ and $\nabla_x(x^\top Ax)=(A+A^\top)x$.</li>
     </ul>
   </div>
 
@@ -235,13 +270,15 @@
     <h3>Last-minute recall</h3>
     <ul>
       <li>$A_{m\times n}B_{n\times p}\Rightarrow m\times p$; $(AB)^\top=B^\top A^\top$.</li>
+      <li>$\mathrm{Tr}(ABC)$ rotates cyclically; $\det(A)=0$ means singular.</li>
       <li>Symmetric + all $\lambda\ge 0$ ⇔ PSD; all $\lambda>0$ ⇔ PD.</li>
       <li>$X^\top BX\succeq 0$ when $B\succeq 0$ — sandwich.</li>
       <li>Full row rank ⇒ $Xw=y$ has a solution.</li>
-      <li>SVD $X=U\Sigma V^\top$, pseudo-inverse $V\Sigma^{-1}U^\top$.</li>
-      <li>Eigen $Au=\lambda u$; PCA picks largest $\lambda$ of covariance.</li>
+      <li>SVD $X=U\Sigma V^\top$, pseudo-inverse $X^\dagger=V\Sigma^{-1}U^\top$.</li>
+      <li>Eigen $Au=\lambda u$; symmetric $A=Q\Lambda Q^\top$.</li>
+      <li>PCA must center data; principal components are top eigenvectors of covariance.</li>
       <li>Gradients are columns; Hessians are symmetric squares.</li>
-      <li>$\nabla(a^\top w)=a$; $\nabla(w^\top Aw)=(A+A^\top)w$.</li>
+      <li>$\nabla_x(w^\top x)=w$; $\nabla_x(x^\top Ax)=(A+A^\top)x$.</li>
     </ul>
   </div>
 </section>
@@ -257,9 +294,10 @@
     <p>线性代数是处理特征向量、模型权重和梯度的语言。在 ML 里你会反复写 $w^\top x$、$X^\top X$、$\nabla f$、$\nabla^2 f$——它们都是这一节定义的对象。</p>
     <p>真正必须知道的几条定义：</p>
     <ul>
-      <li><b>向量 / 矩阵</b>：$x\in\mathbb{R}^d$ 是有序数列；$A\in\mathbb{R}^{m\times n}$ 是把 $\mathbb{R}^n\to\mathbb{R}^m$ 的算子。</li>
+      <li><b>向量 / 矩阵</b>：默认向量是列向量；$x\in\mathbb{R}^d$ 是有序数列，$x^\top$ 是它的行形式。$A\in\mathbb{R}^{m\times n}$ 是把 $\mathbb{R}^n\to\mathbb{R}^m$ 的算子。</li>
       <li><b>点积</b> $x^\top y=\sum_i x_iy_i$ —— 相似度 / 投影的标量度量。</li>
       <li><b>范数</b>：$\|x\|_2=\sqrt{x^\top x}$、$\|x\|_1=\sum_i|x_i|$、$\|x\|_\infty=\max_i|x_i|$。</li>
+      <li><b>Trace / determinant</b>：$\mathrm{Tr}(A)$ 是对角线求和；$\det(A)$ 是特征值乘积，用来判断方阵是否可逆。</li>
       <li><b>秩、列空间、零空间</b>：$A$ 有几个独立方向、把输入送到哪、把谁送到 0。</li>
       <li><b>特征 / SVD</b>：$Au=\lambda u$ 与 $X=U\Sigma V^\top$，回答“这个矩阵到底在干什么”。</li>
       <li><b>对称、PSD、PD</b>：$A=A^\top$，且 $x^\top Ax\ge 0$（PSD）或 $>0$（PD）—— 用来判断损失是否凸。</li>
@@ -300,8 +338,8 @@
     </div>
 
     <div class="callout formula"><div class="head">$\ell_p$ 范数</div>
-      <div class="eq">$$ \|x\|_2=\sqrt{x^\top x},\ \|x\|_1=\sum_i|x_i|,\ \|x\|_\infty=\max_i|x_i| $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\|x\|_2$ 欧式 / L2 范数；$\|x\|_1$ L1（曼哈顿 / 出租车）范数；$\|x\|_\infty$ 最大绝对分量。都非负，等于 0 当且仅当 $x=0$。</p>
+      <div class="eq">$$ \|x\|_p=\left(\sum_i |x_i|^p\right)^{1/p},\quad \|A\|_F=\sqrt{\sum_{i,j}A_{ij}^2}=\sqrt{\mathrm{Tr}(A^\top A)} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $p\ge 1$ 决定使用哪种 vector norm。$\|x\|_2=\sqrt{x^\top x}$ 是欧式 / L2；$\|x\|_1=\sum_i|x_i|$ 是 L1（曼哈顿 / 出租车）；$\|x\|_\infty=\max_i|x_i|$ 是最大绝对分量。$\|A\|_F$ 是 Frobenius norm，把矩阵所有元素摊平成一个向量后算 L2 长度。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 范数就是"长度"。L2 = 圆球；L1 = 菱形球（角点落在坐标轴上，所以 L1 才会把权重精确推到 0）；$\ell_\infty$ = 方盒。</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 用作正则项（损失上加 $\lambda\|w\|_2^2$ 或 $\lambda\|w\|_1$）、距离 $\|x-y\|$、或衡量梯度 / 权重的大小。L2 处处可微；L1 在 0 不可微。</p>
     </div>
@@ -313,6 +351,13 @@
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 推导时给每个矩阵标 shape 再追踪。常用恒等式：$(AB)^\top=B^\top A^\top$；$(AB)C=A(BC)$（结合律）。注意：矩阵乘法<i>不</i>满足交换律。</p>
     </div>
 
+    <div class="callout formula"><div class="head">Trace 与 Determinant</div>
+      <div class="eq">$$ \mathrm{Tr}(ABC)=\mathrm{Tr}(BCA)=\mathrm{Tr}(CAB),\qquad \det(A)=\prod_i \lambda_i $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathrm{Tr}(A)$ 是方阵对角线元素之和；$\det(A)$ 是 determinant，只对方阵定义；$\lambda_i$ 是 $A$ 的 eigenvalues（按重数计）。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> Trace 可以循环移动因子，所以矩阵求导里常把项挪到 $\mathrm{Tr}(\cdot)$ 里更好求导。Determinant 可以理解成线性变换对体积的缩放。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 方阵 singular / 不可逆 ⇔ $\det(A)=0$ ⇔ 至少一个 eigenvalue 为 0。考试推导时，用 Trace 的 cyclic property 把标量改写成“变量在最后/最前”的形式，导数会更明显。</p>
+    </div>
+
     <div class="callout formula"><div class="head">秩 - 零度定理</div>
       <div class="eq">$$ \dim\mathrm{Col}(A)+\dim\mathrm{Ker}(A)=n,\ \ A\in\mathbb{R}^{m\times n} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathrm{Col}(A)$ = 列空间（$A$ 能映射到的 $\mathbb{R}^m$ 子空间）；$\mathrm{Ker}(A)$ = 零空间 = $\{v:Av=0\}$（被 $A$ 杀掉的 $\mathbb{R}^n$ 子空间）；$\dim$ 数它们的基个数；$n$ 是输入维度。</p>
@@ -321,17 +366,24 @@
     </div>
 
     <div class="callout formula"><div class="head">特征方程</div>
-      <div class="eq">$$ Au=\lambda u,\qquad u\ne 0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{n\times n}$（必须方阵）；$u$ 是 <b>eigenvector</b>，是 $A$ 不改变方向的非零向量；$\lambda$ 是匹配的 <b>eigenvalue</b>，是 $u$ 被拉伸的倍数。$A$ 对称时所有 $\lambda$ 实数，$u$ 可选成正交单位基。</p>
+      <div class="eq">$$ Au=\lambda u,\qquad A=Q\Lambda Q^\top\ \text{当 } A=A^\top $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{n\times n}$（必须方阵）；$u$ 是 <b>eigenvector</b>，是 $A$ 不改变方向的非零向量；$\lambda$ 是匹配的 <b>eigenvalue</b>，是 $u$ 被拉伸的倍数。$A$ 对称时所有 $\lambda$ 实数，$u$ 可选成正交单位基；$Q$ 装这些正交 eigenvectors，$\Lambda$ 对角线上装 eigenvalues。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> eigenvector 是 $A$ 的"自然轴"，沿它 $A$ 退化成简单的标量乘。换到 eigenbasis 后矩阵变对角，求幂、求逆都变成逐元素的。</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 解 $\det(A-\lambda I)=0$ 求 $\lambda$，再解 $(A-\lambda I)u=0$ 求每个 $u$。PCA：协方差矩阵最大特征值对应的方向 = 最大方差方向。</p>
     </div>
 
     <div class="callout formula"><div class="head">紧凑 SVD</div>
       <div class="eq">$$ X=U\Sigma V^\top,\ \ U\in\mathbb{R}^{n\times r},\ \Sigma\in\mathbb{R}^{r\times r}_{>0},\ V\in\mathbb{R}^{d\times r} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X\in\mathbb{R}^{n\times d}$ 任意矩阵；$r=\mathrm{rank}(X)$。$U, V$ 列正交（$U^\top U=I$，$V^\top V=I$）。$\Sigma$ 对角，<b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X\in\mathbb{R}^{n\times d}$ 是任意实矩阵，可方可不方；$r=\mathrm{rank}(X)$。$U, V$ 列正交（$U^\top U=I$，$V^\top V=I$）。$\Sigma$ 对角，<b>singular values</b> $\sigma_1\ge\sigma_2\ge\dots>0$。$U$ 的列是 $XX^\top$ 的 eigenvectors，$V$ 的列是 $X^\top X$ 的 eigenvectors，$\sigma_i=\sqrt{\lambda_i(X^\top X)}$。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 任意矩阵 = "旋转 ($V^\top$) → 沿正交轴伸缩 ($\Sigma$) → 旋转 ($U$)"。singular value 衡量 $X$ 在每个轴上拉多大。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 伪逆 $X^+=V\Sigma^{-1}U^\top$（即便 $X$ 不方 / 不可逆也能算）；低秩近似——只保留前 $k$ 个奇异值压缩 / 去噪；PCA：$V$ 的列是主方向，singular value 平方除以 $n$ 是各方向方差。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> Moore-Penrose 伪逆 $X^\dagger=X^+=V\Sigma^{-1}U^\top$（即便 $X$ 不方 / 不可逆也能算）；低秩近似——只保留前 $k$ 个奇异值压缩 / 去噪；PCA：$V$ 的列是主方向，singular value 平方除以 $n$ 是各方向方差。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">PCA 与协方差</div>
+      <div class="eq">$$ \bar X=X-\mu\mathbf{1}^\top,\qquad \Sigma_x=\frac{1}{N}\bar X\bar X^\top,\qquad u_1=\arg\max_{\|u\|=1}u^\top\Sigma_xu $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 这里默认样本按列放。$\mu$ 是样本均值向量，$\bar X$ 是 centered data，$\Sigma_x$ 是 covariance matrix，$u_1$ 是第一主成分。若数据按行存，公式会相应转置。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> PCA 先把数据云移到均值为 0，再找一个单位方向 $u$，让投影方差 $u^\top\Sigma_xu$ 最大。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先 center data，再算 covariance，再取最大 eigenvalues 对应的 eigenvectors。带约束 $\|u\|=1$ 的 Lagrangian 推出 $\Sigma_xu=\lambda u$，所以 PCA 本质是 eigenvalue problem。</p>
     </div>
 
     <div class="callout formula"><div class="head">二次型与 PSD</div>
@@ -339,6 +391,20 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A\in\mathbb{R}^{n\times n}$ 对称（$A=A^\top$）；二次型是标量。<b>PSD</b>（$A\succeq 0$）：对所有 $x$ 都有 $x^\top Ax\ge 0$；<b>PD</b>（$A\succ 0$）：对所有 $x\ne 0$ 都有 $x^\top Ax>0$。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> $x^\top Ax$ 是 $x$ 通过 $A$ 测得的"能量"。PSD = 能量永远非负；几何上曲面 $f(x)=x^\top Ax$ 是个碗（PD = 严格碗、唯一底）。</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 等价判定：所有特征值 $\ge 0$（PSD）/ $>0$（PD）；存在 $A=B^\top B$（PSD）；前主子式 $>0$（PD）。用于认证 Hessian，进而认证损失为凸。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">特殊矩阵与 Gram PSD</div>
+      <div class="eq">$$ Q^\top Q=QQ^\top=I,\qquad K=XX^\top,\qquad z^\top Kz=\|X^\top z\|_2^2\ge 0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $Q$ 是 orthogonal matrix；$K$ 是 Gram matrix，元素是两两 dot products：若 $X$ 的行是数据向量，则 $K_{ij}=x_i^\top x_j$；$z$ 是任意测试 PSD 的向量。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> Orthogonal matrix 是刚性旋转 / 镜像，保持长度和角度不变。Gram matrix 是“相似度表”，总是 PSD，因为任意二次型都会变成平方范数。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 用 $Q^\top=Q^{-1}$ 简化带旋转的式子。Kernel methods 和 ridge regression 里常用 Gram PSD：只要矩阵能写成 $XX^\top$ 或 $X^\top X$，它就自动 PSD。</p>
+    </div>
+
+    <div class="callout formula"><div class="head">二次型几何</div>
+      <div class="eq">$$ (x-\mu)^\top A(x-\mu)=c,\qquad A=Q\Lambda Q^\top $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mu$ 是中心，$A$ 是 symmetric positive definite matrix，$c>0$ 是等高线数值，$Q$ 给 eigenvector 方向，$\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_d)$ 给各方向曲率。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 这个 level set 是椭球。eigenvectors 决定椭球轴的方向；eigenvalue 越大，曲率越强，对应轴越短。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 轴长正比于 $1/\sqrt{\lambda_i}$，更精确是 $\sqrt{c/\lambda_i}$。这就是 Gaussian contours、Mahalanobis distance 和二次损失碗形几何的来源。</p>
     </div>
 
     <div class="callout formula"><div class="head">夹心恒等式</div>
@@ -352,14 +418,14 @@
       <div class="eq">$$ \nabla f\in\mathbb{R}^{d},\ \nabla^2 f\in\mathbb{R}^{d\times d},\ J=\frac{\partial f}{\partial x}\in\mathbb{R}^{m\times n} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Gradient $\nabla f$：偏导组成的列向量，长度等于输入维度。Hessian $\nabla^2 f$：二阶偏导组成的矩阵，光滑函数下对称。Jacobian $J$：向量值 $f:\mathbb{R}^n\to\mathbb{R}^m$ 的 $m\times n$ 矩阵，$J_{ij}=\partial f_i/\partial x_j$。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 约定不同，本课中 gradient 是<i>列</i>。盯紧 shape：少一个转置整条推导静悄悄塌掉。$f:\mathbb{R}^n\to\mathbb{R}^m\to\mathbb{R}^k$ 的链式法则就是 $J_{\text{outer}}\,J_{\text{inner}}$ 矩阵乘法。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 当作"方向导数机器"：gradient 给最陡上升方向；Hessian 给曲率；Jacobian 把向量映射线性化（链式法则 = 矩阵乘法）。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 当作"方向导数机器"：gradient 给最陡上升方向；Hessian 给曲率；Jacobian 把向量映射线性化（链式法则 = 矩阵乘法）。在 stationary point 处，PD Hessian 能保证严格局部最小；PSD 说明局部像碗，但可能有平坦方向。</p>
     </div>
 
     <div class="callout formula"><div class="head">常用导数</div>
-      <div class="eq">$$ \nabla_w (a^\top w)=a,\quad \nabla_w(w^\top A w)=(A+A^\top)w $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a\in\mathbb{R}^d$ 常向量；$A\in\mathbb{R}^{d\times d}$ 常矩阵；$w$ 是变量；梯度对 $w$ 取。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 第一条是 $(ax)'=a$ 的多元版本；第二条是 $(ax^2)'=2ax$ 的多元版本——$A+A^\top$ 出现是因为 $w^\top Aw=w^\top A^\top w$ 只取决于 $A$ 的对称部分。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> $A$ 对称时 $\nabla(w^\top Aw)=2Aw$、$\nabla^2=2A$。配合链式法则可微分任意二次 / 线性损失：OLS $L=\tfrac12\|Xw-y\|^2$ 的 $\nabla L=X^\top(Xw-y)$，$\nabla^2 L=X^\top X$。</p>
+      <div class="eq">$$ \nabla_x (w^\top x)=w,\quad \nabla_x(x^\top A x)=(A+A^\top)x $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w\in\mathbb{R}^d$ 是常向量；$A\in\mathbb{R}^{d\times d}$ 是常矩阵；$x$ 是变量；梯度对 $x$ 取。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 第一条是 $(ax)'=a$ 的多元版本；第二条是 $(ax^2)'=2ax$ 的多元版本——$A+A^\top$ 出现是因为 $x^\top Ax=x^\top A^\top x$ 只取决于 $A$ 的对称部分。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> $A$ 对称时 $\nabla(x^\top Ax)=2Ax$、$\nabla^2=2A$。配合链式法则可微分任意二次 / 线性损失：OLS $L=\tfrac12\|Xw-y\|^2$ 的 $\nabla L=X^\top(Xw-y)$，$\nabla^2 L=X^\top X$。</p>
     </div>
 
   </div>
@@ -400,7 +466,10 @@
       <li><b>证凸 / PSD</b>：尝试写成 $B^\top B$ 或 $X^\top D X$（$D\succeq 0$），把 $v^\top(\cdot)v$ 凑成平方和。</li>
       <li><b>“证 $Xw=y$ 有解”</b>：诉诸秩——满行秩 ⇒ 满射 ⇒ 有解。</li>
       <li><b>最小范数 / SVD 类</b>：把任意解写成 $w=w_\infty+v$（$v\in\mathrm{Ker}(X)$），用正交得 $\|w\|^2=\|w_\infty\|^2+\|v\|^2$。</li>
-      <li><b>背两条求导</b>：$\nabla(a^\top w)=a$，$\nabla(w^\top Aw)=(A+A^\top)w$；其他链式法则组合。</li>
+      <li><b>2-by-2 eigen 题</b>：先算 $\det(A-\lambda I)=0$，解二次方程得 $\lambda$，再把每个 $\lambda$ 代回 $(A-\lambda I)u=0$ 求 eigenvector。</li>
+      <li><b>PCA 推导题</b>：先 center data，再最大化 $u^\top\Sigma_xu$ 且约束 $\|u\|=1$，用 Lagrangian 推到 $\Sigma_xu=\lambda u$。</li>
+      <li><b>线性回归闭式解</b>：先看课程的 $X$ 摆法再背公式。若预测写作 $X^\top w$，normal equation 给 $w^*=(XX^\top)^{-1}XY$；若预测写作 $Xw$，则 $w^*=(X^\top X)^{-1}X^\top y$。</li>
+      <li><b>背两条求导</b>：$\nabla_x(w^\top x)=w$，$\nabla_x(x^\top Ax)=(A+A^\top)x$；其他链式法则组合。</li>
       <li><b>自检</b>：梯度是列，损失是标量，Hessian 对称方阵；对不上就是少了转置。</li>
     </ol>
   </div>
@@ -425,11 +494,14 @@
     <ul>
       <li>反向传播 / 线性回归里能一眼判形状。</li>
       <li>用 $\nabla^2 f\succeq 0$ 论凸，用 PD 论唯一。</li>
+      <li>能手算 2-by-2 矩阵的 eigenvalues / eigenvectors，包括 characteristic equation $\det(A-\lambda I)=0$。</li>
+      <li>会用 Trace cyclic property 与转置反序：$\mathrm{Tr}(ABC)=\mathrm{Tr}(BCA)$，$(AB)^\top=B^\top A^\top$。</li>
       <li>用夹心 $v^\top Hv=(Xv)^\top B(Xv)$ 证 $H=X^\top BX\succeq 0$。</li>
       <li>记住 SVD $X=U\Sigma V^\top$ 与伪逆 $X^+=V\Sigma^{-1}U^\top$。</li>
       <li>能说清秩 ↔ 列空间 ↔ $Xw=y$ 是否可解。</li>
-      <li>PCA：最大方差方向 = 协方差最大特征值对应的特征向量。</li>
-      <li>会用 $\nabla(a^\top w)=a$ 与 $\nabla(w^\top Aw)=(A+A^\top)w$。</li>
+      <li>PCA：最大方差方向 = centered covariance 最大特征值对应的特征向量。</li>
+      <li>能按课程的 $X$ convention 推导 linear regression normal equation。</li>
+      <li>会用 $\nabla_x(w^\top x)=w$ 与 $\nabla_x(x^\top Ax)=(A+A^\top)x$。</li>
     </ul>
   </div>
 
@@ -438,13 +510,15 @@
     <h3>最后一刻能默</h3>
     <ul>
       <li>$A_{m\times n}B_{n\times p}\Rightarrow m\times p$；$(AB)^\top=B^\top A^\top$。</li>
+      <li>$\mathrm{Tr}(ABC)$ 可循环移动；$\det(A)=0$ 表示 singular。</li>
       <li>对称且全 $\lambda\ge 0$ ⇔ PSD；全 $\lambda>0$ ⇔ PD。</li>
       <li>$X^\top BX\succeq 0$（$B\succeq 0$ 时）—— 夹心。</li>
       <li>满行秩 ⇒ $Xw=y$ 有解。</li>
-      <li>SVD $X=U\Sigma V^\top$，伪逆 $V\Sigma^{-1}U^\top$。</li>
-      <li>特征 $Au=\lambda u$；PCA 取协方差最大 $\lambda$。</li>
+      <li>SVD $X=U\Sigma V^\top$，伪逆 $X^\dagger=V\Sigma^{-1}U^\top$。</li>
+      <li>特征 $Au=\lambda u$；对称矩阵 $A=Q\Lambda Q^\top$。</li>
+      <li>PCA 必须 center data；主成分是 covariance 的 top eigenvectors。</li>
       <li>梯度是列，Hessian 是对称方阵。</li>
-      <li>$\nabla(a^\top w)=a$；$\nabla(w^\top Aw)=(A+A^\top)w$。</li>
+      <li>$\nabla_x(w^\top x)=w$；$\nabla_x(x^\top Ax)=(A+A^\top)x$。</li>
     </ul>
   </div>
 </section>

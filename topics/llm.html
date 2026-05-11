@@ -52,6 +52,11 @@
     <li><b>Lecture 19</b>: pre-training objective, perplexity, SFT, alignment, LoRA, and limitations.</li>
     <li><b>HW4</b>: positional encoding, attention, multi-head attention, and parameter counting for a decoder-only LLM.</li>
   </ul>
+  <div class="study-box">
+    <p><b>Language modeling.</b> The core supervised-looking task is next-token prediction: estimate $P_\theta(x_t\mid x_1,\ldots,x_{t-1})$ from raw text.</p>
+    <p><b>Token pipeline.</b> Text is first split into subword tokens, often by BPE, which repeatedly merges frequent adjacent token pairs. Token IDs become vectors through a learnable embedding table; position information is added so the Transformer knows order.</p>
+    <p><b>Scaling hypothesis.</b> Much of modern LLM progress comes from scaling model size and training data together, so the same next-token objective supports many emergent capabilities.</p>
+  </div>
 </section>
 
 <section class="topic lesson-section plain" id="llm-plain-en">
@@ -66,6 +71,15 @@
   <div class="study-box">
     <p>Base models are document continuers. Instruction-tuned models are assistants. That distinction is the reason Lecture 19 separates pre-training from post-training.</p>
   </div>
+  <div class="study-box">
+    <p><b>Training pipeline.</b> Pre-training uses self-supervised NLL on massive unlabeled text. SFT then imitates human-written instruction-response pairs. RLHF uses human preferences or rankings to push outputs toward being helpful, honest, and harmless.</p>
+    <p><b>RL view.</b> During LLM reinforcement learning, the state is the prompt plus generated tokens so far, the action is the next token, and the policy is the model's next-token distribution. GRPO-style methods compare multiple completions for the same prompt to estimate relative advantages without a separate value model.</p>
+  </div>
+  <ul class="mini-list">
+    <li><b>Encoder-only models, such as BERT</b>, use bidirectional attention and masked language modeling, which fits classification and language-understanding tasks.</li>
+    <li><b>Decoder-only models, such as GPT</b>, use causal attention and next-token prediction, which fits open-ended generation.</li>
+    <li><b>Vision Transformers</b> split images into patches, treat patches as tokens, and usually need more data than CNNs because they have less built-in locality bias.</li>
+  </ul>
 </section>
 
 <section class="topic lesson-section equations" id="llm-equations-en">
@@ -83,6 +97,14 @@
     <p><b>Symbols.</b> $z_{t,i}$ is the logit for token $i$ at position $t$; $V$ is the vocabulary set; $j\in V$ means the denominator sums over every candidate token.</p>
     <p><b>How to read it.</b> The LM head produces one logit for every vocabulary token. Softmax converts those logits into probabilities.</p>
     <p><b>How to use.</b> To compare two candidate tokens, compare their logits. To compute an actual probability, exponentiate each logit and normalize by the vocabulary-wide sum.</p>
+  </div>
+  <h3>Token embedding plus position</h3>
+  <div class="eq">$$ h_t^{(0)}=E[x_t]+p_t,\qquad E\in\mathbb{R}^{|V|\times D} $$</div>
+  <div class="study-box">
+    <p><b>Symbols.</b> $E$ is the learnable token embedding table, $|V|$ is vocabulary size, $D$ is hidden size, $E[x_t]$ is the row vector for token $x_t$, and $p_t$ is the positional encoding or position embedding for position $t$.</p>
+    <p><b>How to read it.</b> A token ID by itself is just an index. The model starts by turning it into a $D$-dimensional vector and adding order information because self-attention without positions is permutation equivariant.</p>
+    <p><b>Position detail.</b> The original Transformer used fixed sinusoidal signals; many LLMs use learned or rotary variants. The exam-level idea is the same: inject token order.</p>
+    <p><b>How to use.</b> For parameter counts, the input embedding table contributes about $VD$ parameters. If output embeddings are separate, the LM head contributes another $VD$.</p>
   </div>
   <h3>NLL / cross-entropy loss</h3>
   <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
@@ -110,7 +132,14 @@
   <div class="study-box">
     <p><b>Symbols.</b> If $W_0\in\mathbb{R}^{d\times k}$, then $B\in\mathbb{R}^{d\times r}$ and $A\in\mathbb{R}^{r\times k}$. The rank $r$ is much smaller than $d$ or $k$, so the update is cheap.</p>
     <p><b>How to read it.</b> LoRA freezes the original weight $W_0$ and learns a low-rank update $\Delta W$ instead of a full matrix.</p>
-    <p><b>How to use.</b> Parameter count is $dr+rk$ instead of $dk$. This is why LoRA is a parameter-efficient fine-tuning method.</p>
+    <p><b>How to use.</b> Parameter count is $dr+rk$ instead of $dk$. For a square $D\times D$ matrix, some notes write the equivalent convention $\Delta W=AB$ with $A\in\mathbb{R}^{D\times R}$ and $B\in\mathbb{R}^{R\times D}$, giving $2DR$ trainable parameters instead of $D^2$.</p>
+  </div>
+  <h3>Decoder-only parameter count</h3>
+  <div class="eq">$$ N_{\mathrm{params}}\approx L(4D^2+2DF)+2VD $$</div>
+  <div class="study-box">
+    <p><b>Symbols.</b> $L$ is the number of decoder layers, $D$ is hidden size, $F$ is MLP hidden width, and $V$ is vocabulary size.</p>
+    <p><b>How to read it.</b> Each layer has about $4D^2$ attention parameters for $Q,K,V,O$ projections and $2DF$ MLP parameters for the two linear maps. The $2VD$ term counts input and output embedding matrices.</p>
+    <p><b>How to use.</b> This is the HW4-style back-of-the-envelope count. It usually ignores smaller terms such as biases and LayerNorm; if embeddings are tied, the embedding term changes.</p>
   </div>
 </section>
 
@@ -123,8 +152,12 @@
   <p>Interpretation: on average, the model is as uncertain as choosing uniformly among four plausible next tokens.</p>
   <h3>Lecture 18: top-1 under temperature</h3>
   <p>Temperature rescales all logits by $1/T$. The highest logit remains the highest for $T>0$, so greedy top-1 does not change. Sampling behavior does change: small $T$ is sharper; large $T$ is flatter.</p>
+  <h3>Lecture 18: decoding menu</h3>
+  <p>Greedy decoding picks the most likely next token and can fall into repetitive loops. Beam search keeps the best $B$ partial sequences at each step. Top-k and top-p sampling restrict the candidate pool before sampling, trading off coherence and diversity.</p>
   <h3>HW4 §2.4: simplified decoder-only parameter count</h3>
   <p>For the OLMo-style configuration in HW4, the simplified formula $L(4D^2+2DF)+2VD$ gives about 5.45B parameters. This is why the feed-forward width and vocabulary matrices matter so much.</p>
+  <h3>Lecture 19: prompting and in-context learning</h3>
+  <p>Zero-shot prompting gives only the task instruction. Few-shot prompting adds a few input-output examples so the model can infer the pattern without gradient updates. Chain-of-thought prompting asks for intermediate reasoning, which can improve multi-step tasks.</p>
 </section>
 
 <section class="topic lesson-section tips-section" id="llm-tips-en">
@@ -133,8 +166,11 @@
     <li>For training objective questions, start with autoregressive factorization, then take negative log.</li>
     <li>For perplexity, remember "exponential of average NLL."</li>
     <li>For tokenization questions, compare word-level, character-level, and subword BPE tradeoffs.</li>
-    <li>For post-training questions, separate SFT from RLHF: SFT imitates demonstrations; RLHF optimizes preferences.</li>
+    <li>For post-training questions, separate SFT from RLHF: SFT imitates demonstrations; RLHF optimizes preferences, often by treating generation as an MDP over tokens.</li>
     <li>For decoding questions, distinguish choosing a token from changing the probability distribution.</li>
+    <li>Greedy decoding picks the highest-probability token; beam search keeps the best $B$ partial sequences; top-k samples from the $k$ most likely tokens; top-p samples from the smallest set whose cumulative probability reaches $p$.</li>
+    <li>For parameter counts, remember attention $4D^2$, MLP $2DF$, and input/output embeddings $2VD$ under the simplified HW4 convention.</li>
+    <li>For prompting questions, zero-shot means no examples, few-shot means examples in the prompt, and in-context learning means no gradient update.</li>
   </ol>
 </section>
 
@@ -144,6 +180,8 @@
     <li>Calling a base model an instruction follower. A base model is primarily a document continuer.</li>
     <li>Forgetting to mask system/user tokens during SFT loss when the target is assistant-only generation.</li>
     <li>Thinking lower perplexity always means safer or more truthful output. It measures predictive likelihood, not truth.</li>
+    <li>Forgetting that Transformers need position information; token embeddings alone do not encode order.</li>
+    <li>Confusing beam search with sampling. Beam search searches high-likelihood sequences; sampling intentionally injects randomness.</li>
     <li>Sampling from all tokens without top-k/top-p filtering, which can select extremely low-probability nonsense tokens.</li>
     <li>Assuming LoRA updates all weights. It freezes $W_0$ and trains small low-rank matrices.</li>
   </ul>
@@ -155,8 +193,14 @@
     <li>Write the autoregressive probability and NLL loss.</li>
     <li>Compute and interpret perplexity.</li>
     <li>Explain BPE: repeatedly merge frequent token pairs until the vocabulary target is reached.</li>
+    <li>Explain the $V\times D$ embedding table and why positional encoding is needed.</li>
     <li>Explain greedy, sampling, top-k, and top-p decoding.</li>
+    <li>Explain beam search with beam width $B$.</li>
+    <li>Derive the simplified decoder-only parameter count $L(4D^2+2DF)+2VD$.</li>
+    <li>Distinguish encoder-only BERT, decoder-only GPT, and Vision Transformer use cases.</li>
     <li>Compare pre-training, SFT, RLHF, ICL, domain fine-tuning, and LoRA.</li>
+    <li>Map LLM RL terms: state = prompt plus previous tokens, action = next token, policy = generation distribution.</li>
+    <li>Define zero-shot, few-shot, and chain-of-thought prompting.</li>
     <li>List current LLM limitations: context window, hallucination, prompt sensitivity, jailbreaks, and unreliable reasoning.</li>
   </ul>
 </section>
@@ -165,11 +209,17 @@
   <h2>9. Quick Checklist</h2>
   <ul class="mini-list">
     <li>LLM = decoder-only Transformer + next-token prediction.</li>
+    <li>Autoregressive means full sequence probability is a product of next-token probabilities.</li>
     <li>BPE balances vocabulary size and sequence length.</li>
+    <li>Embeddings use a $V\times D$ table, and positional encoding supplies token order.</li>
+    <li>BERT is encoder-only; GPT is decoder-only; ViT treats image patches as tokens.</li>
     <li>LM head maps hidden state to vocabulary logits.</li>
     <li>Perplexity = $\exp(\text{average NLL})$.</li>
-    <li>SFT teaches instruction following; RLHF aligns preferences.</li>
+    <li>Greedy, beam search, top-k, top-p, and temperature are decoding choices.</li>
+    <li>SFT teaches instruction following; RLHF aligns HHH-style preferences.</li>
+    <li>LLM RL treats next-token generation as policy actions.</li>
     <li>LoRA trains low-rank adapters, not the full matrix.</li>
+    <li>Few-shot and chain-of-thought are prompting methods, not gradient updates.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -183,6 +233,11 @@
     <li><b>Lecture 19</b>：pre-training objective、perplexity、SFT、alignment、LoRA、limitations。</li>
     <li><b>HW4</b>：positional encoding、attention、multi-head attention、decoder-only LLM 参数量。</li>
   </ul>
+  <div class="study-box">
+    <p><b>Language modeling.</b> 核心任务是 next-token prediction：从 raw text 中学习 $P_\theta(x_t\mid x_1,\ldots,x_{t-1})$。</p>
+    <p><b>Token pipeline.</b> 文本先通过 BPE 这类 subword tokenizer 切成 tokens；BPE 会反复 merge 最高频的 adjacent token pairs。Token IDs 通过 learnable embedding table 变成向量；再加 positional encoding，让 Transformer 知道 token order。</p>
+    <p><b>Scaling hypothesis.</b> 现代 LLM 的很多能力来自 model size 和 training data 一起 scale up；同一个 next-token objective 在足够规模下会支持很多复杂能力。</p>
+  </div>
 </section>
 
 <section class="topic lesson-section plain" id="llm-plain-cn">
@@ -197,6 +252,15 @@
   <div class="study-box">
     <p>Base model 本质是 document continuer；instruction-tuned model 才更像 assistant。这就是 Lecture 19 要区分 pre-training 和 post-training 的原因。</p>
   </div>
+  <div class="study-box">
+    <p><b>Training pipeline.</b> Pre-training 在 massive unlabeled text 上做 self-supervised NLL；SFT 用人工 instruction-response pairs 做 imitation；RLHF 用 human preferences / rankings 把输出推向 helpful、honest、harmless。</p>
+    <p><b>RL view.</b> LLM reinforcement learning 里，state 是 prompt 加已经生成的 tokens，action 是 next token，policy 是模型的 next-token distribution。GRPO-style methods 会比较同一个 prompt 的多个 completions，用组内相对分数估计 advantage，不单独训练 value model。</p>
+  </div>
+  <ul class="mini-list">
+    <li><b>Encoder-only model，比如 BERT</b>：用 bidirectional attention 和 masked language modeling，适合 classification / NLU。</li>
+    <li><b>Decoder-only model，比如 GPT</b>：用 causal attention 和 next-token prediction，适合开放式 generation。</li>
+    <li><b>Vision Transformer / ViT</b>：把 image 切成 patches，当成 tokens 交给 Transformer encoder；因为少了 CNN 那种 locality inductive bias，通常更吃数据。</li>
+  </ul>
 </section>
 
 <section class="topic lesson-section equations" id="llm-equations-cn">
@@ -214,6 +278,14 @@
     <p><b>符号.</b> $z_{t,i}$ 是位置 $t$ 上 token $i$ 的 logit；$V$ 是 vocabulary set；$j\in V$ 表示分母要对所有候选 token 求和。</p>
     <p><b>怎么理解.</b> LM head 会对 vocabulary 里的每个 token 给一个 logit，softmax 把这些 logits 转成概率分布。</p>
     <p><b>怎么用.</b> 比较两个候选 token 时看 logits 大小；要算真实概率时，对每个 logit 取 exp，再除以整个 vocabulary 的 exp 总和。</p>
+  </div>
+  <h3>Token embedding plus position</h3>
+  <div class="eq">$$ h_t^{(0)}=E[x_t]+p_t,\qquad E\in\mathbb{R}^{|V|\times D} $$</div>
+  <div class="study-box">
+    <p><b>符号.</b> $E$ 是 learnable token embedding table；$|V|$ 是 vocabulary size；$D$ 是 hidden size；$E[x_t]$ 是 token $x_t$ 对应的 row vector；$p_t$ 是第 $t$ 个位置的 positional encoding / position embedding。</p>
+    <p><b>怎么理解.</b> Token ID 本身只是一个 index。模型先把它查表变成 $D$ 维向量，再加上位置信息，因为没有 position 的 self-attention 对 token order 是 permutation equivariant。</p>
+    <p><b>Position detail.</b> 原始 Transformer 用 fixed sinusoidal signals；很多 LLM 使用 learned 或 rotary variants。考试层面的核心相同：给模型注入顺序信息。</p>
+    <p><b>怎么用.</b> 算参数量时，input embedding table 大约贡献 $VD$ 个参数。如果 output embeddings / LM head 不共享，还要再算一个 $VD$。</p>
   </div>
   <h3>NLL / cross-entropy loss</h3>
   <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
@@ -241,7 +313,14 @@
   <div class="study-box">
     <p><b>符号.</b> 如果 $W_0\in\mathbb{R}^{d\times k}$，则 $B\in\mathbb{R}^{d\times r}$，$A\in\mathbb{R}^{r\times k}$。$r$ 远小于 $d,k$，所以更新很便宜。</p>
     <p><b>怎么理解.</b> LoRA 冻结原始权重 $W_0$，只学习一个低秩更新 $\Delta W$，而不是重新训练整个大矩阵。</p>
-    <p><b>怎么用.</b> 参数量从完整矩阵的 $dk$ 变成 $dr+rk$。这就是 LoRA parameter-efficient 的原因。</p>
+    <p><b>怎么用.</b> 参数量从完整矩阵的 $dk$ 变成 $dr+rk$。如果是 square $D\times D$ matrix，有些笔记会等价写成 $\Delta W=AB$，其中 $A\in\mathbb{R}^{D\times R}$、$B\in\mathbb{R}^{R\times D}$，trainable parameters 是 $2DR$ 而不是 $D^2$。</p>
+  </div>
+  <h3>Decoder-only parameter count</h3>
+  <div class="eq">$$ N_{\mathrm{params}}\approx L(4D^2+2DF)+2VD $$</div>
+  <div class="study-box">
+    <p><b>符号.</b> $L$ 是 decoder layers 数量；$D$ 是 hidden size；$F$ 是 MLP hidden width；$V$ 是 vocabulary size。</p>
+    <p><b>怎么理解.</b> 每层 attention 大约有 $4D^2$ 参数，对应 $Q,K,V,O$ 四个 projection；MLP 有 $2DF$ 参数，对应两层 linear maps；$2VD$ 是 input/output embedding matrices。</p>
+    <p><b>怎么用.</b> 这是 HW4 风格的 quick parameter count。通常忽略 bias、LayerNorm 等小项；如果 input/output embeddings tied，embedding 那项会改变。</p>
   </div>
 </section>
 
@@ -254,8 +333,12 @@
   <p>解释：平均来说，模型像是在 4 个同样可能的 token 中猜。</p>
   <h3>Lecture 18：temperature 会不会改变 top-1?</h3>
   <p>Temperature 只是把所有 logits 除以同一个正数 $T$。最大 logit 仍然最大，所以 greedy top-1 不变。但 sampling 会变：小 $T$ 更尖锐，大 $T$ 更平。</p>
+  <h3>Lecture 18：decoding menu</h3>
+  <p>Greedy decoding 每一步选最可能的 next token，容易陷入 repetition。Beam search 每一步保留 top $B$ 条 partial sequences。Top-k 和 top-p sampling 先限制候选集合再采样，用 coherence 和 diversity 做 tradeoff。</p>
   <h3>HW4 §2.4：decoder-only 参数量估算</h3>
   <p>HW4 的 OLMo-style 配置代入 $L(4D^2+2DF)+2VD$，约为 5.45B parameters。这说明 FFN width 和 vocabulary matrices 都是参数大头。</p>
+  <h3>Lecture 19：prompting 和 in-context learning</h3>
+  <p>Zero-shot prompt 只给任务要求；few-shot prompt 在 prompt 里给几个 input-output examples，让模型不用 gradient update 也能推断模式；chain-of-thought prompt 要求模型写出 intermediate reasoning，常能提升 multi-step reasoning tasks。</p>
 </section>
 
 <section class="topic lesson-section tips-section" id="llm-tips-cn">
@@ -264,8 +347,11 @@
     <li>训练目标题：先写 autoregressive factorization，再取 negative log。</li>
     <li>Perplexity 记住一句：average NLL 的指数。</li>
     <li>Tokenization 题：比较 word-level、character-level、subword BPE 的 tradeoff。</li>
-    <li>Post-training 题：SFT 是模仿 demonstrations；RLHF 是优化 human preferences。</li>
+	    <li>Post-training 题：SFT 是模仿 demonstrations；RLHF 是优化 human preferences，常把 generation 看成 token-level MDP。</li>
     <li>Decoding 题：区分“怎么选 token”和“概率分布如何改变”。</li>
+    <li>Greedy 每步选最高概率 token；beam search 保留 top $B$ 条 partial sequences；top-k 在概率最高的 $k$ 个 tokens 里采样；top-p 在 cumulative probability 达到 $p$ 的最小候选集合里采样。</li>
+    <li>参数量题记住 attention $4D^2$、MLP $2DF$、input/output embeddings $2VD$ 这个 HW4 简化口径。</li>
+    <li>Prompting 题：zero-shot 没有 examples，few-shot 有 prompt examples，in-context learning 不做 gradient update。</li>
   </ol>
 </section>
 
@@ -275,6 +361,8 @@
     <li>把 base model 当成 instruction follower。base model 主要是 document continuer。</li>
     <li>SFT 时忘记 mask system/user tokens，只应该让 assistant target 部分产生主要 loss。</li>
     <li>以为 perplexity 低就代表更安全、更真实。它只衡量 predictive likelihood，不衡量 truth。</li>
+    <li>忘记 Transformer 需要 position information；只有 token embeddings 不能表达顺序。</li>
+    <li>把 beam search 和 sampling 混为一谈。Beam search 是找 high-likelihood sequences；sampling 是主动加入 randomness。</li>
     <li>无过滤地从全部 tokens 采样，可能抽到极低概率的奇怪 token。</li>
     <li>以为 LoRA 更新整张矩阵。LoRA 是冻结 $W_0$，训练低秩矩阵 $A,B$。</li>
   </ul>
@@ -286,8 +374,14 @@
     <li>会写 autoregressive probability 和 NLL loss。</li>
     <li>会计算并解释 perplexity。</li>
     <li>会解释 BPE：反复 merge 高频 token pair，直到达到目标 vocabulary size。</li>
+    <li>会解释 $V\times D$ embedding table，以及为什么需要 positional encoding。</li>
     <li>会区分 greedy、sampling、top-k、top-p decoding。</li>
-    <li>会比较 pre-training、SFT、RLHF、ICL、domain fine-tuning、LoRA。</li>
+    <li>会解释 beam search 和 beam width $B$。</li>
+    <li>会推 simplified decoder-only parameter count：$L(4D^2+2DF)+2VD$。</li>
+    <li>会区分 encoder-only BERT、decoder-only GPT、Vision Transformer 的使用场景。</li>
+	    <li>会比较 pre-training、SFT、RLHF、ICL、domain fine-tuning、LoRA。</li>
+	    <li>会映射 LLM RL：state = prompt + previous tokens，action = next token，policy = generation distribution。</li>
+    <li>会定义 zero-shot、few-shot 和 chain-of-thought prompting。</li>
     <li>会列 current LLM limitations：context window、hallucination、prompt sensitivity、jailbreaks、unreliable reasoning。</li>
   </ul>
 </section>
@@ -296,11 +390,17 @@
   <h2>9. 速记清单 / Quick Checklist</h2>
   <ul class="mini-list">
     <li>LLM = decoder-only Transformer + next-token prediction。</li>
+    <li>Autoregressive 表示 sequence probability 是一串 next-token probabilities 的乘积。</li>
     <li>BPE 平衡 vocabulary size 和 sequence length。</li>
+    <li>Embeddings 用 $V\times D$ table；positional encoding 提供 token order。</li>
+    <li>BERT 是 encoder-only；GPT 是 decoder-only；ViT 把 image patches 当 tokens。</li>
     <li>LM head 把 hidden state 映射到 vocabulary logits。</li>
     <li>Perplexity = $\exp(\text{average NLL})$。</li>
-    <li>SFT 教 instruction following；RLHF 做 preference alignment。</li>
+    <li>Greedy、beam search、top-k、top-p、temperature 都是 decoding choices。</li>
+	    <li>SFT 教 instruction following；RLHF 对齐 HHH-style preferences。</li>
+	    <li>LLM RL 把 next-token generation 当成 policy actions。</li>
     <li>LoRA 训练 low-rank adapters，不训练整张矩阵。</li>
+    <li>Few-shot 和 chain-of-thought 是 prompting methods，不是 gradient updates。</li>
   </ul>
 </section>
 </div><!--/cn-only-->

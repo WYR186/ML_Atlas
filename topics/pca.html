@@ -50,7 +50,7 @@
 
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>PCA projects unlabeled data into a lower-dimensional subspace. The first principal component is the unit direction with maximum projected variance; later components are orthogonal directions with the next largest variances.</p>
-  <p>The method solves dimension reduction, compression, visualization, and feature-construction problems. The crucial first step is centering the data.</p>
+  <p>The method solves dimension reduction, data compression, visualization, and feature extraction problems. Common examples include 2D/3D visualization, eigenfaces-style image features, and noise reduction. The crucial first step is centering the data.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Imagine shining a flashlight on a cloud of points and looking at its shadow. PCA chooses the angle where the shadow is spread out the most, because that shadow preserves the most structure.</p>
@@ -59,6 +59,10 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Variance measures how much data changes along a direction. A direction with high variance carries more signal about how examples differ from one another.</p>
   <p>The optimization becomes an eigenvalue problem: maximizing $w^\top\Sigma w$ subject to $\|w\|=1$ picks the eigenvector of the covariance matrix with the largest eigenvalue. SVD computes the same subspace efficiently in practice.</p>
+  <div class="callout intuition">
+    <div class="head">Two equivalent motivations</div>
+    <p><b>Variance view:</b> choose directions where projected data spreads out the most. <b>Reconstruction view:</b> choose a low-dimensional subspace so projecting down and reconstructing back loses as little squared distance as possible. These two views lead to the same principal components.</p>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -66,39 +70,57 @@
       <div class="head">Centering</div>
       <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$: number of data points; $x^{(i)}$: the $i$-th original data vector in $\mathbb{R}^d$; $\mu$: the sample mean, or the center of the point cloud; $\bar x^{(i)}$: the centered version of point $i$</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Find the center of the point cloud, then rewrite every point as an offset from that center. PCA should describe spread around the mean, not the mean's location.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For hand problems, average each coordinate separately, subtract that vector from every sample, and only then form the covariance matrix.</p>
     </div>
     <div class="callout formula">
       <div class="head">Empirical covariance</div>
       <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\bar X$: matrix whose columns are centered examples $\bar x^{(i)}$; $\Sigma$: covariance matrix; its diagonal entries are variances; $\bar x^{(i)}\bar x^{(i)\top}$: outer product showing how coordinates of one point move together</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The covariance matrix summarizes the shape of the centered cloud: large diagonal entries mean large variance along coordinates, and off-diagonal entries show coordinates moving together.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> With columns-as-examples, multiply $\bar X\bar X^\top$ and divide by $N$. If your convention uses rows as examples, the equivalent formula is $\bar X^\top\bar X/N$.</p>
     </div>
     <div class="callout formula">
       <div class="head">First principal component</div>
       <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w$: a candidate direction vector; $\|w\|_2=1$: unit-length constraint, so scale cannot fake larger variance; $w^\top\Sigma w$: variance of the data after projection onto direction $w$; $\arg\max$: the value of $w$ that makes the expression largest</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Test every unit direction and choose the one whose projected coordinates have the largest variance. The solution is the top eigenvector of $\Sigma$.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a small matrix, solve the eigenvalue problem, sort eigenvalues from largest to smallest, and take the eigenvector attached to the largest eigenvalue as PC1.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Eigenvalues and residual error</div>
+      <div class="eq">$$ |\Sigma-\lambda I|=0,\qquad \Sigma u_k=\lambda_k u_k,\qquad J_L=\sum_{k=L+1}^{d}\lambda_k $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda_k$ is the variance captured by component $u_k$; $I$ is the identity matrix; $L$ is the number of components kept; $J_L$ is the mean squared reconstruction error from discarding the remaining directions.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Eigenvectors give orthogonal principal directions, eigenvalues tell how much variance each direction explains, and discarded eigenvalues are exactly the reconstruction error left behind.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> After sorting $\lambda_1\ge\lambda_2\ge\cdots$, keep the first $L$ vectors and add the rest of the eigenvalues to get the residual error.</p>
     </div>
     <div class="callout formula">
       <div class="head">Projection and reconstruction</div>
       <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: $d\times m$ matrix of selected principal directions; $\hat x$: low-dimensional PCA coordinates in $\mathbb{R}^m$; $\tilde x$: reconstructed approximation back in original space</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Projection records coordinates in the PCA basis after centering. Reconstruction maps those coordinates back into the original feature space and restores the mean.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Always subtract $\mu$ before multiplying by $U^\top$; always add $\mu$ back after multiplying by $U$.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">SVD route</div>
       <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: left singular vectors; PCA directions; $S$: diagonal singular-value matrix; $V^\top$: right singular-vector part; not usually needed for PCA directions; $S^2$: eigenvalues of the covariance matrix under this normalization</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> SVD decomposes the centered data into orthogonal directions and stretch sizes. With the scaled matrix $(1/\sqrt N)\bar X$, the covariance eigenvalues are $s_k^2$; with the unscaled SVD $\bar X=\tilde U\tilde S V^\top$, they are $\tilde s_k^2/N$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In high-dimensional data with $d\gg N$, compute the smaller Gram matrix $\bar X^\top\bar X$ of size $N\times N$ first, then recover data-space principal directions from $\bar X v_k$ and normalize.</p>
     </div>
+  </div>
+  <div class="callout">
+    <div class="head">Step-by-step PCA algorithm</div>
+    <ol>
+      <li>Compute the mean $\mu$.</li>
+      <li>Center every point: $\bar x^{(i)}=x^{(i)}-\mu$.</li>
+      <li>Build the covariance matrix $\Sigma$ from centered data.</li>
+      <li>Solve $|\Sigma-\lambda I|=0$ and find eigenvectors.</li>
+      <li>Sort by eigenvalue and keep the top $L$ principal components.</li>
+      <li>Project with $U^\top(x-\mu)$; reconstruct with $U\hat x+\mu$ if needed.</li>
+    </ol>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
@@ -124,6 +146,10 @@
     <div><b>For 2D hand problems,</b> compute the covariance matrix, then use eigenvectors.</div>
     <div><b>For diagonal covariance,</b> the answer is the axis with the largest diagonal entry.</div>
     <div><b>For reconstruction questions,</b> project with $U^\top(x-\mu)$ and add $\mu$ back at the end.</div>
+    <div><b>If features use different units,</b> standardize to zero mean and unit variance first; otherwise a large-scale feature can dominate PCA.</div>
+    <div><b>To choose $L$,</b> inspect explained eigenvalues with a scree plot; profile likelihood is a more automatic option when covered.</div>
+    <div><b>Whitening / sphering</b> rescales principal coordinates so the transformed data has identity covariance, removing linear correlation and variance scale.</div>
+    <div><b>Variants:</b> Kernel PCA uses the kernel trick for nonlinear variance directions; PPCA treats PCA as a Gaussian latent-variable model and approaches ordinary PCA as noise variance goes to zero.</div>
   </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -132,14 +158,18 @@
     <li>Using raw data instead of centered data.</li>
     <li>Confusing rows-as-examples and columns-as-examples conventions when forming $\Sigma$.</li>
     <li>Thinking PCA uses labels. It is unsupervised.</li>
+    <li>Forgetting that large feature units can dominate unless features are standardized.</li>
+    <li>Mixing SVD normalizations: $\bar X$ gives $\lambda=s^2/N$, while $(1/\sqrt N)\bar X$ gives $\lambda=s^2$.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
     <li>Center a small dataset and compute covariance.</li>
     <li>Solve the max-variance problem via eigenvectors.</li>
+    <li>Explain the equivalent reconstruction-error minimization view.</li>
     <li>Project and reconstruct with $U$ and $\mu$.</li>
     <li>Explain how SVD yields PCA directions.</li>
+    <li>Know residual error is the sum of discarded eigenvalues.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -147,7 +177,9 @@
     <li>I center data before PCA.</li>
     <li>I can write $\max_{\|w\|=1}w^\top\Sigma w$.</li>
     <li>I choose the top eigenvector.</li>
+    <li>Principal components are orthogonal; eigenvalues are variances.</li>
     <li>I know how to project and reconstruct.</li>
+    <li>I know PCA is truncated SVD on centered data.</li>
     <li>I know PCA is unsupervised dimension reduction.</li>
   </ul>
 </section>
@@ -160,7 +192,7 @@
 
       <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
       <p>PCA 把 unlabeled data 投影到低维 subspace。第一主成分是 projected variance 最大的 unit direction；后续主成分是在 orthogonal 约束下继续找剩余最大 variance。</p>
-      <p>它解决 dimension reduction、compression、visualization 和 feature construction 问题。最关键的第一步是 centering。</p>
+      <p>它解决 dimension reduction、compression、visualization、feature extraction 等问题。典型应用包括 2D/3D 可视化、Eigenfaces 风格的图像特征、noise reduction。最关键的第一步是 centering。</p>
 
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>想象你拿手电照一团点云，看它在墙上的影子。PCA 选择那个让影子铺得最开的角度，因为这个影子保留了最多结构。</p>
@@ -169,6 +201,10 @@
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>Variance 衡量数据沿某个方向变化多少。High-variance direction 通常携带更多样本差异的信息。</p>
       <p>优化问题会变成 eigenvalue problem：在 $\|w\|=1$ 下最大化 $w^\top\Sigma w$，会选 covariance matrix 最大 eigenvalue 对应的 eigenvector。实际计算常用 SVD。</p>
+      <div class="callout intuition">
+        <div class="head">两种等价动机</div>
+        <p><b>Variance view:</b> 选择投影后 spread 最大的方向。<b>Reconstruction view:</b> 选择一个低维 subspace，让点投影过去再重建回来时 squared distance loss 最小。两种理解最后得到同一组 principal components。</p>
+      </div>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
@@ -176,39 +212,57 @@
           <div class="head">Centering</div>
           <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$: data points 的数量; $x^{(i)}$: 第 $i$ 个原始数据向量，维度是 $d$; $\mu$: sample mean，也就是点云中心; $\bar x^{(i)}$: centered point，表示点相对均值的位置</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 先找点云中心，再把每个点改写成“相对中心的偏移”。PCA 要看的是围绕 mean 的 spread，不是 mean 自己在空间里的位置。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 手算时每个 coordinate 分别求平均，再从每个 sample 中减掉这个 mean vector，之后才能算 covariance。</p>
         </div>
         <div class="callout formula">
           <div class="head">Empirical covariance</div>
           <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\bar X$: 由 centered examples $\bar x^{(i)}$ 组成的数据矩阵; $\Sigma$: covariance matrix；对角线是各坐标 variance; $\bar x^{(i)}\bar x^{(i)\top}$: outer product，记录一个点各坐标如何一起变化</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Covariance matrix 描述 centered cloud 的形状：diagonal entries 是各坐标 variance，off-diagonal entries 表示两个坐标是否一起变大或变小。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 若约定 columns 是 examples，就算 $\bar X\bar X^\top/N$；如果题目用 rows-as-examples，则对应写成 $\bar X^\top\bar X/N$。</p>
         </div>
         <div class="callout formula">
           <div class="head">First principal component</div>
           <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w$: 候选 direction vector; $\|w\|_2=1$: unit-length constraint，防止靠放大 $w$ 作弊; $w^\top\Sigma w$: 数据投影到 $w$ 方向后的 variance; $\arg\max$: 让这个值最大的那个 $w$</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 在所有 unit directions 里，找 projection variance 最大的方向。解出来就是 $\Sigma$ 的 top eigenvector。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 小矩阵题先解 eigenvalue problem，把 eigenvalues 从大到小排；最大 eigenvalue 对应的 eigenvector 就是 PC1。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Eigenvalues and residual error</div>
+          <div class="eq">$$ |\Sigma-\lambda I|=0,\qquad \Sigma u_k=\lambda_k u_k,\qquad J_L=\sum_{k=L+1}^{d}\lambda_k $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda_k$ 是第 $k$ 个 component 捕捉到的 variance；$I$ 是 identity matrix；$L$ 是保留的 components 数量；$J_L$ 是丢掉剩余 directions 后的 mean squared reconstruction error。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Eigenvectors 给出互相 orthogonal 的 principal directions，eigenvalues 表示每个方向解释多少 variance，被丢掉的 eigenvalues 加起来就是 reconstruction error。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 排好 $\lambda_1\ge\lambda_2\ge\cdots$ 后，保留前 $L$ 个 vectors，剩余 eigenvalues 相加就是 residual error。</p>
         </div>
         <div class="callout formula">
           <div class="head">Projection and reconstruction</div>
           <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: $d\times m$ matrix，列向量是选中的 principal directions; $\hat x$: 低维 PCA coordinates，维度是 $m$; $\tilde x$: 从低维坐标重建回原空间的 approximation</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Projection 是在 center 后，用 PCA basis 记录新坐标；reconstruction 是把低维坐标映回原空间，并把 mean 加回去。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 投影前一定减 $\mu$；重建后一定加 $\mu$。少掉这一步，答案会整体平移错。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">SVD route</div>
           <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: left singular vectors，也就是 PCA directions; $S$: singular values 组成的 diagonal matrix; $V^\top$: right singular vectors；通常不是 PCA direction 本身; $S^2$: 在这个 normalization 下对应 covariance eigenvalues</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> SVD 把 centered data 拆成 orthogonal directions 和 stretch sizes。若对 scaled matrix $(1/\sqrt N)\bar X$ 做 SVD，则 covariance eigenvalues 是 $s_k^2$；若对 unscaled $\bar X=\tilde U\tilde S V^\top$ 做 SVD，则 $\lambda_k=\tilde s_k^2/N$。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当 $d\gg N$ 时，先算更小的 Gram matrix $\bar X^\top\bar X$（$N\times N$），再由 $\bar X v_k$ recover data-space principal direction 并 normalize。</p>
         </div>
+      </div>
+      <div class="callout">
+        <div class="head">PCA 手算流程</div>
+        <ol>
+          <li>计算 mean $\mu$。</li>
+          <li>Center 每个点：$\bar x^{(i)}=x^{(i)}-\mu$。</li>
+          <li>用 centered data 构造 covariance matrix $\Sigma$。</li>
+          <li>解 $|\Sigma-\lambda I|=0$，找 eigenvalues / eigenvectors。</li>
+          <li>按 eigenvalue 从大到小排序，保留前 $L$ 个 principal components。</li>
+          <li>需要压缩就算 $U^\top(x-\mu)$；需要重建就算 $U\hat x+\mu$。</li>
+        </ol>
       </div>
 
       <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
@@ -234,6 +288,10 @@
         <div><b>2D 手算：</b> 算 covariance matrix，再找 eigenvectors。</div>
         <div><b>Diagonal covariance：</b> 最大 diagonal entry 对应的 axis 就是答案。</div>
         <div><b>Reconstruction：</b> 先用 $U^\top(x-\mu)$ 投影，最后一定把 $\mu$ 加回去。</div>
+        <div><b>Feature units 不同：</b> 先 standardize 到 zero mean / unit variance，否则量纲大的 feature 会 dominate PCA。</div>
+        <div><b>选择 $L$：</b> 用 scree plot 看 eigenvalues 的 elbow；如果课程提到 profile likelihood，也可以用它自动找 significant components。</div>
+        <div><b>Whitening / sphering：</b> 把 principal coordinates 再缩放到 covariance 为 identity，去掉 linear correlation 和 variance scale。</div>
+        <div><b>Variants：</b> Kernel PCA 用 kernel trick 找 nonlinear variance directions；PPCA 把 PCA 写成 Gaussian latent-variable model，noise variance $\sigma^2\to0$ 时接近普通 PCA。</div>
       </div>
 
       <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -242,14 +300,18 @@
         <li>用 raw data 直接算 PCA，没有 centering。</li>
         <li>混淆 rows-as-examples 和 columns-as-examples 的 covariance 写法。</li>
         <li>以为 PCA 用 labels；它是 unsupervised。</li>
+        <li>忘记 feature scale：不 standardize 时，大单位 feature 可能支配 principal component。</li>
+        <li>混淆 SVD normalization：对 $\bar X$ 做 SVD 时 $\lambda=s^2/N$；对 $(1/\sqrt N)\bar X$ 做 SVD 时 $\lambda=s^2$。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
       <ul>
         <li>会 center 小数据集并计算 covariance。</li>
         <li>会用 eigenvectors 解 max-variance problem。</li>
+        <li>能解释 PCA 等价于 minimize reconstruction error。</li>
         <li>会用 $U$ 和 $\mu$ 做 projection / reconstruction。</li>
         <li>能解释 SVD 如何得到 PCA directions。</li>
+        <li>知道 residual error 是 discarded eigenvalues 的总和。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -257,7 +319,9 @@
         <li>我做 PCA 前会 center data。</li>
         <li>我能写 $\max_{\|w\|=1}w^\top\Sigma w$。</li>
         <li>我会选择 top eigenvector。</li>
+        <li>Principal components 彼此 orthogonal；eigenvalues 表示对应方向 variance。</li>
         <li>我知道如何 project 和 reconstruct。</li>
+        <li>我知道 PCA 等价于 centered data 的 truncated SVD。</li>
         <li>我知道 PCA 是 unsupervised dimension reduction。</li>
       </ul>
     </section>

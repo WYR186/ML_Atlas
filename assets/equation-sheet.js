@@ -1129,6 +1129,21 @@
       "source": "topics/logistic-regression.html#eq-logistic-regression-decision-boundary"
     },
     {
+      "title": "Binary cross-entropy (BCE)",
+      "eq": "$$ \\mathcal{L}(y,\\hat y)=-\\bigl(y\\log\\hat y+(1-y)\\log(1-\\hat y)\\bigr) $$",
+      "symbols": [
+        { "sym": "$y\\in\\{0,1\\}$", "en": "true binary label (0 or 1)", "cn": "真实二分类标签 $y\\in\\{0,1\\}$" },
+        { "sym": "$\\hat y\\in(0,1)$", "en": "predicted probability of class 1, usually $\\hat y=\\sigma(z)$ where $z$ is the logit", "cn": "预测的 class 1 概率，通常 $\\hat y=\\sigma(z)$（$z$ 为 logit）" },
+        { "sym": "$y\\log\\hat y$", "en": "active when the truth is class 1", "cn": "$y=1$ 时该项激活" },
+        { "sym": "$(1-y)\\log(1-\\hat y)$", "en": "active when the truth is class 0", "cn": "$y=0$ 时该项激活" }
+      ],
+      "usage_en": "Standard loss for any binary classifier with a sigmoid output: logistic regression, MLP with one sigmoid output unit, the two-layer net in HW3. Combined with the sigmoid logit $z$, the gradient simplifies to $\\partial\\mathcal{L}/\\partial z=\\hat y-y$ (see the softmax-CE gradient entry under MLP). For numerical stability use the fused 'BCE-with-logits' form $\\log(1+e^{-y'z})$ with $y'\\in\\{-1,+1\\}$.",
+      "usage_cn": "任意 sigmoid 输出二分类的标准 loss：logistic regression、单 sigmoid 输出的 MLP、HW3 的两层网络都用它。结合 sigmoid logit $z$，梯度简化为 $\\partial\\mathcal{L}/\\partial z=\\hat y-y$（见 MLP 的 softmax-CE 梯度项）。代码上为数值稳定常用 fused 'BCE-with-logits'：$\\log(1+e^{-y'z})$，$y'\\in\\{-1,+1\\}$。",
+      "intuition_en": "Two terms — only one is 'on' for any given example. When $y=1$ you want $\\hat y$ high (the first term punishes low $\\hat y$); when $y=0$ you want $\\hat y$ low (the second term punishes high $\\hat y$). Confidently wrong → unbounded penalty.",
+      "intuition_cn": "两项里只有一项激活：$y=1$ 时希望 $\\hat y$ 大（第一项惩罚 $\\hat y$ 太小），$y=0$ 时希望 $\\hat y$ 小（第二项惩罚 $\\hat y$ 太大）。自信但错 → 惩罚趋近无穷。",
+      "source": "topics/logistic-regression.html#eq-logistic-regression-binary-cross-entropy"
+    },
+    {
       "title": "Negative log-likelihood",
       "eq": "$$ \\min_w \\sum_{(x_i,y_i)\\in D}\\log\\!\\left(1+\\exp(-y_i w^\\top\\phi(x_i))\\right) $$",
       "symbols": [
@@ -2251,6 +2266,22 @@
       "intuition_cn": "只有模型给正确类别很高 probability 时，loss 才小。自信但错误的 prediction 会被重罚。"
     },
     {
+      "title": "Softmax + cross-entropy output gradient",
+      "eq": "$$ \\hat y=\\operatorname{softmax}(z),\\qquad \\frac{\\partial \\mathcal{L}}{\\partial z}=\\hat y-y $$",
+      "source": "topics/mlp.html#eq-mlp-softmax-ce-gradient",
+      "symbols": [
+        { "sym": "$z\\in\\mathbb{R}^K$", "en": "logits — pre-softmax scores at the output layer", "cn": "logits —— 输出层 softmax 之前的 scores" },
+        { "sym": "$\\hat y\\in(0,1)^K$", "en": "softmax probabilities, $\\sum_k\\hat y_k=1$", "cn": "softmax 概率，$\\sum_k\\hat y_k=1$" },
+        { "sym": "$y\\in\\{0,1\\}^K$", "en": "one-hot true label vector", "cn": "one-hot 真实标签向量" },
+        { "sym": "$\\partial\\mathcal{L}/\\partial z$", "en": "gradient of the cross-entropy loss with respect to the logits — same shape as $z$", "cn": "cross-entropy loss 对 logits 的梯度，与 $z$ 同 shape" },
+        { "sym": "$\\hat y-y$", "en": "elementwise difference: positive on the predicted-but-wrong classes, $-1+\\hat y_c$ on the true class $c$", "cn": "逐元素差：被错误预测高的类为正，真实类 $c$ 处为 $-1+\\hat y_c$" }
+      ],
+      "usage_en": "Reach for this whenever an MLP / classifier ends in softmax + cross-entropy (multiclass) or sigmoid + BCE (binary — the same identity, since $K=2$ collapses to $\\hat y-y$ with scalar $\\hat y$). Treat $\\hat y-y$ as the upstream gradient at the logits, then run the affine-layer backward pass to push it through $W,b$. This is the single most-used backprop shortcut on quizzes (Lecture 10 / mt review) and HW3.",
+      "usage_cn": "任何 MLP / 分类器以 softmax + cross-entropy（多类）或 sigmoid + BCE（二类，$K=2$ 时退化成同样的 $\\hat y-y$，$\\hat y$ 为标量）结尾时都用这条。把 $\\hat y-y$ 当作 logits 处的 upstream gradient，再用 affine-layer backward pass 把它穿过 $W,b$。这是 quiz / 期中 review / HW3 上最常用的 backprop 捷径（Lecture 10、mt review）。",
+      "intuition_en": "All the messy derivatives of softmax and $-\\log\\hat y_c$ collapse to a single line: 'predicted minus truth.' That's why deep-learning frameworks fuse softmax and cross-entropy into one op — the analytical gradient is exactly this clean.",
+      "intuition_cn": "softmax 和 $-\\log\\hat y_c$ 各自繁琐的导数合在一起后塌成一行：\"预测减真实\"。这就是深度学习框架把 softmax 和 cross-entropy 融合成一个 op 的原因 —— 解析梯度本身就是这么干净。"
+    },
+    {
       "title": "Mini-batch gradient descent",
       "eq": "$$ \\theta\\leftarrow \\theta-\\alpha\\frac{1}{\\lvert B\\rvert}\\sum_{i\\in B}\\nabla_{\\theta}\\ell_i(\\theta) $$",
       "source": "topics/mlp.html#eq-mlp-mini-batch-gradient-descent",
@@ -2580,7 +2611,7 @@
     },
     {
       "title": "GRU summary",
-      "eq": "$$ z^{(t)}=\\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \\qquad r^{(t)}=\\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$\n$$ h^{(t)}=(1-z^{(t)})\\odot \\tilde h^{(t)}+z^{(t)}\\odot h^{(t-1)} $$",
+      "eq": "$$ z^{(t)}=\\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \\qquad r^{(t)}=\\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$\n$$ \\tilde h^{(t)}=\\tanh\\!\\bigl(W_{hx}x^{(t)}+W_{hh}\\bigl(r^{(t)}\\odot h^{(t-1)}\\bigr)+b_h\\bigr) $$\n$$ h^{(t)}=(1-z^{(t)})\\odot \\tilde h^{(t)}+z^{(t)}\\odot h^{(t-1)} $$",
       "symbols": [
         {
           "sym": "$z_t$",
@@ -3518,6 +3549,20 @@
       "source": "topics/diffusion.html#eq-diffusion-notation"
     },
     {
+      "title": "Noise-schedule identity",
+      "eq": "$$ \\beta_t=1-\\alpha_t,\\qquad \\bar\\alpha_t=\\prod_{i=1}^{t}\\alpha_i $$",
+      "symbols": [
+        { "sym": "$\\beta_t\\in(0,1)$", "en": "noise variance added at single step $t$ (the schedule)", "cn": "第 $t$ 步加入的 noise variance（即 schedule）" },
+        { "sym": "$\\alpha_t=1-\\beta_t$", "en": "single-step signal-retention factor", "cn": "单步 signal-retention factor" },
+        { "sym": "$\\bar\\alpha_t$", "en": "cumulative signal-retention from $0$ to $t$", "cn": "$0$ 到 $t$ 的 cumulative signal-retention" }
+      ],
+      "usage_en": "Plug-and-chug identity used to switch between the two equivalent noise-schedule notations: many lecture / textbook derivations write $1-\\alpha_t$, while ours uses $\\beta_t$. Whenever you see $\\sqrt{1-\\bar\\alpha_t}$ in a formula it is the same as 'cumulative noise-variance' — keep this identity handy when reading any closed-form forward-process or DDPM expression.",
+      "usage_cn": "切换两种等价 noise-schedule 记号的代入式：许多 lecture / textbook 推导写 $1-\\alpha_t$，我们写 $\\beta_t$。看到公式里的 $\\sum\\sqrt{1-\\bar\\alpha_t}$ 时它就等同于 \"累积噪声方差\"——读任何 closed-form forward-process 或 DDPM 推导前先把这条放手边。",
+      "intuition_en": "Two ways of saying the same thing: $\\alpha_t$ is the fraction of signal we KEEP, $\\beta_t$ is the fraction of variance we ADD. They sum to 1 exactly because variance is additive for independent Gaussians and the schedule is normalized.",
+      "intuition_cn": "同一件事两种说法：$\\alpha_t$ 是 KEEP 下来的 signal 占比，$\\beta_t$ 是 ADD 进去的 variance 占比。和为 1 是因为独立 Gaussian 的方差可加，schedule 又归一化过。",
+      "source": "topics/diffusion.html#eq-diffusion-noise-schedule-identity"
+    },
+    {
       "title": "Forward noising process",
       "eq": "$$ q(x_t\\mid x_{t-1})=\\mathcal{N}\\!\\left(x_t;\\sqrt{\\alpha_t}\\,x_{t-1},\\,\\beta_t I\\right) $$\n$$ x_t=\\sqrt{\\alpha_t}\\,x_{t-1}+\\sqrt{\\beta_t}\\,\\epsilon_t,\\qquad \\epsilon_t\\sim\\mathcal{N}(0,I) $$",
       "symbols": [
@@ -3982,6 +4027,20 @@
       "intuition_en": "'How well will the predictor do on data it has never seen?' This is the only quantity that matters at deployment. Training error is a stand-in; test set is a finite-sample estimate; PAC is the worst-case theoretical bound.",
       "intuition_cn": "\"预测器在没见过的数据上表现如何？\" 部署时唯一关心的量。训练 error 是替代；测试集是有限样本估计；PAC 是理论上最坏情况上界。",
       "source": "topics/pac.html#eq-pac-test-error"
+    },
+    {
+      "title": "Generalization gap",
+      "eq": "$$ \\bigl|\\hat\\epsilon_{\\mathcal{D}}(f)-\\epsilon_\\mu(f)\\bigr| $$",
+      "symbols": [
+        { "sym": "$\\hat\\epsilon_{\\mathcal{D}}(f)$", "en": "training (empirical) error of $f$ on dataset $\\mathcal{D}$ of size $n$", "cn": "$f$ 在大小 $n$ 的数据集 $\\mathcal{D}$ 上的训练（经验）error" },
+        { "sym": "$\\epsilon_\\mu(f)$", "en": "true (population) error of $f$ under the data distribution $\\mu$", "cn": "$f$ 在数据分布 $\\mu$ 下的真实（总体）error" },
+        { "sym": "$|\\cdot|$", "en": "absolute value — gap can be in either direction (overfit OR pessimistic estimate)", "cn": "绝对值 —— 间隙可能朝两个方向（overfit 或保守估计）" }
+      ],
+      "usage_en": "The single object that learning theory tries to bound. PAC, Hoeffding, and VC-dimension theorems all give high-probability bounds of the form $|\\hat\\epsilon_{\\mathcal{D}}(f)-\\epsilon_\\mu(f)|\\le \\text{(complexity term)}/\\sqrt n$. On the exam, when asked to 'derive a generalization bound for $f$', you are bounding this quantity. Quiz / final-review questions almost always want you to (i) name this gap, (ii) cite which theorem closes it, (iii) plug in the complexity term ($\\log|F|$ or $d_{\\mathrm{VC}}$).",
+      "usage_cn": "学习理论想要 bound 的唯一对象。PAC、Hoeffding、VC 维定理给出的 high-probability bound 全是 $|\\hat\\epsilon_{\\mathcal{D}}(f)-\\epsilon_\\mu(f)|\\le \\text{(复杂度项)}/\\sqrt n$ 的形式。考试里 \"为 $f$ 推导泛化 bound\" 等价于 bound 这一项。Quiz / final review 几乎一定要你 (i) 写出这个 gap，(ii) 指出哪条定理把它收紧，(iii) 代入复杂度项（$\\log|F|$ 或 $d_{\\mathrm{VC}}$）。",
+      "intuition_en": "'Did the model just memorize the training set, or did it learn a real pattern?' If the gap is small with high probability, the training error is a trustworthy proxy for the test error. The whole point of finite-sample theory is to make this gap shrink as $n$ grows.",
+      "intuition_cn": "\"模型只是死记训练集，还是真的学到了一个 pattern？\" 如果 gap 大概率很小，训练 error 就是一个可信的 test error 代理。有限样本理论的全部目的就是让这个 gap 随 $n$ 增大而缩小。",
+      "source": "topics/pac.html#eq-pac-generalization-gap"
     },
     {
       "title": "Finite realizable ERM bound",
@@ -4498,6 +4557,22 @@
           "en": "weighted average over actions",
           "cn": "对动作做加权平均"
         }
+      ]
+    },
+    {
+      "title": "State-value Bellman expectation",
+      "eq": "$$ V^\\pi(s)=\\sum_{a}\\pi(a\\mid s)\\Bigl[R(s,a)+\\gamma\\sum_{s'}P(s'\\mid s,a)\\,V^\\pi(s')\\Bigr] $$",
+      "source": "topics/value-functions.html#eq-value-functions-state-bellman-expectation",
+      "intuition_en": "Two nested averages: outer over actions chosen by the policy, inner over next-states chosen by the environment. Strip out the action sum and you get the Q-form $V^\\pi(s)=\\sum_a\\pi(a\\mid s)Q^\\pi(s,a)$.",
+      "intuition_cn": "两层嵌套期望：外层对 policy 选出的 actions 平均，内层对 environment 转移到的 next states 平均。把动作那层抽出来即得 Q 形式 $V^\\pi(s)=\\sum_a\\pi(a\\mid s)Q^\\pi(s,a)$。",
+      "usage_en": "The most common Bellman expectation form on RL exams — official review writes it exactly this way for policy evaluation. Use it when you need to write the Bellman fixed-point in V-form (vs the Q-form one row below). Plug in $a^*=\\arg\\max_a$ instead of $\\sum_a\\pi(a\\mid s)$ to get the optimality version $V^*(s)=\\max_a[R+\\gamma\\sum_{s'}PV^*]$.",
+      "usage_cn": "RL 考试上最常用的 Bellman expectation 形式 —— 官方 review 在 policy evaluation 这条就是这么写的。当需要 V 形式的 Bellman 不动点（区别于下一行的 Q 形式）时用它。把 $\\sum_a\\pi(a\\mid s)$ 换成 $a^*=\\arg\\max_a$ 即得 optimality 版本 $V^*(s)=\\max_a[R+\\gamma\\sum_{s'}PV^*]$。",
+      "symbols": [
+        { "sym": "V^π(s)",                    "en": "expected discounted return starting at state $s$ and following policy $\\pi$",          "cn": "在状态 $s$ 出发并遵循策略 $\\pi$ 的折扣期望回报" },
+        { "sym": "$\\pi(a\\mid s)$",           "en": "probability the policy picks action $a$ in state $s$",                                  "cn": "策略在状态 $s$ 选择动作 $a$ 的概率" },
+        { "sym": "R(s,a)",                    "en": "immediate reward for taking $a$ in $s$",                                                "cn": "在 $s$ 执行 $a$ 的即时奖励" },
+        { "sym": "$P(s'\\mid s,a)$",           "en": "environment transition probability — moves to $s'$ after $(s,a)$",                     "cn": "环境转移概率 —— $(s,a)$ 之后到达 $s'$" },
+        { "sym": "γ",                          "en": "discount factor $\\in [0,1)$",                                                          "cn": "折扣因子 $\\in [0,1)$" }
       ]
     },
     {
@@ -5126,7 +5201,7 @@
     },
     {
       "title": "Log-derivative trick",
-      "eq": "$$ \\nabla J=\\int P_\\theta(\\tau)R(\\tau)\\nabla\\log P_\\theta(\\tau)\\,d\\tau,\\qquad \\nabla\\log P_\\theta(\\tau)=\\sum_t\\nabla\\log\\pi_\\theta(a_t\\mid s_t) $$",
+      "eq": "$$ \\begin{aligned} \\nabla J &=\\int P_\\theta(\\tau)R(\\tau)\\nabla\\log P_\\theta(\\tau)\\,d\\tau, \\\\ \\nabla\\log P_\\theta(\\tau) &=\\sum_t\\nabla\\log\\pi_\\theta(a_t\\mid s_t) \\end{aligned} $$",
       "source": "topics/policy-gradient.html#eq-policy-gradient-log-derivative-trick",
       "intuition_en": "This moves the gradient from the sampling probability into a log-probability gradient that the policy network can compute.",
       "intuition_cn": "这个技巧把对采样概率的梯度，转成策略网络能计算的 log 概率梯度。",

@@ -46,14 +46,16 @@
 <div class="en-only">
 <section class="topic" id="cnn-en">
   <h2>Convolutional Neural Networks</h2>
-  <p class="topic-lede">A CNN is a neural network designed for grid-like data, especially images. Lecture 12 emphasizes two ideas: each filter looks at a local patch, and the same filter is reused across the image.</p>
+  <p class="topic-lede">A CNN is a neural network designed for grid-like data, especially images. Lecture 12 emphasizes two ideas: each filter looks at a local patch, and the same filter is reused across the image. The big themes are hierarchy, locality, translation equivariance, and local invariance.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>A fully connected layer treats every pixel position as unrelated. For images, that wastes parameters and ignores spatial structure. CNNs solve this by using convolution layers, pooling layers, nonlinear activations, and eventually fully connected heads.</p>
+  <p>A fully connected layer treats every pixel position as unrelated. For images, that wastes parameters and ignores spatial structure. A $1000\times1000$ RGB image has 3 million input numbers, so a first hidden layer with 1000 units would need 3 billion weights before even counting bias terms. CNNs solve this by using convolution layers, pooling layers, nonlinear activations, and eventually fully connected heads.</p>
   <ul>
     <li><b>Local connectivity:</b> a filter sees a small receptive field, not the whole image at once.</li>
     <li><b>Weight sharing:</b> the same filter slides over many positions, so one edge detector can be reused everywhere.</li>
-    <li><b>Pooling:</b> a fixed operation such as max or average summarizes a local window and usually reduces spatial size.</li>
+    <li><b>Spatial structure:</b> shuffling pixels destroys an image for CNNs because neighbors matter; an MLP has no built-in notion of pixel neighborhood.</li>
+    <li><b>Filter volume:</b> one filter has shape $F_h\times F_w\times C_{\text{in}}$; using $C_{\text{out}}$ filters creates $C_{\text{out}}$ output feature maps.</li>
+    <li><b>Pooling:</b> a fixed operation such as max or average summarizes a local window, usually reduces spatial size, and adds no learned parameters.</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -62,18 +64,19 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Images have repeated local patterns. An edge can appear in the top-left or bottom-right; it is still the same edge. Weight sharing gives CNNs translation equivariance: shifting the input tends to shift the feature map rather than forcing a brand-new detector.</p>
+  <p>Deeper layers grow the <b>effective receptive field</b>: a unit in layer 1 may depend on a tiny patch, but a unit several layers later depends on a much larger region of the original image. That is how CNNs build hierarchy: edges become corners, corners become textures, and textures become object parts.</p>
   <div class="callout intuition">
     <div class="head">Why CNNs use fewer parameters</div>
-    <p>If a $500\times500$ image feeds a 1024-unit fully connected layer, the weight matrix has hundreds of millions of entries. A $3\times3$ convolution with 16 filters has only a few hundred parameters because the same small kernels are reused.</p>
+    <p>If a large image feeds a fully connected layer, every input pixel gets a separate weight for every hidden unit. A convolution only learns a small filter and reuses it everywhere. This is the same reason a $3\times3$ convolution with 16 RGB filters has only $3\cdot3\cdot3\cdot16+16=448$ parameters.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
     <div class="head">Spatial output size</div>
-    <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
+    <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H_{\text{in}}+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
     <p><b>Symbols.</b></p>
     <ul>
-      <li>$H,W_{\text{in}}$ are the input height and width.</li>
+      <li>$H_{\text{in}},W_{\text{in}}$ are the input height and width.</li>
       <li>$F_h,F_w$ are the filter height and width.</li>
       <li>$P_h,P_w$ are padding added on each side of height and width. The $2P$ appears because padding is added to both ends.</li>
       <li>$S_h,S_w$ are strides: how far the filter moves each step.</li>
@@ -130,7 +133,7 @@
     <div>
       <h4>Example C · HW3 §3.3 convolution as a matrix</h4>
       <p class="example-source">Source: HW3 §3.3. Paraphrased.</p>
-      <p>Flatten a small image into a vector and flatten the outputs too. The convolution becomes a sparse matrix multiplication. Each row has only the kernel entries in the positions covered by that sliding window; neighboring rows reuse the same values shifted over.</p>
+      <p>Flatten a small image into a vector and flatten the outputs too. The convolution becomes a sparse matrix multiplication. Each row has only the kernel entries in the positions covered by that sliding window; neighboring rows reuse the same values shifted over. In backprop, the gradient passed to the input is multiplied by the transpose of this sparse convolution matrix.</p>
     </div>
   </div>
 
@@ -140,7 +143,17 @@
     <li>Track channels: filters span all input channels and create output channels.</li>
     <li>For parameter count, multiply kernel height, kernel width, input channels, and number of filters; then add biases if present.</li>
     <li>For pooling, remember there are usually no learned parameters.</li>
+    <li>For multi-layer CNNs, feed each layer's output shape into the next layer. The final answer is often wrong because of one early stride or padding mistake.</li>
   </ul>
+  <div class="callout tip">
+    <div class="head">Layer variants to recognize</div>
+    <ul>
+      <li><b>$1\times1$ pointwise convolution:</b> changes the channel count without changing height or width. It is often used as a bottleneck.</li>
+      <li><b>Dilated convolution:</b> inserts gaps inside the kernel to expand receptive field without adding more kernel parameters.</li>
+      <li><b>Transposed convolution:</b> a learned upsampling layer used in segmentation and generative decoders; it is often described as fractionally strided convolution.</li>
+      <li><b>Batch normalization in CNNs:</b> normalizes each channel using statistics shared across batch and spatial locations, then applies learned scale and shift.</li>
+    </ul>
+  </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
   <ul>
@@ -148,6 +161,7 @@
     <li>Forgetting the floor when stride does not divide evenly.</li>
     <li>Counting one kernel per pixel location; CNNs share the same kernel across locations.</li>
     <li>Forgetting that a $3\times3$ filter on RGB input has $3\times3\times3$ weights, not just $9$.</li>
+    <li>Counting pooling parameters. Standard max pooling and average pooling are fixed operations.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -156,14 +170,18 @@
     <li>Number of trainable parameters in convolution layers.</li>
     <li>Max pooling and average pooling by hand on a small grid.</li>
     <li>Explain local connectivity, weight sharing, and why CNNs suit images.</li>
+    <li>Know why ReLU is preferred over sigmoid in deep CNNs: it keeps gradients healthier and is cheap to compute.</li>
+    <li>Recognize the architecture landmarks: LeNet-5 for early digit recognition, AlexNet for deep ImageNet CNNs with ReLU/dropout, VGG for stacked $3\times3$ filters, GoogLeNet for Inception modules, and ResNet for residual skip connections.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
   <ul>
-    <li>I can compute $N_{\text{out}}=\lfloor(N+2P-F)/S\rfloor+1$.</li>
+    <li>I can compute $N_{\text{out}}=\lfloor(N_{\text{in}}+2P-F)/S\rfloor+1$ for every layer in a stack.</li>
     <li>I can count convolution weights including channels and bias.</li>
     <li>I can explain the difference between convolution, pooling, stride, and padding.</li>
     <li>I can turn a tiny convolution into a sparse matrix pattern.</li>
+    <li>I remember the biological analogy: simple cells resemble local filters; complex cells resemble pooling over local responses.</li>
+    <li>If convolution is written as a sparse matrix $A$, I know backprop to the input uses $A^\top$.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -171,14 +189,16 @@
 <!--cn-only-start--><div class="cn-only">
 <section class="topic" id="cnn">
       <h2>CNN · 卷积神经网络</h2>
-      <p class="topic-lede">CNN 是专门处理 grid-like data 的神经网络，尤其适合 image。Lecture 12 的核心是两件事：filter 只看局部 patch；同一个 filter 在整张图上重复使用。</p>
+      <p class="topic-lede">CNN 是专门处理 grid-like data 的神经网络，尤其适合 image。Lecture 12 的核心是两件事：filter 只看局部 patch；同一个 filter 在整张图上重复使用。总主题是 hierarchy、locality、translation equivariance 和 local invariance。</p>
 
       <h3 class="section-blue">1. Concept Understanding</h3>
-      <p>Fully-connected layer 会把每个像素位置都当成独立特征，参数量巨大，也不利用空间结构。CNN 用 convolution layer、pooling layer、activation，最后接 fully connected head 来解决这个问题。</p>
+      <p>Fully-connected layer 会把每个像素位置都当成独立特征，参数量巨大，也不利用空间结构。一个 $1000\times1000$ RGB image 有 300 万个输入数，如果第一层有 1000 个 hidden units，光第一层就需要 30 亿个 weights，还没算 bias。CNN 用 convolution layer、pooling layer、activation，最后接 fully connected head 来解决这个问题。</p>
       <ul>
         <li><b>Local connectivity</b>：filter 只看小的 receptive field，不是一上来就看全图。</li>
         <li><b>Weight sharing</b>：同一个 filter 在不同位置滑动，edge detector 可以全图复用。</li>
-        <li><b>Pooling</b>：用 max / average 等固定操作总结局部窗口，通常会降低 spatial size。</li>
+        <li><b>Spatial structure</b>：如果把 pixels 随机打乱，图像内容会被破坏；MLP 本身没有内置“相邻像素有关”的假设。</li>
+        <li><b>Filter volume</b>：一个 filter 的 shape 是 $F_h\times F_w\times C_{\text{in}}$；用 $C_{\text{out}}$ 个 filters 就得到 $C_{\text{out}}$ 张 feature maps。</li>
+        <li><b>Pooling</b>：用 max / average 等固定操作总结局部窗口，通常会降低 spatial size，而且没有 learnable parameters。</li>
       </ul>
 
       <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
@@ -187,18 +207,19 @@
 
       <h3 class="section-orange">3. Core Intuition</h3>
       <p>图片里的局部模式会重复出现。边缘出现在左上角还是右下角，本质仍然是边缘。Weight sharing 给 CNN 带来 translation equivariance：输入平移时，feature map 也大致平移，而不是需要重新学习一个 detector。</p>
+      <p>层数越深，<b>effective receptive field</b> 越大：第一层 unit 可能只依赖一个小 patch，但后面几层的 unit 会依赖原图里更大的区域。这就是 CNN 的 hierarchy：边缘组合成角点，角点组合成纹理，纹理再组合成 object parts。</p>
       <div class="callout intuition">
         <div class="head">为什么 CNN 参数少</div>
-        <p>如果 $500\times500$ 图片接到 1024 维 fully connected layer，weight matrix 会有数亿项。一个 $3\times3$ convolution 加 16 个 filters，只有几百个参数，因为小 kernel 被全图复用。</p>
+        <p>大图接 fully connected layer 时，每个 pixel 对每个 hidden unit 都要单独学 weight。Convolution 只学一个小 filter，然后全图复用。同样是 RGB input，一个 $3\times3$ convolution 加 16 个 filters 只有 $3\cdot3\cdot3\cdot16+16=448$ 个参数。</p>
       </div>
 
       <h3 class="section-purple">4. 关键公式</h3>
       <div class="callout formula">
         <div class="head">Spatial output size：输出高宽怎么算</div>
-        <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
+        <div class="eq">$$ H_{\text{out}}=\left\lfloor\frac{H_{\text{in}}+2P_h-F_h}{S_h}\right\rfloor+1,\qquad W_{\text{out}}=\left\lfloor\frac{W_{\text{in}}+2P_w-F_w}{S_w}\right\rfloor+1 $$</div>
         <p><b>符号.</b></p>
         <ul>
-          <li>$H,W_{\text{in}}$ 是 input 的 height 和 width。</li>
+          <li>$H_{\text{in}},W_{\text{in}}$ 是 input 的 height 和 width。</li>
           <li>$F_h,F_w$ 是 filter 的 height 和 width。</li>
           <li>$P_h,P_w$ 是每一边加的 padding；公式里是 $2P$，因为上下或左右两边都加。</li>
           <li>$S_h,S_w$ 是 stride，也就是 filter 每次移动多少格。</li>
@@ -255,7 +276,7 @@
         <div>
           <h4>Example C · HW3 §3.3 convolution 写成矩阵</h4>
           <p class="example-source">来源：HW3 §3.3，已转述。</p>
-          <p>把小图片 flatten 成向量，输出也 flatten。Convolution 可以写成 sparse matrix multiplication。每一行只在当前 sliding window 覆盖的位置放 kernel 权重，相邻行是同一组权重的平移版本。</p>
+          <p>把小图片 flatten 成向量，输出也 flatten。Convolution 可以写成 sparse matrix multiplication。每一行只在当前 sliding window 覆盖的位置放 kernel 权重，相邻行是同一组权重的平移版本。做 backprop 时，传回 input 的 gradient 会乘这个 sparse convolution matrix 的 transpose。</p>
         </div>
       </div>
 
@@ -265,7 +286,17 @@
         <li>一定追踪 channel：filter 会跨过所有 input channels，并产生 output channels。</li>
         <li>参数量先乘 kernel height、kernel width、input channels、filters 数量，再看有没有 bias。</li>
         <li>Pooling 通常没有 learnable parameters。</li>
+        <li>多层 CNN 题要一层一层传 shape；很多错答案都是前面某一层 stride / padding 少算了一步。</li>
       </ul>
+      <div class="callout tip">
+        <div class="head">需要认识的 layer variants</div>
+        <ul>
+          <li><b>$1\times1$ pointwise convolution</b>：只改 channels，不改 height / width，常用作 bottleneck。</li>
+          <li><b>Dilated convolution</b>：在 kernel 里“打洞”，扩大 receptive field，但不增加 kernel 参数量。</li>
+          <li><b>Transposed convolution</b>：learned upsampling layer，常用于 segmentation / generative decoder，也叫 fractionally strided convolution。</li>
+          <li><b>Batch normalization in CNNs</b>：对每个 channel 用 batch 和 spatial locations 上的统计量做 normalization，再学习 scale 和 shift。</li>
+        </ul>
+      </div>
 
       <h3 class="section-red">7. Common Mistakes</h3>
       <ul>
@@ -273,6 +304,7 @@
         <li>Stride 不能整除时忘记 floor。</li>
         <li>以为每个空间位置都有独立 kernel；CNN 的 kernel 是共享的。</li>
         <li>RGB 输入上的 $3\times3$ filter 有 $3\times3\times3$ 个权重，不是只有 $9$ 个。</li>
+        <li>给 pooling layer 数 trainable parameters。标准 max pooling / average pooling 是 fixed operation。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus</h3>
@@ -281,14 +313,18 @@
         <li>Convolution layer 的 trainable parameter count。</li>
         <li>在小 grid 上手算 max pooling / average pooling。</li>
         <li>解释 local connectivity、weight sharing，以及为什么 CNN 适合 image。</li>
+        <li>会解释为什么 deep CNN 常用 ReLU 而不是 sigmoid：ReLU 缓解 vanishing gradient，计算也更便宜。</li>
+        <li>能一句话识别架构演进：LeNet-5 用于早期 digit recognition，AlexNet 推动 deep ImageNet CNN 并使用 ReLU/dropout，VGG 用堆叠 $3\times3$ filters，GoogLeNet 用 Inception modules，ResNet 用 residual / skip connections。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist</h3>
       <ul>
-        <li>我会算 $N_{\text{out}}=\lfloor(N+2P-F)/S\rfloor+1$。</li>
+        <li>我会逐层计算 $N_{\text{out}}=\lfloor(N_{\text{in}}+2P-F)/S\rfloor+1$。</li>
         <li>我会把 channels 和 bias 算进参数量。</li>
         <li>我能区分 convolution、pooling、stride、padding。</li>
         <li>我能把小卷积看成 sparse matrix pattern。</li>
+        <li>我记得 biological analogy：simple cells 类似 local filters；complex cells 类似对局部响应做 pooling。</li>
+        <li>如果 convolution 写成 sparse matrix $A$，backprop 到 input 会用 $A^\top$。</li>
       </ul>
     </section>
 
@@ -320,17 +356,12 @@
       const items = main.querySelectorAll('section.topic > h2, section.topic > h3');
       const ul = document.createElement('ul');
       ul.style.cssText = 'list-style:none; padding:0; margin:0; display:grid; gap:4px;';
-      const seenSection = new Set();
       items.forEach((el) => {
         // Skip headings inside the inactive language wrapper.
         if (lang === 'en' && el.closest('.cn-only')) return;
         if (lang === 'cn' && el.closest('.en-only')) return;
         const sect = el.closest('section.topic');
         if (!sect || !sect.id) return;
-        // Mixed mode: dedupe across <section>s that come in en/cn pairs.
-        const baseId = sect.id.replace(/-(?:en|cn)$/, '');
-        if (lang === 'mixed' && seenSection.has(baseId)) return;
-        seenSection.add(baseId);
         const li = document.createElement('li');
         const a  = document.createElement('a');
         a.href = '#' + sect.id;

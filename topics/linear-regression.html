@@ -39,6 +39,7 @@
       <h1>🧮 <span class="en-only">Linear Regression</span><span class="cn-only">线性回归</span></h1>
       <div class="subtitle"><span class="en-only">MSE · Closed-form · Ridge</span><span class="cn-only">MSE · 闭式解 · Ridge</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_4.pdf" target="_blank">📄 Lecture 4</a>
+        <a class="ref-chip lecture" href="../slides/Lecture_5.pdf" target="_blank">📄 Lecture 5</a>
         <a class="ref-chip hw" href="../HW/hw1.pdf" target="_blank">📝 hw1</a>
         <a class="ref-chip hw" href="../HW/hw1_sol.pdf" target="_blank">📝 hw1_sol</a></div>
     </div>
@@ -67,7 +68,7 @@
     <div class="callout formula">
       <div class="head">Design-matrix objective</div>
       <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w \in \mathbb{R}^d$: weight vector being optimized — one weight per feature； $X \in \mathbb{R}^{n \times d}$: design matrix; row $i$ is feature vector $x_i^\top$； $Y \in \mathbb{R}^n$: vector of target values $(y_1, \ldots, y_n)^\top$； $Xw \in \mathbb{R}^n$: vector of predictions $(\hat{y}_1, \ldots, \hat{y}_n)^\top$； $\|\cdot\|_2^2$: squared L2 norm — sum of squared entries； $\frac{1}{2}$: convenience factor; cancels with the 2 from differentiating the square</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w \in \mathbb{R}^d$: weight vector being optimized — one weight per feature; $X \in \mathbb{R}^{n \times d}$: design matrix; row $i$ is feature vector $x_i^\top$; $Y \in \mathbb{R}^n$: vector of target values $(y_1, \ldots, y_n)^\top$; $Xw \in \mathbb{R}^n$: vector of predictions $(\hat{y}_1, \ldots, \hat{y}_n)^\top$; $\|\cdot\|_2^2$: squared L2 norm — sum of squared entries; $\frac{1}{2}$: convenience factor; cancels with the 2 from differentiating the square</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Geometrically: project $Y$ onto the column space of $X$. Squared error penalizes large residuals quadratically, so it's sensitive to outliers but mathematically clean — convex, differentiable, and unique-minimum whenever $X^\top X$ is invertible.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Stack training inputs into rows of $X$, targets into $Y$. Find $w$ that minimizes the sum of squared residuals (predicted minus true). Solve in closed form via the normal equation when $d$ is small, or via gradient descent when $d$ is large. To include a bias term, prepend a column of 1's to $X$ and treat it as one more component of $w$.</p>
@@ -75,24 +76,33 @@
     <div class="callout formula">
       <div class="head">Gradient</div>
       <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\nabla_w$: gradient with respect to $w$; same shape as $w$ (a $d$-vector)； $Xw - Y \in \mathbb{R}^n$: residual vector — predictions minus targets； $X^\top \in \mathbb{R}^{d \times n}$: transpose of the design matrix； $X^\top(Xw - Y)$: column-by-column inner product of features against the residual</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\nabla_w$: gradient with respect to $w$; same shape as $w$ (a $d$-vector); $Xw - Y \in \mathbb{R}^n$: residual vector — predictions minus targets; $X^\top \in \mathbb{R}^{d \times n}$: transpose of the design matrix; $X^\top(Xw - Y)$: column-by-column inner product of features against the residual</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> $X^\top r$ measures how much each feature column 'explains' the leftover error. If a feature is positively correlated with the residual, increasing its weight reduces error — that's exactly the direction the negative gradient points.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Plug into gradient descent: $w_{t+1} = w_t - \alpha\,X^\top(Xw_t - Y)$. Set the gradient to zero for the closed-form solution. The $j$-th component $[X^\top r]_j$ tells you how to nudge weight $j$ to reduce error, where $r = Xw - Y$ is the residual.</p>
     </div>
     <div class="callout formula">
       <div class="head">Normal equation</div>
       <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w^*$: optimal weight vector — the minimizer； $X^\top X \in \mathbb{R}^{d \times d}$: Gram matrix — symmetric, positive-semidefinite； $(X^\top X)^{-1}$: inverse of the Gram matrix; exists iff $X$ has linearly independent columns ($\mathrm{rank}(X)=d$)； $X^\top Y \in \mathbb{R}^d$: feature-target correlation vector</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w^*$: optimal weight vector — the minimizer; $X^\top X \in \mathbb{R}^{d \times d}$: Gram matrix — symmetric, positive-semidefinite; $(X^\top X)^{-1}$: inverse of the Gram matrix; exists iff $X$ has linearly independent columns ($\mathrm{rank}(X)=d$); $X^\top Y \in \mathbb{R}^d$: feature-target correlation vector</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> 'Stop where the gradient is zero.' The condition $X^\top(Xw - Y) = 0$ says the residual is orthogonal to every feature column — geometrically, $Xw^*$ is the projection of $Y$ onto the column space of $X$, and the leftover $Y - Xw^*$ has zero correlation with any feature.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Set the gradient $X^\top(Xw - Y) = 0$, rearrange. The first form is the linear system to <b>solve</b> (don't actually invert the matrix in code — use `np.linalg.solve` or a Cholesky factorization for stability and speed); the second form is the explicit formula. If $X^\top X$ is singular (e.g. $n &lt; d$ or duplicated features), use ridge regression instead.</p>
     </div>
     <div class="callout formula">
+      <div class="head">Gaussian-noise / MLE view</div>
+      <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
+      <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\varepsilon^{(i)}$ is observation noise; $\sigma^2$ is the noise variance; $p(Y\mid X;w,\sigma^2)$ is the likelihood of the observed targets under the linear-Gaussian model.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Squared loss is not just an arbitrary penalty: it is the negative log-likelihood that falls out when the residuals are assumed Gaussian with constant variance.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In a conceptual proof, write the Gaussian likelihood, take logs, drop constants independent of $w$, and the remaining optimization is exactly least squares.</p>
+    </div>
+    <div class="callout formula">
       <div class="head">Ridge regularization</div>
       <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda \ge 0$: regularization strength (a hyperparameter)； $\|w\|_2^2$: $\sum_j w_j^2$ — sum of squared weights； $\frac{\lambda}{2}\|w\|_2^2$: penalty term that shrinks weights toward 0； $I \in \mathbb{R}^{d \times d}$: identity matrix； $X^\top X + \lambda I$: always invertible when $\lambda &gt; 0$ (positive-definite)</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda \ge 0$: regularization strength (a hyperparameter); $\|w\|_2^2$: $\sum_j w_j^2$ — sum of squared weights; $\frac{\lambda}{2}\|w\|_2^2$: penalty term that shrinks weights toward 0; $I \in \mathbb{R}^{d \times d}$: identity matrix; $X^\top X + \lambda I$: always invertible when $\lambda &gt; 0$ (positive-definite)</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Two pressures fighting: 'fit the data well' vs. 'keep weights small.' Small weights → smoother model → less overfitting and a stable solution even when $X^\top X$ is singular. Bayesian view: ridge $=$ MAP estimate under a Gaussian prior $w \sim \mathcal{N}(0, \frac{1}{\lambda} I)$.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Add the L2 penalty to the OLS objective. Pick $\lambda$ via cross-validation: small $\lambda \approx$ OLS, large $\lambda \approx$ all-zero weights. The closed-form solution just adds $\lambda I$ to the Gram matrix before inverting. <b>Standardize features first</b> — without it, weights with naturally large scales get over-penalized.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>Lasso contrast.</b> Lasso replaces $\|w\|_2^2$ by $\|w\|_1$ and can set some weights exactly to zero, so it acts like feature selection. Larger $\lambda$ usually increases bias but lowers variance.</p>
     </div>
   </div>
 
@@ -128,22 +138,35 @@
     <li>Confusing linear in features with linear in parameters. Polynomial features can still use linear regression.</li>
     <li>Using MSE classification as if it were logistic regression. MSE is not calibrated for binary class probabilities.</li>
   </ul>
+  <div class="callout danger">
+    <div class="head">Exam trap · Linear regression as a classifier</div>
+    <p><b>Operation.</b> For binary classification, encode labels as $\{-1,+1\}$ and predict by thresholding the score: output $+1$ if $w^\top x+b>0$, otherwise $-1$.</p>
+    <ul>
+      <li><b>Outlier sensitivity.</b> A point far from the boundary can still create a huge squared loss, even if it is already classified correctly, and can drag the boundary toward itself.</li>
+      <li><b>Masking in multiclass.</b> If class centers line up, a least-squares classifier can let outer classes dominate and effectively ignore the middle class.</li>
+      <li><b>Not a probability.</b> The raw score is unbounded and is not constrained to $[0,1]$, so it cannot be interpreted directly as a class probability.</li>
+    </ul>
+  </div>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
     <li>Derive the normal equation from the MSE objective.</li>
+    <li>Explain the Gaussian-noise / MLE interpretation of squared loss.</li>
     <li>Explain when the closed form exists and why ridge helps.</li>
+    <li>Compare ridge and lasso: shrinkage vs. sparsity, and the bias-variance trade-off as $\lambda$ changes.</li>
     <li>Construct the design matrix for a bias term or polynomial features.</li>
     <li>Explain the overparameterized case: exact interpolation, null space, and minimum-norm solution.</li>
-    <li>State why linear regression is awkward for classification.</li>
+    <li>State why linear regression is awkward for classification: outliers, masking, and non-probability scores.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
   <ul>
     <li>I can write the model $\hat y=w^\top\phi(x)$.</li>
     <li>I can derive $X^\top Xw=X^\top Y$ from squared loss.</li>
+    <li>I can connect squared loss to Gaussian-noise MLE.</li>
     <li>I know what breaks when $X^\top X$ is not invertible.</li>
     <li>I can add ridge regularization and write its solution.</li>
+    <li>I know that lasso can produce sparse weights.</li>
     <li>I can explain why MSE over-penalizes easy classification examples.</li>
   </ul>
 </section>
@@ -194,11 +217,20 @@
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 令梯度 $X^\top(Xw - Y) = 0$ 整理即可。第一个形式是要<b>解</b>的线性方程组（代码里别真的求逆，用 `np.linalg.solve` 或 Cholesky 既稳定又快）；第二个形式是显式解。当 $X^\top X$ 奇异（如 $n &lt; d$ 或特征重复）时，改用 ridge regression。</p>
         </div>
         <div class="callout formula">
+          <div class="head">Gaussian noise / MLE 视角</div>
+          <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
+          <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\varepsilon^{(i)}$ 是 observation noise；$\sigma^2$ 是 noise variance；$p(Y\mid X;w,\sigma^2)$ 是 linear-Gaussian model 下观察到这些 targets 的 likelihood。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Squared loss 不是随便选的惩罚项：如果假设 residuals 是 constant-variance Gaussian noise，那么 least squares 正好等价于最大化 likelihood。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 概念证明题里，先写 Gaussian likelihood，取 log，丢掉与 $w$ 无关的常数，剩下的 optimization 就是最小化 $\|Y-Xw\|_2^2$。</p>
+        </div>
+        <div class="callout formula">
           <div class="head">Ridge regularization</div>
           <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda \ge 0$: 正则强度（超参数）；$\|w\|_2^2$: $\sum_j w_j^2$ —— 权重平方和；$\frac{\lambda}{2}\|w\|_2^2$: 把权重拉向 0 的惩罚项；$I \in \mathbb{R}^{d \times d}$: 单位矩阵；$X^\top X + \lambda I$: $\lambda &gt; 0$ 时一定可逆（正定）</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 两股力在拔河："拟合好数据" vs. "权重不要太大"。权重小 → 模型更平滑 → 减少过拟合，且即使 $X^\top X$ 奇异也能有稳定解。Bayesian 视角：ridge $=$ 在 Gaussian prior $w \sim \mathcal{N}(0, \frac{1}{\lambda} I)$ 下的 MAP 估计。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在 OLS 目标里加上 L2 惩罚项。$\lambda$ 用 cross-validation 选：$\lambda$ 小 ≈ OLS，$\lambda$ 大 ≈ 全 0 解。闭式解就是在反矩阵前给 Gram 矩阵加 $\lambda I$。<b>先做特征标准化</b> —— 否则尺度天然大的权重会被惩罚得过狠。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>Lasso 对比.</b> Lasso 把 $\|w\|_2^2$ 换成 $\|w\|_1$，可能把某些 weights 直接压成 0，所以有 feature selection 的效果。$\lambda$ 越大，通常 bias 增加、variance 降低。</p>
         </div>
       </div>
 
@@ -234,22 +266,35 @@
         <li>把 “linear in features” 和 “linear in parameters” 混掉；polynomial features 仍然可以是 linear regression。</li>
         <li>把 MSE classification 当成 logistic regression 用；MSE 不是为概率分类设计的。</li>
       </ul>
+      <div class="callout danger">
+        <div class="head">考试高频坑 · Linear regression 做 classification</div>
+        <p><b>操作方法.</b> 二分类时可以把 labels 编成 $\{-1,+1\}$，然后用 score threshold：若 $w^\top x+b&gt;0$ 预测 $+1$，否则预测 $-1$。</p>
+        <ul>
+          <li><b>Outlier sensitivity.</b> 离 decision boundary 很远、甚至已经分得很对的点，仍可能因为 squared loss 产生巨大惩罚，把边界往它那边拖。</li>
+          <li><b>Masking.</b> 多分类里如果类别中心排成一条线，least-squares classifier 可能让两端类别主导，几乎忽略中间类别。</li>
+          <li><b>Not probability.</b> Raw score 没有限制在 $[0,1]$，不能直接解释为 class probability。</li>
+        </ul>
+      </div>
 
       <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
       <ul>
         <li>会从 MSE objective 推 normal equation。</li>
+        <li>会说明 squared loss 的 Gaussian-noise / MLE 解释。</li>
         <li>会解释闭式解什么时候存在，以及 ridge 为什么能稳定 inversion。</li>
+        <li>会比较 ridge 和 lasso：shrinkage vs. sparsity，以及 $\lambda$ 对 bias-variance trade-off 的影响。</li>
         <li>会给 bias / polynomial features 写 design matrix。</li>
         <li>会讲 overparameterized case：exact interpolation、null space、minimum-norm solution。</li>
-        <li>会说明 linear regression 用于 classification 的问题。</li>
+        <li>会说明 linear regression 用于 classification 的问题：outliers、masking、non-probability scores。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能写出 $\hat y=w^\top\phi(x)$。</li>
         <li>我能从 squared loss 推出 $X^\top Xw=X^\top Y$。</li>
+        <li>我能把 squared loss 和 Gaussian-noise MLE 联系起来。</li>
         <li>我知道 $X^\top X$ 不可逆时哪里会断。</li>
         <li>我能写 ridge objective 和 ridge solution。</li>
+        <li>我知道 lasso 可以产生 sparse weights。</li>
         <li>我能解释为什么 MSE 会过度惩罚 easy classification examples。</li>
       </ul>
     </section>

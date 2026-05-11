@@ -50,6 +50,7 @@
 
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>A neural network is trained by minimizing a loss. The hard part is not the update rule itself; gradient descent only says $w_{t+1}=w_t-\alpha\nabla_w L(w_t)$. The hard part is computing the gradient for every parameter in a large graph.</p>
+  <p>Backpropagation is an efficient local message-passing algorithm for evaluating gradients of an error function $E(w)$ in a feed-forward network. Instead of deriving a new full gradient by hand for every architecture, we decompose the network into small operations and apply the chain rule locally.</p>
   <ul>
     <li><b>Computational graph:</b> a directed acyclic graph whose nodes are inputs, parameters, intermediate tensors, and operations.</li>
     <li><b>Forward pass:</b> compute predictions and cache whatever each operation needs for its derivative.</li>
@@ -65,6 +66,11 @@
   <div class="callout intuition">
     <div class="head">Why reverse mode fits neural nets</div>
     <p>Neural networks usually have one scalar loss and many parameters. Reverse mode computes gradients of that one scalar with respect to all parameters in roughly one backward sweep.</p>
+  </div>
+  <div class="mini-list">
+    <div><b>Two-phase training iteration.</b> Forward computes layer values and stores both pre-activations and activations; this page writes pre-activation as $z$ and activation as $a$, while some texts use $a_j$ for pre-activation and $z_j$ for unit output. Backward starts from the scalar loss and walks the graph in reverse.</div>
+    <div><b>Golden rule.</b> Downstream gradient = local gradient $\times$ upstream gradient. If a value feeds multiple later nodes, add all returned contributions.</div>
+    <div><b>Software view.</b> PyTorch builds a dynamic graph during the forward pass, then reverse-mode autodiff traverses it when <code>.backward()</code> is called.</div>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -93,12 +99,40 @@
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> When a variable branches, add all returned gradients into the same accumulator. In code this is why repeated use of a tensor accumulates into one .grad field.</p>
     </div>
     <div class="callout formula">
+      <div class="head">Output error for canonical losses</div>
+      <div class="eq">$$ \delta_k = y_k-t_k $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_k$ is the model output for output unit $k$. $t_k$ is the target value. $\delta_k$ is the output-layer error signal, usually the gradient with respect to the output pre-activation under a matching loss/link pair.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For sigmoid or softmax paired with cross-entropy, the scary derivative simplifies to prediction minus target.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Start the output-layer backward pass with this value, then propagate it into weights and hidden units. Check the sign convention in the problem; some notes define the opposite error.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Hidden unit error</div>
+      <div class="eq">$$ \delta_j = h'(a_j)\sum_k w_{kj}\delta_k $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a_j$ is hidden unit $j$'s pre-activation. $h'(a_j)$ is the activation derivative. $w_{kj}$ connects hidden unit $j$ to upper-layer unit $k$. $\delta_k$ is the upper-layer error signal.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A hidden unit receives blame from every upper unit it affects, then scales that blame by its own activation derivative.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Sum weighted errors from the next layer first, then multiply by the local derivative. For $\tanh$, use $h'(a)=1-\tanh^2(a)$.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Neuron weight gradient</div>
+      <div class="eq">$$ \frac{\partial E_n}{\partial w_{ji}}=\delta_j z_i $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $E_n$ is the loss for example $n$. $w_{ji}$ connects input unit $i$ to unit $j$. $z_i$ is the input-side activation. $\delta_j$ is the error signal at the receiving unit.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A weight changes the loss in proportion to the error at the output end and the activation that entered the weight.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Once $\delta_j$ is known, multiply it by each incoming activation to get the gradient for each incoming weight.</p>
+    </div>
+    <div class="callout formula">
       <div class="head">Affine layer backward pass</div>
       <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
       <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a$: input activation to the layer； $W,b$: weight matrix and bias vector； $z$: pre-activation output； $g_z$: upstream gradient at $z$； $g_z a^\top$: outer product that has the same shape as $W$</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A weight gradient is upstream error times the input that weight saw. The transpose sends the error signal back to the previous layer.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use these formulas for a single example after you know $g_z$. For a mini-batch, compute the same contributions per example and sum or average according to the loss convention.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Batch matrix form</div>
+      <div class="eq">$$ \frac{\partial L}{\partial X}=G_YW^\top,\qquad \frac{\partial L}{\partial W}=X^\top G_Y $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ stores input row vectors for a batch. $Y=XW$ is the affine output. $G_Y=\partial L/\partial Y$ is the upstream gradient matrix.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The upstream gradient flows back through $W^\top$, while the weight gradient is an input-transpose times upstream-gradient product.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the row-vector batch version often used in code. Compare shapes before multiplying: $X^\top G_Y$ must match $W$.</p>
     </div>
     <div class="callout formula">
       <div class="head">ReLU backward pass</div>
@@ -133,7 +167,10 @@
     <li>Draw the graph first. Label each intermediate value, not just the final formula.</li>
     <li>Write the forward values before differentiating; many local gradients need cached values.</li>
     <li>Move backward one node at a time: upstream gradient times local derivative.</li>
+    <li>For HW3-style MLP calculations, use the order: output error $\delta$, activation local gradient, then weight gradient as error signal times previous activation.</li>
     <li>For matrix gradients, write shapes before writing formulas.</li>
+    <li>In PyTorch, call <code>optimizer.zero_grad()</code> before a new backward pass because gradients accumulate in <code>.grad</code>.</li>
+    <li>For RNN questions, use BPTT: unroll the RNN through time, then apply the same backprop rules on the unfolded graph.</li>
   </ul>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -142,6 +179,8 @@
     <li>Confusing elementwise multiplication with matrix multiplication.</li>
     <li>Dropping a transpose in an outer product gradient.</li>
     <li>Using the activation derivative at $a$ instead of at the pre-activation $z$.</li>
+    <li>Calling <code>.backward()</code> repeatedly in PyTorch without clearing old gradients.</li>
+    <li>Forgetting that reverse-mode is efficient here because the network has many parameters but one scalar loss.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -150,14 +189,19 @@
     <li>Explain what information must be saved during the forward pass.</li>
     <li>For a two-layer network, compute forward values, masks for ReLU, and gradient shapes.</li>
     <li>Use the outer-product gradient formulas for affine layers.</li>
+    <li>Recognize $\delta=\hat y-y$ as the canonical output-layer starting point for sigmoid/softmax cross-entropy.</li>
+    <li>Redo HW3 §2.1 until you can compute $z^{(1)}$, $a^{(1)}$, $z^{(2)}$, $\partial L/\partial W^{(2)}$, and $\partial L/\partial W^{(1)}$ without looking.</li>
+    <li>Know that BPTT is ordinary backprop on an unrolled RNN, with repeated products causing vanishing or exploding gradients.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
   <ul>
     <li>I can explain upstream, local, and downstream gradients.</li>
     <li>I can handle reused variables by summing gradient contributions.</li>
+    <li>I can start backprop from the output error signal $\delta$.</li>
     <li>I can verify $\partial L/\partial W$ has the same shape as $W$.</li>
     <li>I can write affine-layer gradients as outer products.</li>
+    <li>I remember PyTorch gradients accumulate unless I call <code>zero_grad()</code>.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -169,6 +213,7 @@
 
       <h3 class="section-blue">1. Concept Understanding</h3>
       <p>训练神经网络是在最小化 loss。梯度下降公式本身很短：$w_{t+1}=w_t-\alpha\nabla_w L(w_t)$；真正麻烦的是大模型里每个 parameter 的 gradient 怎么算。</p>
+      <p>Backpropagation 是一种 local message-passing algorithm，用来高效计算 feed-forward network 中 error function $E(w)$ 对各个参数的 gradients。它不要求你为每个新 architecture 手推一整套公式，而是把网络拆成小 operation，再在 computation graph 上局部套 chain rule。</p>
       <ul>
         <li><b>Computational graph</b>：把变量、参数、中间 tensor、operation 连接成有向无环图。</li>
         <li><b>Forward pass</b>：算 prediction / loss，同时缓存 backward 需要的信息。</li>
@@ -184,6 +229,11 @@
       <div class="callout intuition">
         <div class="head">为什么 neural network 适合 reverse mode</div>
         <p>神经网络通常是一个 scalar loss、非常多 parameters。Reverse mode 可以用一次 backward sweep 算出这个 loss 对所有参数的梯度。</p>
+      </div>
+      <div class="mini-list">
+        <div><b>Two-phase training iteration：</b> Forward 计算各层数值，并保存 pre-activations 和 activations；本页用 $z$ 表示 pre-activation、$a$ 表示 activation，有些教材会用 $a_j$ 表示 pre-activation、$z_j$ 表示 unit output。Backward 从 scalar loss 开始反向走图。</div>
+        <div><b>Golden rule：</b> downstream gradient = local gradient $\times$ upstream gradient。一个值流向多个后续节点时，要把所有 contribution 相加。</div>
+        <div><b>Software view：</b> PyTorch 在 forward pass 时动态建立 graph，调用 <code>.backward()</code> 时用 reverse-mode autodiff 反向遍历。</div>
       </div>
 
       <h3 class="section-purple">4. 关键公式</h3>
@@ -212,12 +262,40 @@
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 变量分叉时，把所有回来的 gradient 都加到同一个 accumulator。代码里的同一个 tensor 被重复使用时，也会累加到同一个 .grad。</p>
         </div>
         <div class="callout formula">
+          <div class="head">Canonical loss 的 output error</div>
+          <div class="eq">$$ \delta_k = y_k-t_k $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_k$ 是第 $k$ 个 output unit 的 prediction；$t_k$ 是 target；$\delta_k$ 是 output layer 的 error signal，通常是 matching loss/link 下对 output pre-activation 的 gradient。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Sigmoid 或 softmax 搭配 cross-entropy 时，复杂 derivative 会简化成 prediction minus target。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Output layer backward 从这个值开始，再把它传给 weights 和 hidden units。注意题目/讲义的 sign convention，有些地方会定义成相反方向。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Hidden unit error</div>
+          <div class="eq">$$ \delta_j = h'(a_j)\sum_k w_{kj}\delta_k $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a_j$ 是 hidden unit $j$ 的 pre-activation；$h'(a_j)$ 是 activation derivative；$w_{kj}$ 连接 hidden unit $j$ 到上一层的 unit $k$；$\delta_k$ 是上层传回来的 error signal。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Hidden unit 从所有受它影响的上层 units 收到“责任”，再乘上自己的 activation derivative。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先把 next layer 的 weighted errors 求和，再乘 local derivative。若 $h=\tanh$，则 $h'(a)=1-\tanh^2(a)$。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Neuron weight gradient</div>
+          <div class="eq">$$ \frac{\partial E_n}{\partial w_{ji}}=\delta_j z_i $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $E_n$ 是第 $n$ 个样本的 loss；$w_{ji}$ 连接 input unit $i$ 到 unit $j$；$z_i$ 是 input-side activation；$\delta_j$ 是 receiving unit 的 error signal。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个 weight 的 gradient = 输出端 error × 输入端当时给它的 activation。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 已知 $\delta_j$ 后，对每条 incoming weight，都乘对应的 input activation $z_i$。</p>
+        </div>
+        <div class="callout formula">
           <div class="head">Affine layer 的 backward pass</div>
           <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
           <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a$: 这一层的 input activation；$W,b$: weight matrix 和 bias vector；$z$: pre-activation output；$g_z$: $z$ 处的 upstream gradient；$g_z a^\top$: outer product，shape 和 $W$ 一样</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> weight gradient = 上游 error × 这个 weight 当时看到的 input。转置 $W^\top$ 则把 error signal 送回上一层。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 已知 $g_z$ 后，单样本直接套这些公式。Mini-batch 时对每个 example 算同样的 contribution，再按 loss 的定义 sum 或 average。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Batch matrix form</div>
+          <div class="eq">$$ \frac{\partial L}{\partial X}=G_YW^\top,\qquad \frac{\partial L}{\partial W}=X^\top G_Y $$</div>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X$ 存一个 batch 的 row-vector inputs；$Y=XW$ 是 affine output；$G_Y=\partial L/\partial Y$ 是 upstream gradient matrix。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Upstream gradient 通过 $W^\top$ 传回 input；weight gradient 是 input-transpose 乘 upstream-gradient。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是代码里常见的 row-vector batch 写法。先检查 shapes：$X^\top G_Y$ 必须和 $W$ 同 shape。</p>
         </div>
         <div class="callout formula">
           <div class="head">ReLU 的 backward pass</div>
@@ -252,7 +330,10 @@
         <li>先画 graph，并给每个 intermediate value 命名。</li>
         <li>先算 forward 数值；很多 local derivative 需要 forward cache。</li>
         <li>Backward 时一次只处理一个节点：upstream gradient × local derivative。</li>
+        <li>HW3 风格 MLP 手算按这个顺序走：output error $\delta$、activation local gradient、再用 error signal × previous activation 得 weight gradient。</li>
         <li>矩阵梯度先写 shape，再写公式。</li>
+        <li>PyTorch 里每次新 backward 前先调用 <code>optimizer.zero_grad()</code>，因为 gradients 会累加到 <code>.grad</code>。</li>
+        <li>RNN 题用 BPTT：先把 RNN 按时间展开，再在 unfolded graph 上做同样的 backprop。</li>
       </ul>
 
       <h3 class="section-red">7. Common Mistakes</h3>
@@ -261,6 +342,8 @@
         <li>把 elementwise multiplication 和 matrix multiplication 混起来。</li>
         <li>Outer product gradient 里漏掉 transpose。</li>
         <li>ReLU derivative 应该看 pre-activation $z$，不是看后面的符号猜。</li>
+        <li>PyTorch 里连续调用 <code>.backward()</code>，却忘记清空旧 gradients。</li>
+        <li>忘记 reverse-mode 在这里高效，是因为 network 有很多 parameters，但最终只有一个 scalar loss。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus</h3>
@@ -269,14 +352,19 @@
         <li>能说明 forward pass 为什么要保存某些 tensor / shape。</li>
         <li>二层网络要会算 forward、ReLU mask、梯度 shape。</li>
         <li>会用 affine layer 的 outer-product gradient formula。</li>
+        <li>看到 sigmoid / softmax cross-entropy，要认出 $\delta=\hat y-y$ 是 output layer 的起点。</li>
+        <li>重做 HW3 §2.1，直到能不看答案算出 $z^{(1)}$、$a^{(1)}$、$z^{(2)}$、$\partial L/\partial W^{(2)}$ 和 $\partial L/\partial W^{(1)}$。</li>
+        <li>知道 BPTT 是 unrolled RNN 上的普通 backprop，重复乘积会导致 vanishing / exploding gradients。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist</h3>
       <ul>
         <li>我能解释 upstream / local / downstream gradient。</li>
         <li>我知道 reuse variable 时梯度要 sum。</li>
+        <li>我能从 output error signal $\delta$ 开始做 backprop。</li>
         <li>我会检查 $\partial L/\partial W$ 的 shape。</li>
         <li>我能把 affine-layer gradients 写成 outer products。</li>
+        <li>我记得 PyTorch gradients 会累加，更新前要 <code>zero_grad()</code>。</li>
       </ul>
     </section>
 

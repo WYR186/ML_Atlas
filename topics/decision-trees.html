@@ -49,8 +49,9 @@
   <p class="topic-lede">Decision trees from Lecture 8 classify by asking a sequence of simple questions. Training greedily chooses splits that reduce label uncertainty, most often using information gain.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>A decision tree represents a function by a binary tree. Each internal node has a split rule $g:X\to\{0,1\}$, and each leaf stores a prediction such as a majority class.</p>
-  <p>For continuous features, this course uses axis-aligned threshold rules such as $x_j\ge\tau$. The learning problem is to choose both the split rules and the tree structure.</p>
+  <p>A decision tree represents a function by a tree-structured set of rules. Internal nodes store split rules, edges represent rule outcomes, and leaf nodes store final predictions.</p>
+  <p>For classification, a leaf usually predicts the majority class among training examples that reach it. For regression, a leaf usually predicts the mean target value in that region.</p>
+  <p>For continuous features, this course uses axis-aligned threshold rules such as $x_j\ge\tau$. These splits carve feature space into non-overlapping box-shaped regions. The learning problem is to choose both the split rules and the tree structure.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>A tree is a flowchart. Start at the root, answer a yes/no question, move left or right, and repeat until a leaf tells you the label.</p>
@@ -59,6 +60,12 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Entropy, Gini, and classification error are all impurity measures. They are low when a node is pure and high when labels are mixed.</p>
   <p>Information gain is uncertainty reduction: parent impurity minus weighted child impurity. Because finding the globally smallest tree is NP-complete, practical tree learning uses a greedy split-by-split heuristic.</p>
+  <div class="mini-list">
+    <div><b>Greedy learning loop.</b> Start with all data at the root, choose the feature and threshold with the largest impurity reduction, split the data, and recurse on each child.</div>
+    <div><b>Common stop rules.</b> Stop when the node is pure, no useful feature remains, a maximum depth is reached, or the leaf would contain too few samples.</div>
+    <div><b>Model behavior.</b> Trees are non-parametric and nonlinear: their complexity can grow with data, and their boundaries can be very jagged.</div>
+    <div><b>Why ensembles help.</b> A single tree is high variance, so bagging, random forests, and boosting often use trees as base learners.</div>
+  </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -124,6 +131,11 @@
     <div><b>For continuous features,</b> sort candidate thresholds and obey the threshold convention stated in the problem.</div>
     <div><b>For prediction,</b> trace one example from root to leaf; do not average across branches.</div>
     <div><b>For theory questions,</b> mention greedy learning because globally smallest tree search is hard.</div>
+    <div><b>For regularization,</b> use early stopping limits such as max depth and minimum leaf size, or prune a fully grown tree using validation performance.</div>
+  </div>
+  <div class="callout tips">
+    <div class="head">HW2-style best split recipe</div>
+    <p>Compute the parent entropy first. Then enumerate each allowed feature-threshold rule, compute the weighted child impurity and information gain, pick the rule with largest $IG$, and assign each child leaf by majority class.</p>
   </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -132,6 +144,7 @@
     <li>Forgetting that $\log 0$ terms are treated as 0 through the limit $p\log p\to0$.</li>
     <li>Assuming deeper is always better. Deep trees often memorize noise and overfit.</li>
     <li>Using the wrong inequality direction when reporting a split rule.</li>
+    <li>Forgetting the regression case: a regression-tree leaf predicts a mean value, not a class vote.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -140,6 +153,8 @@
     <li>Choose a root split for a small continuous dataset.</li>
     <li>Explain greedy tree induction and why exact smallest-tree learning is hard.</li>
     <li>Explain why unrestricted trees overfit.</li>
+    <li>Name early stopping and pruning as tree regularization tools.</li>
+    <li>Explain why decision trees are common base learners for ensembles.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -149,6 +164,7 @@
     <li>I can choose the max-IG split.</li>
     <li>I can explain tree inference as if/then/else.</li>
     <li>I know why trees are flexible but high variance.</li>
+    <li>I know how depth limits, minimum leaf sizes, and pruning fight overfitting.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -159,8 +175,9 @@
       <p class="topic-lede">Lecture 8 的 decision tree 是一种用一连串简单问题做分类的模型。训练时每一步贪心选择最能降低 label uncertainty 的 split，最常用的指标是 information gain。</p>
 
       <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
-      <p>Decision tree 用 binary tree 表示一个函数。每个 internal node 有一个 split rule $g:X\to\{0,1\}$，每个 leaf 存一个 prediction，例如 majority class。</p>
-      <p>对 continuous features，本课常用 axis-aligned threshold rule，比如 $x_j\ge\tau$。学习问题就是选择好的 split rules 和 tree structure。</p>
+      <p>Decision tree 用树状规则表示一个函数。Internal nodes 存 split rules，edges 表示规则结果，leaf nodes 存最终 prediction。</p>
+      <p>Classification 里，leaf 通常预测到达该 leaf 的 training examples 的 majority class。Regression 里，leaf 通常预测该区域 target values 的 mean。</p>
+      <p>对 continuous features，本课常用 axis-aligned threshold rule，比如 $x_j\ge\tau$。这些 split 会把 feature space 切成互不重叠的 box-shaped regions。学习问题就是选择好的 split rules 和 tree structure。</p>
 
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>树就是 flowchart。你从 root 开始，回答一个 yes/no 问题，往左或往右走，直到 leaf 给出 label。</p>
@@ -169,6 +186,12 @@
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>Entropy、Gini、classification error 都是在量化 impurity：节点越纯，impurity 越低；类别越混，impurity 越高。</p>
       <p>Information gain 就是 uncertainty reduction：父节点 impurity 减去子节点 weighted impurity。因为找全局最小树是 NP-complete，实际 tree learning 用逐层 greedy heuristic。</p>
+      <div class="mini-list">
+        <div><b>Greedy learning loop：</b> 从 root 的全部数据开始，选 impurity reduction 最大的 feature 和 threshold，split data，然后对子节点递归。</div>
+        <div><b>常见停止条件：</b> node 已经 pure、没有可用 feature、达到 max depth，或 leaf 样本数太少。</div>
+        <div><b>模型性质：</b> Trees 是 non-parametric 和 nonlinear；复杂度能随数据增长，decision boundary 可以很曲折。</div>
+        <div><b>和 ensembles 的关系：</b> 单棵树 high variance，所以 bagging、random forests、boosting 经常把 tree 当 base learner。</div>
+      </div>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
@@ -234,6 +257,11 @@
         <div><b>Continuous features：</b> 按题目规定的 threshold convention，别自己改成 $&gt;$ 或小数阈值。</div>
         <div><b>Prediction：</b> 一个样本只沿一条 root-to-leaf path 走，不要跨分支平均。</div>
         <div><b>Theory 题：</b> 提到 exact smallest tree 很难，所以用 greedy induction。</div>
+        <div><b>Regularization：</b> 用 max depth、minimum leaf size 这类 early stopping，或者先长满再用 validation performance 做 pruning。</div>
+      </div>
+      <div class="callout tips">
+        <div class="head">HW2-style best split recipe</div>
+        <p>先算 parent entropy。然后枚举每个允许的 feature-threshold rule，算 weighted child impurity 和 information gain，选 $IG$ 最大的 rule，最后按每个 child 的 majority class 给 leaf label。</p>
       </div>
 
       <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -242,6 +270,7 @@
         <li>遇到 $\log 0$ 慌了；$p\log p$ 在 $p\to0$ 时按 0 处理。</li>
         <li>以为树越深一定越好；deep tree 很容易 memorize noise。</li>
         <li>报告 split rule 时把 inequality direction 写反。</li>
+        <li>忘记 regression tree 的 leaf 预测 mean value，不是 class vote。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
@@ -250,6 +279,8 @@
         <li>会给小型 continuous dataset 选 root split。</li>
         <li>能解释 greedy tree induction，以及为什么 exact smallest-tree learning 很难。</li>
         <li>能解释 unrestricted tree 为什么 overfit。</li>
+        <li>能说出 early stopping 和 pruning 是 tree regularization。</li>
+        <li>能说明为什么 decision trees 常被用作 ensembles 的 base learners。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -259,6 +290,7 @@
         <li>我能选择 max-IG split。</li>
         <li>我能把 tree inference 讲成 if/then/else。</li>
         <li>我知道 trees 很 flexible，但 variance 高。</li>
+        <li>我知道 max depth、minimum leaf size、pruning 如何减少 overfitting。</li>
       </ul>
     </section>
 

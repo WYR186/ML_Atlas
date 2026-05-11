@@ -52,22 +52,24 @@
   <div class="mini-list">
     <div><b>Pretext task.</b> Predict rotation, fill missing image patches, reconstruct an input, or predict masked language tokens.</div>
     <div><b>Contrastive task.</b> Make two related views of the same item close in embedding space and unrelated items farther away.</div>
-    <div><b>Representation learning.</b> Pretrain an encoder, then fine-tune it for classification, detection, retrieval, or other downstream tasks.</div>
+    <div><b>Pair vocabulary.</b> The anchor $x$ is the reference item; $x^+$ is a semantically equivalent positive view; $x^-$ is a negative item, often another image in the same minibatch.</div>
+    <div><b>Representation learning.</b> Pretrain an encoder, then freeze or fine-tune it for classification, detection, retrieval, or other downstream tasks.</div>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Think of a model learning to recognize a person from different photos. A front-facing photo and a cropped photo of the same person should land near each other; a different person should land farther away.</p>
-  <p>The labels are created by the data pipeline: two augmentations of one image are a positive pair; other images in the batch become negatives.</p>
+  <p>The labels are created by the data pipeline: two augmentations of one image are a positive pair; other images in the batch become negatives. Useful augmentations include cropping, flipping, blur, color shifts, and mild rotations.</p>
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>Contrastive learning combines two pressures. Alignment pulls positives together; separation keeps negatives apart. Good embeddings preserve semantic content while ignoring nuisance transformations such as crop, color jitter, or mild rotation.</p>
   <p>That is why the lecture emphasizes invariance: the identity of an image should survive common augmentations, so the representation should be stable under those augmentations.</p>
+  <p>Negatives also prevent collapse. If the model only minimized distance between positive views, it could map every input to the same constant vector; negatives make that degenerate solution expensive.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
     <div class="head">Cosine similarity</div>
     <div class="eq">$$ s(f(x),f(x'))=\frac{f(x)^\top f(x')}{\|f(x)\|_2\|f(x')\|_2} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x,x'$: Two inputs or two augmented views.； $f(\cdot)$: Encoder that maps an input to an embedding.； $f(x)^\top f(x')$: Dot product between the two embeddings.； $\|\cdot\|_2$: Euclidean norm, or vector length.； $s$: Similarity score used as a logit.</p>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x,x'$: two inputs or two augmented views. $f(\cdot)$: encoder that maps an input to an embedding. $f(x)^\top f(x')$: dot product between the two embeddings. $\|\cdot\|_2$: Euclidean norm, or vector length. $s$: similarity score used as a logit.</p>
     <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Cosine similarity compares direction rather than raw length, which is why it works well for representation vectors.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Normalize embeddings if needed, then use dot products as cosine scores. Higher score means the pair should be treated as more similar.</p>
@@ -75,22 +77,31 @@
   <div class="callout formula">
     <div class="head">InfoNCE loss</div>
     <div class="eq">$$ \mathcal L_{\mathrm{NCE}}=-\log\frac{\exp(s(f(x),f(x^+))/\tau)}{\exp(s(f(x),f(x^+))/\tau)+\sum_{i=1}^{N}\exp(s(f(x),f(x_i^-))/\tau)} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: Anchor example.； $x^+$: Positive view, usually another augmentation of the same item.； $x_i^-$: Negative example $i$.； $N$: Number of negatives.； $\tau$: Temperature; smaller values sharpen the softmax.； $\exp$: Turns scores into positive softmax weights.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The loss is small when the positive pair receives most of the probability mass among all candidates.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each anchor, score the positive and negatives, divide every score by $\tau$, apply softmax, and use cross-entropy with the positive as the correct class.</p>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: anchor example. $x^+$: positive view, usually another augmentation of the same item. $x_i^-$: negative example $i$. $N$: number of negatives. $\tau$: temperature; smaller values sharpen the softmax. $\exp$: turns scores into positive softmax weights.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The numerator is the positive-pair score. The denominator is a softmax pool containing that positive plus all negatives, so the loss is small only when the positive receives most of the probability mass.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each anchor, score the positive and negatives, divide every score by $\tau$, apply softmax, and use cross-entropy with the positive as the correct class. In training, this single-anchor loss is averaged over the batch, matching the expectation form.</p>
   </div>
   <div class="callout formula">
     <div class="head">Dual-encoder form</div>
     <div class="eq">$$ \mathcal L_{\mathrm{dual}}(x,z)=-\log\frac{\exp(f_1(x)^\top f_2(z))}{\sum_{j=1}^{C}\exp(f_1(x)^\top f_2(z_j))} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_1$: First encoder, such as an image encoder.； $f_2$: Second encoder, such as a text or class encoder.； $z$: Correct paired candidate for $x$.； $z_j$: Candidate item $j$.； $C$: Number of candidates or classes.</p>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_1$: first encoder, such as an image encoder. $f_2$: second encoder, such as a text or class encoder. $z$: correct paired candidate for $x$. $z_j$: candidate item $j$. $C$: number of candidates or classes.</p>
     <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> CLIP-style learning is classification over candidates, except both sides are learned encoders in a shared embedding space.</p>
     <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Build a score table between $x$ embeddings and candidate $z_j$ embeddings, then apply softmax cross-entropy so the paired candidate is selected.</p>
+  </div>
+  <div class="callout formula">
+    <div class="head">Triplet loss comparison</div>
+    <div class="eq">$$ \mathcal L_{\mathrm{triplet}}=\left[d(a,p)^2-d(a,n)^2+m\right]_+ $$</div>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a$ is the anchor, $p$ is one positive, $n$ is one negative, $d(\cdot,\cdot)$ is distance in embedding space, $m$ is the margin, and $[u]_+=\max(u,0)$.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The positive should be closer to the anchor than the negative by at least margin $m$.</p>
+    <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Triplet loss compares one positive against one negative. InfoNCE compares one positive against many negatives through a softmax, which usually gives a richer learning signal.</p>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
   <div class="mini-list">
     <div><b>HW4 1.1 normalized InfoNCE.</b> With unit-norm vectors, compute similarities by dot products, then compare how lowering $\tau$ sharpens the probability assigned to the most similar item.</div>
     <div><b>HW4 1.2 cross-entropy as contrastive learning.</b> Treat the image feature as one encoder output and each class weight vector as a candidate text/class embedding. The usual softmax classifier becomes a dual-encoder loss.</div>
+    <div><b>SimCLR setup.</b> Create two augmented views of the same image as the positive pair; use the other minibatch images as negatives. The composition of augmentations, especially random crop and color distortion, is a key success factor.</div>
+    <div><b>Siamese network view.</b> Two inputs pass through identical weight-sharing encoders, then the loss compares their embeddings. Contrastive systems often use this shared-encoder pattern.</div>
     <div><b>Lecture 15 CLIP example.</b> Paired image and caption embeddings are positives; mismatched captions in the batch are negatives, enabling zero-shot classification through text prompts.</div>
   </div>
 
@@ -99,6 +110,7 @@
     <li>Always label anchor, positive, negatives, encoder, and score function before writing the loss.</li>
     <li>If vectors are normalized, use dot products directly for cosine similarity.</li>
     <li>Lower temperature makes the softmax more confident; it magnifies score gaps.</li>
+    <li>If labels are available, supervised contrastive learning can treat same-class examples as positives and different-class examples as negatives.</li>
     <li>For CLIP-style questions, ask what each encoder can embed at test time. That usually explains zero-shot behavior.</li>
   </ul>
 
@@ -106,6 +118,7 @@
   <ul>
     <li>Using the positive sample in the denominator twice incorrectly. The denominator includes the positive term plus negatives.</li>
     <li>Forgetting temperature $\tau$ in every logit, not just the positive one.</li>
+    <li>Forgetting why negatives matter: without a separation pressure, the encoder can collapse to a constant embedding.</li>
     <li>Calling every unlabeled method "contrastive." Reconstruction and masked prediction are self-supervised, but not necessarily contrastive.</li>
     <li>Explaining CLIP zero-shot as magic rather than as text encoder reuse over new class prompts.</li>
   </ul>
@@ -115,6 +128,8 @@
     <li>Define positive and negative pairs for SimCLR-like training.</li>
     <li>Compute InfoNCE for a small set of feature vectors.</li>
     <li>Explain temperature qualitatively.</li>
+    <li>Explain collapse and why negative pairs prevent it.</li>
+    <li>Compare InfoNCE with triplet loss.</li>
     <li>Show how softmax classification is a special case of dual-encoder contrastive learning.</li>
   </ul>
 
@@ -122,8 +137,12 @@
   <ul>
     <li>SSL creates labels from data itself.</li>
     <li>Contrastive learning pulls positives together and pushes negatives apart.</li>
+    <li>I can name the anchor, positive, and negative samples.</li>
     <li>InfoNCE is softmax cross-entropy over one positive among candidates.</li>
+    <li>Negatives prevent representation collapse.</li>
+    <li>SimCLR uses two augmented views and minibatch negatives.</li>
     <li>CLIP works because both images and text are embedded into the same space.</li>
+    <li>Triplet loss uses one negative; InfoNCE uses multiple negatives.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -138,16 +157,18 @@
       <div class="mini-list">
         <div><b>Pretext task</b>：预测旋转角、补全图像 patch、重建输入、预测 masked token。</div>
         <div><b>Contrastive task</b>：同一对象的两个 view 在 embedding space 里靠近，不相关对象拉远。</div>
-        <div><b>Representation learning</b>：先 pretrain encoder，再 fine-tune 到分类、检测、检索等 downstream tasks。</div>
+        <div><b>Pair vocabulary</b>：anchor $x$ 是参照样本；$x^+$ 是语义等价的 positive view；$x^-$ 是 negative item，实践中常用同一个 minibatch 里的其它图片。</div>
+        <div><b>Representation learning</b>：先 pretrain encoder，再 freeze 或 fine-tune 到分类、检测、检索等 downstream tasks。</div>
       </div>
 
       <h3 class="section-orange">2. 大白话理解 / Plain-English Explanation</h3>
       <p>想象模型在学“认人”：同一个人的正脸照和裁剪照应该离得近；另一个人的照片应该离得远。</p>
-      <p>这里的 label 不是人工标的，而是 data pipeline 造出来的：同一图片的两个 augmentations 是 positive pair，batch 里的其它图片就是 negatives。</p>
+      <p>这里的 label 不是人工标的，而是 data pipeline 造出来的：同一图片的两个 augmentations 是 positive pair，batch 里的其它图片就是 negatives。常见 augmentations 包括 random crop、flip、blur、color shift、轻微 rotation。</p>
 
       <h3 class="section-orange">3. 核心直觉 / Core Intuition</h3>
       <p>Contrastive learning 同时做两件事：alignment 把 positives 拉近，separation 把 negatives 拉开。好的 embedding 应该保留语义内容，同时忽略 crop、颜色扰动、轻微旋转这些 nuisance transformations。</p>
       <p>所以 Lecture 15 强调 invariance principle：图片内容经过常见变换后仍然是同一个对象，representation 也应该稳定。</p>
+      <p>Negatives 还负责防止 collapse。如果只要求 positive views 距离变小，encoder 最偷懒的做法是把所有输入都映射成同一个 constant vector；有 negatives 后，这种 degenerate solution 会被惩罚。</p>
 
       <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
@@ -162,8 +183,8 @@
         <div class="head">InfoNCE loss</div>
         <div class="eq">$$ \mathcal L_{\mathrm{NCE}}=-\log\frac{\exp(s(f(x),f(x^+))/\tau)}{\exp(s(f(x),f(x^+))/\tau)+\sum_{i=1}^{N}\exp(s(f(x),f(x_i^-))/\tau)} $$</div>
         <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: Anchor example。；$x^+$: Positive view，通常是同一对象的另一个 augmentation。；$x_i^-$: 第 $i$ 个 negative example。；$N$: Negative 的数量。；$\tau$: Temperature；越小 softmax 越尖锐。；$\exp$: 把 score 转成正的 softmax weight。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 只有当 positive pair 在所有候选里拿到大部分 probability mass 时，这个 loss 才会小。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 anchor，算 positive 和 negatives 的 scores，每个 score 都除以 $\tau$，再做 softmax，把 positive 当正确类别做 cross-entropy。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 分子是 positive-pair score；分母是 positive 加所有 negatives 的 softmax pool。只有当 positive pair 在所有候选里拿到大部分 probability mass 时，这个 loss 才会小。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 anchor，算 positive 和 negatives 的 scores，每个 score 都除以 $\tau$，再做 softmax，把 positive 当正确类别做 cross-entropy。训练时通常对 batch 里每个 anchor 的 loss 求 average，对应公式里的 expectation。</p>
       </div>
       <div class="callout formula">
         <div class="head">Dual-encoder form</div>
@@ -172,11 +193,20 @@
         <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> CLIP-style learning 本质上是在候选集合里分类，只是两边都由 encoder 映射到同一个 embedding space。</p>
         <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先建立 $x$ embeddings 和所有候选 $z_j$ embeddings 的 score table，再用 softmax cross-entropy 让正确配对被选中。</p>
       </div>
+      <div class="callout formula">
+        <div class="head">Triplet loss comparison</div>
+        <div class="eq">$$ \mathcal L_{\mathrm{triplet}}=\left[d(a,p)^2-d(a,n)^2+m\right]_+ $$</div>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a$ 是 anchor，$p$ 是一个 positive，$n$ 是一个 negative，$d(\cdot,\cdot)$ 是 embedding space 里的 distance，$m$ 是 margin，$[u]_+=\max(u,0)$。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 它要求 anchor 到 positive 的距离，比 anchor 到 negative 的距离至少小 $m$。</p>
+        <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Triplet loss 一次比较 one positive vs one negative；InfoNCE 是 one positive vs multiple negatives 的 softmax，对比信号通常更强。</p>
+      </div>
 
       <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
       <div class="mini-list">
         <div><b>HW4 1.1 normalized InfoNCE</b>：feature 是 unit norm 时，similarity 直接算 dot product；降低 $\tau$ 会让 softmax 更尖锐，放大 score gap。</div>
         <div><b>HW4 1.2 cross-entropy 特例</b>：把 image feature 当作 $f_1(x)$，把每个 class weight 当作候选 embedding，普通 softmax classifier 就是 dual-encoder loss 的特例。</div>
+        <div><b>SimCLR setup</b>：同一张 image 生成两个 augmented views 作为 positive pair；同一个 minibatch 的其它 images 作为 negatives。Augmentation composition 很关键，尤其是 random crop 和 color distortion。</div>
+        <div><b>Siamese network 视角</b>：两个输入经过同一个 shared-weight encoder，再比较 embeddings 的距离。很多 contrastive systems 都是这种共享 encoder 的结构。</div>
         <div><b>Lecture 15 CLIP</b>：配对 image-caption 是 positive，不匹配 caption 是 negatives；测试时可用文本 prompt 做 zero-shot classification。</div>
       </div>
 
@@ -185,6 +215,7 @@
         <li>写 loss 前先标出 anchor、positive、negatives、encoder、score function。</li>
         <li>向量已归一化时，cosine similarity 直接用 dot product。</li>
         <li>$\tau$ 越小，softmax 越自信，score 差距被放大。</li>
+        <li>如果有 labels，supervised contrastive learning 可以把同 class 样本当 positives，不同 class 样本当 negatives。</li>
         <li>CLIP 题要问：测试时 $f_2$ 能不能编码新的文本类别？这通常就是 zero-shot 的关键。</li>
       </ul>
 
@@ -192,6 +223,7 @@
       <ul>
         <li>denominator 写错：它包含 positive term 加 negatives，不是只有 negatives。</li>
         <li>只给 positive 除以 $\tau$，忘记所有 logits 都要除以 temperature。</li>
+        <li>忘记 negatives 为什么重要：没有 separation pressure，encoder 可能 collapse 成 constant embedding。</li>
         <li>把所有 unlabeled method 都叫 contrastive；reconstruction 和 masked prediction 是 SSL，但不一定是 contrastive。</li>
         <li>把 CLIP zero-shot 解释成玄学，而不是 text encoder 对新 class prompt 的泛化。</li>
       </ul>
@@ -201,6 +233,8 @@
         <li>能定义 SimCLR-style positive / negative pairs。</li>
         <li>能对小 feature set 手算 InfoNCE。</li>
         <li>能定性解释 temperature。</li>
+        <li>能解释 collapse，以及为什么 negative pairs 能防止它。</li>
+        <li>能比较 InfoNCE 和 triplet loss。</li>
         <li>能说明 softmax classification 是 dual-encoder contrastive learning 的特例。</li>
       </ul>
 
@@ -208,8 +242,12 @@
       <ul>
         <li>SSL 从数据本身造 supervision。</li>
         <li>Contrastive = 拉近 positives，推远 negatives。</li>
+        <li>我能说清 anchor、positive、negative 分别是什么。</li>
         <li>InfoNCE = 在候选集合中识别唯一 positive 的 softmax CE。</li>
+        <li>Negatives 的关键作用之一是防止 representation collapse。</li>
+        <li>SimCLR 使用 two augmented views 和 minibatch negatives。</li>
         <li>CLIP 的关键是 image 和 text 进同一个 embedding space。</li>
+        <li>Triplet loss 用一个 negative；InfoNCE 用多个 negatives。</li>
       </ul>
     </section>
 

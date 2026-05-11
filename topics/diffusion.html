@@ -46,13 +46,14 @@
 <section class="topic lesson-section concept" id="diffusion-concept-en">
   <h2>1. Concept Understanding</h2>
   <p class="topic-lede">A diffusion model is a generative model that learns to reverse a gradual noising process. The forward process turns clean data $x_0$ into nearly standard Gaussian noise $x_T$; the reverse process starts from noise and denoises step by step back to a sample.</p>
-  <p>Lecture 20 frames diffusion models as iterative VAEs: instead of one latent variable $z$, we introduce a chain $x_1,\ldots,x_T$ of latent noisy states.</p>
+  <p>Lecture 20 frames diffusion models as iterative VAEs: instead of one latent variable $z$, we introduce a chain $x_1,\ldots,x_T$ of latent noisy states. More precisely, DDPMs behave like hierarchical variational autoencoders whose encoder is fixed by the chosen noising process $q$, while the generative decoder $p_\theta$ is learned.</p>
+  <p>The goal is to transform a sample from a simple distribution, usually $x_T\sim\mathcal{N}(0,I)$, into a sample from the complex data distribution through many small denoising steps.</p>
 </section>
 
 <section class="topic lesson-section plain" id="diffusion-plain-en">
   <h2>2. Plain-English Explanation</h2>
   <p>Imagine taking a clear photo and adding a tiny bit of static many times until it becomes pure noise. Training teaches a neural network how to undo one tiny step of static. During generation, you start with random noise and repeatedly clean it up.</p>
-  <p>That is why image diffusion often looks like coarse-to-fine refinement: early steps recover broad structure; later steps sharpen details.</p>
+  <p>That is why image diffusion often looks like coarse-to-fine refinement: early steps recover broad structure; later steps sharpen details. This differs from an LLM's left-to-right token generation: diffusion repeatedly refines the whole sample at once.</p>
 </section>
 
 <section class="topic lesson-section intuition-section" id="diffusion-intuition-en">
@@ -60,18 +61,30 @@
   <p>The forward direction is easy because we choose it: add Gaussian noise according to a schedule. The reverse direction is hard because many clean images could have produced a noisy image. A neural network learns the reverse Gaussian transition, often by predicting the noise or the clean image hidden inside the noisy sample.</p>
   <div class="study-box">
     <p>The fixed forward process gives a tractable training signal. The learned reverse process becomes a sampler: $x_T\sim\mathcal{N}(0,I)$, then $x_T\to x_{T-1}\to\cdots\to x_0$.</p>
+    <p>For image diffusion, the shared denoising network is often a U-Net. It keeps spatial detail through skip connections while still building global context, and it takes the time index $t$ so the same network can handle different noise levels.</p>
   </div>
 </section>
 
 <section class="topic lesson-section equations" id="diffusion-equations-en">
   <h2>4. Key Equations</h2>
   <h3>Notation</h3>
-  <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final almost-pure-noise step, $I$ is the identity covariance matrix, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$.</p>
+  <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final almost-pure-noise step, $I$ is the identity covariance matrix, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$. Some notes write the noisy state as $z_t$; this page uses $x_t$ for the same object.</p>
   <div class="study-box">
-    <p><b>Symbols.</b> $x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final noise step, $q$ is the fixed forward process, $p_\theta$ is the learned reverse process, and $\alpha_t,\beta_t,\bar\alpha_t$ control one-step and cumulative noise.</p>
+    <p><b>Symbols.</b> $x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final noise step, $q$ is the fixed forward process, $p_\theta$ is the learned reverse process, $w$ is an optional conditioning signal such as a text prompt, and $\alpha_t,\beta_t,\bar\alpha_t$ control one-step and cumulative noise.</p>
     <p><b>How to read it.</b> $q(\cdot)$ is the fixed forward noising process; $p_\theta(\cdot)$ is the learned reverse denoising process. $\alpha_t,\beta_t$ describe one step, while $\bar{\alpha}_t$ describes the cumulative effect from $0$ to $t$.</p>
     <p><b>How to use.</b> first decide whether the question is moving forward ($q$) or backward ($p_\theta$). Then decide whether it asks for one step ($\alpha_t,\beta_t$) or a direct jump from clean data ($\bar{\alpha}_t$).</p>
   </div>
+  <h3 id="eq-diffusion-noise-schedule-identity">Noise-schedule identity</h3>
+  <div class="eq">$$ \beta_t=1-\alpha_t,\qquad \bar\alpha_t=\prod_{i=1}^{t}\alpha_i $$</div>
+  <p>Plug-and-chug bridge between the two equivalent ways of writing a diffusion noise schedule. Many lectures and textbooks write the per-step noise variance as <i>"$1-\alpha_t$"</i>; ours writes it as <i>"$\beta_t$"</i>. Both refer to the same number — this identity is the dictionary.</p>
+  <ul class="mini-list">
+    <li><b>$\alpha_t$</b> = signal-retention factor at step $t$ — the fraction of the previous state we keep. $0&lt;\alpha_t&lt;1$, monotonically decreasing toward 0 as $t$ grows.</li>
+    <li><b>$\beta_t = 1 - \alpha_t$</b> = noise variance added at step $t$ — the fraction of variance we inject. $0&lt;\beta_t&lt;1$, monotonically increasing toward 1.</li>
+    <li><b>$\bar\alpha_t = \prod_{i=1}^t \alpha_i$</b> = cumulative signal retention from step $0$ to step $t$. Used in the direct-sample formula $q(x_t\mid x_0)$ below; never written as a single $\alpha$.</li>
+  </ul>
+  <p><b>Why memorize it.</b> Whenever you see $\sqrt{1-\bar\alpha_t}$ in a closed-form formula, that's "cumulative noise-variance scale" — exactly the analogue of $\sqrt{\beta_t}$ but for the multi-step jump from $x_0$ to $x_t$. Forgetting the $\beta_t = 1-\alpha_t$ correspondence is the #1 source of bookkeeping errors when you switch between lecture notation and HW4's ELBO derivation. Reach for this identity at the start of any diffusion problem.</p>
+  <p><b>Sanity check.</b> Variance is additive for independent Gaussians and the schedule is normalized to "old + new = same scale," so $\alpha_t+\beta_t=1$ is exactly the conservation statement. If you see a derivation where a step accidentally uses $\alpha_t+\beta_t\ne 1$, you've probably mixed two notational conventions.</p>
+
   <h3>Forward noising process</h3>
   <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
   <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
@@ -88,15 +101,18 @@
   <ul class="mini-list">
     <li>$\sqrt{\bar{\alpha}_t}$ is the remaining signal scale. It shrinks the original clean sample.</li>
     <li>$\sqrt{1-\bar{\alpha}_t}$ is the noise scale. It grows as more noise steps accumulate.</li>
+    <li>In the large-$T$ limit, $\bar{\alpha}_T$ is near $0$, so $x_T$ becomes essentially indistinguishable from $\mathcal{N}(0,I)$.</li>
     <li>In training-code style questions, sample $t$, sample $\epsilon$, build $x_t$, then ask the network to recover the noise or clean signal.</li>
   </ul>
   <h3>Learned reverse transition</h3>
   <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <div class="eq">$$ p_\theta(x_{t-1}\mid x_t,w)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t,w),\,\beta_t I\right) $$</div>
   <p>This is the model we learn. At generation time, start from $x_T\sim\mathcal{N}(0,I)$, then repeatedly use $p_\theta(x_{t-1}\mid x_t)$ to move from $T$ down to $0$.</p>
   <ul class="mini-list">
     <li>$\theta$ are neural-network parameters.</li>
     <li>$\mu_\theta(x_t,t)$ is the predicted mean of the slightly cleaner previous state.</li>
     <li>$\Sigma_\theta(x_t,t)$ is the reverse-step covariance; in many simplified derivations it is fixed or parameterized simply.</li>
+    <li>$w$ is optional conditioning, such as a class label or text embedding. A single shared network is reused for every $t$; the time input tells it which noise level it is denoising.</li>
   </ul>
   <h3>Posterior mean used in HW4 §3.4</h3>
   <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
@@ -110,6 +126,10 @@
     <li>The coefficient on $x_0$ tells how much the clean reference anchors the posterior.</li>
     <li>To use the formula, compute $\alpha_t$, $\bar{\alpha}_{t-1}$, $\bar{\alpha}_t$, and $\beta_t$ first; then plug in the two vectors $x_t$ and $x_0$.</li>
   </ul>
+  <h3>Simplified noise-prediction objective</h3>
+  <div class="eq">$$ \mathcal{L}_{\text{simple}}=\mathbb{E}_{t,x_0,\epsilon}\left[\left\|\epsilon_\theta(x_t,t,w)-\epsilon\right\|_2^2\right] $$</div>
+  <p>Instead of asking the network to directly predict the clean image, many DDPM implementations ask it to predict the noise $\epsilon$ that was added to create $x_t$. Here $\epsilon_\theta$ is the shared denoising network, and $w$ is optional conditioning.</p>
+  <p><b>How to use it.</b> Sample a clean example $x_0$, sample a time $t$, sample Gaussian noise $\epsilon$, construct $x_t$ using the direct formula, then train the network output to match $\epsilon$.</p>
 </section>
 
 <section class="topic lesson-section examples" id="diffusion-examples-en">
@@ -121,7 +141,11 @@
 -D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T))
 -\sum_{t=2}^{T}\mathbb{E}_{q(x_t\mid x_0)}
 \left[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\right] $$</div>
-  <p>The three pieces are reconstruction, prior matching, and step consistency.</p>
+  <ul class="mini-list">
+    <li><b>Reconstruction:</b> the first term rewards the final denoising step from $x_1$ back to clean $x_0$.</li>
+    <li><b>Prior matching:</b> the terminal KL makes $q(x_T\mid x_0)$ match the simple prior $p(x_T)=\mathcal{N}(0,I)$.</li>
+    <li><b>Consistency:</b> the sum of KLs matches each learned reverse step to the true posterior $q(x_{t-1}\mid x_t,x_0)$.</li>
+  </ul>
   <h3>HW4 §3.3: derive $q(x_t\mid x_0)$</h3>
   <p>Repeatedly substitute the reparameterized transition. A linear combination of independent Gaussians is Gaussian. The signal coefficient multiplies into $\sqrt{\bar{\alpha}_t}$, and the remaining variance becomes $1-\bar{\alpha}_t$.</p>
   <h3>HW4 §3.4: posterior mean</h3>
@@ -138,6 +162,9 @@
     <li>For ELBO questions, name the three terms and their meanings.</li>
     <li>For posterior questions, write Bayes' rule and remember "product of Gaussians is Gaussian."</li>
     <li>For sampling questions, start from $x_T\sim\mathcal{N}(0,I)$ and run reverse steps down to $x_0$.</li>
+    <li>Remember sampling cost: generation needs many sequential denoising-network passes, so it is slower than a single feed-forward generator.</li>
+    <li>For conditional generation, guidance modifies the denoising direction so the sample follows the condition $w$ more strongly. Both classifier guidance and classifier-free guidance are common exam keywords.</li>
+    <li>Latent diffusion speeds things up by running diffusion in a lower-dimensional learned latent space instead of pixel space.</li>
   </ol>
 </section>
 
@@ -149,6 +176,7 @@
     <li>Thinking the forward process is learned. In the basic DDPM setup, the noising schedule is fixed.</li>
     <li>Claiming exact density $p_\theta(x_0)$ is easy. It requires integrating out the full latent chain, so ELBO is used instead.</li>
     <li>Confusing diffusion generation with LLM generation: diffusion refines the whole sample; LLMs generate left to right.</li>
+    <li>Confusing incremental noise $\sqrt{\beta_t}\epsilon_t$ with total accumulated noise $\sqrt{1-\bar{\alpha}_t}\epsilon$.</li>
   </ul>
 </section>
 
@@ -160,6 +188,8 @@
     <li>Write the ELBO three-term decomposition and explain each term.</li>
     <li>Derive the posterior mean $\tilde{\mu}_t(x_t,x_0)$ or at least set up the Gaussian product correctly.</li>
     <li>Describe inference: sample noise, then repeatedly denoise.</li>
+    <li>Know the practical noise-prediction objective $\|\epsilon_\theta(x_t,t,w)-\epsilon\|^2$.</li>
+    <li>Explain why U-Net is natural for image diffusion: it preserves spatial resolution with skip connections while learning global context.</li>
   </ul>
 </section>
 
@@ -172,39 +202,54 @@
     <li>$q(x_t\mid x_0)=\mathcal{N}(\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I)$.</li>
     <li>ELBO = reconstruction minus prior KL minus transition KLs.</li>
     <li>Generation runs from $T$ down to $0$.</li>
+    <li>I can separate per-step noise $\beta_t$ from cumulative noise $1-\bar{\alpha}_t$.</li>
+    <li>I know guidance and latent diffusion as practical extensions.</li>
   </ul>
 </section>
 </div><!--/en-only-->
 
 <!--cn-only-start--><div class="cn-only">
 <section class="topic lesson-section concept" id="diffusion-concept-cn">
-  <h2>1. Concept Understanding</h2>
+  <h2>1. 概念理解 / Concept Understanding</h2>
   <p class="topic-lede">Diffusion model 是一种生成模型，核心是学习反转一个逐步加噪过程。Forward process 把 clean data $x_0$ 逐步变成接近标准高斯噪声 $x_T$；reverse process 从噪声开始，一步步 denoise 回样本。</p>
-  <p>Lecture 20 把 diffusion 看成 iterative VAE：VAE 只有一个 latent variable $z$，diffusion 则有一整条 latent noisy states：$x_1,\ldots,x_T$。</p>
+  <p>Lecture 20 把 diffusion 看成 iterative VAE：VAE 只有一个 latent variable $z$，diffusion 则有一整条 latent noisy states：$x_1,\ldots,x_T$。更精确地说，DDPM 很像 hierarchical VAE：encoder 由预先定义的 noising process $q$ 固定住，真正要学习的是 generative decoder $p_\theta$。</p>
+  <p>目标是把一个 simple distribution 里的样本，通常是 $x_T\sim\mathcal{N}(0,I)$，通过很多小步 denoising 变成复杂 data distribution 里的样本，比如 image。</p>
 </section>
 
 <section class="topic lesson-section plain" id="diffusion-plain-cn">
-  <h2>2. 大白话理解</h2>
+  <h2>2. 大白话理解 / Plain-English Explanation</h2>
   <p>想象你拿一张清晰照片，每次加一点点雪花噪声，重复很多次，最后它变成纯噪声。训练时，网络学的是“怎么把一步噪声往回擦掉”。生成时，就从随机噪声开始，一步一步擦回图片。</p>
-  <p>所以图像 diffusion 常像 coarse-to-fine refinement：前面几步先恢复大轮廓，后面几步再补细节。</p>
+  <p>所以图像 diffusion 常像 coarse-to-fine refinement：前面几步先恢复大轮廓，后面几步再补细节。它和 LLM 的 left-to-right token generation 不一样：diffusion 是反复 refine 整个样本。</p>
 </section>
 
 <section class="topic lesson-section intuition-section" id="diffusion-intuition-cn">
-  <h2>3. Core Intuition</h2>
+  <h2>3. 核心直觉 / Core Intuition</h2>
   <p>Forward 方向简单，因为是我们自己规定的：按 noise schedule 加 Gaussian noise。Reverse 方向难，因为同一个 noisy image 可能来自很多 clean images。神经网络要学一个逆向 Gaussian transition，常见实现会预测 noise $\epsilon$ 或 clean image $x_0$。</p>
   <div class="study-box">
     <p>固定 forward process 给了可计算的训练信号；学到的 reverse process 就变成 sampler：$x_T\sim\mathcal{N}(0,I)$，然后 $x_T\to x_{T-1}\to\cdots\to x_0$。</p>
+    <p>图像 diffusion 里，shared denoising network 常用 U-Net。它靠 skip connections 保留 spatial detail，同时又能学习 global context；并且会输入 time index $t$，让同一个网络知道当前 noise level。</p>
   </div>
 </section>
 
 <section class="topic lesson-section equations" id="diffusion-equations-cn">
   <h2>4. 核心公式 / Key Equations</h2>
   <h3>符号表 / Notation</h3>
-  <p>$x_0$ 是 clean data，$x_t$ 是第 $t$ 步 noisy state，$T$ 是最后几乎纯噪声的步数，$I$ 是 identity covariance matrix，$\beta_t$ 是噪声方差，$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$。</p>
+  <p>$x_0$ 是 clean data，$x_t$ 是第 $t$ 步 noisy state，$T$ 是最后几乎纯噪声的步数，$I$ 是 identity covariance matrix，$\beta_t$ 是噪声方差，$\alpha_t=1-\beta_t$，$\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$。有些 notes 会把 noisy state 写成 $z_t$；本页用 $x_t$ 表示同一个东西。</p>
   <div class="study-box">
-    <p><strong>如何读 diffusion 公式：</strong>$q(\cdot)$ 是 fixed forward noising process；$p_\theta(\cdot)$ 是 learned reverse denoising process。$\alpha_t,\beta_t$ 描述单步变化；$\bar{\alpha}_t$ 描述从 $0$ 到 $t$ 的累计效果。</p>
+    <p><strong>如何读 diffusion 公式：</strong>$q(\cdot)$ 是 fixed forward noising process；$p_\theta(\cdot)$ 是 learned reverse denoising process；$w$ 是 optional conditioning signal，比如 text prompt。$\alpha_t,\beta_t$ 描述单步变化；$\bar{\alpha}_t$ 描述从 $0$ 到 $t$ 的累计效果。</p>
     <p><strong>怎么用这套符号：</strong>先判断题目是在 forward 加噪（$q$）还是 reverse 去噪（$p_\theta$）；再判断它问的是单步变化（$\alpha_t,\beta_t$）还是从 clean data 直接跳到第 $t$ 步（$\bar{\alpha}_t$）。</p>
   </div>
+  <h3 id="eq-diffusion-noise-schedule-identity-cn">Noise-schedule identity（噪声 schedule 恒等式）</h3>
+  <div class="eq">$$ \beta_t=1-\alpha_t,\qquad \bar\alpha_t=\prod_{i=1}^{t}\alpha_i $$</div>
+  <p>diffusion noise schedule 两种等价写法之间的代入桥。许多 lecture 与 textbook 把单步噪声方差写成 <i>"$1-\alpha_t$"</i>；本课写成 <i>"$\beta_t$"</i>。两者指同一个数 —— 这条恒等式就是字典。</p>
+  <ul class="mini-list">
+    <li><b>$\alpha_t$</b> = 第 $t$ 步的 signal-retention factor —— 保留的旧 state 占比。$0&lt;\alpha_t&lt;1$，$t$ 增大单调减小到 0。</li>
+    <li><b>$\beta_t = 1 - \alpha_t$</b> = 第 $t$ 步加入的 noise variance —— 注入的方差占比。$0&lt;\beta_t&lt;1$，单调增大到 1。</li>
+    <li><b>$\bar\alpha_t = \prod_{i=1}^t \alpha_i$</b> = 从第 0 步累计到第 $t$ 步的 signal retention，下面 $q(x_t\mid x_0)$ 的 direct-sample 公式要用；不能写成单个 $\alpha$。</li>
+  </ul>
+  <p><b>为什么要记住.</b> 任何 closed-form 公式里出现 $\sqrt{1-\bar\alpha_t}$，那就是 “累计噪声方差 scale” —— 单步 $\sqrt{\beta_t}$ 在 $x_0\to x_t$ multi-step 跳跃下的对应物。忘记 $\beta_t = 1-\alpha_t$ 这条对应关系，是在 lecture notation 与 HW4 ELBO 推导之间切换时 bookkeeping 出错的 #1 来源。任何 diffusion 题开头先把这条放手边。</p>
+  <p><b>Sanity check.</b> 独立 Gaussian 的方差可加，schedule 又被归一化成 “旧 + 新 = 同一 scale”，所以 $\alpha_t+\beta_t=1$ 就是 conservation 的写照。如果在某步推导里看见 $\alpha_t+\beta_t\ne 1$，多半是把两套记号混在一起了。</p>
+
   <h3>正向加噪 / Forward noising process</h3>
   <div class="eq">$$ q(x_t\mid x_{t-1})=\mathcal{N}\!\left(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t I\right) $$</div>
   <div class="eq">$$ x_t=\sqrt{\alpha_t}\,x_{t-1}+\sqrt{\beta_t}\,\epsilon_t,\qquad \epsilon_t\sim\mathcal{N}(0,I) $$</div>
@@ -221,15 +266,18 @@
   <ul class="mini-list">
     <li>$\sqrt{\bar{\alpha}_t}$ 是剩下的 signal scale，会缩小原始 clean sample。</li>
     <li>$\sqrt{1-\bar{\alpha}_t}$ 是 noise scale，累计加噪越多，它越大。</li>
+    <li>当 $T$ 很大、$\bar{\alpha}_T$ 接近 $0$ 时，$x_T$ 基本就和 $\mathcal{N}(0,I)$ 的样本难以区分。</li>
     <li>训练代码题里通常是：sample $t$，sample $\epsilon$，构造 $x_t$，再让 network 预测 noise 或 clean signal。</li>
   </ul>
   <h3>学到的反向去噪 / Learned reverse transition</h3>
   <div class="eq">$$ p_\theta(x_{t-1}\mid x_t)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t),\,\Sigma_\theta(x_t,t)\right) $$</div>
+  <div class="eq">$$ p_\theta(x_{t-1}\mid x_t,w)=\mathcal{N}\!\left(x_{t-1};\mu_\theta(x_t,t,w),\,\beta_t I\right) $$</div>
   <p>这是模型要学的部分。generation 时，从 $x_T\sim\mathcal{N}(0,I)$ 开始，然后不断使用 $p_\theta(x_{t-1}\mid x_t)$ 从 $T$ reverse 到 $0$。</p>
   <ul class="mini-list">
     <li>$\theta$ 是 neural-network parameters。</li>
     <li>$\mu_\theta(x_t,t)$ 是模型预测的 slightly cleaner previous state 的 mean。</li>
     <li>$\Sigma_\theta(x_t,t)$ 是 reverse-step covariance；很多简化推导里它会固定或用简单形式 parameterize。</li>
+    <li>$w$ 是 optional conditioning，比如 class label 或 text embedding。同一个 shared network 会复用在所有 $t$ 上；time input 告诉它现在正在 denoise 哪个 noise level。</li>
   </ul>
   <h3>HW4 §3.4 的 posterior mean</h3>
   <div class="eq">$$ \tilde{\mu}_t(x_t,x_0)=
@@ -243,10 +291,14 @@
     <li>$x_0$ 前面的系数表示 clean reference 对 posterior 的 anchor 有多强。</li>
     <li>套公式时先算 $\alpha_t$、$\bar{\alpha}_{t-1}$、$\bar{\alpha}_t$、$\beta_t$，再把 $x_t$ 和 $x_0$ 代进去。</li>
   </ul>
+  <h3>简化 noise-prediction objective</h3>
+  <div class="eq">$$ \mathcal{L}_{\text{simple}}=\mathbb{E}_{t,x_0,\epsilon}\left[\left\|\epsilon_\theta(x_t,t,w)-\epsilon\right\|_2^2\right] $$</div>
+  <p>很多 DDPM 实现不会直接让网络预测 clean image，而是让它预测构造 $x_t$ 时加入的 noise $\epsilon$。这里 $\epsilon_\theta$ 是 shared denoising network，$w$ 是 optional conditioning。</p>
+  <p><b>怎么用.</b> 先 sample clean example $x_0$，sample time $t$，sample Gaussian noise $\epsilon$，用 direct formula 构造 $x_t$，然后训练 network output 去匹配 $\epsilon$。</p>
 </section>
 
 <section class="topic lesson-section examples" id="diffusion-examples-cn">
-  <h2>5. Worked Examples</h2>
+  <h2>5. 例题讲解 / Worked Examples</h2>
   <h3>HW4 §3.1：写 diffusion ELBO</h3>
   <p class="source-note">出处：HW4 §3，题意转述。</p>
   <div class="eq">$$ \log p_\theta(x_0)\ge
@@ -254,7 +306,11 @@
 -D_{KL}(q(x_T\mid x_0)\,\|\,p(x_T))
 -\sum_{t=2}^{T}\mathbb{E}_{q(x_t\mid x_0)}
 \left[D_{KL}(q(x_{t-1}\mid x_t,x_0)\,\|\,p_\theta(x_{t-1}\mid x_t))\right] $$</div>
-  <p>三项分别是 reconstruction、prior matching、step consistency。</p>
+  <ul class="mini-list">
+    <li><b>Reconstruction</b>：第一项奖励最后从 $x_1$ denoise 回 clean $x_0$ 的质量。</li>
+    <li><b>Prior matching</b>：terminal KL 让 $q(x_T\mid x_0)$ 匹配 simple prior $p(x_T)=\mathcal{N}(0,I)$。</li>
+    <li><b>Consistency</b>：一串 KL 让每个 learned reverse step 匹配 true posterior $q(x_{t-1}\mid x_t,x_0)$。</li>
+  </ul>
   <h3>HW4 §3.3：推 $q(x_t\mid x_0)$</h3>
   <p>反复代入 reparameterized transition。独立 Gaussian 的线性组合仍然是 Gaussian；信号系数一路相乘得到 $\sqrt{\bar{\alpha}_t}$，剩下的噪声方差合并成 $1-\bar{\alpha}_t$。</p>
   <h3>HW4 §3.4：posterior mean</h3>
@@ -264,40 +320,46 @@
 </section>
 
 <section class="topic lesson-section tips-section" id="diffusion-tips-cn">
-  <h2>6. Problem-Solving Tips</h2>
+  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
   <ol>
     <li>推导前先定义 $\alpha_t=1-\beta_t$ 和 $\bar{\alpha}_t=\prod_i\alpha_i$。</li>
     <li>推 $q(x_t\mid x_0)$ 用 reparameterization，别上来就硬乘 PDF。</li>
     <li>ELBO 题先写三项，再解释每项含义。</li>
     <li>Posterior 题先写 Bayes' rule，并记住 product of Gaussians is Gaussian。</li>
     <li>Sampling 题从 $x_T\sim\mathcal{N}(0,I)$ 开始，一步步 reverse 到 $x_0$。</li>
+    <li>记住 sampling cost：generation 需要很多次 sequential denoising-network forward pass，所以比单次 feed-forward generator 慢。</li>
+    <li>Conditional generation 里，guidance 会调整 denoising direction，让 sample 更遵守 condition $w$。考试常见关键词包括 classifier guidance 和 classifier-free guidance。</li>
+    <li>Latent diffusion 会在更低维的 learned latent space 里做 diffusion，而不是直接在 pixel space 里做，所以更快。</li>
   </ol>
 </section>
 
 <section class="topic lesson-section mistakes" id="diffusion-mistakes-cn">
-  <h2>7. Common Mistakes</h2>
+  <h2>7. 常见错误 / Common Mistakes</h2>
   <ul class="mini-list">
     <li>混淆 $\alpha_t$ 和 $\bar{\alpha}_t$：一个是单步，一个是累计。</li>
     <li>状态方程里忘记 square root。</li>
     <li>以为 forward process 是学出来的。基础 DDPM 里 noising schedule 是固定的。</li>
     <li>说可以轻易直接算 $p_\theta(x_0)$。它要积分掉整条 latent chain，所以通常用 ELBO。</li>
     <li>把 diffusion generation 和 LLM generation 混起来：diffusion 是整张样本反复 refine；LLM 是 left-to-right token 生成。</li>
+    <li>混淆 incremental noise $\sqrt{\beta_t}\epsilon_t$ 和 total accumulated noise $\sqrt{1-\bar{\alpha}_t}\epsilon$。</li>
   </ul>
 </section>
 
 <section class="topic lesson-section exam-section" id="diffusion-exam-cn">
-  <h2>8. Exam Focus</h2>
+  <h2>8. 考试重点 / Exam Focus</h2>
   <ul class="mini-list">
     <li>会写 $q(x_t\mid x_{t-1})$ 和 $q(x_t\mid x_0)$。</li>
     <li>能解释 $\bar{\alpha}_T$ 很小时，$x_T$ 为什么接近 $\mathcal{N}(0,I)$。</li>
     <li>会写 ELBO 三项分解，并解释三项。</li>
     <li>会推 posterior mean $\tilde{\mu}_t(x_t,x_0)$，至少能正确 setup Gaussian product。</li>
     <li>能描述 inference：sample noise，然后不断 denoise。</li>
+    <li>知道实践中的 noise-prediction objective：$\|\epsilon_\theta(x_t,t,w)-\epsilon\|^2$。</li>
+    <li>能解释为什么 image diffusion 常用 U-Net：它用 skip connections 保留 spatial resolution，同时学习 global context。</li>
   </ul>
 </section>
 
 <section class="topic lesson-section checklist-section" id="diffusion-checklist-cn">
-  <h2>9. Quick Checklist</h2>
+  <h2>9. 速记清单 / Quick Checklist</h2>
   <ul class="mini-list">
     <li>Forward process：加 Gaussian noise。</li>
     <li>Reverse process：学习 denoising transitions。</li>
@@ -305,6 +367,8 @@
     <li>$q(x_t\mid x_0)=\mathcal{N}(\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I)$。</li>
     <li>ELBO = reconstruction - prior KL - transition KLs。</li>
     <li>生成从 $T$ 到 $0$。</li>
+    <li>我能区分 per-step noise $\beta_t$ 和 cumulative noise $1-\bar{\alpha}_t$。</li>
+    <li>我知道 guidance 和 latent diffusion 是常见实践扩展。</li>
   </ul>
 </section>
 </div><!--/cn-only-->

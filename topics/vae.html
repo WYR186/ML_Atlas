@@ -50,10 +50,11 @@
 
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>The goal is to learn a distribution that can generate realistic samples. Instead of modeling every pixel interaction directly, a VAE assumes data comes from a simpler hidden code $z$ sampled from a prior, then decoded into an observation $x$.</p>
+  <p>Operationally, a classifier asks “what label fits this input?”, while a VAE asks “how could this kind of input be produced?” In a conditional generative version the target is $p(x\mid y)$. After training, generation is simple: sample $z\sim\mathcal{N}(0,I)$ and pass it through the decoder.</p>
   <ul>
     <li><b>Prior:</b> $p(z)$ is usually a simple Gaussian such as $\mathcal{N}(0,I)$.</li>
-    <li><b>Decoder:</b> $p_\theta(x\mid z)$ maps latent codes to data space.</li>
-    <li><b>Encoder:</b> $q_\phi(z\mid x)$ approximates the hard posterior over latents for a given input.</li>
+    <li><b>Decoder / generator network:</b> $p_\theta(x\mid z)$ maps latent codes to data space.</li>
+    <li><b>Encoder / inference network:</b> $q_\phi(z\mid x)$ approximates the hard posterior over latents for a given input.</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -62,9 +63,14 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>VAEs work because real data often lives near a lower-dimensional manifold. The KL term keeps the latent space organized and sampleable; the reconstruction term keeps the decoder faithful to the input. Together, they create a latent space where nearby points tend to decode to similar samples.</p>
+  <p>Compared with a deterministic auto-encoder, a VAE stores each input as a small Gaussian cloud rather than one exact point. The decoder therefore learns to turn noisy, slightly perturbed latent codes into sensible outputs, which is why interpolation and new sample generation are possible.</p>
   <div class="callout intuition">
     <div class="head">The key tradeoff</div>
     <p>If the KL term is too weak, the latent space becomes messy and hard to sample. If it is too strong, reconstructions become blurry or overly generic. The ELBO balances both forces.</p>
+  </div>
+  <div class="callout">
+    <div class="head">Manifold viewpoint</div>
+    <p>A good latent space acts like a coordinate system for data factors. In face data, for example, nearby latent directions may track interpretable changes such as rotation, expression, or style, although the model is not guaranteed to align dimensions perfectly with human labels.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -88,15 +94,15 @@
       <div class="head">ELBO to maximize</div>
       <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{L}(x)$: ELBO, a lower bound on $\log p_\theta(x)$.； $\mathbb{E}_{z\sim q}$: Average over latent samples from the encoder distribution.； $\log p_\theta(x\mid z)$: Reconstruction log-likelihood.； $D_{KL}(q\|p)$: KL penalty that keeps the approximate posterior near the prior.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> One term asks the decoder to reconstruct well; the other keeps the latent space organized enough to sample from.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Exact $\log p_\theta(x)$ is hard because it requires integrating over all $z$, so we maximize this lower bound instead. One term asks the decoder to reconstruct well; the other keeps the latent space organized enough to sample from.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Maximize the ELBO, or minimize negative ELBO. In code this is usually reconstruction loss plus KL loss, with signs chosen for minimization.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Maximize the ELBO, or minimize negative ELBO. In code this is usually reconstruction loss plus KL loss, with signs chosen for minimization. The expectation term is commonly approximated with Monte Carlo samples of $z$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Reparameterization</div>
       <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon$: Standard normal noise independent of network parameters.； $\sigma_\phi(x)$: Standard deviation vector, not variance.； $\odot$: Elementwise multiplication.； $z$: Latent sample passed into the decoder.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Move the randomness into a separate noise variable, so the network output remains a differentiable transformation.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Directly sampling from $q_\phi(z\mid x)$ would block the gradient path through the random draw. Reparameterization moves the randomness into a separate noise variable, so the network output remains a differentiable transformation.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Sample $\epsilon$, compute $z$, and backpropagate through $\mu_\phi(x)$ and $\sigma_\phi(x)$. This keeps stochastic sampling compatible with gradients.</p>
     </div>
     <div class="callout formula">
@@ -121,7 +127,12 @@
       <p>Training a VAE involves several approximations: using $q_\phi(z\mid x)$ instead of the true posterior, restricting $q_\phi$ to a Gaussian family, estimating the reconstruction expectation with samples, optimizing the ELBO instead of exact log-likelihood, and using SGD on a nonconvex objective.</p>
     </div>
     <div>
-      <h4>Example C · HW3 §4.2 Gaussian KL</h4>
+      <h4>Example C · VAE vs deterministic AE</h4>
+      <p class="example-source">Source: Lecture 13 auto-encoder to VAE transition, paraphrased.</p>
+      <p>A deterministic auto-encoder maps an image to one code $z=f_\phi(x)$. A VAE maps it to a Gaussian $q_\phi(z\mid x)$, samples a nearby code, and trains the decoder to reconstruct from that noisy sample. This is the reason a VAE decoder can handle new latent samples more gracefully than a plain AE decoder.</p>
+    </div>
+    <div>
+      <h4>Example D · HW3 §4.2 Gaussian KL</h4>
       <p class="example-source">Source: HW3 §4.2. Paraphrased.</p>
       <p>For $q=\mathcal{N}(\mu,\sigma^2)$ and $p=\mathcal{N}(0,1)$, plug the two Gaussian log densities into $E_q[\log q-\log p]$. The result is $\tfrac12(\mu^2+\sigma^2-\log\sigma^2-1)$; diagonal multivariate Gaussians sum this over dimensions.</p>
     </div>
@@ -133,6 +144,7 @@
     <li>When asked for the loss, write negative ELBO if the problem is in minimization form.</li>
     <li>For the KL term, check whether the model uses $\sigma$, $\sigma^2$, or <code>logvar</code>.</li>
     <li>For reparameterization, separate the random noise $\epsilon$ from learnable $\mu$ and $\sigma$.</li>
+    <li>For generation questions, sample $z$ from the prior first, then decode with $p_\theta(x\mid z)$.</li>
   </ul>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -141,14 +153,17 @@
     <li>Dropping the KL term and turning the model into a plain autoencoder.</li>
     <li>Sampling $z$ directly in a way that blocks gradients through $\mu$ and $\sigma$.</li>
     <li>Using $\log\sigma$ where the formula expects $\log\sigma^2$.</li>
+    <li>Forgetting that the reconstruction expectation is usually estimated with Monte Carlo samples.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
   <ul>
     <li>Explain discriminative vs generative modeling.</li>
+    <li>Compare a VAE with a deterministic auto-encoder: distribution in latent space versus single code point.</li>
     <li>Write and interpret the ELBO.</li>
     <li>Write the reparameterization trick.</li>
     <li>Derive or recall the closed-form Gaussian KL.</li>
+    <li>Name the main approximations: variational posterior, ELBO lower bound, and Monte Carlo expectation.</li>
     <li>Explain why VAE latent interpolation tends to be smooth.</li>
   </ul>
 
@@ -157,6 +172,7 @@
     <li>I can name the prior, encoder, and decoder distributions.</li>
     <li>I can explain reconstruction term vs KL term.</li>
     <li>I can write $z=\mu+\sigma\odot\epsilon$ from memory.</li>
+    <li>I can describe how to generate a new sample from a trained VAE.</li>
     <li>I can compute the diagonal Gaussian KL term.</li>
   </ul>
 </section>
@@ -169,10 +185,11 @@
 
       <h3 class="section-blue">1. Concept Understanding</h3>
       <p>目标是学到一个能生成真实样本的 distribution。VAE 不直接硬拟合所有像素关系，而是假设数据由一个更简单的隐藏变量 $z$ 生成：先从 prior 抽 $z$，再通过 decoder 生成 $x$。</p>
+      <p>操作上，classifier 问的是“这个 input 应该是什么 label？”，VAE 问的是“这种 input 可能怎么被生成？”如果是 conditional generative 版本，目标就是 $p(x\mid y)$。训练好后，生成新样本的流程很直接：sample $z\sim\mathcal{N}(0,I)$，再丢进 decoder。</p>
       <ul>
         <li><b>Prior</b>：$p(z)$，通常是简单高斯 $\mathcal{N}(0,I)$。</li>
-        <li><b>Decoder</b>：$p_\theta(x\mid z)$，把 latent code 映射到 data space。</li>
-        <li><b>Encoder</b>：$q_\phi(z\mid x)$，近似给定输入 $x$ 后的 posterior。</li>
+        <li><b>Decoder / generator network</b>：$p_\theta(x\mid z)$，把 latent code 映射到 data space。</li>
+        <li><b>Encoder / inference network</b>：$q_\phi(z\mid x)$，近似给定输入 $x$ 后的 posterior。</li>
       </ul>
 
       <h3 class="section-orange">2. Plain-English Explanation / 大白话理解</h3>
@@ -181,9 +198,14 @@
 
       <h3 class="section-orange">3. Core Intuition</h3>
       <p>VAE 有效，是因为真实数据常集中在低维 manifold 附近。KL term 让 latent space 有秩序、能从 prior 采样；reconstruction term 让 decoder 不能乱画。两者结合后，latent space 里相近的点通常会 decode 成相近样本。</p>
+      <p>和 deterministic auto-encoder 相比，VAE 不是把每个输入压成一个精确点，而是压成一个小 Gaussian cloud。Decoder 因此会被训练成能把 noisy / perturbed latent codes 也 decode 成合理输出，所以 interpolation 和新样本生成更自然。</p>
       <div class="callout intuition">
         <div class="head">核心 tradeoff</div>
         <p>KL 太弱，latent space 会乱，采样质量差；KL 太强，reconstruction 可能变模糊、过于平均。ELBO 就是在平衡“像原图”和“潜空间规整”。</p>
+      </div>
+      <div class="callout">
+        <div class="head">Manifold 视角</div>
+        <p>好的 latent space 像数据因素的坐标系。比如人脸数据里，某些 latent direction 可能对应 rotation、expression、style 这样的变化；不过模型不保证每一维都自动和人类语义标签严格对齐。</p>
       </div>
 
       <h3 class="section-purple">4. Key Equations</h3>
@@ -207,15 +229,15 @@
           <div class="head">ELBO（最大化）</div>
           <div class="eq">$$ \mathcal{L}(x)=\mathbb{E}_{z\sim q_\phi(z\mid x)}[\log p_\theta(x\mid z)]-D_{KL}\!\left(q_\phi(z\mid x)\,\|\,p(z)\right) $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{L}(x)$: ELBO，是 $\log p_\theta(x)$ 的 lower bound。；$\mathbb{E}_{z\sim q}$: 对 encoder distribution 采样出的 $z$ 求平均。；$\log p_\theta(x\mid z)$: Reconstruction log-likelihood。；$D_{KL}(q\|p)$: KL penalty，用来让 approximate posterior 靠近 prior。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一项要求 decoder 重建得好，另一项让 latent space 足够规整，方便从 prior 采样。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Exact $\log p_\theta(x)$ 要对所有 $z$ 积分，通常很难算，所以改为最大化这个 lower bound。一项要求 decoder 重建得好，另一项让 latent space 足够规整，方便从 prior 采样。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 理论上 maximize ELBO；代码里常写成 minimize negative ELBO，也就是 reconstruction loss 加 KL loss。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 理论上 maximize ELBO；代码里常写成 minimize negative ELBO，也就是 reconstruction loss 加 KL loss。Expectation term 通常用 Monte Carlo samples of $z$ 来近似。</p>
         </div>
         <div class="callout formula">
           <div class="head">Reparameterization trick</div>
           <div class="eq">$$ z=\mu_\phi(x)+\sigma_\phi(x)\odot\epsilon,\quad \epsilon\sim\mathcal{N}(0,I) $$</div>
           <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\epsilon$: Standard normal noise，不依赖网络参数。；$\sigma_\phi(x)$: Standard deviation vector，不是 variance。；$\odot$: Elementwise multiplication。；$z$: 送入 decoder 的 latent sample。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把随机性挪到独立噪声里，让网络输出部分仍然是可微 transformation。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 如果直接从 $q_\phi(z\mid x)$ sample，随机抽样这一步会挡住梯度。Reparameterization 把随机性挪到独立噪声里，让网络输出部分仍然是可微 transformation。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先 sample $\epsilon$，再算 $z$，然后梯度可以传回 $\mu_\phi(x)$ 和 $\sigma_\phi(x)$。这样 stochastic sampling 仍然能配合 backpropagation。</p>
         </div>
         <div class="callout formula">
@@ -240,7 +262,12 @@
           <p>VAE 训练里有几类近似：用 $q_\phi(z\mid x)$ 近似真实 posterior，把 $q_\phi$ 限制成 Gaussian family，用采样估计 reconstruction expectation，优化 ELBO 而不是 exact log-likelihood，以及用 SGD 处理非凸目标。</p>
         </div>
         <div>
-          <h4>Example C · HW3 §4.2 Gaussian KL</h4>
+          <h4>Example C · VAE vs deterministic AE</h4>
+          <p class="example-source">来源：Lecture 13 从 auto-encoder 到 VAE 的过渡，已转述。</p>
+          <p>Deterministic auto-encoder 把图片映射到一个 code $z=f_\phi(x)$。VAE 把图片映射到 Gaussian $q_\phi(z\mid x)$，再从附近 sample 一个 code 交给 decoder 重建。正因为 decoder 训练时见过 noisy latent samples，它比 plain AE decoder 更能处理新的 latent sample。</p>
+        </div>
+        <div>
+          <h4>Example D · HW3 §4.2 Gaussian KL</h4>
           <p class="example-source">来源：HW3 §4.2，已转述。</p>
           <p>当 $q=\mathcal{N}(\mu,\sigma^2)$、$p=\mathcal{N}(0,1)$，把两个 Gaussian 的 log density 代入 $E_q[\log q-\log p]$，得到 $\tfrac12(\mu^2+\sigma^2-\log\sigma^2-1)$；多维 diagonal Gaussian 就对每一维求和。</p>
         </div>
@@ -252,6 +279,7 @@
         <li>如果题目说 minimize loss，就写 negative ELBO。</li>
         <li>KL term 要看清代码/题目用的是 $\sigma$、$\sigma^2$，还是 <code>logvar</code>。</li>
         <li>Reparameterization 要把随机性 $\epsilon$ 和可学习的 $\mu,\sigma$ 分开。</li>
+        <li>Generation 题先从 prior sample $z$，再用 $p_\theta(x\mid z)$ decode。</li>
       </ul>
 
       <h3 class="section-red">7. Common Mistakes</h3>
@@ -260,14 +288,17 @@
         <li>漏掉 KL term，把模型退化成普通 autoencoder。</li>
         <li>直接 sample $z$ 导致梯度不能传回 $\mu,\sigma$。</li>
         <li>公式需要 $\log\sigma^2$，却误用成 $\log\sigma$。</li>
+        <li>忘记 reconstruction expectation 通常是用 Monte Carlo samples 近似的。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus</h3>
       <ul>
         <li>解释 discriminative vs generative modeling。</li>
+        <li>能比较 VAE 和 deterministic auto-encoder：latent space 里是 distribution，而不是单个 code point。</li>
         <li>写出并解释 ELBO。</li>
         <li>写出 reparameterization trick。</li>
         <li>推导或默写 Gaussian KL closed form。</li>
+        <li>能说出主要近似来源：variational posterior、ELBO lower bound、Monte Carlo expectation。</li>
         <li>解释为什么 VAE latent interpolation 通常比较平滑。</li>
       </ul>
 
@@ -276,6 +307,7 @@
         <li>我能说出 prior、encoder、decoder 分别是什么。</li>
         <li>我能解释 reconstruction term 和 KL term。</li>
         <li>我能默写 $z=\mu+\sigma\odot\epsilon$。</li>
+        <li>我能描述 trained VAE 如何生成新样本。</li>
         <li>我能计算 diagonal Gaussian KL。</li>
       </ul>
     </section>

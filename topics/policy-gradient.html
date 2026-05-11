@@ -54,6 +54,12 @@
     <div class="head">Directly optimize a parameterized policy</div>
     <p><b>Policy gradient</b> maximizes expected trajectory reward by differentiating the policy parameters $\theta$ of $\pi_\theta(a\mid s)$. Instead of first learning an optimal Q-table, it asks: how should we change the policy so high-reward actions become more likely?</p>
     <p>Lecture 25 derives vanilla policy gradient / REINFORCE. Lecture 27 then extends the same idea to actor-critic, PPO, and LLM reinforcement learning. These practical algorithms are marked in the PPT as not covered in exam, but they explain how modern RL systems are trained.</p>
+    <ul>
+      <li><b>Smooth policy changes.</b> Small parameter changes smoothly shift action probabilities, unlike $\epsilon$-greedy policies that can flip abruptly when two Q-values swap order.</li>
+      <li><b>Stochastic policies.</b> PG can directly learn randomized behavior, which matters in games or settings where mixing actions is part of the optimum.</li>
+      <li><b>Continuous actions.</b> The policy can output distribution parameters, such as Gaussian mean $\mu_\theta(s)$ and standard deviation $\sigma_\theta(s)$, instead of enumerating actions.</li>
+      <li><b>Sometimes simpler.</b> In some tasks, approximating the policy is easier than approximating every action value.</li>
+    </ul>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -67,6 +73,7 @@
   <div class="callout intuition">
     <div class="head">Why log-probability appears</div>
     <p>The environment sampling process is not directly differentiable. The log-derivative trick uses $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$, so the gradient can be written in terms of $\nabla\log\pi_\theta(a_t\mid s_t)$, which is differentiable.</p>
+    <p>The Policy Gradient Theorem is the formal reason this works cleanly: the gradient can be written with action values and policy derivatives without differentiating the unknown state distribution induced by the policy.</p>
     <p>PPO keeps policy-gradient updates from changing the policy too violently. GRPO, in Lecture 27, removes the learned value model and estimates advantages by comparing multiple completions for the same prompt.</p>
   </div>
 
@@ -79,24 +86,45 @@
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the starting point for REINFORCE/policy-gradient derivations: differentiate J with respect to θ.</p>
     </div>
+    <div class="callout formula"><div class="head">Policy Gradient Theorem</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)\propto \sum_s \mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a\mid s) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mu_\pi(s)$: how often state $s$ is visited under policy $\pi$； $q_\pi(s,a)$: expected return after taking $a$ in $s$； $\nabla_\theta\pi_\theta(a\mid s)$: how the action probability changes with parameters.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Increase probabilities of actions with high $q_\pi(s,a)$ in states that the current policy actually visits.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This theorem justifies sample-based PG updates without needing to differentiate the state-visitation distribution $\mu_\pi$ directly.</p>
+    </div>
     <div class="callout formula"><div class="head">Monte-Carlo estimator</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> N: number of sampled trajectories； R(τ_i): return of trajectory i； ∇θ log πθ(a_t^i|s_t^i): direction changing probability of sampled action； H: trajectory horizon</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Estimate the gradient from sampled trajectories: high-return trajectories increase log-probability of the actions they took.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this when rollouts are available but the environment is not differentiable. Average N trajectories to reduce noise.</p>
     </div>
-    <div class="callout formula"><div class="head">Advantage version</div>
-      <div class="eq">$$ \nabla J\approx \mathbb{E}[A^\pi(s_t,a_t)\nabla_\theta\log\pi_\theta(a_t\mid s_t)] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> A^π(s_t,a_t): advantage of action a_t； ∇θ log πθ: policy score gradient； E: expectation over sampled states/actions</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Replace raw return by advantage so actions are reinforced only when they are better than expected for that state.</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this in actor-critic and PPO-style algorithms to reduce variance and stabilize updates.</p>
+    <div class="callout formula"><div class="head">REINFORCE update</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)=\mathbb{E}_{\pi}\!\left[G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
+      <div class="eq">$$ \theta_{t+1}\leftarrow \theta_t+\alpha G_t\nabla_\theta\log\pi_{\theta_t}(A_t\mid S_t) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $G_t$: Monte-Carlo return from time $t$； $\alpha$: learning rate； $A_t,S_t$: sampled action and state； $\nabla_\theta\log\pi$: score function of the chosen action.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If $G_t$ is large, move parameters in the direction that makes the sampled action more likely in that state.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Run an episode, compute returns, then apply this update to the action log-probabilities along the episode. It is Monte Carlo, so it is unbiased but often high variance.</p>
     </div>
-    <div class="callout formula"><div class="head">Advantage definition</div>
+    <div class="callout formula"><div class="head">Baseline / advantage version</div>
+      <div class="eq">$$ \nabla J\approx \mathbb{E}\!\left[(G_t-b(S_t))\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^π(s,a): value after taking action a； V^π(s): average value of state s； A^π(s,a): extra value above/below baseline</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Advantage compares an action to the state baseline: positive means better than average, negative worse.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the policy-gradient weight: increase probability for positive advantage and reduce reinforcement for negative advantage.</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $b(S_t)$ is any state-only baseline； $\hat v(S_t,w)$ is a common learned baseline； $A^\pi$ is advantage.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The update asks whether the action did better than the state baseline, not merely whether the whole episode return was large.</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use $G_t-\hat v(S_t,w)$ in REINFORCE with baseline, or use a critic-estimated advantage in actor-critic / PPO-style algorithms.</p>
+    </div>
+    <div class="callout formula"><div class="head">Why a baseline is unbiased</div>
+      <div class="eq">$$ \mathbb{E}_{A\sim\pi(\cdot\mid s)}[b(s)\nabla_\theta\log\pi_\theta(A\mid s)]
+=b(s)\sum_a\nabla_\theta\pi_\theta(a\mid s)=b(s)\nabla_\theta 1=0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $b(s)$ must not depend on the sampled action； the sum runs over all actions available in state $s$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A state-only baseline changes the variance of the estimator but has zero expected contribution to the gradient.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the standard HW5 proof: pull $b(s)$ outside the action expectation, convert $\pi\nabla\log\pi$ to $\nabla\pi$, then use $\sum_a\pi(a\mid s)=1$.</p>
+    </div>
+    <div class="callout formula"><div class="head">Softmax eligibility vector</div>
+      <div class="eq">$$ \nabla_\theta\log\pi_\theta(a\mid s)=x(s,a)-\sum_b\pi_\theta(b\mid s)x(s,b) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x(s,a)$ is the feature vector for state-action pair $(s,a)$； $b$ indexes possible actions； $\pi_\theta(b\mid s)$ weights the average feature vector under the current policy.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The chosen action's feature vector is compared against the policy's average feature vector in that state.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For softmax policies with linear preferences $h_\theta(s,a)=\theta^\top x(s,a)$, compute the chosen feature vector, compute the probability-weighted average feature vector, then subtract.</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM policy</div>
       <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
@@ -119,11 +147,15 @@
     <p>Write $J=\int P_\theta(\tau)R(\tau)d\tau$. Then $\nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)d\tau$. In an MDP, only policy terms depend on $\theta$, so $\nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t|s_t)$.</p>
   </div>
   <div class="callout example">
-    <div class="head">Example 2 · Actor-critic advantage (Lecture 27, p. 10-11)</div>
-    <p>If $Q(s,a)=12$ and $V(s)=9$, the advantage is $3$: the action was better than average. If $Q(s,a)=7$, advantage is $-2$: discourage it relative to the state baseline.</p>
+    <div class="head">Example 2 · Baseline proof and advantage meaning (HW5 / Lecture 27)</div>
+    <p>For a fixed state, $\mathbb{E}[b(s)\nabla\log\pi(A|s)]=0$, so subtracting $b(s)$ does not bias the gradient. If $Q(s,a)=12$ and $V(s)=9$, the advantage is $3$: the action was better than the state baseline. If $Q(s,a)=7$, advantage is $-2$.</p>
   </div>
   <div class="callout example">
-    <div class="head">Example 3 · GRPO for LLM completions (Lecture 27, p. 16-18)</div>
+    <div class="head">Example 3 · Softmax eligibility vector (HW5)</div>
+    <p>If the chosen action has feature $x(s,a)$ and the current policy averages features as $\sum_b\pi(b|s)x(s,b)$, the eligibility vector is their difference. Positive-gradient directions are exactly the features that make the chosen action stand out from the policy average.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example 4 · GRPO for LLM completions (Lecture 27, p. 16-18)</div>
     <p>For one prompt, sample several completions. Compare their rewards inside the group: completions that beat the group average get positive relative advantage; worse completions get negative relative advantage. This avoids training a separate value model.</p>
   </div>
 
@@ -136,7 +168,21 @@
       <li>Drop environment dynamics from the gradient if they do not depend on $\theta$.</li>
       <li>Replace full returns by $Q$, advantage, or a baseline when discussing variance reduction.</li>
       <li>For LLM RL, map policy to next-token distribution and reward to final answer correctness.</li>
+      <li>For on-policy questions, remember old trajectories become stale after $\theta$ changes unless the algorithm adds an importance-sampling or clipping correction.</li>
     </ol>
+  </div>
+
+  <div class="callout tips">
+    <div class="head">PG vs. Q-learning</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px;">Feature</th><th style="text-align:left;padding:8px;">Q-learning</th><th style="text-align:left;padding:8px;">Policy Gradient / REINFORCE</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Nature</td><td style="padding:8px;">Model-free, off-policy</td><td style="padding:8px;">Model-free, on-policy</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Learning goal</td><td style="padding:8px;">Learn $Q$, then derive a greedy policy</td><td style="padding:8px;">Optimize $\pi_\theta$ directly</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Action space</td><td style="padding:8px;">Best fit for discrete actions</td><td style="padding:8px;">Natural for stochastic or continuous actions</td></tr>
+        <tr><td style="padding:8px;">Tradeoff</td><td style="padding:8px;">Often more sample-efficient</td><td style="padding:8px;">Often higher variance, but more flexible</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -147,6 +193,7 @@
       <li>Forgetting the log in $\nabla\log\pi$.</li>
       <li>Differentiating the environment transition when it does not depend on $\theta$.</li>
       <li>Using an action-dependent baseline and claiming it is automatically unbiased.</li>
+      <li>Reusing old trajectories as if vanilla PG were off-policy. After the policy changes, the sampled action distribution no longer matches the current $\pi_\theta$.</li>
       <li>Ignoring PPO's reason for clipping: repeated updates on the same trajectories can destroy the policy.</li>
     </ul>
   </div>
@@ -156,6 +203,9 @@
     <div class="head">What matters most</div>
     <ul>
       <li>Core exam: policy-gradient objective, log-derivative trick, on-policy nature, baseline idea.</li>
+      <li>Be able to state the Policy Gradient Theorem and explain each symbol in $\sum_s\mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a|s)$.</li>
+      <li>Be able to write the REINFORCE update, prove the state-only baseline has zero expected gradient, and compute the softmax eligibility vector.</li>
+      <li>Know why PG is useful for smooth stochastic policies and continuous action spaces.</li>
       <li>Lecture 27 practical context: actor-critic reduces variance with advantage; PPO limits destructive updates; LLM-as-MDP uses token actions; GRPO compares completions for the same prompt.</li>
       <li>The PPT explicitly marks actor-critic, PPO, LLM RL, RLVR, and GRPO as not covered in exam.</li>
     </ul>
@@ -166,9 +216,13 @@
     <h3>Last-minute recall</h3>
     <ul>
       <li>$J(\theta)=E[R(\tau)]$.</li>
+      <li>PG directly optimizes $\pi_\theta(a|s)$.</li>
       <li>$\nabla J\approx R(\tau)\sum_t\nabla\log\pi(a_t|s_t)$.</li>
+      <li>REINFORCE uses $G_t\nabla\log\pi(A_t|S_t)$.</li>
       <li>On-policy: collect trajectories from current policy.</li>
-      <li>Advantage = $Q-V$; lowers variance.</li>
+      <li>Baseline: subtract $b(s)$ to reduce variance without bias.</li>
+      <li>Advantage = $Q-V$; better-than-average action signal.</li>
+      <li>Softmax eligibility = chosen features minus policy-average features.</li>
       <li>PPO clips policy updates; GRPO uses group-relative rewards.</li>
       <li>LLM action = next token; reward can be verifiable correctness.</li>
     </ul>
@@ -185,6 +239,12 @@
     <div class="head">直接优化参数化策略</div>
     <p><b>Policy gradient</b> 通过对策略 $\pi_\theta(a\mid s)$ 的参数 $\theta$ 求梯度，最大化期望轨迹奖励。它不一定先学最优 Q 表，而是直接问：怎样改变策略，让高回报动作更容易被采样？</p>
     <p>Lecture 25 推导 vanilla policy gradient / REINFORCE；Lecture 27 继续把这个想法扩展到 actor-critic、PPO 和 LLM 强化学习。PPT 标注这些 practical algorithms 不在考试范围，但它们解释了现代 RL 系统怎么训练。</p>
+    <ul>
+      <li><b>Smooth policy changes.</b> 参数小幅变化时，action probabilities 也平滑变化；不像 $\epsilon$-greedy，两个 Q-values 顺序一换，greedy action 可能突然翻转。</li>
+      <li><b>Stochastic policies.</b> PG 可以直接学习随机策略，在 Poker 这类需要 bluff / mixed strategy 的任务里很自然。</li>
+      <li><b>Continuous actions.</b> 策略可以输出分布参数，比如 Gaussian 的 mean $\mu_\theta(s)$ 和 std $\sigma_\theta(s)$，不用枚举无限多 actions。</li>
+      <li><b>Sometimes simpler.</b> 有些任务里，直接近似 policy 比近似所有 action values 更容易。</li>
+    </ul>
   </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
@@ -198,6 +258,7 @@
   <div class="callout intuition">
     <div class="head">为什么会出现 log-probability</div>
     <p>环境采样过程通常不能直接对策略参数求导。Log-derivative trick 用 $\nabla P(\tau)=P(\tau)\nabla\log P(\tau)$，把梯度写到可微的 $\nabla\log\pi_\theta(a_t\mid s_t)$ 上。</p>
+    <p>Policy Gradient Theorem 的关键意义是：梯度可以写成 action value 和 policy derivative 的形式，不需要直接对未知的 state-visitation distribution 求导。</p>
     <p>PPO 的作用是限制 policy-gradient 更新不要太暴力。Lecture 27 中 GRPO 则去掉 learned value model，通过比较同一个 prompt 的多个 completions 来估计 advantages。</p>
   </div>
 
@@ -210,24 +271,45 @@
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 推导 REINFORCE / policy gradient 时从这里开始：对 θ 求梯度。</p>
     </div>
+    <div class="callout formula"><div class="head">Policy Gradient Theorem</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)\propto \sum_s \mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a\mid s) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mu_\pi(s)$ 是 policy $\pi$ 下 state $s$ 被访问的频率；$q_\pi(s,a)$ 是在 $s$ 做 $a$ 后的 expected return；$\nabla_\theta\pi_\theta(a\mid s)$ 是 action probability 对参数的变化方向。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 当前策略经常访问的 state 更重要；在这些 state 里，要提高 high-$q_\pi$ actions 的概率。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这个 theorem 说明我们可以用 sample-based PG update，而不必直接对 state-visitation distribution $\mu_\pi$ 求导。</p>
+    </div>
     <div class="callout formula"><div class="head">Monte-Carlo 估计</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> N: 采样轨迹数量；R(τ_i): 第 i 条轨迹回报；∇θ log πθ(a_t^i|s_t^i): 改变该采样动作概率的梯度方向；H: 轨迹长度</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 用采样 trajectories 估计梯度：高回报轨迹会提高其中动作的 log-probability。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当能采样 rollout、但不能对环境求导时使用。对 N 条轨迹取平均可以降低噪声。</p>
     </div>
-    <div class="callout formula"><div class="head">Advantage 版本</div>
-      <div class="eq">$$ \nabla J\approx \mathbb{E}[A^\pi(s_t,a_t)\nabla_\theta\log\pi_\theta(a_t\mid s_t)] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> A^π(s_t,a_t): 动作 a_t 的优势；∇θ log πθ: 策略 log 概率梯度；E: 对采样状态和动作取期望</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把 raw return 换成 advantage：只有动作比该 state 的平均水平更好时，才强烈强化它。</p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在 actor-critic、PPO 等算法中用它降方差、稳定更新。</p>
+    <div class="callout formula"><div class="head">REINFORCE 更新</div>
+      <div class="eq">$$ \nabla_\theta J(\theta)=\mathbb{E}_{\pi}\!\left[G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
+      <div class="eq">$$ \theta_{t+1}\leftarrow \theta_t+\alpha G_t\nabla_\theta\log\pi_{\theta_t}(A_t\mid S_t) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $G_t$ 是从时间 $t$ 开始的 Monte-Carlo return；$\alpha$ 是 learning rate；$A_t,S_t$ 是采样到的 action 和 state；$\nabla_\theta\log\pi$ 是 chosen action 的 score function。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 如果 $G_t$ 很高，就沿着“让这个 state 下这个 action 更容易出现”的方向更新参数。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先跑完整 episode，算 returns，再对 episode 里的 action log-probabilities 做这个更新。它是 Monte Carlo，所以通常 unbiased 但 high variance。</p>
     </div>
-    <div class="callout formula"><div class="head">Advantage 定义</div>
+    <div class="callout formula"><div class="head">Baseline / advantage 版本</div>
+      <div class="eq">$$ \nabla J\approx \mathbb{E}\!\left[(G_t-b(S_t))\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^π(s,a): 做动作 a 后的价值；V^π(s): 状态 s 的平均价值；A^π(s,a): 相对 baseline 多出或少掉的价值</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Advantage 把某个 action 和该 state 的平均水平比较：正数表示比平均好，负数表示更差。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把它作为 policy gradient 的权重：advantage 为正就提高该动作概率，为负就降低或少强化。</p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $b(S_t)$ 是只依赖 state 的 baseline；常用 baseline 是 learned state-value $\hat v(S_t,w)$；$A^\pi$ 是 advantage。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 更新看的不是 episode return 绝对有多大，而是 action 相比这个 state 的正常水平好多少。</p>
+
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> REINFORCE with baseline 里用 $G_t-\hat v(S_t,w)$；actor-critic / PPO 中常用 critic 估计出的 advantage。</p>
+    </div>
+    <div class="callout formula"><div class="head">为什么 baseline 不引入 bias</div>
+      <div class="eq">$$ \mathbb{E}_{A\sim\pi(\cdot\mid s)}[b(s)\nabla_\theta\log\pi_\theta(A\mid s)]
+=b(s)\sum_a\nabla_\theta\pi_\theta(a\mid s)=b(s)\nabla_\theta 1=0 $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $b(s)$ 不能依赖采样到的 action；sum 遍历 state $s$ 下所有 actions。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> state-only baseline 改变 estimator 的 variance，但它的期望梯度贡献是 0。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> HW5 证明套路：把 $b(s)$ 从 action expectation 里提出去，把 $\pi\nabla\log\pi$ 换成 $\nabla\pi$，最后用 $\sum_a\pi(a\mid s)=1$。</p>
+    </div>
+    <div class="callout formula"><div class="head">Softmax eligibility vector</div>
+      <div class="eq">$$ \nabla_\theta\log\pi_\theta(a\mid s)=x(s,a)-\sum_b\pi_\theta(b\mid s)x(s,b) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x(s,a)$ 是 state-action pair 的 feature vector；$b$ 遍历 possible actions；$\pi_\theta(b\mid s)$ 给出当前策略下的加权平均。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> chosen action 的 feature vector 减去当前 policy 的平均 feature vector；它告诉你 chosen action 比平均行为“多了哪些特征”。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对 linear preferences $h_\theta(s,a)=\theta^\top x(s,a)$ 的 softmax policy，先算 chosen feature，再算 policy-weighted average feature，最后相减。</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM 策略</div>
       <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
@@ -250,11 +332,15 @@
     <p>写 $J=\int P_\theta(\tau)R(\tau)d\tau$。则 $\nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)d\tau$。在 MDP 中，只有策略项依赖 $\theta$，所以 $\nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t|s_t)$。</p>
   </div>
   <div class="callout example">
-    <div class="head">例 2 · Actor-critic advantage（Lecture 27, p. 10-11）</div>
-    <p>若 $Q(s,a)=12$、$V(s)=9$，advantage 为 $3$：动作比平均表现好。若 $Q(s,a)=7$，advantage 为 $-2$：应减少选择该动作的倾向。</p>
+    <div class="head">例 2 · Baseline proof 和 advantage 含义（HW5 / Lecture 27）</div>
+    <p>固定一个 state 时，$\mathbb{E}[b(s)\nabla\log\pi(A|s)]=0$，所以减掉 $b(s)$ 不会让 gradient 产生 bias。若 $Q(s,a)=12$、$V(s)=9$，advantage 为 $3$：动作比 state baseline 好；若 $Q(s,a)=7$，advantage 为 $-2$。</p>
   </div>
   <div class="callout example">
-    <div class="head">例 3 · LLM completions 的 GRPO（Lecture 27, p. 16-18）</div>
+    <div class="head">例 3 · Softmax eligibility vector（HW5）</div>
+    <p>如果 chosen action 的 feature 是 $x(s,a)$，当前 policy 的平均 feature 是 $\sum_b\pi(b|s)x(s,b)$，eligibility vector 就是两者之差。正方向对应“让 chosen action 更突出的那些特征”。</p>
+  </div>
+  <div class="callout example">
+    <div class="head">例 4 · LLM completions 的 GRPO（Lecture 27, p. 16-18）</div>
     <p>对同一个 prompt 采样多个 completions，在组内比较奖励：高于组平均的 completion 得正 relative advantage，低于组平均的得负 relative advantage。这样可以不用单独训练 value model。</p>
   </div>
 
@@ -267,7 +353,21 @@
       <li>若环境 dynamics 不依赖 $\theta$，梯度里把它去掉。</li>
       <li>讨论降方差时，把总 return 替换成 $Q$、advantage 或 baseline。</li>
       <li>LLM RL 题把策略映射成 next-token distribution，把奖励映射成最终答案正确性。</li>
+      <li>On-policy 题要记住：$\theta$ 一更新，旧 trajectories 就和当前 policy 不匹配；除非算法额外加 importance sampling 或 clipping correction。</li>
     </ol>
+  </div>
+
+  <div class="callout tips">
+    <div class="head">PG vs. Q-learning</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px;">Feature</th><th style="text-align:left;padding:8px;">Q-learning</th><th style="text-align:left;padding:8px;">Policy Gradient / REINFORCE</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Nature</td><td style="padding:8px;">Model-free、off-policy</td><td style="padding:8px;">Model-free、on-policy</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Learning goal</td><td style="padding:8px;">先学 $Q$，再导出 greedy policy</td><td style="padding:8px;">直接优化 $\pi_\theta$</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Action space</td><td style="padding:8px;">更适合 discrete actions</td><td style="padding:8px;">更自然处理 stochastic / continuous actions</td></tr>
+        <tr><td style="padding:8px;">Tradeoff</td><td style="padding:8px;">通常 sample efficiency 更高</td><td style="padding:8px;">variance 常更高，但表达更灵活</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3 class="section-red">7. 常见错误</h3>
@@ -278,6 +378,7 @@
       <li>漏掉 $\nabla\log\pi$ 中的 log。</li>
       <li>对不依赖 $\theta$ 的环境转移求导。</li>
       <li>baseline 依赖 action 还声称自动无偏。</li>
+      <li>把旧 trajectories 当成 vanilla PG 可以随便复用的数据。Policy 一变，采样分布就不再等于当前 $\pi_\theta$。</li>
       <li>忽略 PPO clipping 的动机：重复使用同一批 trajectories 更新太多会破坏策略。</li>
     </ul>
   </div>
@@ -287,6 +388,9 @@
     <div class="head">最重要的内容</div>
     <ul>
       <li>核心考试点：policy-gradient 目标、log-derivative trick、on-policy 性质、baseline 思想。</li>
+      <li>会说清 Policy Gradient Theorem，并解释 $\sum_s\mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a|s)$ 里每个符号。</li>
+      <li>会写 REINFORCE update，会证明 state-only baseline 期望梯度为 0，会算 softmax eligibility vector。</li>
+      <li>知道 PG 为什么适合 smooth stochastic policies 和 continuous action spaces。</li>
       <li>Lecture 27 practical context：actor-critic 用 advantage 降方差；PPO 限制破坏性更新；LLM-as-MDP 以 token 为动作；GRPO 比较同 prompt 的多个 completions。</li>
       <li>PPT 明确 actor-critic、PPO、LLM RL、RLVR、GRPO 不在考试范围。</li>
     </ul>
@@ -297,9 +401,13 @@
     <h3>最后一刻能默</h3>
     <ul>
       <li>$J(\theta)=E[R(\tau)]$。</li>
+      <li>PG 直接优化 $\pi_\theta(a|s)$。</li>
       <li>$\nabla J\approx R(\tau)\sum_t\nabla\log\pi(a_t|s_t)$。</li>
+      <li>REINFORCE 用 $G_t\nabla\log\pi(A_t|S_t)$。</li>
       <li>On-policy：用当前策略采样轨迹。</li>
-      <li>Advantage = $Q-V$；降低方差。</li>
+      <li>Baseline：减 $b(s)$ 降 variance，不引入 bias。</li>
+      <li>Advantage = $Q-V$；表示比 state 平均动作好多少。</li>
+      <li>Softmax eligibility = chosen features - policy-average features。</li>
       <li>PPO clip policy update；GRPO 用组内相对奖励。</li>
       <li>LLM action = next token；reward 可为可验证正确性。</li>
     </ul>

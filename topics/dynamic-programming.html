@@ -52,7 +52,8 @@
   <div class="callout">
     <div class="head">Planning with a known environment model</div>
     <p><b>Value iteration</b> repeatedly applies the Bellman optimality backup until values stabilize. <b>Policy iteration</b> alternates between evaluating the current policy and improving it greedily.</p>
-    <p>Lecture 24 frames both algorithms as ways to avoid brute-force enumeration over all deterministic policies, which would be exponential in the number of states.</p>
+    <p>Lecture 24 frames both algorithms as ways to avoid brute-force enumeration over all deterministic policies. There are $|\mathcal{A}|^{|\mathcal{S}|}$ such policies, so enumeration becomes exponential in the number of states.</p>
+    <p>Both are <b>model-based</b>: they require the transition probabilities $P(s'\mid s,a)$ and reward function $R(s,a)$. For a finite fully observable MDP, there exists at least one deterministic optimal policy, so planning can search for the best action in each state.</p>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -67,6 +68,8 @@
     <div class="head">Why the algorithms improve</div>
     <p>Bellman optimality gives a fixed point for the best possible values. Value iteration approaches that fixed point directly through repeated contraction.</p>
     <p>Policy iteration takes a different path: evaluation tells you exactly how good the current policy is, and improvement makes the policy greedy with respect to that evaluation. If the policy stops changing, it is optimal.</p>
+    <p>This is the <b>generalized policy iteration</b> viewpoint: evaluation and improvement keep pulling each other toward optimality. Value iteration can be read as a truncated version of policy iteration, doing only a one-step optimality backup instead of fully evaluating a policy before improving.</p>
+    <p>Policy iteration improves monotonically: a greedy improvement is strictly better unless the policy is already optimal. In finite MDPs, there are only finitely many deterministic policies, so policy iteration reaches an optimal policy in finite steps.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -80,9 +83,10 @@
     </div>
     <div class="callout formula"><div class="head">Value iteration</div>
       <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^(k): Q estimate at iteration k； Q^(k-1): previous estimate； γ: discount factor； max_{a'}: best next action under current estimate</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each iteration rebuilds Q from one-step reward plus the best previous estimate of future value.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it when P,R are known and you want Q*. Repeat until values stop changing much.</p>
+      <div class="eq">$$ V^{(k)}(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^{(k-1)}(s')\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^(k), V^(k): value estimates at iteration k； Q^(k-1), V^(k-1): previous estimates； γ: discount factor； max: choose the best action under the previous estimate</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each iteration does a one-step lookahead: immediate reward plus discounted best future value from the previous table.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Initialize values arbitrarily, with terminal states usually fixed at 0. Sweep all states until $\max_s|V^{(k)}(s)-V^{(k-1)}(s)|&lt;\theta$, then extract a greedy policy.</p>
     </div>
     <div class="callout formula"><div class="head">Policy evaluation</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
@@ -96,7 +100,14 @@
       <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π_new(s): improved action in state s； argmax_a: action maximizing lookahead； R(s,a): immediate reward； E_{s'}V^π(s'): expected next-state value</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> After evaluating π, improve it by choosing the action with the largest one-step lookahead value.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this in policy iteration: evaluate π, greedify π, repeat.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this in policy iteration: evaluate π, greedify π, repeat until $\pi_{\text{new}}=\pi_{\text{old}}$.</p>
+    </div>
+    <div class="callout formula"><div class="head">Greedy policy extraction</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\pi^*(s)$ is the optimal action in state $s$; $Q^*$ and $V^*$ are optimal value functions; the $\arg\max$ returns an action, not the value itself.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once the optimal value table is known or nearly converged, the policy is obtained by choosing the action with the largest one-step lookahead.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the final step after value iteration and the improvement step inside policy iteration.</p>
     </div>
     <div class="callout formula wide"><div class="head">Geometric convergence idea</div>
       <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
@@ -126,7 +137,9 @@
     <ol>
       <li>If $P$ and $R$ are known, dynamic programming is available.</li>
       <li>If the problem asks for repeated Bellman backups, use value iteration.</li>
+      <li>For value iteration, initialize $V$ or $Q$, sweep all states with the max backup, stop at threshold $\theta$, then extract the greedy policy.</li>
       <li>If the problem asks for evaluate-then-improve, use policy iteration.</li>
+      <li>For policy iteration, initialize a policy, evaluate it by a linear system or iterative evaluation, greedify it, and stop when the policy is stable.</li>
       <li>If only sampled transitions are available, switch to model-free methods such as Q-learning.</li>
     </ol>
   </div>
@@ -137,6 +150,8 @@
     <ul>
       <li>Applying DP when $P$ is unknown. DP is model-known planning.</li>
       <li>Confusing policy evaluation with policy improvement.</li>
+      <li>Thinking value iteration returns a policy automatically. It returns values first; the greedy policy must be extracted afterward.</li>
+      <li>Forgetting that policy iteration terminates on policy stability, not on a small value-table change.</li>
       <li>Using $V^{(k)}$ from the new iteration on some states and the old iteration on others without stating an asynchronous update scheme.</li>
       <li>Forgetting the terminal / horizon boundary condition in finite-horizon DP.</li>
     </ul>
@@ -150,7 +165,17 @@
       <li>Policy iteration = policy evaluation + policy improvement.</li>
       <li>Both require known transition and reward models.</li>
       <li>Bellman contraction explains convergence.</li>
+      <li>Know the comparison: value iteration uses a max backup every sweep; policy iteration fully evaluates a policy before greedy improvement.</li>
+      <li>Know the convergence story: VI is geometric by contraction; PI is finite in finite MDPs because there are finitely many deterministic policies.</li>
     </ul>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:12px;">
+      <thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">Feature</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">Value Iteration</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">Policy Iteration</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Main move</td><td style="padding:8px;border-bottom:1px solid var(--border);">Directly update values toward $V^*$ or $Q^*$</td><td style="padding:8px;border-bottom:1px solid var(--border);">Alternate evaluation and greedy improvement</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">Per iteration</td><td style="padding:8px;border-bottom:1px solid var(--border);">Cheaper Bellman max sweep</td><td style="padding:8px;border-bottom:1px solid var(--border);">More expensive evaluation, often fewer outer loops</td></tr>
+        <tr><td style="padding:8px;">View</td><td style="padding:8px;">Truncated policy iteration</td><td style="padding:8px;">Full evaluation plus greedy improvement</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -158,9 +183,10 @@
     <h4>Last-minute recall</h4>
     <ul>
       <li>Known model → DP.</li>
-      <li>Value iteration updates values directly.</li>
-      <li>Policy iteration alternates evaluate and improve.</li>
+      <li>Value iteration updates values directly and extracts policy afterward.</li>
+      <li>Policy iteration alternates evaluate and improve until policy stability.</li>
       <li>Greedy improvement uses one-step lookahead.</li>
+      <li>GPI = evaluation plus improvement pulling toward optimality.</li>
       <li>Unknown model → Q-learning / policy gradient.</li>
     </ul>
   </div>
@@ -176,7 +202,8 @@
   <div class="callout">
     <div class="head">Model-known planning</div>
     <p><b>Value iteration</b> 反复套 Bellman optimality backup，直到 value 稳定。<b>Policy iteration</b> 则是“先评估当前策略，再把策略改得更贪心”，不断交替。</p>
-    <p>Lecture 24 的动机是：枚举所有 deterministic policies 太贵，所以我们用 Bellman 结构系统性地找最优策略。</p>
+    <p>Lecture 24 的动机是：枚举所有 deterministic policies 太贵。这样的策略一共有 $|\mathcal{A}|^{|\mathcal{S}|}$ 个，会随 states 数量指数增长，所以我们用 Bellman 结构系统性地找最优策略。</p>
+    <p>两者都是 <b>model-based</b>：必须知道 transition probabilities $P(s'\mid s,a)$ 和 reward function $R(s,a)$。在有限、完全可观测的 MDP 里，至少存在一个 deterministic optimal policy，所以规划时可以把目标理解成“每个 state 选一个最好 action”。</p>
   </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
@@ -191,6 +218,8 @@
     <div class="head">为什么会越来越好</div>
     <p>Bellman optimality 给出最优 value 的 fixed point。Value iteration 直接靠 contraction 往这个 fixed point 靠近。</p>
     <p>Policy iteration 则把问题拆开：evaluation 精确知道当前 policy 有多好；improvement 用这个评价去做 greedy 更新。策略不再变化时，就已经满足 optimality。</p>
+    <p>这就是 <b>generalized policy iteration / GPI</b>：evaluation 和 improvement 两股力量互相拉着系统走向 optimality。Value iteration 可以看成 truncated policy iteration：不把某个 policy 完整 evaluate 到收敛，而是每轮只做一步 optimality backup。</p>
+    <p>Policy iteration 有 monotonicity：greedy improvement 会得到更好的 policy，除非当前 policy 已经 optimal。有限 MDP 只有有限多个 deterministic policies，所以 PI 会在有限步内到达 optimal policy。</p>
   </div>
 
   <h3 class="section-purple">4. 关键公式</h3>
@@ -204,9 +233,10 @@
     </div>
     <div class="callout formula"><div class="head">Value iteration</div>
       <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^(k): 第 k 轮 Q 估计；Q^(k-1): 上一轮估计；γ: 折扣因子；max_{a'}: 当前估计下最佳下一动作</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每轮迭代用“一步奖励 + 上一轮估计的最佳未来价值”来更新 Q。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当 P,R 已知且想求 Q* 时使用。重复更新，直到 value 变化很小。</p>
+      <div class="eq">$$ V^{(k)}(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^{(k-1)}(s')\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^(k), V^(k): 第 k 轮 value estimates；Q^(k-1), V^(k-1): 上一轮估计；γ: discount factor；max: 按上一轮 value 选择最好的 action</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每轮都做 one-step lookahead：即时 reward + 上一轮表格里的最佳未来 value。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先任意初始化 value，terminal states 通常固定为 0。反复 sweep 所有 states，直到 $\max_s|V^{(k)}(s)-V^{(k-1)}(s)|&lt;\theta$，最后抽取 greedy policy。</p>
     </div>
     <div class="callout formula"><div class="head">Policy evaluation</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
@@ -220,7 +250,14 @@
       <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π_new(s): 状态 s 的改进后动作；argmax_a: 让前瞻价值最大的动作；R(s,a): 即时奖励；E_{s'}V^π(s'): 下一状态期望价值</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 评估完策略 π 后，用一步前瞻选择价值最大的动作，从而改进策略。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 policy iteration 的 improvement 步：evaluate π，再 greedify π，循环。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 policy iteration 的 improvement 步：evaluate π，再 greedify π，直到 $\pi_{\text{new}}=\pi_{\text{old}}$。</p>
+    </div>
+    <div class="callout formula"><div class="head">抽取 greedy policy</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
+      <div class="eq">$$ \pi^*(s)=\arg\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')\right] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\pi^*(s)$ 是 state $s$ 的最优 action；$Q^*$ 和 $V^*$ 是 optimal value functions；$\arg\max$ 返回的是 action，不是最大值本身。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦 optimal value table 已知或基本收敛，policy 就是每个 state 里 one-step lookahead 最大的 action。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 value iteration 后的最后一步，也是 policy iteration 里的 improvement 步。</p>
     </div>
     <div class="callout formula wide"><div class="head">几何收敛口径</div>
       <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
@@ -250,7 +287,9 @@
     <ol>
       <li>题目给了 $P$ 和 $R$，可以用 DP。</li>
       <li>题目说 repeated Bellman backups，多半是 value iteration。</li>
+      <li>Value iteration 步骤：初始化 $V$ 或 $Q$，对所有 states 做 max backup，变化小于 $\theta$ 后，抽取 greedy policy。</li>
       <li>题目说 evaluate then improve，多半是 policy iteration。</li>
+      <li>Policy iteration 步骤：初始化 policy，线性系统或 iterative evaluation 求 $V^\pi$，再 greedify，直到 policy stable。</li>
       <li>如果只有 sampled transitions，没有完整模型，就转向 model-free：Q-learning 或 policy gradient。</li>
     </ol>
   </div>
@@ -261,6 +300,8 @@
     <ul>
       <li>在不知道 $P$ 的情况下硬用 DP；DP 是 model-known planning。</li>
       <li>混淆 policy evaluation 和 policy improvement。</li>
+      <li>以为 value iteration 直接输出 policy。它先输出 values，最后还要 greedy extraction。</li>
+      <li>以为 policy iteration 用 value change 停止。PI 的标准停止条件是 policy stable。</li>
       <li>同步更新时一半用旧 $V$、一半用新 $V$，但没有说明 asynchronous update。</li>
       <li>有限时域 DP 忘记 terminal / horizon 边界条件。</li>
     </ul>
@@ -274,7 +315,17 @@
       <li>知道 policy iteration = policy evaluation + policy improvement。</li>
       <li>说明两者都需要已知 transition / reward model。</li>
       <li>用 Bellman contraction 解释 convergence。</li>
+      <li>会比较：VI 每轮做 max backup；PI 先完整 evaluate 当前 policy，再 greedy improve。</li>
+      <li>会说 convergence：VI 由 contraction 得到 geometric convergence；PI 在有限 MDP 中因 deterministic policies 有限而 finite convergence。</li>
     </ul>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:12px;">
+      <thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">对比点</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">Value Iteration</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);">Policy Iteration</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">核心动作</td><td style="padding:8px;border-bottom:1px solid var(--border);">直接把 values 往 $V^*$ / $Q^*$ 更新</td><td style="padding:8px;border-bottom:1px solid var(--border);">evaluation 和 greedy improvement 交替</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border);">单轮成本</td><td style="padding:8px;border-bottom:1px solid var(--border);">单轮 Bellman max sweep 比较便宜</td><td style="padding:8px;border-bottom:1px solid var(--border);">evaluation 更贵，但 outer loops 通常更少</td></tr>
+        <tr><td style="padding:8px;">本质视角</td><td style="padding:8px;">truncated policy iteration</td><td style="padding:8px;">full evaluation + greedy improvement</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3 class="section-yellow">9. 速记清单</h3>
@@ -282,9 +333,10 @@
     <h4>最后一刻能默</h4>
     <ul>
       <li>Known model → DP。</li>
-      <li>Value iteration 直接更新 value。</li>
-      <li>Policy iteration 交替 evaluation / improvement。</li>
+      <li>Value iteration 先更新 value，最后抽取 policy。</li>
+      <li>Policy iteration 交替 evaluation / improvement，直到 policy stable。</li>
       <li>Greedy improvement 用 one-step lookahead。</li>
+      <li>GPI = evaluation + improvement 一起把系统推向 optimality。</li>
       <li>Unknown model → Q-learning / policy gradient。</li>
     </ul>
   </div>

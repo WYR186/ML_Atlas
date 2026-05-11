@@ -49,8 +49,8 @@
   <p class="topic-lede">K-means is the clustering algorithm from Lecture 9. It alternates between assigning points to the closest center and updating each center to the mean of its assigned points.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>K-means partitions unlabeled data into $K$ clusters. It assumes each point belongs to exactly one cluster and each cluster is represented by a center $\mu_k$.</p>
-  <p>The objective is the within-cluster sum of squared distances. The algorithm is simple, but the problem is non-convex, so initialization matters.</p>
+  <p>K-means is an unsupervised learning method for finding hidden structure in unlabeled data $\mathcal{D}=\{x^{(i)}\}_{i=1}^N$. It partitions the dataset into $K$ disjoint clusters, where each point belongs to exactly one cluster and each cluster is represented by a center $\mu_k$.</p>
+  <p>The objective is the within-cluster sum of squared Euclidean distances, also called distortion or reconstruction error. The algorithm is simple, but the problem is non-convex, so initialization matters.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
   <p>Drop $K$ magnets onto the scatter plot. Each point runs to its closest magnet. Then each magnet moves to the average location of the points that chose it. Repeat until nothing changes.</p>
@@ -58,40 +58,38 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>With centers fixed, the best assignment is obvious: choose the nearest center. With assignments fixed, the best center is also obvious: the arithmetic mean of the assigned points.</p>
-  <p>Alternating these two easy subproblems monotonically decreases the objective and converges in finitely many assignment changes, but only to a local optimum.</p>
+  <p>Alternating these two easy subproblems monotonically decreases the objective and converges in finitely many assignment changes, but only to a local optimum. This finite convergence comes from the fact that there are only finitely many possible hard assignments.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Objective</div>
-      <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
+      <div class="eq">$$ J^*=\min_{\mu_1,\ldots,\mu_K}\min_{r_{ik}}\sum_{i=1}^N\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
       <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $J$: k-means objective, also called within-cluster sum of squares; $n$: number of data points; $K$: number of clusters chosen before running the algorithm; $x^{(i)}$: the $i$-th data point; $\mu_k$: center of cluster $k$; $r_{ik}$: assignment indicator: 1 if point $i$ is assigned to cluster $k$, otherwise 0</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $J^*$ is the best possible distortion; $N$ is the number of data points; $K$ is the chosen number of clusters; $x^{(i)}$ is point $i$; $\mu_k$ is center $k$; $r_{ik}$ is a hard assignment indicator: 1 if point $i$ is assigned to cluster $k$, otherwise 0.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The objective adds the squared Euclidean distance from every point to the center it chose. The row constraint $\sum_k r_{ik}=1$ says each point picks exactly one cluster.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a proposed clustering, set one $r_{ik}=1$ per point, compute each point-to-center squared distance, and add them. Lloyd's algorithm tries to decrease this value, but it does not guarantee the global minimum $J^*$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Assignment step</div>
       <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\arg\min_j$: the index $j$ of the center with the smallest distance; $\|x^{(i)}-\mu_j\|_2^2$: squared Euclidean distance from point $i$ to center $j$</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\arg\min_j$ returns the center index $j$ with the smallest squared distance; $\|x^{(i)}-\mu_j\|_2^2$ is the squared Euclidean dissimilarity from point $i$ to center $j$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> With centers fixed, every point greedily chooses its nearest center. This is the Lloyd assignment step, often compared to the E-step of EM.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Build a distance table from each point to each center, pick the smallest entry in every row, and mark that cluster's $r_{ik}$ as 1.</p>
     </div>
     <div class="callout formula">
       <div class="head">Update step</div>
       <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\sum_i r_{ik}x^{(i)}$: sum of points currently assigned to cluster $k$; $\sum_i r_{ik}$: number of points assigned to cluster $k$; $\mu_k$: new center after averaging assigned points</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\sum_i r_{ik}x^{(i)}$ is the sum of points assigned to cluster $k$; $\sum_i r_{ik}$ is the number of assigned points; $\mu_k$ is the updated centroid.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> With assignments fixed, the squared-distance objective is minimized by placing the center at the arithmetic mean of its assigned points.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each cluster, average only the points assigned to that cluster. If a cluster is empty, an implementation must reinitialize or otherwise handle that center.</p>
     </div>
     <div class="callout formula">
       <div class="head">Per-iteration cost</div>
       <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$: number of points; $d$: feature dimension of each point; $K$: number of centers compared against each point</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> </p>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$ is the number of points; $d$ is feature dimension; $K$ is the number of centers compared against each point.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The assignment step dominates: each of $N$ points compares against $K$ centers, and each distance costs $O(d)$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Per Lloyd iteration, quote $O(NKd)$ for the main cost. Total runtime multiplies this by the number of iterations until assignments stop changing.</p>
     </div>
   </div>
 
@@ -109,14 +107,22 @@
   <div class="callout example">
     <div class="head">Example C · Soft assignment relaxation</div>
     <div class="example-source">Source: HW2 Problem 7, paraphrased.</div>
-    <p>Relaxing assignment variables from one-hot values to $[0,1]$ does not improve the optimum. For fixed centers, a weighted average of distances is at least the minimum distance, so an optimal soft solution can be chosen as a hard nearest-center assignment.</p>
+    <p>Relaxing assignment variables from one-hot values to soft weights $r_{ik}\in[0,1]$ with $\sum_k r_{ik}=1$ does not improve the optimum. For fixed centers, a weighted average of distances is at least the minimum distance, so an optimal soft solution can be chosen as a hard nearest-center assignment.</p>
+  </div>
+  <div class="callout example">
+    <div class="head">Example D · Prototypes for classification</div>
+    <div class="example-source">Source: Lecture 9, supervised use of clustering.</div>
+    <p>To turn k-means into a classifier, run k-means separately inside each labeled class and keep $R$ prototypes per class. A new point is labeled by the class of its closest prototype, so prediction uses learned centroids rather than all training points.</p>
   </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <div class="mini-list">
     <div><b>For hand iteration,</b> draw a distance table: points by centers.</div>
+    <div><b>For initialization,</b> remember the standard version randomly chooses $K$ training points as initial centroids, so multiple restarts are useful.</div>
     <div><b>For the M-step,</b> average only points assigned to that cluster.</div>
     <div><b>For proof questions,</b> use “fix one block, optimize the other block” logic.</div>
+    <div><b>For choosing $K$,</b> plot distortion versus $K$ and look for an elbow where the improvement slows down.</div>
+    <div><b>For the GMM link,</b> say k-means is the small-variance, hard-assignment limit of an equal spherical Gaussian mixture trained by EM.</div>
     <div><b>For limitations,</b> mention local minima, outliers, choice of $K$, and spherical-cluster bias.</div>
   </div>
 
@@ -125,6 +131,7 @@
     <li>Forgetting every point must be assigned to exactly one cluster in hard k-means.</li>
     <li>Updating centers before recomputing all assignments for the current iteration.</li>
     <li>Claiming k-means finds the global optimum.</li>
+    <li>Confusing k-means with KNN. K-means learns $K$ centroids from unlabeled data; KNN stores labeled training examples and predicts from nearest neighbors.</li>
     <li>Ignoring empty clusters; implementations need a rule for them.</li>
   </ul>
 
@@ -134,6 +141,7 @@
     <li>Write the WCSS objective with assignment variables.</li>
     <li>Derive the mean update from fixed assignments.</li>
     <li>Explain convergence to local optimum and sensitivity to initialization.</li>
+    <li>State the per-iteration complexity $O(NKd)$ and why the assignment step dominates.</li>
     <li>Prove the HW2 hard-vs-soft assignment equivalence.</li>
   </ul>
 
@@ -143,6 +151,8 @@
     <li>I know the mean update step.</li>
     <li>I can write the objective and constraints.</li>
     <li>I remember k-means is non-convex and initialization-sensitive.</li>
+    <li>I know the elbow heuristic for choosing $K$.</li>
+    <li>I can distinguish k-means from KNN.</li>
     <li>I can explain why squared Euclidean distance favors spherical clusters.</li>
   </ul>
 </section>
@@ -154,8 +164,8 @@
       <p class="topic-lede">K-means 是 Lecture 9 的 clustering algorithm：在“把点分给最近中心”和“把中心更新成簇均值”之间交替，也叫 Lloyd iterations。</p>
 
       <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
-      <p>K-means 把 unlabeled data 分成 $K$ 个 clusters。每个点只属于一个 cluster，每个 cluster 用 center $\mu_k$ 表示。</p>
-      <p>目标是最小化 within-cluster sum of squared distances。算法很简单，但 objective non-convex，所以 initialization 很重要。</p>
+      <p>K-means 是 unsupervised learning，用来在 unlabeled data $\mathcal{D}=\{x^{(i)}\}_{i=1}^N$ 中找 hidden structure。它把 dataset 分成 $K$ 个互不重叠的 clusters，每个点只属于一个 cluster，每个 cluster 用 center $\mu_k$ 表示。</p>
+      <p>目标是最小化 within-cluster squared Euclidean distances，也叫 distortion / reconstruction error。算法很简单，但 objective non-convex，所以 initialization 很重要。</p>
 
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
       <p>把 $K$ 块磁铁丢到散点图上。每个点跑向最近的磁铁；然后磁铁移动到选择它的点的平均位置。不断重复，直到没人想换队。</p>
@@ -163,40 +173,38 @@
 
       <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
       <p>如果 centers 固定，最优 assignment 很明显：选最近中心。如果 assignments 固定，最优 center 也很明显：取 assigned points 的 arithmetic mean。</p>
-      <p>交替优化这两个简单子问题会让 objective 单调下降，并在有限次 assignment changes 后收敛；但一般只保证 local optimum。</p>
+      <p>交替优化这两个简单子问题会让 objective 单调下降，并在有限次 assignment changes 后收敛；但一般只保证 local optimum。有限收敛的原因是 hard assignments 的可能情况有限。</p>
 
       <h3 class="section-purple">4. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Objective</div>
-          <div class="eq">$$ J=\sum_{i=1}^n\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
+          <div class="eq">$$ J^*=\min_{\mu_1,\ldots,\mu_K}\min_{r_{ik}}\sum_{i=1}^N\sum_{k=1}^K r_{ik}\|x^{(i)}-\mu_k\|_2^2 $$</div>
           <div class="eq">$$ r_{ik}\in\{0,1\},\qquad \sum_k r_{ik}=1 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $J$: k-means objective，也叫 within-cluster sum of squares; $n$: data points 数量; $K$: 预先指定的 clusters 数量; $x^{(i)}$: 第 $i$ 个数据点; $\mu_k$: 第 $k$ 个 cluster center; $r_{ik}$: assignment indicator：点 $i$ 属于 cluster $k$ 时为 1，否则为 0</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $J^*$ 是最优 distortion；$N$ 是 points 数量；$K$ 是预先指定的 clusters 数量；$x^{(i)}$ 是第 $i$ 个点；$\mu_k$ 是第 $k$ 个 center；$r_{ik}$ 是 hard assignment indicator，点 $i$ 属于 cluster $k$ 时为 1，否则为 0。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这个 objective 把每个点到自己 cluster center 的 squared Euclidean distance 加起来。约束 $\sum_k r_{ik}=1$ 表示每个点必须且只能选一个 cluster。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 给定一组 clustering 后，每个点只保留一个 $r_{ik}=1$，算它到对应 center 的平方距离再求和。Lloyd algorithm 会不断降低这个值，但不保证达到 global minimum $J^*$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Assignment step</div>
           <div class="eq">$$ r_{ik}=1\quad\text{if}\quad k=\arg\min_j\|x^{(i)}-\mu_j\|_2^2 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\arg\min_j$: 让距离最小的 center index $j$; $\|x^{(i)}-\mu_j\|_2^2$: 点 $i$ 到 center $j$ 的 squared Euclidean distance</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\arg\min_j$ 返回 squared distance 最小的 center index；$\|x^{(i)}-\mu_j\|_2^2$ 是点 $i$ 到 center $j$ 的 squared Euclidean dissimilarity。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Centers 固定时，每个点都 greedy 地选最近中心。这就是 Lloyd assignment step，也常类比 EM 里的 E-step。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 手算时先画 distance table：每个点一行、每个 center 一列；每行选最小值，对应的 $r_{ik}$ 设为 1。</p>
         </div>
         <div class="callout formula">
           <div class="head">Update step</div>
           <div class="eq">$$ \mu_k=\frac{\sum_i r_{ik}x^{(i)}}{\sum_i r_{ik}} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\sum_i r_{ik}x^{(i)}$: 当前分到 cluster $k$ 的所有点之和; $\sum_i r_{ik}$: 当前分到 cluster $k$ 的点数; $\mu_k$: 更新后的 cluster center</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\sum_i r_{ik}x^{(i)}$ 是当前分到 cluster $k$ 的点的向量和；$\sum_i r_{ik}$ 是该 cluster 的点数；$\mu_k$ 是更新后的 centroid。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Assignments 固定时，让 squared-distance objective 最小的 center 就是这些点的 arithmetic mean。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 cluster，只平均分给它的点。如果某个 cluster 为空，实际实现需要 reinitialize 或采用其他处理规则。</p>
         </div>
         <div class="callout formula">
           <div class="head">Per-iteration cost</div>
           <div class="eq">$$ O(KNd)\text{ for assignments},\qquad O(Nd)\text{ for means} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$: points 数量; $d$: 每个点的 feature dimension; $K$: 每个点要比较的 centers 数量</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> </p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> </p>
+          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$ 是 points 数量；$d$ 是 feature dimension；$K$ 是每个点要比较的 centers 数量。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Assignment step 最贵：$N$ 个点各自比较 $K$ 个 centers，每次 distance 计算要 $O(d)$。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每一轮 Lloyd iteration 的主成本写 $O(NKd)$；总 runtime 再乘以直到 assignments 不变所需的 iterations 数。</p>
         </div>
       </div>
 
@@ -214,14 +222,22 @@
       <div class="callout example">
         <div class="head">Example C · Soft assignment relaxation</div>
         <div class="example-source">来源：HW2 Problem 7，题意转述。</div>
-        <p>把 assignment variables 从 one-hot 放宽到 $[0,1]$ 不会让 optimum 更好。固定 centers 时，距离的 weighted average 至少是最小距离，所以最优 soft solution 可以取成 nearest-center hard assignment。</p>
+        <p>把 assignment variables 从 one-hot 放宽到 soft weights $r_{ik}\in[0,1]$ 且 $\sum_k r_{ik}=1$ 不会让 optimum 更好。固定 centers 时，距离的 weighted average 至少是最小距离，所以最优 soft solution 可以取成 nearest-center hard assignment。</p>
+      </div>
+      <div class="callout example">
+        <div class="head">Example D · 用 prototypes 做 classification</div>
+        <div class="example-source">来源：Lecture 9，clustering 的 supervised 用法。</div>
+        <p>如果要把 k-means 用于 classification，可以在每个 labeled class 内分别跑 k-means，每类保留 $R$ 个 prototypes。新点预测时找最近 prototype，并输出该 prototype 所属的 class。</p>
       </div>
 
       <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
       <div class="mini-list">
         <div><b>手跑 iteration：</b> 画 distance table，行是 points，列是 centers。</div>
+        <div><b>Initialization：</b> 标准版本随机从 training data 里选 $K$ 个点当 initial centroids，所以 multiple restarts 很有用。</div>
         <div><b>M-step：</b> 只平均分给该 cluster 的点。</div>
         <div><b>证明题：</b> 用“固定一组变量，优化另一组变量”的 alternate optimization 逻辑。</div>
+        <div><b>选择 $K$：</b> 画 distortion vs. $K$，找下降速度明显变慢的 elbow。</div>
+        <div><b>GMM 关联：</b> k-means 可看成 equal spherical GMM 用 EM 训练时，variance $\sigma^2\to0$ 的 hard-assignment 极限。</div>
         <div><b>局限性：</b> local minima、outliers、选择 $K$、spherical-cluster bias。</div>
       </div>
 
@@ -230,6 +246,7 @@
         <li>忘记 hard k-means 中每个点必须 exactly one cluster。</li>
         <li>在同一轮中还没算完所有 assignments 就先更新 centers。</li>
         <li>声称 k-means 保证 global optimum。</li>
+        <li>把 k-means 和 KNN 混淆：K-means 从 unlabeled data 学 centroids；KNN 保存 labeled training examples，用 nearest neighbors 预测。</li>
         <li>忽略 empty clusters；实际实现需要处理规则。</li>
       </ul>
 
@@ -239,6 +256,7 @@
         <li>会用 assignment variables 写 WCSS objective。</li>
         <li>会从 fixed assignments 推 mean update。</li>
         <li>能解释 local optimum 和 initialization sensitivity。</li>
+        <li>能写出 per-iteration complexity $O(NKd)$，并说明 assignment step 是主成本。</li>
         <li>会证明 HW2 的 hard-vs-soft assignment equivalence。</li>
       </ul>
 
@@ -248,6 +266,8 @@
         <li>我知道 mean update step。</li>
         <li>我能写 objective 和 constraints。</li>
         <li>我记得 k-means non-convex 且依赖 initialization。</li>
+        <li>我知道 elbow heuristic 可以用来选 $K$。</li>
+        <li>我能区分 k-means 和 KNN。</li>
         <li>我能解释 squared Euclidean distance 为什么偏向 spherical clusters。</li>
       </ul>
     </section>

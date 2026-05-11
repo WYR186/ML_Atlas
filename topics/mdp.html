@@ -49,7 +49,7 @@
   <p class="topic-lede">Lecture 23 introduces reinforcement learning as decision making with delayed feedback. A Markov Decision Process is the formal language for an agent that interacts with an environment over time.</p>
 
   <h3 class="section-blue">1. Concept Understanding</h3>
-  <p>An <b>MDP</b> models sequential decisions. At each time step, the agent observes a state, chooses an action, receives a scalar reward, and moves to the next state.</p>
+  <p>An <b>MDP</b> models sequential decisions where outcomes are partly random and partly controlled by a decision-maker. At each time step, the agent observes a state, chooses an action, receives a scalar reward, and moves to the next state.</p>
   <p>The formal object is</p>
   <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
   <ul>
@@ -57,7 +57,7 @@
     <li>$\mathcal{A}$: possible actions.</li>
     <li>$P(s'\mid s,a)$: transition distribution.</li>
     <li>$R(s,a)$: immediate reward.</li>
-    <li>$\gamma\in[0,1)$: discount factor for future rewards.</li>
+    <li>$\gamma\in[0,1)$: discount factor for future rewards; with bounded rewards, it keeps infinite-horizon returns finite.</li>
   </ul>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -66,6 +66,7 @@
 
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>The Markov property says the current state contains enough information for predicting the next state distribution once the action is chosen. The past can matter only through how it is summarized in the current state.</p>
+  <p>This is the first-order Markov assumption. If the observation is not actually Markov, standard Bellman, dynamic programming, and RL guarantees apply only after the state is augmented with enough hidden or historical information.</p>
   <p>This matters because Bellman equations and dynamic programming rely on breaking a long decision problem into one-step pieces: immediate reward plus value of the next state.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -179,7 +180,7 @@
   <p class="topic-lede">Lecture 23 把 reinforcement learning 引入为“带 delayed feedback 的序列决策”。MDP 是描述 agent 与 environment 长期交互的正式语言。</p>
 
   <h3 class="section-blue">1. 概念理解</h3>
-  <p><b>MDP</b> 描述一连串决策：每一步 agent 观察 state，选择 action，得到 scalar reward，然后 environment 转移到 next state。</p>
+  <p><b>MDP</b> 描述一连串决策：结果一部分来自 environment 的随机性，一部分由 decision-maker / agent 的 action 控制。每一步 agent 观察 state，选择 action，得到 scalar reward，然后 environment 转移到 next state。</p>
   <p>正式写成：</p>
   <div class="eq">$$ \mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma) $$</div>
   <ul>
@@ -187,7 +188,7 @@
     <li>$\mathcal{A}$：动作集合。</li>
     <li>$P(s'\mid s,a)$：transition distribution。</li>
     <li>$R(s,a)$：immediate reward。</li>
-    <li>$\gamma\in[0,1)$：future reward 的 discount factor。</li>
+    <li>$\gamma\in[0,1)$：future reward 的 discount factor；reward 有界时，它能让 infinite-horizon return 保持有限。</li>
   </ul>
 
   <h3 class="section-orange">2. 大白话理解</h3>
@@ -196,6 +197,7 @@
 
   <h3 class="section-orange">3. 核心直觉</h3>
   <p>Markov property 说：只要给定当前 state 和 action，预测下一步不需要再看完整 history。过去当然可能重要，但它必须已经被总结进当前 state 里。</p>
+  <p>这就是 first-order Markov assumption。如果 observation 本身不满足 Markov，标准 Bellman、dynamic programming、RL convergence guarantee 只有在你把足够的 hidden/history information 补进 state 后才成立。</p>
   <p>这个性质让 Bellman equation 和 dynamic programming 成立：长问题可以拆成“一步 reward + next state value”。</p>
 
   <h3 class="section-purple">4. 关键公式</h3>

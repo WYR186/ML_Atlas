@@ -64,6 +64,7 @@
   <h3 class="section-orange">3. Core Intuition</h3>
   <p>A model class that can shatter many points can also memorize many random labels. That flexibility makes training error less trustworthy. VC bounds correct for this by adding a complexity term that shrinks as $n$ grows.</p>
   <p>The main message is not that the bound is always tight; Lecture 22 notes it can be loose. The main message is the direction: more complexity requires more data.</p>
+  <p><b>Philosophical takeaway.</b> "If someone can explain every phenomenon, their explanations are worthless." VC dimension is the formal measurement of that ability-to-explain: a class with infinite VC dimension can fit any random noise just as easily as a real pattern, so its training fit carries no signal about generalization. Bounded flexibility is what makes learning meaningful.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
@@ -134,6 +135,46 @@
     <p>Use Hoeffding when the classifier is fixed before data. Use a VC-style or uniform bound when the classifier is selected from a class after seeing the training set.</p>
   </div>
 
+  <div class="callout" id="fundamental-theorem-en">
+    <div class="head">Fundamental Theorem of Statistical Learning</div>
+    <p>The single high-value theorem from learning theory worth a full sentence on the cheat sheet. For binary classification with 0-1 loss, the following three statements are <b>equivalent</b>:</p>
+    <ol>
+      <li>The hypothesis class $\mathcal{H}$ is <b>PAC-learnable</b>.</li>
+      <li>$\mathcal{H}$ has <b>finite VC dimension</b> ($\mathrm{VCdim}(\mathcal{H})<\infty$).</li>
+      <li><b>Uniform convergence</b> holds over $\mathcal{H}$ — empirical risk concentrates around true risk for <i>every</i> $h\in\mathcal{H}$ simultaneously.</li>
+    </ol>
+    <p><b>Why it matters.</b> "PAC-learnable" sounds like a property of the algorithm; "finite VC" is a structural property of the class; "uniform convergence" is a probabilistic property of the empirical risk landscape. The theorem says these are all the same thing in the binary 0-1 setting — so finiteness of $|\mathcal{H}|$ is sufficient but <b>not necessary</b> for PAC-learnability.</p>
+    <p><b>Finite versus infinite classes.</b> For a finite class, $\log|\mathcal{H}|$ can be the complexity term. For an infinite class, raw cardinality is no longer useful; $\mathrm{VCdim}(\mathcal{H})$ replaces it. Larger VC dimension means a more flexible class, and the bound asks for more data because the gap scales roughly like $\sqrt{\mathrm{VCdim}(\mathcal{H})/n}$.</p>
+    <p><b>Canonical example.</b> Threshold functions $h_c(x)=\mathbf{1}\{x\ge c\}$ on the real line form an <i>infinite</i> class ($c\in\mathbb{R}$), yet $\mathrm{VCdim}=1$ (Example 1 below). By the theorem, this class is PAC-learnable — and indeed it is, with $\mathcal{O}(\tfrac{1}{\epsilon}\log\tfrac{1}{\delta})$ samples. Without the theorem, you might wrongly conclude that infinite classes can never be PAC-learnable.</p>
+    <p><b>Exam template.</b> When asked "is class $\mathcal{H}$ PAC-learnable?", don't try to invent a sample-complexity bound by hand — compute $\mathrm{VCdim}(\mathcal{H})$. Finite VC dimension ⇒ yes; infinite VC dimension ⇒ no. The reverse direction (using PAC-learnability to deduce uniform convergence) appears on theoretical questions about why ERM works.</p>
+  </div>
+
+  <div class="callout" id="standard-vc-dimensions-en">
+    <div class="head">Standard VC dimensions to memorize</div>
+    <p>A handful of canonical hypothesis classes whose VC dimension shows up over and over on quizzes / finals. Memorize the values and one sentence of why for each.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:8px 6px;">Hypothesis class</th>
+          <th style="text-align:left;padding:8px 6px;">$\mathrm{VCdim}$</th>
+          <th style="text-align:left;padding:8px 6px;">Why / quickest counterexample</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Thresholds on $\mathbb{R}$</b><br/>$h_c(x)=\mathbf{1}\{x\ge c\}$</td><td style="padding:8px 6px;">$1$</td><td style="padding:8px 6px;">Two ordered points $x_1&lt;x_2$ cannot get the labeling $(+,-)$ — the rule is monotone.</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Intervals on $\mathbb{R}$</b><br/>$h_{a,b}(x)=\mathbf{1}\{x\in[a,b]\}$</td><td style="padding:8px 6px;">$2$</td><td style="padding:8px 6px;">Three points $x_1&lt;x_2&lt;x_3$ cannot get the labeling $(+,-,+)$ — a single interval can't include the outer two while excluding the middle.</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Lines in $\mathbb{R}^2$</b> (linear classifiers)</td><td style="padding:8px 6px;">$3$</td><td style="padding:8px 6px;">Three non-collinear points are shatterable; four points fail under an XOR-style labeling.</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Non-homogeneous halfspaces in $\mathbb{R}^d$</b><br/>$h_{w,b}(x)=\mathrm{sign}(w^\top x+b)$</td><td style="padding:8px 6px;">$d+1$</td><td style="padding:8px 6px;">Generalization of the 2D case. The "+1" is the bias degree of freedom.</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Homogeneous halfspaces in $\mathbb{R}^d$</b><br/>$h_w(x)=\mathrm{sign}(w^\top x)$</td><td style="padding:8px 6px;">$d$</td><td style="padding:8px 6px;">Boundary must pass through origin — one fewer degree of freedom than the non-homogeneous case.</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Axis-aligned rectangles in $\mathbb{R}^2$</b></td><td style="padding:8px 6px;">$4$</td><td style="padding:8px 6px;">Four extreme points (top / bottom / left / right) shatter; for any 5 points, the innermost cannot be labeled "$-$" if the four outer ones are "$+$".</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Neural nets with sign activation</b></td><td style="padding:8px 6px;">$\mathcal{O}(|E|\log|E|)$</td><td style="padding:8px 6px;">Scales with the number of edges $|E|$. The full proof is technical, but the takeaway is "VC scales with parameter count, not depth."</td></tr>
+        <tr><td style="padding:8px 6px;"><b>$\sin(\alpha x)$ classifiers</b><br/>$h_\alpha(x)=\mathrm{sign}(\sin(\alpha x))$</td><td style="padding:8px 6px;">$\infty$</td><td style="padding:8px 6px;">Cranking $\alpha$ up makes the function oscillate fast enough to realize any binary labeling on any finite point set. <i>One real parameter, infinite VC</i> — the textbook warning that "few parameters" does not mean "low complexity."</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px;"><b>How to use the table.</b> When a question asks "what is $\mathrm{VCdim}$ of class X?", first try to match X to a row above; many quiz problems are direct rephrasings of one of these. When asked to <i>prove</i> a stated value, follow the two-part pattern: (i) lower bound by exhibiting a shatterable set of size $d$, (ii) upper bound by showing every set of size $d+1$ has at least one impossible labeling.</p>
+    <p style="margin:6px 0 0;"><b>Connection to the bound.</b> Plugging any of these into the typical VC-style bound, the generalization gap scales as $\sqrt{\mathrm{VCdim}/n}$. So a more expressive class (larger VC) buys you smaller approximation error but requires more data to keep the estimation gap small — exactly the bias-variance trade-off, written in learning-theory notation.</p>
+  </div>
+
   <h3 class="section-gray">5. Worked Examples</h3>
   <div class="mini-list">
     <div>
@@ -176,6 +217,7 @@
     <li>Know the two-part proof pattern: lower bound by construction, upper bound by impossible labeling.</li>
     <li>Use Hoeffding for fixed hypotheses and VC bounds for uniform control.</li>
     <li>Remember finite VC dimension implies PAC learnability for binary classification.</li>
+    <li>Explain why infinite hypothesis classes can still be PAC-learnable when VC dimension is finite.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -185,6 +227,7 @@
     <li>Thresholds on $\mathbb{R}$ have VC dimension 1.</li>
     <li>Lines in $\mathbb{R}^2$ have VC dimension 3.</li>
     <li>Complexity term shrinks like roughly $\sqrt{d/n}$.</li>
+    <li>Finite class: use $\log|\mathcal{H}|$; infinite class: use VC dimension.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -210,6 +253,7 @@
   <h3 class="section-orange">3. Core Intuition · 核心直觉</h3>
   <p>一个能 shatter 很多点的 class，也可能记住很多 random labels，所以 training error 更不可信。VC bound 用 complexity term 修正这种不可信度，样本数 $n$ 越大，这个 term 越小。</p>
   <p>Lecture 22 也提醒：这个 bound 可能很松。它最重要的不是精确数值，而是方向：模型越复杂，需要越多数据。</p>
+  <p><b>哲学层面.</b> "如果一个人什么现象都能解释，那他的解释就一文不值。" VC dimension 正是对这种 "解释能力" 的形式化测量：infinite VC dimension 的 class 拟合 random noise 与拟合真实 pattern 一样轻松，所以 training fit 对 generalization 完全无信号。学习有意义的前提，是 flexibility 必须有上限。</p>
 
   <h3 class="section-purple">4. Key Equations · 关键公式</h3>
   <div class="cols2">
@@ -280,6 +324,46 @@
     <p>如果 classifier 在看数据前已经固定，用 Hoeffding。若 classifier 是看完 training set 后从整个 class 里挑出来的，用 VC-style / uniform bound。</p>
   </div>
 
+  <div class="callout" id="fundamental-theorem-cn">
+    <div class="head">Fundamental Theorem of Statistical Learning（统计学习基本定理）</div>
+    <p>学习理论里值得在 cheat sheet 上完整写下的那条定理。对二分类 + 0-1 loss，下面三件事 <b>等价</b>：</p>
+    <ol>
+      <li>hypothesis class $\mathcal{H}$ 是 <b>PAC-learnable</b>；</li>
+      <li>$\mathcal{H}$ 的 <b>VC dimension 有限</b>（$\mathrm{VCdim}(\mathcal{H})<\infty$）；</li>
+      <li>$\mathcal{H}$ 上 <b>uniform convergence</b> 成立 —— 对每个 $h\in\mathcal{H}$ 同时有 empirical risk 集中在 true risk 附近。</li>
+    </ol>
+    <p><b>为什么重要.</b> "PAC-learnable" 听起来是算法的性质，"finite VC" 是 class 的结构性质，"uniform convergence" 是 empirical risk 的概率性质 —— 定理告诉你这三件事在二分类 0-1 setting 下是同一件事。所以 $|\mathcal{H}|$ 有限是 PAC-learnability 的 sufficient 但 <b>不 necessary</b> 条件。</p>
+    <p><b>有限类 vs 无限类.</b> 对 finite class，可以用 $\log|\mathcal{H}|$ 当 complexity term。对 infinite class，raw cardinality 已经没用了，要用 $\mathrm{VCdim}(\mathcal{H})$ 替代。VC dimension 越大，class 越灵活，bound 需要更多数据，因为 generalization gap 大致按 $\sqrt{\mathrm{VCdim}(\mathcal{H})/n}$ 缩小。</p>
+    <p><b>典型例子.</b> 实数轴上的 threshold function $h_c(x)=\mathbf{1}\{x\ge c\}$ 是 <i>infinite</i> class（$c\in\mathbb{R}$），但 $\mathrm{VCdim}=1$（下面例 1）。由定理可知它仍然 PAC-learnable，sample complexity 大约 $\mathcal{O}(\tfrac{1}{\epsilon}\log\tfrac{1}{\delta})$。没有这条定理，可能会误以为 infinite class 都不能 PAC-learnable。</p>
+    <p><b>考试模板.</b> 题目问 "$\mathcal{H}$ PAC-learnable 吗？"，不要硬手算 sample complexity bound —— 直接算 $\mathrm{VCdim}(\mathcal{H})$。finite VC dimension ⇒ 是；infinite VC dimension ⇒ 否。反方向（用 PAC-learnability 推 uniform convergence）出现在解释 ERM 为什么有效的理论题里。</p>
+  </div>
+
+  <div class="callout" id="standard-vc-dimensions-cn">
+    <div class="head">必背 VC dimension 速查表</div>
+    <p>Quiz / final 反复出现的几个 canonical hypothesis class，背下数值与一句话理由即可。</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:8px 6px;">Hypothesis class</th>
+          <th style="text-align:left;padding:8px 6px;">$\mathrm{VCdim}$</th>
+          <th style="text-align:left;padding:8px 6px;">原因 / 最快反例</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}$ 上的 threshold</b><br/>$h_c(x)=\mathbf{1}\{x\ge c\}$</td><td style="padding:8px 6px;">$1$</td><td style="padding:8px 6px;">两点 $x_1&lt;x_2$ 拿不到 $(+,-)$ 这种 labeling —— 规则单调。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}$ 上的 interval</b><br/>$h_{a,b}(x)=\mathbf{1}\{x\in[a,b]\}$</td><td style="padding:8px 6px;">$2$</td><td style="padding:8px 6px;">三点 $x_1&lt;x_2&lt;x_3$ 拿不到 $(+,-,+)$ —— 单一 interval 不可能包外两个、排中间。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}^2$ 中的 line（linear classifier）</b></td><td style="padding:8px 6px;">$3$</td><td style="padding:8px 6px;">三个不共线的点可 shatter；任何四个点都会败给一个 XOR 风格 labeling。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}^d$ 中的 non-homogeneous halfspace</b><br/>$h_{w,b}(x)=\mathrm{sign}(w^\top x+b)$</td><td style="padding:8px 6px;">$d+1$</td><td style="padding:8px 6px;">2D 情形的高维推广；多出的 "+1" 是 bias 的自由度。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}^d$ 中的 homogeneous halfspace</b><br/>$h_w(x)=\mathrm{sign}(w^\top x)$</td><td style="padding:8px 6px;">$d$</td><td style="padding:8px 6px;">边界必须过原点 —— 比 non-homogeneous 少一个自由度。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>$\mathbb{R}^2$ 中的 axis-aligned rectangle</b></td><td style="padding:8px 6px;">$4$</td><td style="padding:8px 6px;">取上下左右四个 extremes 可 shatter；任意 5 个点中，最里面那个无法在外四个为 "$+$" 的同时被标 "$-$"。</td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;"><b>Sign 激活的 neural network</b></td><td style="padding:8px 6px;">$\mathcal{O}(|E|\log|E|)$</td><td style="padding:8px 6px;">随边数 $|E|$ 增长。完整证明很技术，要点是 "VC 与 parameter count 同阶，与 depth 关系次要"。</td></tr>
+        <tr><td style="padding:8px 6px;"><b>$\sin(\alpha x)$ 分类器</b><br/>$h_\alpha(x)=\mathrm{sign}(\sin(\alpha x))$</td><td style="padding:8px 6px;">$\infty$</td><td style="padding:8px 6px;">把 $\alpha$ 调高，函数振得够快就能 realize 任意有限点集的任意 labeling。<i>一个实数参数，infinite VC</i> —— 教科书级警示："参数少" 不等于 "复杂度低"。</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px;"><b>怎么用这张表.</b> 题目问 "class X 的 $\mathrm{VCdim}$ 是多少？"，先尝试与上表逐行匹配 —— 多数 quiz 题就是上面某一行的换皮。如果要你 <i>证明</i> 某个值，按两步模板：(i) 给出大小为 $d$ 的可 shatter 集做 lower bound；(ii) 证明任意大小为 $d+1$ 的集合都至少有一个 labeling 做不到，得 upper bound。</p>
+    <p style="margin:6px 0 0;"><b>与 bound 的联系.</b> 把上面任一行代入 typical VC-style bound，generalization gap 大约按 $\sqrt{\mathrm{VCdim}/n}$ 缩小。所以更强的 class（更大 VC）能换来更小 approximation error，但需要更多数据才能压住 estimation gap —— 就是 bias-variance trade-off 的 learning-theory 写法。</p>
+  </div>
+
   <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
   <div class="mini-list">
     <div>
@@ -322,6 +406,7 @@
     <li>掌握两步证明：下界靠构造，上界靠 impossible labeling。</li>
     <li>固定 hypothesis 用 Hoeffding；整个 class 用 VC / uniform bound。</li>
     <li>记住二分类里 finite VC dimension implies PAC learnability。</li>
+    <li>能解释为什么 infinite hypothesis class 只要 VC dimension 有限，也可以 PAC-learnable。</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -331,6 +416,7 @@
     <li>$\mathbb{R}$ 上 threshold 的 VC dimension 是 1。</li>
     <li>$\mathbb{R}^2$ 中 line classifier 的 VC dimension 是 3。</li>
     <li>复杂度项大致随 $\sqrt{d/n}$ 缩小。</li>
+    <li>Finite class 用 $\log|\mathcal{H}|$；infinite class 用 VC dimension。</li>
   </ul>
 </section>
 

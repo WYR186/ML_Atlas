@@ -52,6 +52,7 @@
     <li><b>Residual connections</b> keep gradients and information flowing through many layers.</li>
     <li><b>LayerNorm</b> stabilizes activation scale during training.</li>
   </ul>
+  <p>A Transformer addresses the RNN sequential bottleneck by letting all positions compute in parallel while attention gives direct token-to-token communication paths.</p>
 </section>
 
 <section class="topic lesson-section plain" id="transformer-plain-en">
@@ -64,6 +65,9 @@
   <p>The architecture alternates between <b>mixing across positions</b> and <b>transforming within positions</b>. Attention is the across-token communication step. The MLP is the per-token computation step. Stacking many blocks lets shallow layers learn local patterns and deeper layers learn more abstract language features.</p>
   <div class="study-box">
     <p>For exam-style reasoning, the important split is simple: attention projections mix information across tokens, while feed-forward matrices do most of the per-token nonlinear computation.</p>
+  </div>
+  <div class="study-box">
+    <p><b>RNN / CNN / Transformer comparison.</b> RNNs are sequential, have an $O(n)$ path length across a sequence, and are often summarized as $O(nd^2)$ work. CNNs are parallel but communicate through local kernels, often needing depth or dilation for long-range contact, with a typical $O(knd^2)$ cost for kernel width $k$. Transformers are parallel and give any two tokens an $O(1)$ attention path, but self-attention costs about $O(n^2d)$ and can be memory intensive.</p>
   </div>
 </section>
 
@@ -80,8 +84,8 @@
   <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
   <div class="study-box">
     <p><b>Symbols.</b> $W_Q,W_K,W_V,W_O$ are learned projection matrices. In the usual parameter-count simplification each is $D\times D$, even though internally the $N$ heads split the width into smaller pieces.</p>
-    <p><b>How to read it.</b> The block learns three views of each token: what it asks for ($Q$), how it is matched ($K$), and what content it contributes ($V$). Heads run attention in parallel, concatenate their outputs, then $W_O$ mixes them back into model width $D$.</p>
-    <p><b>How to use.</b> For parameter counting, do not multiply $4D^2$ by the number of heads again. The heads partition the same total width.</p>
+    <p><b>How to read it.</b> The block learns three views of each token: what it asks for ($Q$), how it is matched ($K$), and what content it contributes ($V$). Heads run attention in parallel over different subspaces, concatenate their outputs, then $W_O$ mixes them back into model width $D$.</p>
+    <p><b>How to use.</b> For parameter counting, do not multiply $4D^2$ by the number of heads again. With $N$ heads, each head is usually about $D/N$ wide, so the heads partition the same total width instead of creating $N$ full-width copies.</p>
   </div>
   <h3>Parameter count from HW4 §2.4</h3>
   <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
@@ -112,8 +116,9 @@
   <ol>
     <li>For architecture questions, name the path: token embedding plus position, repeated decoder blocks, LM head.</li>
     <li>For parameter counts, write matrix shapes first. Most mistakes disappear once shapes are explicit.</li>
-    <li>The number of heads $N$ often cancels in standard MHA parameter counting because all heads concatenate back to width $D$.</li>
+    <li>The number of heads $N$ often cancels in standard MHA parameter counting because each head is narrower and all heads concatenate back to width $D$.</li>
     <li>Separate attention parameters, MLP parameters, and vocabulary matrices before adding them.</li>
+    <li>For comparison questions, contrast parallelism, communication path length, and attention's $O(n^2d)$ sequence cost.</li>
   </ol>
 </section>
 
@@ -134,6 +139,7 @@
     <li>Know why residuals and LayerNorm make deep stacks trainable.</li>
     <li>Be able to derive $4D^2+2DF$ per layer.</li>
     <li>Be able to compute the full formula $L(4D^2+2DF)+2VD$.</li>
+    <li>Compare RNNs, CNNs, and Transformers by parallelism, path length, and complexity.</li>
   </ul>
 </section>
 
@@ -144,7 +150,9 @@
     <li>FFN transforms each token independently.</li>
     <li>Residuals preserve information and gradients.</li>
     <li>LayerNorm stabilizes scale.</li>
+    <li>Transformer attention gives $O(1)$ token-to-token path length but $O(n^2d)$ sequence cost.</li>
     <li>Per-layer simplified parameter count: $4D^2+2DF$.</li>
+    <li>Heads split representation subspaces; they do not duplicate full $D$-wide projections.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -159,6 +167,7 @@
     <li><b>Residual connections</b>：让信息和梯度穿过很多层时不容易断。</li>
     <li><b>LayerNorm</b>：稳定 activation scale，让训练更稳。</li>
   </ul>
+  <p>Transformer 解决 RNN 的 sequential bottleneck：所有位置可以并行计算，同时 attention 让 token 和 token 之间有直接通信路径。</p>
 </section>
 
 <section class="topic lesson-section plain" id="transformer-plain-cn">
@@ -171,6 +180,9 @@
   <p>Transformer 的本质节奏是：先 <b>across positions 混合信息</b>，再 <b>within position 做变换</b>。Attention 负责 token 之间通信，MLP 负责每个 token 内部计算。层数叠深以后，浅层学局部 pattern，深层学更抽象的语言结构。</p>
   <div class="study-box">
     <p>考试里最重要的拆分很简单：attention projections 负责跨 token 混合信息，feed-forward matrices 负责每个 token 内部的非线性计算。</p>
+  </div>
+  <div class="study-box">
+    <p><b>RNN / CNN / Transformer 对比.</b> RNN 按时间顺序算，跨序列 path length 是 $O(n)$，常见复杂度记作 $O(nd^2)$；CNN 可以并行，但靠 local kernels 传信息，长程依赖通常需要更深层或 dilation，kernel width 为 $k$ 时常写作 $O(knd^2)$；Transformer 可以并行，任意两个 token 的 attention path length 是 $O(1)$，代价是 self-attention 大约 $O(n^2d)$，memory 压力更大。</p>
   </div>
 </section>
 
@@ -187,8 +199,8 @@
   <div class="eq">$$ Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,\qquad \mathrm{MHA}(X)=\mathrm{Concat}(head_1,\ldots,head_N)W_O $$</div>
   <div class="study-box">
     <p><b>符号.</b> $W_Q,W_K,W_V,W_O$ 都是 learned projection matrices。常见参数量估算里它们都按 $D\times D$ 计算；$N$ 个 heads 只是把总宽度切成更窄的 head 维度。</p>
-    <p><b>怎么理解.</b> 模型把每个 token 投影成三种视角：$Q$ 表示“我要找什么”，$K$ 表示“我怎么被匹配”，$V$ 表示“我能提供什么内容”。多个 heads 并行算 attention，拼接后再用 $W_O$ 混回宽度 $D$。</p>
-    <p><b>怎么用.</b> 数参数时不要在 $4D^2$ 外面再乘 heads 数 $N$；heads 是在同一个总维度 $D$ 里拆分。</p>
+    <p><b>怎么理解.</b> 模型把每个 token 投影成三种视角：$Q$ 表示“我要找什么”，$K$ 表示“我怎么被匹配”，$V$ 表示“我能提供什么内容”。多个 heads 在不同 subspaces 里并行算 attention，拼接后再用 $W_O$ 混回宽度 $D$。</p>
+    <p><b>怎么用.</b> 数参数时不要在 $4D^2$ 外面再乘 heads 数 $N$。如果有 $N$ 个 heads，每个 head 通常大约是 $D/N$ 宽，所以它们是在同一个总维度 $D$ 里拆分，不是复制 $N$ 份完整 $D$-wide projection。</p>
   </div>
   <h3>HW4 §2.4 参数量公式</h3>
   <div class="eq">$$ \text{attention per layer}=4D^2,\qquad \text{MLP per layer}=2DF $$</div>
@@ -219,8 +231,9 @@
   <ol>
     <li>架构题先按路径说：token embedding + position，然后重复 decoder blocks，最后 LM head。</li>
     <li>参数量题先写矩阵 shape，shape 写对基本就不乱。</li>
-    <li>标准 MHA 的参数量里，head 数 $N$ 往往会 cancel，因为所有 heads 拼回宽度 $D$。</li>
+    <li>标准 MHA 的参数量里，head 数 $N$ 往往会 cancel，因为每个 head 更窄，所有 heads 拼回宽度 $D$。</li>
     <li>最后相加时分三块：attention、MLP、vocabulary matrices。</li>
+    <li>对比题抓三点：是否 parallel、path length 多长、attention 的 $O(n^2d)$ sequence cost。</li>
   </ol>
 </section>
 
@@ -241,6 +254,7 @@
     <li>能解释 residual 和 LayerNorm 为什么让深层网络更好训练。</li>
     <li>会推一层参数量 $4D^2+2DF$。</li>
     <li>会算整模型公式 $L(4D^2+2DF)+2VD$。</li>
+    <li>会按 parallelism、path length、complexity 比较 RNN、CNN、Transformer。</li>
   </ul>
 </section>
 
@@ -251,7 +265,9 @@
     <li>FFN 负责每个 token 自己加工。</li>
     <li>Residual 保信息、保梯度。</li>
     <li>LayerNorm 稳定尺度。</li>
+    <li>Transformer attention 的 token-to-token path length 是 $O(1)$，但 sequence cost 是 $O(n^2d)$。</li>
     <li>简化一层参数量：$4D^2+2DF$。</li>
+    <li>Heads 是拆 representation subspaces，不是复制完整 $D$ 维 projection。</li>
   </ul>
 </section>
 </div><!--/cn-only-->

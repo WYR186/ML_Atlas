@@ -63,6 +63,7 @@
   <p>The cell state $c^{(t)}$ is the important highway. Instead of replacing memory completely, LSTM updates it additively:</p>
   <div class="eq">$$ c^{(t)} = f^{(t)}\odot c^{(t-1)} + i^{(t)}\odot \tilde c^{(t)} $$</div>
   <p>This structure lets the model keep old information when $f^{(t)}$ is near 1 and write new information when $i^{(t)}$ is large. The model learns the gates from data; they are not hand-coded rules.</p>
+  <p><b>Constant Error Carousel (CEC).</b> The formal name for what the additive update achieves. When $f^{(t)}\!\approx\!1$, the partial derivative $\partial c^{(t)}/\partial c^{(t-1)}\!\approx\!1$, so the cell state forms a near-identity <b>linear self-loop</b> that gradients can travel along over many time steps without exponential decay. That uninterrupted gradient path is exactly the architectural fix for the vanishing-gradient problem in vanilla RNNs — there's no repeated multiplication by a $&lt;1$ Jacobian factor.</p>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="callout formula">
@@ -83,14 +84,16 @@
     <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The cell update is keep-old-memory plus write-new-memory. The plus sign is the key: memory can flow additively instead of being overwritten every step.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If a problem gives gate values directly, skip matrix multiplications and plug vectors into the cell equation coordinate by coordinate.</p>
   </div>
-  <div class="callout formula">
+  <div class="callout formula" id="eq-lstm-gru-summary">
     <div class="head">GRU summary</div>
     <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
     <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
     <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $z^{(t)}$ is the update/keep gate in this convention. $r^{(t)}$ is the reset gate. $\tilde h^{(t)}$ is candidate hidden state. $\odot$ is elementwise multiplication.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A GRU blends old hidden state with candidate hidden state using fewer gates than an LSTM. Large $z^{(t)}$ keeps more old hidden state in this written convention.</p>
-    <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute $z,r$, compute candidate $\tilde h$, then blend candidate and old hidden state coordinate by coordinate. Always read the formula because some texts use the opposite $z$ convention.</p>
+    <p style="font-size:13px;margin:6px 0 4px;"><b>Three lines = one GRU step.</b> Line 1 computes the two gates from the current input and previous hidden state. Line 2 computes a <b>candidate</b> hidden state $\tilde h^{(t)}$ — like a vanilla-RNN proposal, except the previous state is first masked by the reset gate $r^{(t)}\odot h^{(t-1)}$ so the candidate can ignore stale context. Line 3 blends the candidate with the previous state using the update gate.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>Symbols.</b> $z^{(t)}$ is the update / keep gate in this convention; $r^{(t)}$ is the reset gate; $\tilde h^{(t)}$ is the candidate hidden state; $W_{\tilde h x}, W_{\tilde h h}, b_{\tilde h}$ are the candidate's own weights (separate from the gate weights); $\odot$ is elementwise multiplication.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> GRU blends old hidden state with the candidate using <i>fewer</i> gates than an LSTM (no separate cell state, no output gate). With this written convention, large $z^{(t)}$ keeps more old hidden state.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Compute $z, r$ first, then $\tilde h^{(t)}$ (don't forget the reset mask on $h^{(t-1)}$), then the blended $h^{(t)}$ coordinate by coordinate. Always look at the formula before explaining $z$'s direction — some textbooks flip the convention.</p>
+    <p style="font-size:13px;margin:4px 0 0;"><b>Why the candidate matters.</b> Without the $\tilde h$ line, the GRU is incomplete — the update equation $h^{(t)}=(1-z)\odot\tilde h+z\odot h^{(t-1)}$ alone doesn't tell you what $\tilde h$ is. HW3-style "fill in the GRU forward pass" or "back-prop through one GRU step" questions almost always ask about this middle line.</p>
   </div>
 
   <h3 class="section-gray">5. Worked Examples</h3>
@@ -106,6 +109,8 @@
     <li>When reading equations, separate gates from candidate memory. Gates usually use sigmoid; candidate memory often uses tanh-like activations.</li>
     <li>For shape checks, every gate vector has the same dimension as the hidden state.</li>
     <li>For comparisons, say GRU is simpler and parameter-lighter; LSTM has an explicit cell state and output gate.</li>
+    <li><b>Initialize the forget-gate bias $b_f$ to ~1.</b> A standard practical trick: at $t=0$ this makes $f^{(t)}\!\approx\!\sigma(1)\!\approx\!0.73$, so the cell starts in a "remember by default" state and learns what to forget rather than starting from "forget everything." Big convergence-speed win on long sequences and a frequent quiz / interview gotcha.</li>
+    <li><b>When does LSTM actually pay off?</b> LSTM has roughly 4× the parameters per cell of a vanilla RNN (3 gates + candidate memory), so it's slower per step and per epoch. The trade is worth it for tasks where long-range context matters — machine translation, handwriting recognition, speech, long-document summarization. For short-context tasks a vanilla RNN or even an MLP may match it.</li>
   </ul>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -155,6 +160,7 @@
       <p>最重要的是 cell state $c^{(t)}$ 这条“记忆高速路”。LSTM 不是每步都重写记忆，而是做加法式更新：</p>
       <div class="eq">$$ c^{(t)} = f^{(t)}\odot c^{(t-1)} + i^{(t)}\odot \tilde c^{(t)} $$</div>
       <p>当 $f^{(t)}$ 接近 1，旧记忆保留；当 $i^{(t)}$ 大，新信息写入。gate 是模型从数据里学出来的，不是人工规则。</p>
+      <p><b>Constant Error Carousel (CEC).</b> 这套加法式更新有个正式名字。$f^{(t)}\!\approx\!1$ 时，$\partial c^{(t)}/\partial c^{(t-1)}\!\approx\!1$，cell state 形成一条近似 identity 的 <b>linear self-loop</b>，gradient 可以沿着它穿越很多 time step 而不会指数衰减。这条不被打断的 gradient 路径，就是 LSTM 解决 vanilla RNN vanishing-gradient 的架构层手术 —— 没有反复乘以 $&lt;1$ 的 Jacobian factor。</p>
 
       <h3 class="section-purple">4. 核心公式 / Key Equations</h3>
       <div class="callout formula">
@@ -175,14 +181,16 @@
         <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Cell update = 保留旧记忆 + 写入新记忆。中间的加号很关键：memory 可以 additive 地流动，而不是每一步都完全覆盖。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果题目直接给 gate values，就跳过矩阵乘法，把向量逐坐标代进 cell equation。</p>
       </div>
-      <div class="callout formula">
+      <div class="callout formula" id="eq-lstm-gru-summary-cn">
         <div class="head">GRU 速记</div>
         <div class="eq">$$ z^{(t)}=\sigma(W_{zx}x^{(t)}+W_{zh}h^{(t-1)}+b_z), \qquad r^{(t)}=\sigma(W_{rx}x^{(t)}+W_{rh}h^{(t-1)}+b_r) $$</div>
         <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
         <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 在这个写法里，$z^{(t)}$ 是 update/keep gate；$r^{(t)}$ 是 reset gate；$\tilde h^{(t)}$ 是 candidate hidden state；$\odot$ 是 elementwise multiplication。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> GRU 用更少的 gates 混合旧 hidden state 和 candidate hidden state。按这个公式，$z^{(t)}$ 越大，越保留旧 hidden state。</p>
-        <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 $z,r$，再算 candidate $\tilde h$，最后逐坐标 blend。注意有些教材的 $z$ 方向相反，所以先看公式再解释。</p>
+        <p style="font-size:13px;margin:6px 0 4px;"><b>三行 = 一个 GRU 步.</b> 第 1 行用当前 input 和上一 hidden state 算两个 gates。第 2 行算 <b>candidate</b> hidden state $\tilde h^{(t)}$ —— 像 vanilla RNN 的 proposal，区别是先用 reset gate 给 previous state 套了 mask $r^{(t)}\odot h^{(t-1)}$，让 candidate 可以选择忽略陈旧 context。第 3 行用 update gate 把 candidate 与 previous state blend 起来。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>符号.</b> 这个写法下 $z^{(t)}$ 是 update / keep gate；$r^{(t)}$ 是 reset gate；$\tilde h^{(t)}$ 是 candidate hidden state；$W_{\tilde h x}, W_{\tilde h h}, b_{\tilde h}$ 是 candidate 自己的 weights（与 gate weights 分开）；$\odot$ 是 elementwise multiplication。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> GRU 用 <i>更少</i> 的 gates 把旧 hidden state 和 candidate 混在一起（没有单独 cell state，也没有 output gate）。这个写法下 $z^{(t)}$ 越大，越保留旧 hidden state。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先算 $z, r$，再算 $\tilde h^{(t)}$（别忘记给 $h^{(t-1)}$ 套 reset mask），最后逐坐标 blend 出 $h^{(t)}$。注意有些教材的 $z$ 方向相反，先看公式再解释。</p>
+        <p style="font-size:13px;margin:4px 0 0;"><b>candidate 为什么必要.</b> 没有 $\tilde h$ 这一行整个 GRU 就不完整 —— 单看 $h^{(t)}=(1-z)\odot\tilde h+z\odot h^{(t-1)}$ 你不知道 $\tilde h$ 是什么。HW3 风格的 “补全 GRU forward pass” 或 “backprop 一个 GRU step” 题，几乎都问中间这一行。</p>
       </div>
 
       <h3 class="section-gray">5. 例题讲解 / Worked Examples</h3>
@@ -198,6 +206,8 @@
         <li>读公式时把 gates 和 candidate memory 分开；gate 通常是 sigmoid。</li>
         <li>shape check：每个 gate vector 的维度都和 hidden state 一样。</li>
         <li>比较题里说清：GRU 更轻；LSTM 有显式 cell state 和 output gate。</li>
+        <li><b>Forget-gate bias $b_f$ 初始化为 ~1.</b> 标准实践 trick：$t=0$ 时 $f^{(t)}\!\approx\!\sigma(1)\!\approx\!0.73$，cell 默认进入 "remember" 状态，模型只需学 "什么时候忘"，而不是从 "全部忘掉" 起步。长序列收敛速度提升明显，也是 quiz / interview 高频陷阱。</li>
+        <li><b>什么时候真的值得用 LSTM？</b> 每个 cell 的参数量大约是 vanilla RNN 的 4 倍（3 个 gate + candidate memory），所以单步、单 epoch 都更慢。值得付出这个代价的场景 = 长程依赖关键的任务：machine translation、handwriting recognition、speech、long-document summarization。短上下文任务上，vanilla RNN 甚至 MLP 也可能持平。</li>
       </ul>
 
       <h3 class="section-red">7. 常见错误 / Common Mistakes</h3>

@@ -54,6 +54,8 @@
     <div class="head">Dynamic consistency for value functions</div>
     <p>A value function is not just a table of scores. It must be consistent with the environment dynamics, the reward function, and the policy. The Bellman equation states this consistency condition.</p>
     <p>Lecture 24 develops policy evaluation, Bellman optimality, value iteration, and policy iteration. HW5 Section 2 asks you to derive the same recursion from the definition of discounted return.</p>
+    <p>A policy $\pi^*$ is optimal if its expected return is at least as large as every other policy's return from every state.</p>
+    <p>For finite fully observable discounted MDPs, at least one deterministic optimal policy exists. Once $V^*$ or $Q^*$ is known, any policy that is greedy with respect to the optimal value is optimal.</p>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -68,6 +70,11 @@
     <div class="head">Why the recursion works</div>
     <p>Discounting makes the future smaller by a factor $\gamma &lt; 1$, so repeated Bellman backups cannot amplify errors forever. Each backup pulls value estimates closer to a fixed point.</p>
     <p>This is why value iteration can converge and why Q-learning uses the same one-step target even when $P$ and $R$ are not explicitly known.</p>
+  </div>
+  <div class="callout intuition">
+    <div class="head">Why optimality needs iteration</div>
+    <p>Fixed-policy evaluation is linear once the policy is known. Bellman optimality is different: the $\max$ over actions makes the equation non-linear, so we usually solve it by repeated backups.</p>
+    <p>Value iteration applies the optimal Bellman operator until convergence. Policy iteration alternates between policy evaluation and greedy policy improvement.</p>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
@@ -85,26 +92,33 @@
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Expands Q into immediate reward, then averages over next states and next actions chosen by π.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it for policy evaluation when transition probabilities and policy probabilities are known.</p>
     </div>
+    <div class="callout formula"><div class="head">State-value Bellman expectation</div>
+      <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\sum_{s',r}p(s',r\mid s,a)\,[r+\gamma V^\pi(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> p(s',r|s,a): probability of next state s' and reward r after taking a in s； π(a|s): policy probability； γV^π(s'): discounted future value</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Average the one-step quantity reward plus future value over the policy's actions and the environment's possible next outcomes.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this V-form when rewards are written as random variables. If reward is deterministic, replace the inner sum over r with $R(s,a)$.</p>
+    </div>
     <div class="callout formula"><div class="head">Optimality equations</div>
-      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
-      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V*(s): optimal state value； Q*(s,a): optimal value after taking action a； max_a: choose the best action； E_{s'}: average over next states</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Optimal value assumes the best action is chosen at every step.</p>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a)=\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
+      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'\in\mathcal{A}}Q^*(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $V^*(s)$ is the best possible value starting from state $s$. $Q^*(s,a)$ is the best possible value after first taking action $a$. $p(s',r\mid s,a)$ is the joint probability of next state and reward. $P(s'\mid s,a)$ is transition probability, and $R(s,a)$ is expected immediate reward.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Optimal value chooses the best first action, then assumes optimal behavior afterward. The $Q^*$ form says: reward now, then go to $s'$ and choose the best next action.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use these equations to derive value iteration, optimal Bellman backups, and optimal policies.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use the $V^*$ equation when backing up state values and the $Q^*$ equation when backing up state-action values. In both cases, replace policy averaging with a max over actions.</p>
     </div>
     <div class="callout formula"><div class="head">Greedy optimal policy</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π*(s): optimal action in state s； argmax_a: the action that maximizes Q*； Q*(s,a): optimal action-value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once Q* is known, choose the action with the largest Q* in each state.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the final extraction step after value iteration or Q-learning estimates Q*.</p>
+      <div class="eq">$$ \pi^*(s)\in\arg\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\pi^*(s)$ is an optimal action in state $s$. $\arg\max_a$ returns the action or actions with the largest value. If several actions tie, any fixed tie-breaking gives a deterministic optimal policy.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Greedy with respect to $Q^*$ is immediate: compare the stored action values. Greedy with respect to $V^*$ requires a one-step model-based lookahead through $p$ or $P,R$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the final extraction step after value iteration, policy iteration, or Q-learning. $Q^*$ is convenient for acting because the agent can choose $\arg\max_a Q^*(s,a)$ without knowing transition dynamics at decision time.</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman optimality operator contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> T: Bellman optimality operator； ||·||∞: largest absolute difference over states； U,V: two candidate value functions； γ: discount/contraction factor</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> T is one optimal Bellman backup. The contraction inequality says repeated backups shrink value-function error by a factor at most γ.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to justify convergence of value iteration: because γ&lt;1, repeated T approaches the unique fixed point V*.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> $T$ is one optimal Bellman backup. The contraction inequality says repeated backups shrink value-function error by a factor at most $\gamma$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to justify convergence of value iteration: because $\gamma&lt;1$, repeated $T$ approaches the unique fixed point $V^*$, independent of the initial guess.</p>
     </div>
   </div>
 
@@ -115,7 +129,7 @@
   </div>
   <div class="callout example">
     <div class="head">Example 2 · Maximum possible $Q^*$ from HW5 §2.4</div>
-    <p>If every reward is at most $R_{\max}$, the largest possible discounted sum is the geometric series $R_{\max}+ \gamma R_{\max}+\gamma^2R_{\max}+\cdots = R_{\max}/(1-\gamma)$.</p>
+    <p>If every reward is at most $R_{\max}$, the largest possible discounted sum is the geometric series $R_{\max}+ \gamma R_{\max}+\gamma^2R_{\max}+\cdots = R_{\max}/(1-\gamma)$. The same upper bound applies to $V^*$ and $Q^*$ whenever rewards are bounded above by $R_{\max}$.</p>
   </div>
   <div class="callout example">
     <div class="head">Example 3 · Contraction proof sketch from HW5 §2.5</div>
@@ -130,6 +144,7 @@
       <li>Write immediate reward first, then add discounted expected next value.</li>
       <li>Use $\sum_{a'}\pi(a'|s')$ for policy evaluation; use $\max_{a'}$ for optimality or Q-learning.</li>
       <li>For contraction proofs, take absolute values, use max-difference inequality, then use $\sum_{s'}P(s'|s,a)=1$.</li>
+      <li>If asked why $Q^*$ is useful, say that $Q^*(s,a)$ lets the agent choose actions by direct comparison; $V^*(s)$ still needs a transition-model lookahead.</li>
     </ol>
   </div>
 
@@ -141,6 +156,7 @@
       <li>Forgetting the expectation over stochastic next states.</li>
       <li>Dropping $\gamma$ in the contraction proof.</li>
       <li>Writing $V^*(s)=Q^*(s,a)$ for every action; it only equals the maximum over actions.</li>
+      <li>Treating Bellman optimality like a linear policy-evaluation system. The max makes it non-linear.</li>
     </ul>
   </div>
 
@@ -152,6 +168,8 @@
       <li>Derive the Bellman equation by splitting off the first reward.</li>
       <li>Write Bellman optimality equations and the greedy policy rule.</li>
       <li>Explain why Bellman backup is a $\gamma$-contraction in $\ell_\infty$.</li>
+      <li>Know that finite discounted MDPs have a unique optimal value fixed point and at least one deterministic optimal policy.</li>
+      <li>Mention the curse of dimensionality when asked about limitations: tabular DP scales badly as state variables multiply.</li>
     </ul>
   </div>
 
@@ -164,6 +182,7 @@
       <li>Bellman target = reward now + discounted future value.</li>
       <li>Contraction factor is $\gamma$.</li>
       <li>Greedy policy comes from $\arg\max_a Q^*(s,a)$.</li>
+      <li>$Q^*$ makes action selection model-free at decision time.</li>
     </ul>
   </div>
 </section>
@@ -179,6 +198,8 @@
     <div class="head">Value function 的一致性条件</div>
     <p>一个 value function 不能只是随便填的分数表；它必须和环境转移 $P$、奖励 $R$、策略 $\pi$ 一致。Bellman equation 就是在说：当前价值 = 当前奖励 + 折扣后的下一步价值。</p>
     <p>如果是给定策略，就按策略平均；如果是最优控制，就对动作取最大。</p>
+    <p>Policy $\pi^*$ 是 optimal，意思是：从任意 state 出发，它的 expected return 都不低于任何其他 policy。</p>
+    <p>在 finite fully observable discounted MDP 中，至少存在一个 deterministic optimal policy。一旦知道 $V^*$ 或 $Q^*$，任何对 optimal value 做 greedy 的 policy 都是 optimal。</p>
   </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
@@ -193,6 +214,11 @@
     <div class="head">为什么这个递归会收敛</div>
     <p>折扣因子 $\gamma&lt;1$ 会让未来影响变小，所以每做一次 Bellman backup，旧误差最多被乘上 $\gamma$。反复 backup 就像把估计往唯一 fixed point 拉近。</p>
     <p>这也是 Q-learning 能工作的底层原因：即使不知道完整 $P$ 和 $R$，它也在用采样版的一步 Bellman target。</p>
+  </div>
+  <div class="callout intuition">
+    <div class="head">为什么 optimality 要靠迭代</div>
+    <p>Fixed-policy evaluation 在 policy 已知后是 linear system；Bellman optimality 不一样，因为里面有对 actions 的 $\max$，这个 max 让方程变成 non-linear，通常不能像普通 policy evaluation 那样直接解析解。</p>
+    <p>Value iteration 就是反复套 optimal Bellman operator 直到收敛；Policy iteration 则交替做 policy evaluation 和 greedy policy improvement。</p>
   </div>
 
   <h3 class="section-purple">4. 关键公式</h3>
@@ -210,26 +236,33 @@
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把 Q 展开成即时奖励，然后对下一状态以及策略 π 选择的下一动作做平均。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当转移概率和策略概率已知时，用它做 policy evaluation。</p>
     </div>
+    <div class="callout formula"><div class="head">State-value Bellman expectation</div>
+      <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\sum_{s',r}p(s',r\mid s,a)\,[r+\gamma V^\pi(s')] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> p(s',r|s,a): 在 state s 做 action a 后，同时得到 next state s' 和 reward r 的概率；π(a|s): policy 选 a 的概率；γV^π(s'): 折扣后的未来价值</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 对“一步 reward + future value”做两层平均：先按 policy 平均 actions，再按 environment 平均 next outcome。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> reward 被写成随机变量时用这个 V 形式；如果 reward 是 deterministic，就把对 r 的求和替换成 $R(s,a)$。</p>
+    </div>
     <div class="callout formula"><div class="head">Bellman optimality</div>
-      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
-      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot\mid s,a)}[V^*(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> V*(s): 状态 s 的最优价值；Q*(s,a): 先做 a 后的最优价值；max_a: 在动作中取最大；E_{s'}: 对下一状态取期望</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 最优价值假设每一步都选最好的动作。V* 是 Q* 对动作取最大；Q* 是即时奖励加下一状态最优价值。</p>
+      <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a)=\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
+      <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'\in\mathcal{A}}Q^*(s',a') $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $V^*(s)$ 是从 state $s$ 出发的最优价值；$Q^*(s,a)$ 是先做 action $a$ 后的最优价值；$p(s',r\mid s,a)$ 是 next state 和 reward 的联合概率；$P(s'\mid s,a)$ 是 transition probability；$R(s,a)$ 是 expected immediate reward。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Optimal value 先选最好的 first action，然后假设未来也一直 optimal。$Q^*$ 形式就是：当前 reward，加上到达 $s'$ 后继续选择最佳 action 的价值。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它推导 value iteration、Bellman optimality backup，以及最优策略。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新 state values 时用 $V^*$ 形式；更新 state-action values 时用 $Q^*$ 形式。看到 optimality，就把 policy average 换成 max over actions。</p>
     </div>
     <div class="callout formula"><div class="head">最优策略</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π*(s): 状态 s 的最优动作；argmax_a: 使 Q* 最大的动作；Q*(s,a): 最优 action-value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦知道 Q*，每个 state 的最优动作就是让 Q* 最大的动作。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Value iteration 或 Q-learning 估出 Q* 后，用这个公式抽取最终策略。</p>
+      <div class="eq">$$ \pi^*(s)\in\arg\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\pi^*(s)$ 是 state $s$ 的一个 optimal action；$\arg\max_a$ 返回让 value 最大的 action。若多个 actions 并列最大，任选一个固定 tie-breaking，就得到 deterministic optimal policy。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 有 $Q^*$ 时，greedy 很直接：比较 $Q^*(s,a)$。只有 $V^*$ 时，需要用环境模型 $p$ 或 $P,R$ 做一步 lookahead 才能比较 actions。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 value iteration、policy iteration 或 Q-learning 之后抽取 policy 的步骤。$Q^*$ 的好处是：决策时不必知道 transition dynamics，直接选 $\arg\max_a Q^*(s,a)$。</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman operator 是 $\gamma$-contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> T: Bellman 最优算子；||·||∞: 所有状态最大绝对差；U,V: 两个候选 value function；γ: 折扣 / 收缩系数</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> T 表示做一次最优 Bellman backup。Contraction 不等式说明反复 backup 会让 value function 误差按 γ 收缩。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它解释 value iteration 为什么收敛：因为 γ&lt;1，反复套 T 会逼近唯一不动点 V*。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $T$ 表示做一次最优 Bellman backup。Contraction 不等式说明反复 backup 会让 value function 误差最多按 $\gamma$ 收缩。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它解释 value iteration 为什么收敛：因为 $\gamma&lt;1$，反复套 $T$ 会逼近唯一 fixed point $V^*$，而且与 initial guess 无关。</p>
     </div>
   </div>
 
@@ -240,7 +273,7 @@
   </div>
   <div class="callout example">
     <div class="head">例 2 · 最大 $Q^*$ 上界（HW5 §2.4）</div>
-    <p>如果每步 reward 最多是 $R_{\max}$，最乐观情况就是每一步都拿 $R_{\max}$：$R_{\max}+\gamma R_{\max}+\gamma^2R_{\max}+\cdots=R_{\max}/(1-\gamma)$。</p>
+    <p>如果每步 reward 最多是 $R_{\max}$，最乐观情况就是每一步都拿 $R_{\max}$：$R_{\max}+\gamma R_{\max}+\gamma^2R_{\max}+\cdots=R_{\max}/(1-\gamma)$。只要 reward 被 $R_{\max}$ 上界住，$V^*$ 和 $Q^*$ 也都不会超过这个上界。</p>
   </div>
   <div class="callout example">
     <div class="head">例 3 · contraction 证明框架（HW5 §2.5）</div>
@@ -255,6 +288,7 @@
       <li>公式永远从 immediate reward 写起，再加 discounted future value。</li>
       <li>给定策略用 $\sum_{a'}\pi(a'|s')$；最优或 Q-learning 用 $\max_{a'}$。</li>
       <li>证明 contraction 时先写 $TV-TU$，再用 max 差值不等式和 $\sum P=1$。</li>
+      <li>问为什么用 $Q^*$：答 $Q^*(s,a)$ 可以直接比较 actions；只有 $V^*(s)$ 时还需要 transition-model lookahead。</li>
     </ol>
   </div>
 
@@ -266,6 +300,7 @@
       <li>忘记 stochastic transition 需要对 $s'$ 求期望。</li>
       <li>contraction 证明漏掉 $\gamma$。</li>
       <li>误以为 $V^*(s)$ 等于所有动作的 $Q^*(s,a)$；它只等于最大的那个。</li>
+      <li>把 Bellman optimality 当成 linear policy-evaluation system；里面的 max 让它变成 non-linear。</li>
     </ul>
   </div>
 
@@ -277,6 +312,8 @@
       <li>从 discounted return 推出 Bellman equation。</li>
       <li>写出 Bellman optimality equations 和 greedy policy。</li>
       <li>解释 Bellman backup 为什么是 $\gamma$-contraction。</li>
+      <li>知道 finite discounted MDP 有唯一 optimal value fixed point，并且至少存在一个 deterministic optimal policy。</li>
+      <li>局限性要会提 curse of dimensionality：tabular DP 会随 state variables 增加迅速爆炸。</li>
     </ul>
   </div>
 
@@ -289,6 +326,7 @@
       <li>Bellman target = 当前 reward + 折扣未来。</li>
       <li>Contraction factor 是 $\gamma$。</li>
       <li>最优策略来自 $\arg\max_a Q^*(s,a)$。</li>
+      <li>$Q^*$ 让决策时不需要 transition dynamics。</li>
     </ul>
   </div>
 </section>

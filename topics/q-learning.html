@@ -52,8 +52,9 @@
   <h3 class="section-blue">1. Concept Understanding</h3>
   <div class="callout">
     <div class="head">Model-free, off-policy value learning</div>
-    <p><b>Q-learning</b> learns an estimate of the optimal action-value function from sampled transitions $(s,a,r,s')$. It is <b>model-free</b> because it does not need the transition dynamics $P(s'\mid s,a)$ or reward function table $R(s,a)$.</p>
+    <p><b>Q-learning</b> is an iterative, model-free, off-policy algorithm for approximating the optimal action-value function $Q^*(s,a)$ from sampled transitions $(s,a,r,s')$. It is <b>model-free</b> because it does not need the transition dynamics $P(s'\mid s,a)$ or reward function table $R(s,a)$.</p>
     <p>Lecture 25 emphasizes the trajectory viewpoint: a trajectory is a sample, and each observed transition can update the current Q estimate through a Monte-Carlo / temporal-difference style moving average. Lecture 27 briefly recaps this before moving to practical LLM RL.</p>
+    <p><b>Formal view.</b> Each transition performs a stochastic Bellman optimality backup: replace the unavailable expectation over all next states with one observed next state, then use $\max_{a'}Q(s',a')$ to aim directly at $Q^*$.</p>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -67,27 +68,50 @@
   <div class="callout intuition">
     <div class="head">Why the update has this shape</div>
     <p>The target $r+\gamma\max_{a'}Q(s',a')$ is a one-step Bellman guess: immediate reward plus discounted best future value. The learning rate $\alpha$ makes the update an exponential moving average, giving newer samples more influence.</p>
-    <p>The phrase “does not depend on current Q” in Lecture 25 refers to the target: the target uses the next-state maximum, while the old $Q(s,a)$ only decides how far we move toward it.</p>
+    <p>The max operator is the off-policy piece: it asks, "what would the greedy policy do next?" even if the observed transition came from an exploratory behavior policy such as $\epsilon$-greedy.</p>
+  </div>
+  <div class="callout">
+    <div class="head">Theory notes for exams</div>
+    <ul>
+      <li><b>Convergence:</b> tabular Q-learning converges to $Q^*$ with probability 1 when every state-action pair is updated infinitely often and the learning rates decay appropriately, for example $\sum_t\alpha_t=\infty$ and $\sum_t\alpha_t^2&lt;\infty$.</li>
+      <li><b>Experience replay:</b> because the update is off-policy, old transitions can be stored in a replay buffer and sampled again. This reduces correlation between updates and helps rare rewards propagate backward without rediscovering the same trajectory many times.</li>
+      <li><b>Exploration is still required:</b> off-policy means the target can be greedy; it does not mean the behavior policy may ignore unvisited actions forever.</li>
+    </ul>
   </div>
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> y: temporal-difference target； r: observed reward； s': next state； max_{a'}Q(s',a'): best estimated next-state value</p>
+      <ul>
+        <li>$y$ is the temporal-difference target, the value we want the old estimate to move toward.</li>
+        <li>$r$ is the reward observed immediately after taking action $a$ in state $s$.</li>
+        <li>$\gamma$ discounts future value; smaller $\gamma$ makes the agent care less about later rewards.</li>
+        <li>$s'$ is the next state in the sampled transition.</li>
+        <li>$\max_{a'}Q(s',a')$ is the best currently estimated value available from the next state.</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The target is observed reward now plus discounted best estimated value of the next state.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use y as the supervised target when updating Q(s,a) from a sampled transition (s,a,r,s').</p>
     </div>
     <div class="callout formula"><div class="head">Incremental update</div>
       <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> α: learning rate； y-Q(s,a): TD error； ←: replace old value with updated value； Q(s,a): current estimate</p>
+      <ul>
+        <li>$Q(s,a)$ on the right side is the old estimate for the state-action pair just observed.</li>
+        <li>$\alpha$ is the learning rate; it controls how much the new target overrides the old estimate.</li>
+        <li>$y-Q(s,a)$ is the TD error: positive means the old estimate was too low, negative means it was too high.</li>
+        <li>$\leftarrow$ means replace the table entry with the updated value.</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Move the old Q estimate a fraction α toward the TD target. The bracket is the TD error.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this online after each sampled transition. α controls how strongly new evidence overrides the old estimate.</p>
     </div>
     <div class="callout formula"><div class="head">Moving-average form</div>
       <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q'(s,a): updated Q value； 1-α: weight on old estimate； α: weight on target； r+γ max Q: TD target</p>
+      <ul>
+        <li>$Q'(s,a)$ is the updated value after applying the learning step.</li>
+        <li>$(1-\alpha)Q(s,a)$ is the portion of the old estimate kept after the update.</li>
+        <li>$\alpha(r+\gamma\max_{a'}Q(s',a'))$ is the portion contributed by the new TD target.</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Same update as a weighted average: keep 1-α of the old estimate and mix in α of the new target.</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this form to understand stability: small α is smoother; large α reacts faster but is noisier.</p>
@@ -97,6 +121,24 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π(s): chosen policy action； argmax_a: action maximizing Q； Q(s,a): learned action-value estimate</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> After Q is learned, choose the action with highest estimated value in each state.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it at test time or to extract a deterministic policy. During training, often add exploration such as ε-greedy.</p>
+    </div>
+    <div class="callout formula wide"><div class="head">DQN Bellman loss</div>
+      <div class="eq">$$ Q_\theta(s,a)\approx Q^*(s,a),\qquad y=r+\gamma\max_{a'}Q_{\theta^-}(s',a') $$</div>
+      <div class="eq">$$ \mathcal{L}(\theta)=\mathbb{E}_{(s,a,r,s')\sim\mathcal{B}}\left[\bigl(y-Q_\theta(s,a)\bigr)^2\right] $$</div>
+      <ul>
+        <li>$Q_\theta$ is a neural network approximation to the Q-function.</li>
+        <li>$\theta$ are the online network parameters being trained; $\theta^-$ are the slower target-network parameters used to compute $y$.</li>
+        <li>$\mathcal{B}$ is the replay buffer containing stored transitions.</li>
+        <li>$\mathcal{L}(\theta)$ is the squared Bellman error: prediction minus TD target, squared and averaged over replay samples.</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> DQN turns Q-learning into supervised regression: the network prediction $Q_\theta(s,a)$ is trained to match a Bellman target.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In a terminal next state, drop the future term and use $y=r$. The target network keeps $y$ from changing too quickly while $\theta$ is updated.</p>
+    </div>
+    <div class="callout formula wide"><div class="head">Double Q-learning target</div>
+      <div class="eq">$$ y_{\text{DoubleQ}}=r+\gamma Q_2\!\left(s',\arg\max_{a'}Q_1(s',a')\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $Q_1$ selects the greedy next action; $Q_2$ evaluates that selected action. The roles can be swapped on different updates.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Ordinary Q-learning uses the same noisy estimates to select and evaluate the max. Double Q-learning separates those two jobs to reduce overestimation.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> First find the action that maximizes $Q_1(s',a')$, then plug that action into $Q_2$ for the target value.</p>
     </div>
   </div>
 
@@ -115,6 +157,10 @@
     <div class="head">Example 3 · Optimistic initialization (HW5 §3)</div>
     <p>In the combination-lock style HW problem, initializing all Q-values high makes untried actions look attractive. Failed actions get revised downward, pushing the agent toward unexplored actions and improving exploration.</p>
   </div>
+  <div class="callout example">
+    <div class="head">Example 4 · Replay after a rare successful trajectory (HW5 §3)</div>
+    <p>Without replay, a sparse reward may only move one predecessor state backward each time the agent rediscovers the whole rare path. With replay, the stored successful trajectory can be backed up repeatedly, often from the end toward the start, so the reward signal reaches earlier decisions much faster.</p>
+  </div>
 
   <h3 class="section-yellow">6. Problem-Solving Tips</h3>
   <div class="callout tips">
@@ -124,6 +170,9 @@
       <li>Take the maximum over <b>next-state</b> actions.</li>
       <li>Compute target $y=r+\gamma\max Q(s',\cdot)$.</li>
       <li>Update old + $\alpha$(target - old).</li>
+      <li>If $s'$ is terminal, use future value $0$ instead of $\max_{a'}Q(s',a')$.</li>
+      <li>For Q-table trajectory practice, process transitions in the given order; each line updates only the visited $(s,a)$ entry.</li>
+      <li>For value-bound questions, reuse the Bellman geometric-series bound: if all rewards are at most $R_{\max}$, then $\max_{s,a}Q^*(s,a)\le R_{\max}/(1-\gamma)$.</li>
       <li>For conceptual questions, say model-free + off-policy + needs exploration.</li>
     </ol>
   </div>
@@ -137,7 +186,12 @@
       <li>Forgetting the learning rate and replacing the old Q entirely.</li>
       <li>Assuming unvisited state-action pairs can be learned. Exploration is required.</li>
       <li>Confusing model-free learning with not needing data; model-free still needs trajectories.</li>
+      <li>Forgetting maximization bias: the maximum of noisy Q estimates tends to overestimate true value.</li>
     </ul>
+  </div>
+  <div class="callout danger">
+    <div class="head">Limitation and variant</div>
+    <p>The same max operator that makes Q-learning off-policy can create <b>maximization bias</b>, because noisy high estimates are more likely to be selected by a maximum. <b>Double Q-learning</b> reduces this by using one Q-function to choose the action and another Q-function to evaluate it.</p>
   </div>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -146,8 +200,11 @@
     <ul>
       <li>Write both Q-learning update forms from memory.</li>
       <li>Explain why it is model-free and off-policy.</li>
-      <li>Hand-compute one update with numbers.</li>
+      <li>Hand-compute one update, or a short sequence of Q-table updates, with numbers.</li>
       <li>Explain why optimistic initialization encourages exploration.</li>
+      <li>State the tabular convergence conditions: keep visiting every state-action pair and decay $\alpha$ appropriately.</li>
+      <li>Recognize DQN tools: replay buffer, target network, and squared Bellman error.</li>
+      <li>Explain max bias and the select-versus-evaluate idea of Double Q-learning.</li>
     </ul>
   </div>
 
@@ -160,6 +217,9 @@
       <li>Update: $Q\leftarrow Q+\alpha(\text{target}-Q)$.</li>
       <li>Off-policy: greedy target, arbitrary behavior data.</li>
       <li>Model-free: no known $P$ or $R$ table.</li>
+      <li>DQN: neural $Q_\theta$, replay buffer, target network.</li>
+      <li>Double Q: reduce max overestimation.</li>
+      <li>Value bound: $Q^*\le R_{\max}/(1-\gamma)$ when rewards are bounded above by $R_{\max}$.</li>
     </ul>
   </div>
 </section>
@@ -172,8 +232,9 @@
   <h3 class="section-blue">1. 概念理解</h3>
   <div class="callout">
     <div class="head">Model-free、off-policy 的价值学习</div>
-    <p><b>Q-learning</b> 从采样 transition $(s,a,r,s')$ 中学习最优动作价值函数。它是 <b>model-free</b>，因为不需要已知转移概率 $P(s'\mid s,a)$ 或奖励函数表 $R(s,a)$。</p>
+    <p><b>Q-learning</b> 是一种 iterative、model-free、off-policy algorithm，用采样 transition $(s,a,r,s')$ 去近似最优动作价值函数 $Q^*(s,a)$。它是 <b>model-free</b>，因为不需要已知转移概率 $P(s'\mid s,a)$ 或奖励函数表 $R(s,a)$。</p>
     <p>Lecture 25 强调 trajectory 视角：trajectory 是样本，每个观察到的 transition 都可以用 Monte-Carlo / temporal-difference 风格的 moving average 更新当前 Q 估计。Lecture 27 会快速 recap 这点，再进入 LLM RL 的 practical algorithms。</p>
+    <p><b>Formal view.</b> 每个 transition 都是在做一次 stochastic Bellman optimality backup：用一个真实观察到的 next state 替代完整 expectation，再用 $\max_{a'}Q(s',a')$ 直接朝 $Q^*$ 学。</p>
   </div>
 
   <h3 class="section-orange">2. 大白话理解</h3>
@@ -187,27 +248,50 @@
   <div class="callout intuition">
     <div class="head">为什么更新式长这样</div>
     <p>目标 $r+\gamma\max_{a'}Q(s',a')$ 是一步 Bellman 估计：即时奖励 + 折扣后的最佳未来价值。学习率 $\alpha$ 让更新成为指数滑动平均，新样本权重更大。</p>
-    <p>Lecture 25 说 target “does not depend on current Q”，意思是 target 用下一状态最大值；旧的 $Q(s,a)$ 只决定我们离 target 还有多远。</p>
+    <p>max operator 是 off-policy 的关键：它问的是“如果下一步按 greedy policy 走，会拿到多少价值？”即使当前 transition 来自 $\epsilon$-greedy 这样的 exploratory behavior policy。</p>
+  </div>
+  <div class="callout">
+    <div class="head">考试常问的理论性质</div>
+    <ul>
+      <li><b>Convergence:</b> tabular Q-learning 在每个 state-action pair 被无限次更新、learning rate $\alpha$ 合理衰减时，会以 probability 1 收敛到 $Q^*$；典型条件是 $\sum_t\alpha_t=\infty$ 且 $\sum_t\alpha_t^2&lt;\infty$。</li>
+      <li><b>Experience replay:</b> 因为 update 是 off-policy，旧 transitions 可以存进 replay buffer 反复抽样训练。这样能降低 updates 的相关性，也能让 rare reward 不必每次都重新跑完整 trajectory 才往前传播。</li>
+      <li><b>Exploration still matters:</b> off-policy 只说明 target 可以 greedy，不代表 behavior policy 可以永远不探索未访问动作。</li>
+    </ul>
   </div>
 
   <h3 class="section-purple">4. 关键公式</h3>
   <div class="cols2">
     <div class="callout formula"><div class="head">TD target</div>
       <div class="eq">$$ y=r+\gamma\max_{a'}Q(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> y: TD 更新目标；r: 本次观察到的奖励；s': 下一状态；max_{a'}Q(s',a'): 下一状态最佳估计价值</p>
+      <ul>
+        <li>$y$ 是 temporal-difference target，也就是旧估计要靠近的目标值。</li>
+        <li>$r$ 是在 state $s$ 做 action $a$ 后本次观察到的 immediate reward。</li>
+        <li>$\gamma$ 是 discount factor，越小表示越不重视远期 reward。</li>
+        <li>$s'$ 是 sampled transition 里的 next state。</li>
+        <li>$\max_{a'}Q(s',a')$ 是下一状态里当前估计最好的 future value。</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> TD target 表示：现在观察到的奖励 + 下一状态里当前估计的最佳未来价值。</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 从样本转移 (s,a,r,s') 更新 Q(s,a) 时，把 y 当成 supervised target。</p>
     </div>
     <div class="callout formula"><div class="head">增量更新</div>
       <div class="eq">$$ Q(s,a)\leftarrow Q(s,a)+\alpha\big[y-Q(s,a)\big] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> α: 学习率；y-Q(s,a): TD 误差；←: 用更新后的值替换旧值；Q(s,a): 当前估计值</p>
+      <ul>
+        <li>右边的 $Q(s,a)$ 是这个 state-action pair 的旧估计。</li>
+        <li>$\alpha$ 是 learning rate，控制新 target 覆盖旧估计的力度。</li>
+        <li>$y-Q(s,a)$ 是 TD error：正数表示旧估计偏低，负数表示旧估计偏高。</li>
+        <li>$\leftarrow$ 表示用更新后的数值替换原来的 table entry。</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把旧 Q 估计朝 TD target 移动 α 的比例。中括号 y-Q(s,a) 是 TD error。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每采样到一个 transition 就可在线更新一次。α 控制新样本覆盖旧估计的力度。</p>
     </div>
     <div class="callout formula"><div class="head">滑动平均形式</div>
       <div class="eq">$$ Q'(s,a)=(1-\alpha)Q(s,a)+\alpha\left(r+\gamma\max_{a'}Q(s',a')\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q'(s,a): 更新后的 Q 值；1-α: 旧估计权重；α: 新 target 权重；r+γ max Q: TD target</p>
+      <ul>
+        <li>$Q'(s,a)$ 是做完这一步后的 updated Q value。</li>
+        <li>$(1-\alpha)Q(s,a)$ 是保留下来的旧估计部分。</li>
+        <li>$\alpha(r+\gamma\max_{a'}Q(s',a'))$ 是新 TD target 贡献的部分。</li>
+      </ul>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这是同一个更新的加权平均写法：保留 1-α 的旧估计，混入 α 的新 target。</p>
 
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这个形式理解稳定性：α 小更平滑；α 大反应更快但更噪。</p>
@@ -217,6 +301,24 @@
       <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π(s): 策略选择的动作；argmax_a: 让 Q 最大的动作；Q(s,a): 学到的 action-value 估计</p>
       <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 学到 Q 后，每个 state 选择估计价值最高的 action。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 测试时或抽取确定性策略时使用。训练时通常还要加 exploration，例如 ε-greedy。</p>
+    </div>
+    <div class="callout formula wide"><div class="head">DQN Bellman loss</div>
+      <div class="eq">$$ Q_\theta(s,a)\approx Q^*(s,a),\qquad y=r+\gamma\max_{a'}Q_{\theta^-}(s',a') $$</div>
+      <div class="eq">$$ \mathcal{L}(\theta)=\mathbb{E}_{(s,a,r,s')\sim\mathcal{B}}\left[\bigl(y-Q_\theta(s,a)\bigr)^2\right] $$</div>
+      <ul>
+        <li>$Q_\theta$ 是 neural network 版的 Q-function approximation。</li>
+        <li>$\theta$ 是正在训练的 online network 参数；$\theta^-$ 是更新更慢的 target network 参数，用来计算 $y$。</li>
+        <li>$\mathcal{B}$ 是 replay buffer，里面存 old transitions。</li>
+        <li>$\mathcal{L}(\theta)$ 是 squared Bellman error：prediction 和 TD target 的差平方后，对 replay samples 取平均。</li>
+      </ul>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> DQN 把 Q-learning 变成 supervised regression：让网络预测 $Q_\theta(s,a)$ 去拟合 Bellman target。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 $s'$ 是 terminal state，future term 设为 0，也就是 $y=r$。Target network 的作用是让 target 不要随着 $\theta$ 每一步剧烈变化。</p>
+    </div>
+    <div class="callout formula wide"><div class="head">Double Q-learning target</div>
+      <div class="eq">$$ y_{\text{DoubleQ}}=r+\gamma Q_2\!\left(s',\arg\max_{a'}Q_1(s',a')\right) $$</div>
+      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $Q_1$ 负责选择 greedy next action；$Q_2$ 负责评估这个 action 的 value。不同 update 中也可以交换 $Q_1,Q_2$ 的角色。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 普通 Q-learning 用同一组 noisy estimates 同时选择和评估 max，容易 overestimate。Double Q-learning 把“选动作”和“估价值”拆开，降低 maximization bias。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先用 $Q_1(s',a')$ 找 argmax action，再把这个 action 放进 $Q_2$ 里读 value。</p>
     </div>
   </div>
 
@@ -235,6 +337,10 @@
     <div class="head">例 3 · 乐观初始化（HW5 §3）</div>
     <p>Combination-lock 类题中，把所有 Q 初始得很高，会让未尝试动作看起来诱人。失败动作被下调后，agent 会被推向其他未探索动作，从而改善探索。</p>
   </div>
+  <div class="callout example">
+    <div class="head">例 4 · rare successful trajectory 后做 replay（HW5 §3）</div>
+    <p>没有 replay 时，sparse reward 往往要等 agent 再次撞完整条 rare path，才能往前多传播一点。用了 replay 后，已经存下来的 successful trajectory 可以反复 backup，直觉上从终点往起点更新，所以 reward signal 更快传到 earlier decisions。</p>
+  </div>
 
   <h3 class="section-yellow">6. 题型与解题步骤</h3>
   <div class="callout tips">
@@ -244,6 +350,9 @@
       <li>对<b>下一状态</b>动作取最大。</li>
       <li>算 target：$y=r+\gamma\max Q(s',\cdot)$。</li>
       <li>用 old + $\alpha$(target - old) 更新。</li>
+      <li>如果 $s'$ 是 terminal state，future value 取 0，不再加 $\max_{a'}Q(s',a')$。</li>
+      <li>Q-table 轨迹手算题按题目给的 transition 顺序更新；每一行只改被访问到的 $(s,a)$。</li>
+      <li>value bound 题复用 Bellman 的 geometric-series bound：若所有 reward 至多 $R_{\max}$，则 $\max_{s,a}Q^*(s,a)\le R_{\max}/(1-\gamma)$。</li>
       <li>概念题回答：model-free + off-policy + 需要 exploration。</li>
     </ol>
   </div>
@@ -257,7 +366,12 @@
       <li>忘记学习率，直接用 target 覆盖旧 Q。</li>
       <li>以为没访问过的 state-action pair 也能学到；必须探索。</li>
       <li>混淆 model-free 与不需要数据；model-free 仍然需要 trajectories。</li>
+      <li>忽略 maximization bias：noisy Q estimates 取 max 后，通常会偏高估计 true value。</li>
     </ul>
+  </div>
+  <div class="callout danger">
+    <div class="head">局限与变体</div>
+    <p>让 Q-learning off-policy 的同一个 max operator，也可能带来 <b>maximization bias</b>：噪声偏高的估计更容易被 max 选中。<b>Double Q-learning</b> 用一个 Q-function 选 action，另一个 Q-function 估 value，从而减少这种 overestimation。</p>
   </div>
 
   <h3 class="section-yellow">8. 考试重点</h3>
@@ -266,8 +380,11 @@
     <ul>
       <li>默写 Q-learning 两种更新形式。</li>
       <li>解释 model-free 和 off-policy。</li>
-      <li>手算一次带数字的更新。</li>
+      <li>手算一次更新，或一小段 Q-table trajectory updates。</li>
       <li>解释 optimistic initialization 为什么促进探索。</li>
+      <li>会说 tabular convergence 条件：每个 state-action pair 持续访问，$\alpha$ 合理衰减。</li>
+      <li>识别 DQN 三件套：replay buffer、target network、squared Bellman error。</li>
+      <li>解释 max bias，以及 Double Q-learning 的 select / evaluate 分离。</li>
     </ul>
   </div>
 
@@ -280,6 +397,9 @@
       <li>Update：$Q\leftarrow Q+\alpha(\text{target}-Q)$。</li>
       <li>Off-policy：greedy target，可用任意 behavior data。</li>
       <li>Model-free：不需要已知 $P$ 或 $R$ 表。</li>
+      <li>DQN：neural $Q_\theta$、replay buffer、target network。</li>
+      <li>Double Q：降低 max overestimation。</li>
+      <li>Value bound：reward 被 $R_{\max}$ 上界住时，$Q^*\le R_{\max}/(1-\gamma)$。</li>
     </ul>
   </div>
 </section>
