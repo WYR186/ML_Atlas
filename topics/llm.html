@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Autoregressive NLL · Perplexity</span><span class="cn-only">Autoregressive NLL · PPL</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_18.pdf" target="_blank">📄 Lecture 18</a>
         <a class="ref-chip lecture" href="../slides/Lecture_19.pdf" target="_blank">📄 Lecture 19</a>
-        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a></div>
+        <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/artificial-intelligence/large-language-model-llm/" target="_blank" rel="noopener">🔗 GeeksforGeeks LLM</a></div>
     </div>
 
 <div class="en-only">
@@ -82,8 +83,24 @@
   </ul>
 </section>
 
+<section class="topic lesson-section examples" id="llm-visual-en">
+  <h2>4. Visual Reading Guide</h2>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/llm-transformer-flow.svg" alt="High-level Transformer in LLMs flow from input through embedding and Transformer blocks to output" loading="lazy" />
+      <figcaption><b>Read this as the big pipeline.</b> Text becomes tokens, tokens become vectors with position information, Transformer blocks process context, and the output side produces the next token distribution.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Input to embedding.</b> Raw text is tokenized first; each token ID is looked up in an embedding table and combined with positional information.</div>
+    <div><b>Transformer blocks.</b> The reference diagram shows encoder and decoder blocks as the broader Transformer family. In this course's LLM setup, focus on the decoder-only causal block used by GPT-style models.</div>
+    <div><b>Output loop.</b> The decoder hidden state maps to vocabulary logits, softmax gives probabilities, and the chosen next token is fed back into the context.</div>
+    <div><b>Reference.</b> Additional overview context: <a href="https://www.geeksforgeeks.org/artificial-intelligence/large-language-model-llm/" target="_blank" rel="noopener">GeeksforGeeks Large Language Model</a>.</div>
+  </div>
+</section>
+
 <section class="topic lesson-section equations" id="llm-equations-en">
-  <h2>4. Key Equations</h2>
+  <h2>5. Key Equations</h2>
   <h3>Autoregressive factorization</h3>
   <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
@@ -128,7 +145,7 @@
 </section>
 
 <section class="topic lesson-section examples" id="llm-examples-en">
-  <h2>5. Worked Examples</h2>
+  <h2>6. Worked Examples</h2>
   <h3>Lecture 19: perplexity from three correct-token probabilities</h3>
   <p class="source-note">Source: Lecture 19, paraphrased.</p>
   <p>If the model assigns probability $0.25$ to each of three true next tokens, then</p>
@@ -145,7 +162,7 @@
 </section>
 
 <section class="topic lesson-section tips-section" id="llm-tips-en">
-  <h2>6. Problem-Solving Tips</h2>
+  <h2>7. Problem-Solving Tips</h2>
   <ol>
     <li>For training objective questions, start with autoregressive factorization, then take negative log.</li>
     <li>For perplexity, remember "exponential of average NLL."</li>
@@ -159,7 +176,7 @@
 </section>
 
 <section class="topic lesson-section mistakes" id="llm-mistakes-en">
-  <h2>7. Common Mistakes</h2>
+  <h2>8. Common Mistakes</h2>
   <ul class="mini-list">
     <li>Calling a base model an instruction follower. A base model is primarily a document continuer.</li>
     <li>Forgetting to mask system/user tokens during SFT loss when the target is assistant-only generation.</li>
@@ -172,7 +189,7 @@
 </section>
 
 <section class="topic lesson-section exam-section" id="llm-exam-en">
-  <h2>8. Exam Focus</h2>
+  <h2>9. Exam Focus</h2>
   <ul class="mini-list">
     <li>Write the autoregressive probability and NLL loss.</li>
     <li>Compute and interpret perplexity.</li>
@@ -190,7 +207,7 @@
 </section>
 
 <section class="topic lesson-section checklist-section" id="llm-checklist-en">
-  <h2>9. Quick Checklist</h2>
+  <h2>10. Quick Checklist</h2>
   <ul class="mini-list">
     <li>LLM = decoder-only Transformer + next-token prediction.</li>
     <li>Autoregressive means full sequence probability is a product of next-token probabilities.</li>
@@ -247,8 +264,24 @@
   </ul>
 </section>
 
+<section class="topic lesson-section examples" id="llm-visual-cn">
+  <h2>4. Visual Reading Guide / 看图理解</h2>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/llm-transformer-flow.svg" alt="LLM 中 Transformer 的高层流程图：input、embedding、positional encoding、Transformer blocks、output" loading="lazy" />
+      <figcaption><b>把这张图当成大流程看。</b> Text 先变 tokens，tokens 变成带 position 的 vectors，Transformer blocks 处理上下文，output side 再产生 next-token distribution。</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Input 到 embedding：</b> 原始文字先 tokenize；每个 token ID 查 embedding table，再加 positional information。</div>
+    <div><b>Transformer blocks：</b> 参考图画的是更广义的 Transformer family，有 encoder 和 decoder。按本课 LLM 语境，重点看 GPT-style decoder-only causal block。</div>
+    <div><b>Output loop：</b> Decoder hidden state 映射到 vocabulary logits，softmax 变成概率，选出的 next token 再接回 context。</div>
+    <div><b>参考链接：</b> 如果想看 LLM 总览语境，可以看 <a href="https://www.geeksforgeeks.org/artificial-intelligence/large-language-model-llm/" target="_blank" rel="noopener">GeeksforGeeks Large Language Model</a>。</div>
+  </div>
+</section>
+
 <section class="topic lesson-section equations" id="llm-equations-cn">
-  <h2>4. 核心公式 / Key Equations</h2>
+  <h2>5. 核心公式 / Key Equations</h2>
   <h3>Autoregressive factorization</h3>
   <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
@@ -293,7 +326,7 @@
 </section>
 
 <section class="topic lesson-section examples" id="llm-examples-cn">
-  <h2>5. 例题讲解 / Worked Examples</h2>
+  <h2>6. 例题讲解 / Worked Examples</h2>
   <h3>Lecture 19：三个 token 概率算 perplexity</h3>
   <p class="source-note">出处：Lecture 19，题意转述。</p>
   <p>如果模型对三个真实 next tokens 都给了 $0.25$ 的概率：</p>
@@ -310,7 +343,7 @@
 </section>
 
 <section class="topic lesson-section tips-section" id="llm-tips-cn">
-  <h2>6. 解题技巧 / Problem-Solving Tips</h2>
+  <h2>7. 解题技巧 / Problem-Solving Tips</h2>
   <ol>
     <li>训练目标题：先写 autoregressive factorization，再取 negative log。</li>
     <li>Perplexity 记住一句：average NLL 的指数。</li>
@@ -324,7 +357,7 @@
 </section>
 
 <section class="topic lesson-section mistakes" id="llm-mistakes-cn">
-  <h2>7. 常见错误 / Common Mistakes</h2>
+  <h2>8. 常见错误 / Common Mistakes</h2>
   <ul class="mini-list">
     <li>把 base model 当成 instruction follower。base model 主要是 document continuer。</li>
     <li>SFT 时忘记 mask system/user tokens，只应该让 assistant target 部分产生主要 loss。</li>
@@ -337,7 +370,7 @@
 </section>
 
 <section class="topic lesson-section exam-section" id="llm-exam-cn">
-  <h2>8. 考试重点 / Exam Focus</h2>
+  <h2>9. 考试重点 / Exam Focus</h2>
   <ul class="mini-list">
     <li>会写 autoregressive probability 和 NLL loss。</li>
     <li>会计算并解释 perplexity。</li>
@@ -355,7 +388,7 @@
 </section>
 
 <section class="topic lesson-section checklist-section" id="llm-checklist-cn">
-  <h2>9. 速记清单 / Quick Checklist</h2>
+  <h2>10. 速记清单 / Quick Checklist</h2>
   <ul class="mini-list">
     <li>LLM = decoder-only Transformer + next-token prediction。</li>
     <li>Autoregressive 表示 sequence probability 是一串 next-token probabilities 的乘积。</li>
@@ -386,7 +419,7 @@
 <script src="../assets/popup-data.js"></script>
 <script src="../assets/main.js"></script>
 <script>
-  // Auto-build TOC from the 9 section titles — language-aware.
+  // Auto-build TOC from the section titles — language-aware.
   // Re-runs on lang switch so EN mode never lists CN headings (and vice versa).
   (function () {
     const main = document.querySelector('.block-main');
