@@ -65,32 +65,31 @@
 
   <h3 class="section-purple">4. Key Equations</h3>
   <div class="cols2">
-    <div class="callout formula">
+    <div class="callout formula" id="eq-linear-regression-design-matrix-objective">
       <div class="head">Design-matrix objective</div>
       <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Fits $w$ by making the prediction vector $Xw$ as close as possible to the target vector $Y$ under squared error.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Chooses weights whose predictions stay close to the targets under squared error.</p>
     </div>
-    <div class="callout formula">
+    <div class="callout formula" id="eq-linear-regression-gradient">
       <div class="head">Gradient</div>
       <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Measures how each feature is correlated with the residuals. Use it for gradient descent, or set it to zero to derive the closed form.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Points to how the weights should move to reduce squared error.</p>
     </div>
-    <div class="callout formula">
+    <div class="callout formula" id="eq-linear-regression-normal-equation">
       <div class="head">Normal equation</div>
       <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Gives the closed-form least-squares solution when $X^\top X$ is invertible. Geometrically, the residual becomes orthogonal to every feature column.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Solves the zero-gradient condition directly when the matrix inverse exists.</p>
     </div>
-    <div class="callout formula">
+    <div class="callout formula" id="eq-linear-regression-gaussian-noise-mle-view">
       <div class="head">Gaussian-noise / MLE view</div>
       <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
       <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
-      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Explains why squared loss appears naturally: under Gaussian residual noise, minimizing MSE is the same as maximum likelihood estimation.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Shows squared loss is the likelihood loss implied by Gaussian residual noise.</p>
     </div>
-    <div class="callout formula">
+    <div class="callout formula" id="eq-linear-regression-ridge-regularization">
       <div class="head">Ridge regularization</div>
       <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
-      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Adds an L2 penalty that shrinks weights, stabilizes singular or ill-conditioned problems, and trades a bit more bias for lower variance.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>Lasso contrast.</b> Lasso uses an L1 penalty instead, so it can set weights exactly to zero.</p>
+      <p style="font-size:13px;margin:6px 0 0;"><b>What it does.</b> Shrinks weights while fitting the data, making least squares more stable.</p>
     </div>
   </div>
 
@@ -184,29 +183,28 @@
         <div class="callout formula">
           <div class="head">MSE objective</div>
           <div class="eq">$$ \min_w \; \frac12\|Y-Xw\|_2^2 $$</div>
-          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 找一组 $w$，让预测向量 $Xw$ 尽量贴近目标向量 $Y$；误差用 squared loss 衡量。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 找一组权重，让预测尽量贴近真实值；误差按平方计算。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gradient</div>
           <div class="eq">$$ \nabla_w \frac12\|Y-Xw\|_2^2 = X^\top(Xw-Y) $$</div>
-          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 衡量每个 feature 和 residuals 的相关程度；可用于 gradient descent，也可令它为 0 推出 closed form。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 告诉你权重往哪个方向动，squared error 会下降。</p>
         </div>
         <div class="callout formula">
           <div class="head">Normal equation</div>
           <div class="eq">$$ X^\top Xw^* = X^\top Y,\qquad w^*=(X^\top X)^{-1}X^\top Y $$</div>
-          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 给出 least-squares 的闭式解，前提是 $X^\top X$ 可逆；几何上 residual 会与每个 feature column 正交。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 在矩阵可逆时，直接解出 gradient 为 0 的最优权重。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gaussian noise / MLE 视角</div>
           <div class="eq">$$ y^{(i)} = w^\top\phi(x^{(i)})+\varepsilon^{(i)},\qquad \varepsilon^{(i)}\sim\mathcal{N}(0,\sigma^2) $$</div>
           <div class="eq">$$ -\log p(Y\mid X;w,\sigma^2)=\frac{1}{2\sigma^2}\|Y-Xw\|_2^2+\text{constant} $$</div>
-          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 解释 squared loss 从哪里来：如果 residual noise 是 Gaussian，最小化 MSE 就等价于 maximum likelihood estimation。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 说明 Gaussian residual noise 会自然导出 squared loss。</p>
         </div>
         <div class="callout formula">
           <div class="head">Ridge regularization</div>
           <div class="eq">$$ \min_w \frac12\|Y-Xw\|_2^2+\frac{\lambda}{2}\|w\|_2^2,\qquad w^*=(X^\top X+\lambda I)^{-1}X^\top Y $$</div>
-          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 加 L2 penalty 来 shrink weights，让奇异或病态问题更稳定，同时用更高一点 bias 换更低 variance。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>Lasso 对比.</b> Lasso 用 L1 penalty，因此可以把部分 weights 直接压成 0。</p>
+          <p style="font-size:13px;margin:6px 0 0;"><b>这个公式在做什么？</b> 一边拟合数据，一边压小权重，让 least squares 更稳定。</p>
         </div>
       </div>
 

@@ -1039,6 +1039,37 @@
       "source": "topics/linear-regression.html#eq-linear-regression-normal-equation"
     },
     {
+      "title": "Gaussian-noise / MLE view",
+      "eq": "$$ y^{(i)} = w^\\top\\phi(x^{(i)})+\\varepsilon^{(i)},\\quad \\varepsilon^{(i)}\\sim\\mathcal{N}(0,\\sigma^2) $$\n$$ -\\log p(Y\\mid X;w,\\sigma^2)=\\frac{1}{2\\sigma^2}\\|Y-Xw\\|_2^2+\\text{constant} $$",
+      "symbols": [
+        {
+          "sym": "$\\varepsilon^{(i)}$",
+          "en": "residual noise around the linear prediction",
+          "cn": "线性预测值周围的 residual noise"
+        },
+        {
+          "sym": "$\\mathcal{N}(0,\\sigma^2)$",
+          "en": "zero-mean Gaussian noise with variance $\\sigma^2$",
+          "cn": "均值为 0、方差为 $\\sigma^2$ 的 Gaussian noise"
+        },
+        {
+          "sym": "$-\\log p(Y\\mid X;w,\\sigma^2)$",
+          "en": "negative log-likelihood of the observed targets",
+          "cn": "观测目标值的 negative log-likelihood"
+        },
+        {
+          "sym": "$\\text{constant}$",
+          "en": "terms that do not depend on $w$",
+          "cn": "与 $w$ 无关的项"
+        }
+      ],
+      "usage_en": "Use this when asked why MSE is natural for linear regression. Under Gaussian residual noise, maximizing likelihood over $w$ is equivalent to minimizing $\\|Y-Xw\\|_2^2$ because the other terms are constants with respect to $w$.",
+      "usage_cn": "题目问为什么 linear regression 用 MSE 时用它解释：在 Gaussian residual noise 假设下，对 $w$ 做 maximum likelihood 等价于最小化 $\\|Y-Xw\\|_2^2$，因为其他项对 $w$ 是常数。",
+      "intuition_en": "The model says the line gives the mean prediction, and the observed $y$ values are Gaussian jitters around that mean. Squared loss appears because Gaussian log-density contains a squared distance from the mean.",
+      "intuition_cn": "这个模型说：直线给出平均预测，真实 $y$ 是围绕这个均值的 Gaussian 抖动。Squared loss 会出现，是因为 Gaussian log-density 里天然有“离均值的平方距离”。",
+      "source": "topics/linear-regression.html#eq-linear-regression-gaussian-noise-mle-view"
+    },
+    {
       "title": "Ridge regularization",
       "eq": "$$ \\min_w \\frac12\\|Y-Xw\\|_2^2+\\frac{\\lambda}{2}\\|w\\|_2^2,\\qquad w^*=(X^\\top X+\\lambda I)^{-1}X^\\top Y $$",
       "symbols": [
@@ -1101,6 +1132,37 @@
       "intuition_en": "An S-curve that interprets a linear score as a probability. Negative scores → near 0, large positives → near 1, $z=0$ → exactly 0.5. Saturates at the extremes, which is why logistic regression has 'flat' gradients for very confident predictions.",
       "intuition_cn": "一条 S 形曲线，把线性 score 解读为概率。负 score → 接近 0，大的正 score → 接近 1，$z=0$ → 正好 0.5。两端饱和 —— 这就是为什么对 \"非常自信\" 的预测梯度会变平。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-sigmoid"
+    },
+    {
+      "title": "Logit / log-odds",
+      "eq": "$$ \\log\\frac{p}{1-p}=w^\\top\\phi(x)+b $$",
+      "symbols": [
+        {
+          "sym": "$p$",
+          "en": "predicted probability of class 1",
+          "cn": "预测为 class 1 的概率"
+        },
+        {
+          "sym": "$\\frac{p}{1-p}$",
+          "en": "odds of class 1 versus class 0",
+          "cn": "class 1 相对 class 0 的 odds"
+        },
+        {
+          "sym": "$\\log\\frac{p}{1-p}$",
+          "en": "logit / log-odds; the inverse scale of the sigmoid",
+          "cn": "logit / log-odds；sigmoid 的反向尺度"
+        },
+        {
+          "sym": "$w^\\top\\phi(x)+b$",
+          "en": "linear score with bias",
+          "cn": "带 bias 的线性 score"
+        }
+      ],
+      "usage_en": "Use it to explain what the weights mean and why the boundary is linear. A one-unit feature increase adds $w_j$ to log-odds, and setting $p=0.5$ makes the left side $\\log 1=0$.",
+      "usage_cn": "用它解释权重含义和为什么 boundary 是线性的。某个 feature 加 1 会让 log-odds 增加 $w_j$；令 $p=0.5$ 时左边变成 $\\log 1=0$。",
+      "intuition_en": "Logistic regression does not make probability itself a straight line. It makes the log-odds a straight line, then passes that value through sigmoid to get a probability.",
+      "intuition_cn": "Logistic regression 不是让 probability 本身成直线，而是让 log-odds 成直线，再通过 sigmoid 转回 probability。",
+      "source": "topics/logistic-regression.html#eq-logistic-regression-logit-log-odds"
     },
     {
       "title": "Decision boundary",
@@ -1206,6 +1268,37 @@
       "source": "topics/logistic-regression.html#eq-logistic-regression-gradient-descent-update"
     },
     {
+      "title": "Gradient and IRLS",
+      "eq": "$$ \\nabla L(w)=\\sum_i(\\mu_i-y_i)x_i,\\qquad \\mu_i=\\sigma(w^\\top x_i) $$",
+      "symbols": [
+        {
+          "sym": "$\\mu_i$",
+          "en": "predicted probability $P(y_i=1\\mid x_i)$",
+          "cn": "预测概率 $P(y_i=1\\mid x_i)$"
+        },
+        {
+          "sym": "$\\mu_i-y_i$",
+          "en": "probability residual: predicted minus true label",
+          "cn": "概率残差：预测值减真实标签"
+        },
+        {
+          "sym": "$x_i$",
+          "en": "input feature vector for example $i$",
+          "cn": "第 $i$ 个样本的输入特征向量"
+        },
+        {
+          "sym": "$\\nabla L(w)$",
+          "en": "gradient of the 0/1-label negative log-likelihood",
+          "cn": "$0/1$ 标签 negative log-likelihood 的梯度"
+        }
+      ],
+      "usage_en": "Use this gradient in batch or mini-batch GD. In matrix form it is $X^\\top(\\mu-y)$. IRLS / Newton pairs it with the Hessian $X^\\top B X$ to take second-order steps.",
+      "usage_cn": "把这个 gradient 放进 batch 或 mini-batch GD。矩阵形式是 $X^\\top(\\mu-y)$。IRLS / Newton 会把它和 Hessian $X^\\top B X$ 配起来做二阶更新。",
+      "intuition_en": "Each example votes to move the weights by 'how wrong the probability is' times its input direction. The shape mirrors linear regression residuals, but the prediction is passed through sigmoid first.",
+      "intuition_cn": "每个样本都按“概率错了多少”乘上自己的输入方向来推动权重。形式像 linear regression 的 residual，只是预测先过了 sigmoid。",
+      "source": "topics/logistic-regression.html#eq-logistic-regression-gradient-and-irls"
+    },
+    {
       "title": "Convexity check for $y\\in\\{0,1\\}$ form",
       "eq": "$$ \\nabla^2 L(w)=X^\\top B X,\\qquad B=\\mathrm{diag}(p_i(1-p_i)) $$",
       "symbols": [
@@ -1235,6 +1328,37 @@
       "intuition_en": "'Variances $p_i(1-p_i)$ are between 0 and 0.25 — never negative.' That non-negativity is what guarantees convexity; without it, the loss could have multiple local minima and GD would be unreliable.",
       "intuition_cn": "\"方差 $p_i(1-p_i)$ 在 0 到 0.25 之间 —— 永远非负。\" 这个非负性正是凸性的保障；没有它的话，loss 可能有多个局部最小，GD 就不可靠。",
       "source": "topics/logistic-regression.html#eq-logistic-regression-convexity-check-for-y-0-1-form"
+    },
+    {
+      "title": "Softmax extension",
+      "eq": "$$ p(y=c\\mid x)=\\frac{\\exp(w_c^\\top x)}{\\sum_{j=1}^{C}\\exp(w_j^\\top x)} $$",
+      "symbols": [
+        {
+          "sym": "$C$",
+          "en": "number of classes",
+          "cn": "类别总数"
+        },
+        {
+          "sym": "$w_c^\\top x$",
+          "en": "logit / score for class $c$",
+          "cn": "class $c$ 的 logit / score"
+        },
+        {
+          "sym": "$\\exp(w_c^\\top x)$",
+          "en": "positive unnormalized score for class $c$",
+          "cn": "class $c$ 的正的未归一化分数"
+        },
+        {
+          "sym": "$\\sum_j \\exp(w_j^\\top x)$",
+          "en": "normalizer that makes probabilities sum to 1",
+          "cn": "让所有概率加起来为 1 的归一化项"
+        }
+      ],
+      "usage_en": "Use softmax for multiclass logistic regression. Train with multiclass cross-entropy. In numerical code, subtract the maximum logit or use a fused log-sum-exp implementation to avoid overflow.",
+      "usage_cn": "多分类 logistic regression 用 softmax。训练时配 multiclass cross-entropy。写代码时先减最大 logit，或直接用 fused log-sum-exp 实现，避免 overflow。",
+      "intuition_en": "Softmax is sigmoid's multiclass cousin: every class gets a score, exponentials make higher scores dominate, and the denominator turns the scores into a probability distribution.",
+      "intuition_cn": "Softmax 是 sigmoid 的多分类版本：每个 class 一个 score，指数让高 score 占更多概率质量，分母把它们变成概率分布。",
+      "source": "topics/logistic-regression.html#eq-logistic-regression-softmax-extension"
     }
   ],
   "svm": [
