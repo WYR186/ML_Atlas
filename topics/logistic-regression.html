@@ -68,47 +68,600 @@
       <div class="head">Sigmoid</div>
       <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
       <p><b>What it does.</b> Turns an unbounded score into a probability; score $0$ is the tie point.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">An S-curve that interprets a linear score as a probability. Negative scores → near 0, large positives → near 1, $z=0$ → exactly 0.5. Saturates at the extremes, which is why logistic regression has &#39;flat&#39; gradients for very confident predictions.</span>
+            <span class="cn-only">一条 S 形曲线，把线性 score 解读为概率。负 score → 接近 0，大的正 score → 接近 1，$z=0$ → 正好 0.5。两端饱和 —— 这就是为什么对 &quot;非常自信&quot; 的预测梯度会变平。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\sigma(z)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the logistic / sigmoid function — squashes any real $z$ into $(0,1)$</span>
+                  <span class="cn-only">logistic / sigmoid 函数 —— 把任意实数 $z$ 压到 $(0,1)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$z = w^\top x$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the linear score — typically $w^\top x + b$</span>
+                  <span class="cn-only">线性 score —— 通常是 $w^\top x + b$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$e^{-z}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">exponential — large positive $z$ → tiny denominator → output near 1</span>
+                  <span class="cn-only">指数 —— $z$ 大的正值 → 分母极小 → 输出接近 1</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use as the output activation for binary classification; interpret $\sigma(w^\top x)$ as $P(y=1 \mid x)$. Threshold at 0.5 to predict the class. Derivative is $\sigma&#39;(z) = \sigma(z)(1-\sigma(z))$ — appears in every gradient computation.</span>
+            <span class="cn-only">二分类的输出激活函数；把 $\sigma(w^\top x)$ 当作 $P(y=1 \mid x)$。阈值 0.5 给出预测类别。导数 $\sigma&#39;(z) = \sigma(z)(1-\sigma(z))$ —— 在每次梯度计算中都会出现。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-logit-log-odds">
       <div class="head">Logit / log-odds</div>
       <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
       <p><b>What it does.</b> Puts the linear model on log-odds instead of raw probability.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Logistic regression does not make probability itself a straight line. It makes the log-odds a straight line, then passes that value through sigmoid to get a probability.</span>
+            <span class="cn-only">Logistic regression 不是让 probability 本身成直线，而是让 log-odds 成直线，再通过 sigmoid 转回 probability。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$p$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability of class 1</span>
+                  <span class="cn-only">预测为 class 1 的概率</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\frac{p}{1-p}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">odds of class 1 versus class 0</span>
+                  <span class="cn-only">class 1 相对 class 0 的 odds</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\log\frac{p}{1-p}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">logit / log-odds; the inverse scale of the sigmoid</span>
+                  <span class="cn-only">logit / log-odds；sigmoid 的反向尺度</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top\phi(x)+b$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">linear score with bias</span>
+                  <span class="cn-only">带 bias 的线性 score</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use it to explain what the weights mean and why the boundary is linear. A one-unit feature increase adds $w_j$ to log-odds, and setting $p=0.5$ makes the left side $\log 1=0$.</span>
+            <span class="cn-only">用它解释权重含义和为什么 boundary 是线性的。某个 feature 加 1 会让 log-odds 增加 $w_j$；令 $p=0.5$ 时左边变成 $\log 1=0$。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-decision-boundary">
       <div class="head">Decision boundary</div>
       <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
       <p><b>What it does.</b> Converts the $0.5$ probability cutoff into a zero-score sign test.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Sigmoid is 0.5 exactly when its input is 0.&#39; So the decision boundary lives at $w^\top \phi(x) = 0$ — a hyperplane through the origin (or shifted, with bias). The non-linear part is only in the output, not the boundary.</span>
+            <span class="cn-only">&quot;sigmoid 在输入为 0 时正好等于 0.5。&quot; 所以决策边界位于 $w^\top \phi(x) = 0$ —— 过原点的超平面（带 bias 时平移）。非线性只在输出部分，不在边界形状。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$p(y=1 \mid x) = 0.5$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the cutoff probability for classifying as class 1</span>
+                  <span class="cn-only">判为类别 1 的概率阈值</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top \phi(x) = 0$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the equivalent linear condition (sigmoid is 0.5 at $z=0$)</span>
+                  <span class="cn-only">等价的线性条件（sigmoid 在 $z=0$ 处取 0.5）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\phi(x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">feature map (identity for plain logistic regression)</span>
+                  <span class="cn-only">特征映射（普通 logistic regression 中是恒等映射）</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use to plot or analyze classifier behavior. The decision surface is a hyperplane in $\phi(x)$-space — that&#39;s what makes logistic regression a **linear classifier** despite the non-linear sigmoid output.</span>
+            <span class="cn-only">用于画图或分析分类器行为。决策面在 $\phi(x)$ 空间是一个超平面 —— 尽管输出经过非线性 sigmoid，logistic regression 仍是**线性分类器**。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-negative-log-likelihood">
       <div class="head">Negative log-likelihood</div>
       <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
       <p><b>What it does.</b> Trains the classifier with a smooth penalty for wrong or weak margins.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Penalty grows when the score has the wrong sign relative to $y_i$. Confident-and-correct → near-zero loss; confident-and-wrong → linear penalty in $|z|$. This is what makes the loss convex and well-behaved.</span>
+            <span class="cn-only">当 score 的符号与 $y_i$ 相反时惩罚增大。自信且对 → 损失接近 0；自信但错 → 惩罚关于 $|z|$ 线性增长。正是这种形式让 loss 凸且行为良好。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$D$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">training set $\{(x_i, y_i)\}$</span>
+                  <span class="cn-only">训练集 $\{(x_i, y_i)\}$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$y_i \in \{-1, +1\}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">label in the $\pm 1$ form (different sign convention than 0/1)</span>
+                  <span class="cn-only">$\pm 1$ 形式的标签（与 0/1 约定符号不同）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top \phi(x_i)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">linear margin score</span>
+                  <span class="cn-only">线性 margin score</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\log(1 + e^{-z})$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">softplus / log-loss — smooth approximation of $\max(0, -z)$</span>
+                  <span class="cn-only">softplus / log-loss —— $\max(0, -z)$ 的光滑近似</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Standard logistic-regression objective. Minimize via gradient descent (no closed form because of the non-linearity). Add an L2 regularizer $\frac{\lambda}{2}\|w\|^2$ for ridge-style logistic regression.</span>
+            <span class="cn-only">logistic regression 标准目标。用 gradient descent 最小化（因非线性无闭式解）。加 L2 正则 $\frac{\lambda}{2}\|w\|^2$ 即 ridge 版 logistic regression。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy">
       <div class="head">Binary cross-entropy (BCE)</div>
       <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
       <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
       <p><b>What it does.</b> Uses the same training idea for $0/1$ labels: give the true class high probability.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Two terms — only one is &#39;on&#39; for any given example. When $y=1$ you want $\hat y$ high (the first term punishes low $\hat y$); when $y=0$ you want $\hat y$ low (the second term punishes high $\hat y$). Confidently wrong → unbounded penalty.</span>
+            <span class="cn-only">两项里只有一项激活：$y=1$ 时希望 $\hat y$ 大（第一项惩罚 $\hat y$ 太小），$y=0$ 时希望 $\hat y$ 小（第二项惩罚 $\hat y$ 太大）。自信但错 → 惩罚趋近无穷。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$y\in\{0,1\}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">true binary label (0 or 1)</span>
+                  <span class="cn-only">真实二分类标签 $y\in\{0,1\}$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\hat y\in(0,1)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability of class 1, usually $\hat y=\sigma(z)$ where $z$ is the logit</span>
+                  <span class="cn-only">预测的 class 1 概率，通常 $\hat y=\sigma(z)$（$z$ 为 logit）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$y\log\hat y$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">active when the truth is class 1</span>
+                  <span class="cn-only">$y=1$ 时该项激活</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$(1-y)\log(1-\hat y)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">active when the truth is class 0</span>
+                  <span class="cn-only">$y=0$ 时该项激活</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Standard loss for any binary classifier with a sigmoid output: logistic regression, MLP with one sigmoid output unit, the two-layer net in HW3. Combined with the sigmoid logit $z$, the gradient simplifies to $\partial\mathcal{L}/\partial z=\hat y-y$ (see the softmax-CE gradient entry under MLP). For numerical stability use the fused &#39;BCE-with-logits&#39; form $\log(1+e^{-y&#39;z})$ with $y&#39;\in\{-1,+1\}$.</span>
+            <span class="cn-only">任意 sigmoid 输出二分类的标准 loss：logistic regression、单 sigmoid 输出的 MLP、HW3 的两层网络都用它。结合 sigmoid logit $z$，梯度简化为 $\partial\mathcal{L}/\partial z=\hat y-y$（见 MLP 的 softmax-CE 梯度项）。代码上为数值稳定常用 fused &#39;BCE-with-logits&#39;：$\log(1+e^{-y&#39;z})$，$y&#39;\in\{-1,+1\}$。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-gradient-descent-update">
       <div class="head">Gradient descent update</div>
       <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
       <p><b>What it does.</b> Updates weights one step in the direction that lowers the loss.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Walk against the gradient by step size $\alpha$.&#39; On convex losses (logistic regression is convex), this finds the global minimum; learning-rate tuning is the main practical concern.</span>
+            <span class="cn-only">&quot;沿负梯度走 $\alpha$ 步。&quot; 在凸 loss（logistic regression 凸）上能找到全局最小；实际中调学习率是主要工作。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$w_t$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">current weight vector at step $t$</span>
+                  <span class="cn-only">第 $t$ 步的当前权重向量</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w_{t+1}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">updated weights after one step</span>
+                  <span class="cn-only">一步更新后的权重</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\alpha$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">learning rate (positive scalar)</span>
+                  <span class="cn-only">学习率（正标量）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\nabla f(w_t)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">gradient of the loss at $w_t$</span>
+                  <span class="cn-only">$w_t$ 处 loss 的梯度</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Generic GD update — works for any differentiable loss, not just logistic. For logistic regression specifically, $\nabla f(w) = -\sum_i y_i \sigma(-y_i w^\top x_i)\, x_i$ (with $\pm 1$ labels). Pick $\alpha$ via line search or schedule.</span>
+            <span class="cn-only">通用 GD 更新 —— 对任意可微 loss 都适用，不限 logistic。logistic regression 中 $\nabla f(w) = -\sum_i y_i \sigma(-y_i w^\top x_i)\, x_i$（$\pm 1$ 标签下）。$\alpha$ 用 line search 或调度选。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-gradient-and-irls">
       <div class="head">Gradient and IRLS</div>
       <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
       <p><b>What it does.</b> Shows each example pushes the weights by its probability error times its input.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Each example votes to move the weights by &#39;how wrong the probability is&#39; times its input direction. The shape mirrors linear regression residuals, but the prediction is passed through sigmoid first.</span>
+            <span class="cn-only">每个样本都按“概率错了多少”乘上自己的输入方向来推动权重。形式像 linear regression 的 residual，只是预测先过了 sigmoid。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\mu_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability $P(y_i=1\mid x_i)$</span>
+                  <span class="cn-only">预测概率 $P(y_i=1\mid x_i)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\mu_i-y_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">probability residual: predicted minus true label</span>
+                  <span class="cn-only">概率残差：预测值减真实标签</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$x_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">input feature vector for example $i$</span>
+                  <span class="cn-only">第 $i$ 个样本的输入特征向量</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\nabla L(w)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">gradient of the 0/1-label negative log-likelihood</span>
+                  <span class="cn-only">$0/1$ 标签 negative log-likelihood 的梯度</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use this gradient in batch or mini-batch GD. In matrix form it is $X^\top(\mu-y)$. IRLS / Newton pairs it with the Hessian $X^\top B X$ to take second-order steps.</span>
+            <span class="cn-only">把这个 gradient 放进 batch 或 mini-batch GD。矩阵形式是 $X^\top(\mu-y)$。IRLS / Newton 会把它和 Hessian $X^\top B X$ 配起来做二阶更新。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula wide" id="eq-logistic-regression-convexity-check-for-y-0-1-form">
       <div class="head">Convexity check for $y\in\{0,1\}$ form</div>
       <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
       <p><b>What it does.</b> Shows the curvature is PSD, which is why logistic loss is convex.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Variances $p_i(1-p_i)$ are between 0 and 0.25 — never negative.&#39; That non-negativity is what guarantees convexity; without it, the loss could have multiple local minima and GD would be unreliable.</span>
+            <span class="cn-only">&quot;方差 $p_i(1-p_i)$ 在 0 到 0.25 之间 —— 永远非负。&quot; 这个非负性正是凸性的保障；没有它的话，loss 可能有多个局部最小，GD 就不可靠。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\nabla^2 L(w)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">Hessian of the logistic loss</span>
+                  <span class="cn-only">logistic loss 的 Hessian</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$X$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">design matrix (rows are feature vectors)</span>
+                  <span class="cn-only">设计矩阵（行是特征向量）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$B = \mathrm{diag}(p_i(1-p_i))$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">diagonal of variances $p_i(1-p_i)$ where $p_i = \sigma(w^\top x_i)$</span>
+                  <span class="cn-only">方差对角阵，$p_i = \sigma(w^\top x_i)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$p_i (1-p_i) \ge 0$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">each diagonal entry non-negative ⇒ $B \succeq 0$</span>
+                  <span class="cn-only">每个对角项非负 ⇒ $B \succeq 0$</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use the sandwich identity: $X^\top B X \succeq 0$ when $B \succeq 0$, so the Hessian is PSD everywhere → the logistic loss is convex → gradient descent converges to the global minimum.</span>
+            <span class="cn-only">用 sandwich 恒等式：$B \succeq 0$ 时 $X^\top B X \succeq 0$，所以 Hessian 处处 PSD → logistic loss 凸 → gradient descent 收敛到全局最小。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
     <div class="callout formula wide" id="eq-logistic-regression-softmax-extension">
       <div class="head">Softmax extension</div>
       <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
       <p><b>What it does.</b> Turns one score per class into probabilities that add up to $1$.</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Softmax is sigmoid&#39;s multiclass cousin: every class gets a score, exponentials make higher scores dominate, and the denominator turns the scores into a probability distribution.</span>
+            <span class="cn-only">Softmax 是 sigmoid 的多分类版本：每个 class 一个 score，指数让高 score 占更多概率质量，分母把它们变成概率分布。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$C$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">number of classes</span>
+                  <span class="cn-only">类别总数</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w_c^\top x$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">logit / score for class $c$</span>
+                  <span class="cn-only">class $c$ 的 logit / score</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\exp(w_c^\top x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">positive unnormalized score for class $c$</span>
+                  <span class="cn-only">class $c$ 的正的未归一化分数</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\sum_j \exp(w_j^\top x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">normalizer that makes probabilities sum to 1</span>
+                  <span class="cn-only">让所有概率加起来为 1 的归一化项</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use softmax for multiclass logistic regression. Train with multiclass cross-entropy. In numerical code, subtract the maximum logit or use a fused log-sum-exp implementation to avoid overflow.</span>
+            <span class="cn-only">多分类 logistic regression 用 softmax。训练时配 multiclass cross-entropy。写代码时先减最大 logit，或直接用 fused log-sum-exp 实现，避免 overflow。</span>
+          </div>
+        </div></div>
+      </details>
     </div>
   </div>
 
@@ -196,47 +749,600 @@
           <div class="head">Sigmoid</div>
           <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
           <p><b>这个公式在做什么？</b> 把任意 score 压成 probability；score 为 0 时正好是分界点。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">An S-curve that interprets a linear score as a probability. Negative scores → near 0, large positives → near 1, $z=0$ → exactly 0.5. Saturates at the extremes, which is why logistic regression has &#39;flat&#39; gradients for very confident predictions.</span>
+            <span class="cn-only">一条 S 形曲线，把线性 score 解读为概率。负 score → 接近 0，大的正 score → 接近 1，$z=0$ → 正好 0.5。两端饱和 —— 这就是为什么对 &quot;非常自信&quot; 的预测梯度会变平。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\sigma(z)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the logistic / sigmoid function — squashes any real $z$ into $(0,1)$</span>
+                  <span class="cn-only">logistic / sigmoid 函数 —— 把任意实数 $z$ 压到 $(0,1)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$z = w^\top x$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the linear score — typically $w^\top x + b$</span>
+                  <span class="cn-only">线性 score —— 通常是 $w^\top x + b$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$e^{-z}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">exponential — large positive $z$ → tiny denominator → output near 1</span>
+                  <span class="cn-only">指数 —— $z$ 大的正值 → 分母极小 → 输出接近 1</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use as the output activation for binary classification; interpret $\sigma(w^\top x)$ as $P(y=1 \mid x)$. Threshold at 0.5 to predict the class. Derivative is $\sigma&#39;(z) = \sigma(z)(1-\sigma(z))$ — appears in every gradient computation.</span>
+            <span class="cn-only">二分类的输出激活函数；把 $\sigma(w^\top x)$ 当作 $P(y=1 \mid x)$。阈值 0.5 给出预测类别。导数 $\sigma&#39;(z) = \sigma(z)(1-\sigma(z))$ —— 在每次梯度计算中都会出现。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula">
           <div class="head">Logit / log-odds</div>
           <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
           <p><b>这个公式在做什么？</b> 把线性模型放在 log-odds 上，而不是直接放在 probability 上。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Logistic regression does not make probability itself a straight line. It makes the log-odds a straight line, then passes that value through sigmoid to get a probability.</span>
+            <span class="cn-only">Logistic regression 不是让 probability 本身成直线，而是让 log-odds 成直线，再通过 sigmoid 转回 probability。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$p$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability of class 1</span>
+                  <span class="cn-only">预测为 class 1 的概率</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\frac{p}{1-p}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">odds of class 1 versus class 0</span>
+                  <span class="cn-only">class 1 相对 class 0 的 odds</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\log\frac{p}{1-p}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">logit / log-odds; the inverse scale of the sigmoid</span>
+                  <span class="cn-only">logit / log-odds；sigmoid 的反向尺度</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top\phi(x)+b$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">linear score with bias</span>
+                  <span class="cn-only">带 bias 的线性 score</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use it to explain what the weights mean and why the boundary is linear. A one-unit feature increase adds $w_j$ to log-odds, and setting $p=0.5$ makes the left side $\log 1=0$.</span>
+            <span class="cn-only">用它解释权重含义和为什么 boundary 是线性的。某个 feature 加 1 会让 log-odds 增加 $w_j$；令 $p=0.5$ 时左边变成 $\log 1=0$。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula">
           <div class="head">Decision boundary</div>
           <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
           <p><b>这个公式在做什么？</b> 把 0.5 的 probability cutoff 改写成 score 是否为 0。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Sigmoid is 0.5 exactly when its input is 0.&#39; So the decision boundary lives at $w^\top \phi(x) = 0$ — a hyperplane through the origin (or shifted, with bias). The non-linear part is only in the output, not the boundary.</span>
+            <span class="cn-only">&quot;sigmoid 在输入为 0 时正好等于 0.5。&quot; 所以决策边界位于 $w^\top \phi(x) = 0$ —— 过原点的超平面（带 bias 时平移）。非线性只在输出部分，不在边界形状。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$p(y=1 \mid x) = 0.5$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the cutoff probability for classifying as class 1</span>
+                  <span class="cn-only">判为类别 1 的概率阈值</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top \phi(x) = 0$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">the equivalent linear condition (sigmoid is 0.5 at $z=0$)</span>
+                  <span class="cn-only">等价的线性条件（sigmoid 在 $z=0$ 处取 0.5）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\phi(x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">feature map (identity for plain logistic regression)</span>
+                  <span class="cn-only">特征映射（普通 logistic regression 中是恒等映射）</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use to plot or analyze classifier behavior. The decision surface is a hyperplane in $\phi(x)$-space — that&#39;s what makes logistic regression a **linear classifier** despite the non-linear sigmoid output.</span>
+            <span class="cn-only">用于画图或分析分类器行为。决策面在 $\phi(x)$ 空间是一个超平面 —— 尽管输出经过非线性 sigmoid，logistic regression 仍是**线性分类器**。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula">
           <div class="head">NLL / log loss</div>
           <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
           <p><b>这个公式在做什么？</b> 用一个平滑 loss 惩罚错误或不够强的 margin。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Penalty grows when the score has the wrong sign relative to $y_i$. Confident-and-correct → near-zero loss; confident-and-wrong → linear penalty in $|z|$. This is what makes the loss convex and well-behaved.</span>
+            <span class="cn-only">当 score 的符号与 $y_i$ 相反时惩罚增大。自信且对 → 损失接近 0；自信但错 → 惩罚关于 $|z|$ 线性增长。正是这种形式让 loss 凸且行为良好。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$D$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">training set $\{(x_i, y_i)\}$</span>
+                  <span class="cn-only">训练集 $\{(x_i, y_i)\}$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$y_i \in \{-1, +1\}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">label in the $\pm 1$ form (different sign convention than 0/1)</span>
+                  <span class="cn-only">$\pm 1$ 形式的标签（与 0/1 约定符号不同）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w^\top \phi(x_i)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">linear margin score</span>
+                  <span class="cn-only">线性 margin score</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\log(1 + e^{-z})$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">softplus / log-loss — smooth approximation of $\max(0, -z)$</span>
+                  <span class="cn-only">softplus / log-loss —— $\max(0, -z)$ 的光滑近似</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Standard logistic-regression objective. Minimize via gradient descent (no closed form because of the non-linearity). Add an L2 regularizer $\frac{\lambda}{2}\|w\|^2$ for ridge-style logistic regression.</span>
+            <span class="cn-only">logistic regression 标准目标。用 gradient descent 最小化（因非线性无闭式解）。加 L2 正则 $\frac{\lambda}{2}\|w\|^2$ 即 ridge 版 logistic regression。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy-cn">
           <div class="head">Binary cross-entropy (BCE)</div>
           <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
           <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
           <p><b>这个公式在做什么？</b> 用 $0/1$ 标签表达同一个训练目标：让真实类别概率尽量高。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Two terms — only one is &#39;on&#39; for any given example. When $y=1$ you want $\hat y$ high (the first term punishes low $\hat y$); when $y=0$ you want $\hat y$ low (the second term punishes high $\hat y$). Confidently wrong → unbounded penalty.</span>
+            <span class="cn-only">两项里只有一项激活：$y=1$ 时希望 $\hat y$ 大（第一项惩罚 $\hat y$ 太小），$y=0$ 时希望 $\hat y$ 小（第二项惩罚 $\hat y$ 太大）。自信但错 → 惩罚趋近无穷。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$y\in\{0,1\}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">true binary label (0 or 1)</span>
+                  <span class="cn-only">真实二分类标签 $y\in\{0,1\}$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\hat y\in(0,1)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability of class 1, usually $\hat y=\sigma(z)$ where $z$ is the logit</span>
+                  <span class="cn-only">预测的 class 1 概率，通常 $\hat y=\sigma(z)$（$z$ 为 logit）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$y\log\hat y$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">active when the truth is class 1</span>
+                  <span class="cn-only">$y=1$ 时该项激活</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$(1-y)\log(1-\hat y)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">active when the truth is class 0</span>
+                  <span class="cn-only">$y=0$ 时该项激活</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Standard loss for any binary classifier with a sigmoid output: logistic regression, MLP with one sigmoid output unit, the two-layer net in HW3. Combined with the sigmoid logit $z$, the gradient simplifies to $\partial\mathcal{L}/\partial z=\hat y-y$ (see the softmax-CE gradient entry under MLP). For numerical stability use the fused &#39;BCE-with-logits&#39; form $\log(1+e^{-y&#39;z})$ with $y&#39;\in\{-1,+1\}$.</span>
+            <span class="cn-only">任意 sigmoid 输出二分类的标准 loss：logistic regression、单 sigmoid 输出的 MLP、HW3 的两层网络都用它。结合 sigmoid logit $z$，梯度简化为 $\partial\mathcal{L}/\partial z=\hat y-y$（见 MLP 的 softmax-CE 梯度项）。代码上为数值稳定常用 fused &#39;BCE-with-logits&#39;：$\log(1+e^{-y&#39;z})$，$y&#39;\in\{-1,+1\}$。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula">
           <div class="head">Gradient descent</div>
           <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
           <p><b>这个公式在做什么？</b> 每一步把权重往能降低 loss 的方向挪一点。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Walk against the gradient by step size $\alpha$.&#39; On convex losses (logistic regression is convex), this finds the global minimum; learning-rate tuning is the main practical concern.</span>
+            <span class="cn-only">&quot;沿负梯度走 $\alpha$ 步。&quot; 在凸 loss（logistic regression 凸）上能找到全局最小；实际中调学习率是主要工作。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$w_t$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">current weight vector at step $t$</span>
+                  <span class="cn-only">第 $t$ 步的当前权重向量</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w_{t+1}$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">updated weights after one step</span>
+                  <span class="cn-only">一步更新后的权重</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\alpha$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">learning rate (positive scalar)</span>
+                  <span class="cn-only">学习率（正标量）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\nabla f(w_t)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">gradient of the loss at $w_t$</span>
+                  <span class="cn-only">$w_t$ 处 loss 的梯度</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Generic GD update — works for any differentiable loss, not just logistic. For logistic regression specifically, $\nabla f(w) = -\sum_i y_i \sigma(-y_i w^\top x_i)\, x_i$ (with $\pm 1$ labels). Pick $\alpha$ via line search or schedule.</span>
+            <span class="cn-only">通用 GD 更新 —— 对任意可微 loss 都适用，不限 logistic。logistic regression 中 $\nabla f(w) = -\sum_i y_i \sigma(-y_i w^\top x_i)\, x_i$（$\pm 1$ 标签下）。$\alpha$ 用 line search 或调度选。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula">
           <div class="head">Gradient and IRLS</div>
           <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
           <p><b>这个公式在做什么？</b> 每个样本用 “概率误差 × 输入” 来推动权重更新。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Each example votes to move the weights by &#39;how wrong the probability is&#39; times its input direction. The shape mirrors linear regression residuals, but the prediction is passed through sigmoid first.</span>
+            <span class="cn-only">每个样本都按“概率错了多少”乘上自己的输入方向来推动权重。形式像 linear regression 的 residual，只是预测先过了 sigmoid。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\mu_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">predicted probability $P(y_i=1\mid x_i)$</span>
+                  <span class="cn-only">预测概率 $P(y_i=1\mid x_i)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\mu_i-y_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">probability residual: predicted minus true label</span>
+                  <span class="cn-only">概率残差：预测值减真实标签</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$x_i$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">input feature vector for example $i$</span>
+                  <span class="cn-only">第 $i$ 个样本的输入特征向量</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\nabla L(w)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">gradient of the 0/1-label negative log-likelihood</span>
+                  <span class="cn-only">$0/1$ 标签 negative log-likelihood 的梯度</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use this gradient in batch or mini-batch GD. In matrix form it is $X^\top(\mu-y)$. IRLS / Newton pairs it with the Hessian $X^\top B X$ to take second-order steps.</span>
+            <span class="cn-only">把这个 gradient 放进 batch 或 mini-batch GD。矩阵形式是 $X^\top(\mu-y)$。IRLS / Newton 会把它和 Hessian $X^\top B X$ 配起来做二阶更新。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula wide">
           <div class="head">Convexity check ($y\in\{0,1\}$ form)</div>
           <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
           <p><b>这个公式在做什么？</b> 说明曲率是 PSD，因此 logistic loss 是 convex。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">&#39;Variances $p_i(1-p_i)$ are between 0 and 0.25 — never negative.&#39; That non-negativity is what guarantees convexity; without it, the loss could have multiple local minima and GD would be unreliable.</span>
+            <span class="cn-only">&quot;方差 $p_i(1-p_i)$ 在 0 到 0.25 之间 —— 永远非负。&quot; 这个非负性正是凸性的保障；没有它的话，loss 可能有多个局部最小，GD 就不可靠。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$\nabla^2 L(w)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">Hessian of the logistic loss</span>
+                  <span class="cn-only">logistic loss 的 Hessian</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$X$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">design matrix (rows are feature vectors)</span>
+                  <span class="cn-only">设计矩阵（行是特征向量）</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$B = \mathrm{diag}(p_i(1-p_i))$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">diagonal of variances $p_i(1-p_i)$ where $p_i = \sigma(w^\top x_i)$</span>
+                  <span class="cn-only">方差对角阵，$p_i = \sigma(w^\top x_i)$</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$p_i (1-p_i) \ge 0$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">each diagonal entry non-negative ⇒ $B \succeq 0$</span>
+                  <span class="cn-only">每个对角项非负 ⇒ $B \succeq 0$</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use the sandwich identity: $X^\top B X \succeq 0$ when $B \succeq 0$, so the Hessian is PSD everywhere → the logistic loss is convex → gradient descent converges to the global minimum.</span>
+            <span class="cn-only">用 sandwich 恒等式：$B \succeq 0$ 时 $X^\top B X \succeq 0$，所以 Hessian 处处 PSD → logistic loss 凸 → gradient descent 收敛到全局最小。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
         <div class="callout formula wide">
           <div class="head">Softmax extension</div>
           <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
           <p><b>这个公式在做什么？</b> 把每个 class 的 score 变成总和为 1 的 probabilities。</p>
+
+      <details class="equation-explain-wrap" open data-static-equation-explain="1" data-topic-equation-explain="1">
+        <summary class="equation-explain-toggle">
+          <span class="explain-toggle-chevron" aria-hidden="true">▸</span>
+          <span class="en-only">Explain</span>
+          <span class="cn-only">解释</span>
+        </summary>
+        <div class="equation-explain">
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">Intuition</span><span class="cn-only">理解</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Softmax is sigmoid&#39;s multiclass cousin: every class gets a score, exponentials make higher scores dominate, and the denominator turns the scores into a probability distribution.</span>
+            <span class="cn-only">Softmax 是 sigmoid 的多分类版本：每个 class 一个 score，指数让高 score 占更多概率质量，分母把它们变成概率分布。</span>
+          </div>
+        </div>
+        <div class="explain-row explain-symbols-row">
+          <div class="explain-label">
+            <span class="en-only">Symbols</span><span class="cn-only">符号</span>
+          </div>
+          <ul class="explain-symbols">
+
+              <li>
+                <span class="explain-sym">$C$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">number of classes</span>
+                  <span class="cn-only">类别总数</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$w_c^\top x$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">logit / score for class $c$</span>
+                  <span class="cn-only">class $c$ 的 logit / score</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\exp(w_c^\top x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">positive unnormalized score for class $c$</span>
+                  <span class="cn-only">class $c$ 的正的未归一化分数</span>
+                </span>
+              </li>
+              <li>
+                <span class="explain-sym">$\sum_j \exp(w_j^\top x)$</span>
+                <span class="explain-sym-def">
+                  <span class="en-only">normalizer that makes probabilities sum to 1</span>
+                  <span class="cn-only">让所有概率加起来为 1 的归一化项</span>
+                </span>
+              </li>
+          </ul>
+        </div>
+        <div class="explain-row">
+          <div class="explain-label">
+            <span class="en-only">How to use</span><span class="cn-only">如何运用</span>
+          </div>
+          <div class="explain-text">
+            <span class="en-only">Use softmax for multiclass logistic regression. Train with multiclass cross-entropy. In numerical code, subtract the maximum logit or use a fused log-sum-exp implementation to avoid overflow.</span>
+            <span class="cn-only">多分类 logistic regression 用 softmax。训练时配 multiclass cross-entropy。写代码时先减最大 logit，或直接用 fused log-sum-exp 实现，避免 overflow。</span>
+          </div>
+        </div></div>
+      </details>
         </div>
       </div>
 
