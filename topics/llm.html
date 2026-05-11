@@ -87,59 +87,43 @@
   <h3>Autoregressive factorization</h3>
   <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $x_t$ is the token at position $t$; $x_{\lt t}$ means all earlier tokens; $T$ is sequence length; $\theta$ denotes model parameters.</p>
-    <p><b>How to read it.</b> A language model assigns probability to a whole sequence by predicting one token at a time. The probability of the full sequence is the product of all next-token probabilities.</p>
-    <p><b>How to use.</b> For training-loss derivations, take the log of this product to turn it into a sum, then negate it to get NLL.</p>
+    <p><b>What it does.</b> A language model assigns probability to a whole sequence by predicting one token at a time. The probability of the full sequence is the product of all next-token probabilities.</p>
   </div>
   <h3>Next-token probability</h3>
   <div class="eq">$$ P_\theta(x_t=i\mid x_{\lt t})=\frac{\exp(z_{t,i})}{\sum_{j\in V}\exp(z_{t,j})} $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $z_{t,i}$ is the logit for token $i$ at position $t$; $V$ is the vocabulary set; $j\in V$ means the denominator sums over every candidate token.</p>
-    <p><b>How to read it.</b> The LM head produces one logit for every vocabulary token. Softmax converts those logits into probabilities.</p>
-    <p><b>How to use.</b> To compare two candidate tokens, compare their logits. To compute an actual probability, exponentiate each logit and normalize by the vocabulary-wide sum.</p>
+    <p><b>What it does.</b> The LM head produces one logit for every vocabulary token. Softmax converts those logits into probabilities.</p>
   </div>
   <h3>Token embedding plus position</h3>
   <div class="eq">$$ h_t^{(0)}=E[x_t]+p_t,\qquad E\in\mathbb{R}^{|V|\times D} $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $E$ is the learnable token embedding table, $|V|$ is vocabulary size, $D$ is hidden size, $E[x_t]$ is the row vector for token $x_t$, and $p_t$ is the positional encoding or position embedding for position $t$.</p>
-    <p><b>How to read it.</b> A token ID by itself is just an index. The model starts by turning it into a $D$-dimensional vector and adding order information because self-attention without positions is permutation equivariant.</p>
+    <p><b>What it does.</b> A token ID by itself is just an index. The model starts by turning it into a $D$-dimensional vector and adding order information because self-attention without positions is permutation equivariant.</p>
     <p><b>Position detail.</b> The original Transformer used fixed sinusoidal signals; many LLMs use learned or rotary variants. The exam-level idea is the same: inject token order.</p>
-    <p><b>How to use.</b> For parameter counts, the input embedding table contributes about $VD$ parameters. If output embeddings are separate, the LM head contributes another $VD$.</p>
   </div>
   <h3>NLL / cross-entropy loss</h3>
   <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $X=(x_1,\ldots,x_T)$ is the token sequence. $T$ is sequence length. $\theta$ are model parameters. $P_\theta(x_t\mid x_{\lt t})$ is the probability the model assigns to the correct next token at position $t$.</p>
-    <p><b>How to read it.</b> The loss penalizes the model whenever it assigns low probability to the true next token. Averaging by $T$ makes examples of different lengths comparable.</p>
-    <p><b>How to use.</b> If the model gives probabilities $p_1,\ldots,p_T$ to the correct tokens, plug in $-\frac1T\sum_t \log p_t$.</p>
+    <p><b>What it does.</b> The loss penalizes the model whenever it assigns low probability to the true next token. Averaging by $T$ makes examples of different lengths comparable.</p>
   </div>
   <h3>Perplexity</h3>
   <div class="eq">$$ PP(X)=\exp(\mathcal{L}(X;\theta))=\left(\prod_{t=1}^T P_\theta(x_t\mid x_{\lt t})\right)^{-1/T} $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $PP(X)$ is perplexity. $\mathcal{L}(X;\theta)$ is average NLL. The product multiplies the correct-token probabilities across positions, and exponent $-1/T$ turns that product into an inverse geometric mean.</p>
-    <p><b>How to read it.</b> Perplexity is exponentiated average NLL. A perplexity of 4 means the model is, on average, as uncertain as choosing uniformly among 4 options.</p>
-    <p><b>How to use.</b> First compute average NLL, then exponentiate. If all correct-token probabilities are equal to $p$, then perplexity is $1/p$.</p>
+    <p><b>What it does.</b> Perplexity is exponentiated average NLL. A perplexity of 4 means the model is, on average, as uncertain as choosing uniformly among 4 options.</p>
   </div>
   <h3>Temperature decoding</h3>
   <div class="eq">$$ P_T(i)=\mathrm{softmax}\!\left(\frac{z_i}{T}\right) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $z_i$ is the logit for candidate token $i$. $T>0$ is decoding temperature, not sequence length here. $P_T(i)$ is the sampling probability after dividing logits by temperature and applying softmax.</p>
-    <p><b>How to read it.</b> Temperature rescales logits before softmax. Smaller $T$ makes the distribution sharper; larger $T$ makes it flatter.</p>
-    <p><b>How to use.</b> For any finite $T>0$, greedy top-1 does not change because dividing by a positive constant preserves logit order. Sampling changes because probabilities become sharper or flatter.</p>
+    <p><b>What it does.</b> Temperature rescales logits before softmax. Smaller $T$ makes the distribution sharper; larger $T$ makes it flatter.</p>
   </div>
   <h3>LoRA update</h3>
   <div class="eq">$$ W = W_0+\Delta W,\qquad \Delta W=BA,\qquad r\ll \min(d,k) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> If $W_0\in\mathbb{R}^{d\times k}$, then $B\in\mathbb{R}^{d\times r}$ and $A\in\mathbb{R}^{r\times k}$. The rank $r$ is much smaller than $d$ or $k$, so the update is cheap.</p>
-    <p><b>How to read it.</b> LoRA freezes the original weight $W_0$ and learns a low-rank update $\Delta W$ instead of a full matrix.</p>
-    <p><b>How to use.</b> Parameter count is $dr+rk$ instead of $dk$. For a square $D\times D$ matrix, some notes write the equivalent convention $\Delta W=AB$ with $A\in\mathbb{R}^{D\times R}$ and $B\in\mathbb{R}^{R\times D}$, giving $2DR$ trainable parameters instead of $D^2$.</p>
+    <p><b>What it does.</b> LoRA freezes the original weight $W_0$ and learns a low-rank update $\Delta W$ instead of a full matrix.</p>
   </div>
   <h3>Decoder-only parameter count</h3>
   <div class="eq">$$ N_{\mathrm{params}}\approx L(4D^2+2DF)+2VD $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $L$ is the number of decoder layers, $D$ is hidden size, $F$ is MLP hidden width, and $V$ is vocabulary size.</p>
-    <p><b>How to read it.</b> Each layer has about $4D^2$ attention parameters for $Q,K,V,O$ projections and $2DF$ MLP parameters for the two linear maps. The $2VD$ term counts input and output embedding matrices.</p>
-    <p><b>How to use.</b> This is the HW4-style back-of-the-envelope count. It usually ignores smaller terms such as biases and LayerNorm; if embeddings are tied, the embedding term changes.</p>
+    <p><b>What it does.</b> Each layer has about $4D^2$ attention parameters for $Q,K,V,O$ projections and $2DF$ MLP parameters for the two linear maps. The $2VD$ term counts input and output embedding matrices.</p>
   </div>
 </section>
 
@@ -268,59 +252,43 @@
   <h3>Autoregressive factorization</h3>
   <div class="eq">$$ P_\theta(x_1,\ldots,x_T)=\prod_{t=1}^{T}P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $x_t$ 是第 $t$ 个 token；$x_{\lt t}$ 表示它前面的所有 tokens；$T$ 是 sequence length；$\theta$ 是模型参数。</p>
-    <p><b>怎么理解.</b> 语言模型给整句话打概率，是一个 token 一个 token 预测出来的。整段序列的概率，就是每一步 next-token probability 的乘积。</p>
-    <p><b>怎么用.</b> 推 loss 时先对乘积取 log，把 product 变成 sum，再加负号得到 NLL。</p>
+    <p><b>这个公式在做什么？</b> 语言模型给整句话打概率，是一个 token 一个 token 预测出来的。整段序列的概率，就是每一步 next-token probability 的乘积。</p>
   </div>
   <h3>Next-token probability</h3>
   <div class="eq">$$ P_\theta(x_t=i\mid x_{\lt t})=\frac{\exp(z_{t,i})}{\sum_{j\in V}\exp(z_{t,j})} $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $z_{t,i}$ 是位置 $t$ 上 token $i$ 的 logit；$V$ 是 vocabulary set；$j\in V$ 表示分母要对所有候选 token 求和。</p>
-    <p><b>怎么理解.</b> LM head 会对 vocabulary 里的每个 token 给一个 logit，softmax 把这些 logits 转成概率分布。</p>
-    <p><b>怎么用.</b> 比较两个候选 token 时看 logits 大小；要算真实概率时，对每个 logit 取 exp，再除以整个 vocabulary 的 exp 总和。</p>
+    <p><b>这个公式在做什么？</b> LM head 会对 vocabulary 里的每个 token 给一个 logit，softmax 把这些 logits 转成概率分布。</p>
   </div>
   <h3>Token embedding plus position</h3>
   <div class="eq">$$ h_t^{(0)}=E[x_t]+p_t,\qquad E\in\mathbb{R}^{|V|\times D} $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $E$ 是 learnable token embedding table；$|V|$ 是 vocabulary size；$D$ 是 hidden size；$E[x_t]$ 是 token $x_t$ 对应的 row vector；$p_t$ 是第 $t$ 个位置的 positional encoding / position embedding。</p>
-    <p><b>怎么理解.</b> Token ID 本身只是一个 index。模型先把它查表变成 $D$ 维向量，再加上位置信息，因为没有 position 的 self-attention 对 token order 是 permutation equivariant。</p>
+    <p><b>这个公式在做什么？</b> Token ID 本身只是一个 index。模型先把它查表变成 $D$ 维向量，再加上位置信息，因为没有 position 的 self-attention 对 token order 是 permutation equivariant。</p>
     <p><b>Position detail.</b> 原始 Transformer 用 fixed sinusoidal signals；很多 LLM 使用 learned 或 rotary variants。考试层面的核心相同：给模型注入顺序信息。</p>
-    <p><b>怎么用.</b> 算参数量时，input embedding table 大约贡献 $VD$ 个参数。如果 output embeddings / LM head 不共享，还要再算一个 $VD$。</p>
   </div>
   <h3>NLL / cross-entropy loss</h3>
   <div class="eq">$$ \mathcal{L}(X;\theta)=-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(x_t\mid x_{\lt t}) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $X=(x_1,\ldots,x_T)$ 是 token sequence；$T$ 是 sequence length；$\theta$ 是 model parameters；$P_\theta(x_t\mid x_{\lt t})$ 是模型给第 $t$ 个正确 next token 的 probability。</p>
-    <p><b>怎么理解.</b> 如果模型给真实 next token 的概率低，$-\log p$ 就大，loss 就高。除以 $T$ 是为了让不同长度样本可比较。</p>
-    <p><b>怎么用.</b> 如果正确 tokens 的概率是 $p_1,\ldots,p_T$，直接代入 $-\frac1T\sum_t \log p_t$。</p>
+    <p><b>这个公式在做什么？</b> 如果模型给真实 next token 的概率低，$-\log p$ 就大，loss 就高。除以 $T$ 是为了让不同长度样本可比较。</p>
   </div>
   <h3>Perplexity</h3>
   <div class="eq">$$ PP(X)=\exp(\mathcal{L}(X;\theta))=\left(\prod_{t=1}^T P_\theta(x_t\mid x_{\lt t})\right)^{-1/T} $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $PP(X)$ 是 perplexity；$\mathcal{L}(X;\theta)$ 是 average NLL；product 把每个位置的 correct-token probability 相乘；指数 $-1/T$ 把它变成 inverse geometric mean。</p>
-    <p><b>怎么理解.</b> Perplexity 是 average NLL 的指数。$PP=4$ 可以理解成：平均每一步像是在 4 个同样可能的 token 里猜。</p>
-    <p><b>怎么用.</b> 先算 average NLL，再取 exp。如果每个正确 token 概率都等于 $p$，perplexity 就是 $1/p$。</p>
+    <p><b>这个公式在做什么？</b> Perplexity 是 average NLL 的指数。$PP=4$ 可以理解成：平均每一步像是在 4 个同样可能的 token 里猜。</p>
   </div>
   <h3>Temperature decoding</h3>
   <div class="eq">$$ P_T(i)=\mathrm{softmax}\!\left(\frac{z_i}{T}\right) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $z_i$ 是 candidate token $i$ 的 logit；这里 $T>0$ 是 decoding temperature，不是 sequence length；$P_T(i)$ 是 logits 除以 temperature 再 softmax 后的 sampling probability。</p>
-    <p><b>怎么理解.</b> Temperature 是在 softmax 前缩放 logits。小 $T$ 让分布更尖锐，大 $T$ 让分布更平。</p>
-    <p><b>怎么用.</b> 任何有限 $T>0$ 都不会改变 greedy top-1，因为除以正数不改变 logits 排序。但 sampling 会变：小 $T$ 更保守，大 $T$ 更随机。</p>
+    <p><b>这个公式在做什么？</b> Temperature 是在 softmax 前缩放 logits。小 $T$ 让分布更尖锐，大 $T$ 让分布更平。</p>
   </div>
   <h3>LoRA update</h3>
   <div class="eq">$$ W = W_0+\Delta W,\qquad \Delta W=BA,\qquad r\ll \min(d,k) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> 如果 $W_0\in\mathbb{R}^{d\times k}$，则 $B\in\mathbb{R}^{d\times r}$，$A\in\mathbb{R}^{r\times k}$。$r$ 远小于 $d,k$，所以更新很便宜。</p>
-    <p><b>怎么理解.</b> LoRA 冻结原始权重 $W_0$，只学习一个低秩更新 $\Delta W$，而不是重新训练整个大矩阵。</p>
-    <p><b>怎么用.</b> 参数量从完整矩阵的 $dk$ 变成 $dr+rk$。如果是 square $D\times D$ matrix，有些笔记会等价写成 $\Delta W=AB$，其中 $A\in\mathbb{R}^{D\times R}$、$B\in\mathbb{R}^{R\times D}$，trainable parameters 是 $2DR$ 而不是 $D^2$。</p>
+    <p><b>这个公式在做什么？</b> LoRA 冻结原始权重 $W_0$，只学习一个低秩更新 $\Delta W$，而不是重新训练整个大矩阵。</p>
   </div>
   <h3>Decoder-only parameter count</h3>
   <div class="eq">$$ N_{\mathrm{params}}\approx L(4D^2+2DF)+2VD $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $L$ 是 decoder layers 数量；$D$ 是 hidden size；$F$ 是 MLP hidden width；$V$ 是 vocabulary size。</p>
-    <p><b>怎么理解.</b> 每层 attention 大约有 $4D^2$ 参数，对应 $Q,K,V,O$ 四个 projection；MLP 有 $2DF$ 参数，对应两层 linear maps；$2VD$ 是 input/output embedding matrices。</p>
-    <p><b>怎么用.</b> 这是 HW4 风格的 quick parameter count。通常忽略 bias、LayerNorm 等小项；如果 input/output embeddings tied，embedding 那项会改变。</p>
+    <p><b>这个公式在做什么？</b> 每层 attention 大约有 $4D^2$ 参数，对应 $Q,K,V,O$ 四个 projection；MLP 有 $2DF$ 参数，对应两层 linear maps；$2VD$ 是 input/output embedding matrices。</p>
   </div>
 </section>
 

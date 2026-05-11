@@ -87,81 +87,59 @@
 
     <div class="callout formula"><div class="head">Sum Rule / Marginalization</div>
       <div class="eq">$$ p(x)=\sum_y p(x,y)\qquad\text{or}\qquad p(x)=\int p(x,y)\,dy $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $p(x,y)$ is a joint distribution. $y$ is the variable you want to remove. Use a sum for discrete $Y$ and an integral for continuous $Y$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The marginal probability of $x$ collects all ways $x$ can occur together with any value of $y$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to compute evidence in Bayes' rule, remove nuisance variables, or turn a joint table into a lower-dimensional table.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The marginal probability of $x$ collects all ways $x$ can occur together with any value of $y$.</p>
     </div>
 
     <div class="callout formula"><div class="head">Product Rule / Chain Rule</div>
       <div class="eq">$$ p(x,y)=p(y\mid x)p(x),\qquad p(x_{1:D})=\prod_{i=1}^{D}p(x_i\mid x_{1:i-1}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x_{1:D}$ means $(x_1,\ldots,x_D)$. The first term in the product is $p(x_1)$ because there are no previous variables.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A joint probability can be built by choosing variables one at a time and conditioning on what has already been chosen.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to factor graphical models, derive Bayes' rule, or write a likelihood for several dependent variables.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A joint probability can be built by choosing variables one at a time and conditioning on what has already been chosen.</p>
     </div>
 
     <div class="callout formula"><div class="head">Conditional Probability</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A, B$ are events. $P(A,B)$ is the <i>joint</i> probability that both occur. $P(B)$ is the <i>marginal</i> of the conditioning event (sum / integrate the joint over $A$). The formula is undefined when $P(B)=0$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Conditioning shrinks the world to outcomes where $B$ holds and renormalizes by the area of that "new world," $P(B)$. The denominator is the size of the slice you've kept.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Whenever a problem says "the probability of $A$ given $B$": look up the joint $P(A,B)$ in a table, divide by the marginal $P(B)$. The result is a probability in $[0,1]$.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Conditioning shrinks the world to outcomes where $B$ holds and renormalizes by the area of that "new world," $P(B)$. The denominator is the size of the slice you've kept.</p>
     </div>
 
     <div class="callout formula"><div class="head">Bayes' Rule</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $P(A)$ is the <b>prior</b> (your belief before seeing evidence). $P(B\mid A)$ is the <b>likelihood</b> (chance of observing $B$ when $A$ is true). $P(A\mid B)$ is the <b>posterior</b> (belief after seeing $B$). $P(B)$ is the normalizer that makes posteriors sum to 1.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Rational belief update — start with a prior, rescale each hypothesis by how well it explains the evidence. Slogan: <b>posterior $\propto$ likelihood × prior</b>.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use whenever you have $P(B\mid A)$ but want $P(A\mid B)$. Multiply prior × likelihood; if $P(B)$ is not given, expand it via the law of total probability ($P(B)=\sum_a P(B\mid A=a)P(A=a)$).</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Rational belief update — start with a prior, rescale each hypothesis by how well it explains the evidence. Slogan: <b>posterior $\propto$ likelihood × prior</b>.</p>
     </div>
 
     <div class="callout formula"><div class="head">Independence</div>
       <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $A, B$ are events. The two forms (joint factorization and conditional equality) are mathematically equivalent — pick whichever is easier to verify.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Knowing $B$ tells you nothing new about $A$; the joint distribution factorizes into the product of marginals.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> To test, compute both sides on a small contingency table and compare. To use as an assumption (e.g. dice rolls), substitute $P(A,B)\to P(A)P(B)$ to simplify joint probabilities into products.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Knowing $B$ tells you nothing new about $A$; the joint distribution factorizes into the product of marginals.</p>
     </div>
 
     <div class="callout formula"><div class="head">Conditional Independence</div>
       <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $C$ is the conditioning variable (in Naive Bayes, the class label $Y$). $A, B$ are the two events whose link you're testing. Equivalent form: $P(A\mid B,C)=P(A\mid C)$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> $A$ and $B$ may look correlated overall, but once $C$ is known, the link disappears. Two umbrellas opening together look correlated — until you condition on "it's raining" ($C$), at which point both events just react to $C$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> In NB or graphical-model problems, plug it in to factorize a high-dimensional joint $P(X_1,\dots,X_d\mid Y)$ as the product $\prod_i P(X_i\mid Y)$. Always verify the assumption is reasonable for the data.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> $A$ and $B$ may look correlated overall, but once $C$ is known, the link disappears. Two umbrellas opening together look correlated — until you condition on "it's raining" ($C$), at which point both events just react to $C$.</p>
     </div>
 
     <div class="callout formula"><div class="head">Law of Total Probability</div>
       <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\{A=a\}$ is a partition of the sample space into mutually exclusive cases. $P(A=a)$ is the weight of each case (must sum to 1). $P(B\mid A=a)$ is the probability of $B$ inside that case.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Split the world into cases of $A$, weight each case's probability of $B$ by how often that case occurs, and add them up.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Use whenever you need $P(B)$ but only have the conditionals — the most common use is filling in the denominator of Bayes' rule.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Split the world into cases of $A$, weight each case's probability of $B$ by how often that case occurs, and add them up.</p>
     </div>
 
     <div class="callout formula"><div class="head">Moments: Expectation, Variance, Covariance</div>
       <div class="eq">$$ \mathbb{E}[f(X)]=\sum_x p(x)f(x)\quad\text{or}\quad \int p(x)f(x)\,dx $$</div>
       <div class="eq">$$ \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2,\qquad \mathrm{Cov}(X,Y)=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f(X)$ is any function of the random variable. Variance measures spread around the mean. Covariance measures whether two variables tend to move together.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Expectation is a probability-weighted average; variance is average squared spread; covariance is positive when large $X$ tends to come with large $Y$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> For hand problems, compute $\mathbb{E}[X]$, $\mathbb{E}[X^2]$, and $\mathbb{E}[XY]$ separately, then plug into the shortcut formulas.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Expectation is a probability-weighted average; variance is average squared spread; covariance is positive when large $X$ tends to come with large $Y$.</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Standard Distributions</div>
       <div class="eq">$$ \mathrm{Bernoulli}(x;\mu)=\mu^x(1-\mu)^{1-x},\qquad \mathrm{Binomial}(m;N,\mu)=\binom{N}{m}\mu^m(1-\mu)^{N-m} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Bernoulli models one binary trial $x\in\{0,1\}$ with success probability $\mu$. Binomial models $m$ successes in $N$ independent Bernoulli trials.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Bernoulli is one coin flip; Binomial is the count of heads after many independent flips.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Bernoulli for binary labels/features and Binomial for counts of successes. Logistic regression and Bernoulli NB both rely on this binary-event likelihood idea.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Bernoulli is one coin flip; Binomial is the count of heads after many independent flips.</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Multivariate Gaussian and Empirical Distribution</div>
       <div class="eq">$$ \mathcal{N}(x;\mu,\Sigma)=\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left[-\frac12(x-\mu)^\top\Sigma^{-1}(x-\mu)\right] $$</div>
       <div class="eq">$$ p_{\mathrm{emp}}(x)=\frac1n\sum_{i=1}^{n}\delta(x-x_i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mu$ is the mean vector, $\Sigma$ is the covariance matrix, and $\delta(\cdot)$ is a Dirac delta spike at a training point.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Gaussian density is controlled by center and covariance; equal-density surfaces are ellipsoids. The empirical distribution puts equal mass on observed samples.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use Gaussians for continuous data, Gaussian NB, PCA/covariance intuition, and noise models. Use the empirical distribution to express "training data as a distribution"; it is a sum of point masses. The Central Limit Theorem explains why sums of many independent effects often look approximately Gaussian.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Gaussian density is controlled by center and covariance; equal-density surfaces are ellipsoids. The empirical distribution puts equal mass on observed samples.</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes Factorization (preview)</div>
       <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $Y$ is the class label. $X_i$ is feature $i$ (out of $d$). $P(Y)$ is the class <b>prior</b> (how common each class is). $P(X_i\mid Y)$ is the per-feature class-conditional likelihood. The "$\propto$" hides the normalizer $P(X)$, which doesn't depend on $y$ and so doesn't affect the $\arg\max$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> Bayes' rule supplies the numerator; the conditional-independence assumption lets you factorize the likelihood as a product of one-feature pieces. This drops the number of parameters from $\sim 2^d$ down to $2d$ — the only reason NB is tractable in high dimensions.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Train by counting feature occurrences within each class to estimate $P(Y)$ and each $P(X_i\mid Y)$. Predict with $\hat y=\arg\max_y P(Y)\prod_i P(X_i\mid Y)$. In code, use $\log$ sums instead of products to avoid floating-point underflow.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> Bayes' rule supplies the numerator; the conditional-independence assumption lets you factorize the likelihood as a product of one-feature pieces. This drops the number of parameters from $\sim 2^d$ down to $2d$ — the only reason NB is tractable in high dimensions.</p>
     </div>
 
   </div>
@@ -309,81 +287,59 @@
 
     <div class="callout formula"><div class="head">Sum rule / marginalization</div>
       <div class="eq">$$ p(x)=\sum_y p(x,y)\qquad\text{or}\qquad p(x)=\int p(x,y)\,dy $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $p(x,y)$ 是 joint distribution；$y$ 是要被消掉的变量。离散 $Y$ 用 sum，连续 $Y$ 用 integral。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $x$ 的 marginal probability 把“$x$ 和所有可能 $y$ 同时出现”的情况全部加起来。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用来算 Bayes denominator / evidence、消掉 nuisance variable，或者把高维 joint table 降成低维 table。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> $x$ 的 marginal probability 把“$x$ 和所有可能 $y$ 同时出现”的情况全部加起来。</p>
     </div>
 
     <div class="callout formula"><div class="head">Product rule / chain rule</div>
       <div class="eq">$$ p(x,y)=p(y\mid x)p(x),\qquad p(x_{1:D})=\prod_{i=1}^{D}p(x_i\mid x_{1:i-1}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x_{1:D}$ 表示 $(x_1,\ldots,x_D)$。乘积第一项其实是 $p(x_1)$，因为前面没有变量可条件化。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个 joint probability 可以按顺序生成变量：先生成第一个，再在前面变量已知的条件下生成下一个。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用于 factor graphical models、推 Bayes' rule、或者为多个 dependent variables 写 likelihood。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 一个 joint probability 可以按顺序生成变量：先生成第一个，再在前面变量已知的条件下生成下一个。</p>
     </div>
 
     <div class="callout formula"><div class="head">条件概率</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(A,B)}{P(B)},\qquad P(B)>0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A, B$ 为事件；$P(A,B)$ 是二者同时发生的<i>联合</i>概率；$P(B)$ 是被条件事件的<i>边缘</i>概率（把联合对 $A$ 求和 / 积分得到）；$P(B)=0$ 时未定义。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 条件化 = 把世界缩小到 $B$ 成立的那部分，再用"新世界"的面积 $P(B)$ 重新归一化；分母就是你保留的那块切片的大小。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 题目说"在 $B$ 已发生时 $A$ 的概率"——查表算出联合 $P(A,B)$，再除以边缘 $P(B)$；结果是落在 $[0,1]$ 的概率。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 条件化 = 把世界缩小到 $B$ 成立的那部分，再用"新世界"的面积 $P(B)$ 重新归一化；分母就是你保留的那块切片的大小。</p>
     </div>
 
     <div class="callout formula"><div class="head">贝叶斯公式</div>
       <div class="eq">$$ P(A\mid B)=\frac{P(B\mid A)\,P(A)}{P(B)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $P(A)$ 是 <b>prior</b>（看到证据前的信念）；$P(B\mid A)$ 是 <b>likelihood</b>（在 $A$ 下看到 $B$ 的概率）；$P(A\mid B)$ 是 <b>posterior</b>（看到 $B$ 后的信念）；$P(B)$ 是让 posterior 求和为 1 的归一化常数。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 理性的信念更新——从先验出发，按"假设解释证据的程度"重缩放。口诀：<b>posterior $\propto$ likelihood × prior</b>。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 题目给 $P(B\mid A)$ 而要 $P(A\mid B)$ 时使用；$P(B)$ 没给就用全概率公式展开 $P(B)=\sum_a P(B\mid A=a)P(A=a)$ 补上。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 理性的信念更新——从先验出发，按"假设解释证据的程度"重缩放。口诀：<b>posterior $\propto$ likelihood × prior</b>。</p>
     </div>
 
     <div class="callout formula"><div class="head">独立</div>
       <div class="eq">$$ P(A,B)=P(A)P(B)\;\Leftrightarrow\;P(A\mid B)=P(A) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $A, B$ 为事件；联合因子分解与条件等式两种写法数学上等价，挑容易验证的那个用。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 知道 $B$ 对 $A$ 的概率没有任何新信息；联合分布拆成边缘的乘积。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 验独立：在小列联表上算两边再比较；用作假设时（如掷骰子），把 $P(A,B)$ 直接换成 $P(A)P(B)$ 简化联合概率。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 知道 $B$ 对 $A$ 的概率没有任何新信息；联合分布拆成边缘的乘积。</p>
     </div>
 
     <div class="callout formula"><div class="head">条件独立</div>
       <div class="eq">$$ P(A,B\mid C)=P(A\mid C)\,P(B\mid C) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $C$ 是被条件化的变量（在 Naive Bayes 里就是类别 $Y$）；$A, B$ 是要检验关系的两个事件。等价写法：$P(A\mid B,C)=P(A\mid C)$。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 表面上 $A, B$ 相关，但一旦知道 $C$ 关联消失。两人同时打伞看上去相关，告诉你"在下雨" $C$ 之后，两件事就只是分别在响应共同因 $C$。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> NB / 图模型题里直接代入，把高维联合 $P(X_1,\dots,X_d\mid Y)$ 拆成 $\prod_i P(X_i\mid Y)$。代入前要确认这个假设对数据合理。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 表面上 $A, B$ 相关，但一旦知道 $C$ 关联消失。两人同时打伞看上去相关，告诉你"在下雨" $C$ 之后，两件事就只是分别在响应共同因 $C$。</p>
     </div>
 
     <div class="callout formula"><div class="head">全概率公式</div>
       <div class="eq">$$ P(B)=\sum_{a}P(B\mid A=a)\,P(A=a) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\{A=a\}$ 是样本空间的互斥划分；$P(A=a)$ 是各案的权重（求和必须为 1）；$P(B\mid A=a)$ 是该案下 $B$ 的条件概率。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 按 $A$ 的取值分情形，每个情形里 $B$ 的发生概率乘以该情形的出现频率，再加权求和。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 没给 $P(B)$ 但有条件概率时用——最常见的就是补贝叶斯公式的分母。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 按 $A$ 的取值分情形，每个情形里 $B$ 的发生概率乘以该情形的出现频率，再加权求和。</p>
     </div>
 
     <div class="callout formula"><div class="head">Moments: expectation, variance, covariance</div>
       <div class="eq">$$ \mathbb{E}[f(X)]=\sum_x p(x)f(x)\quad\text{or}\quad \int p(x)f(x)\,dx $$</div>
       <div class="eq">$$ \mathrm{Var}(X)=\mathbb{E}[X^2]-\mathbb{E}[X]^2,\qquad \mathrm{Cov}(X,Y)=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f(X)$ 是 random variable 的任意函数；variance 衡量围绕 mean 的 spread；covariance 衡量两个变量是否一起变大/变小。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> Expectation 是按概率加权平均；variance 是平均平方偏离；covariance 为正表示大的 $X$ 往往伴随大的 $Y$。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 手算时分开算 $\mathbb{E}[X]$、$\mathbb{E}[X^2]$、$\mathbb{E}[XY]$，再代入 shortcut formulas。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> Expectation 是按概率加权平均；variance 是平均平方偏离；covariance 为正表示大的 $X$ 往往伴随大的 $Y$。</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">常见分布 / Standard distributions</div>
       <div class="eq">$$ \mathrm{Bernoulli}(x;\mu)=\mu^x(1-\mu)^{1-x},\qquad \mathrm{Binomial}(m;N,\mu)=\binom{N}{m}\mu^m(1-\mu)^{N-m} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Bernoulli 描述一次 binary trial，$x\in\{0,1\}$，success probability 是 $\mu$。Binomial 描述 $N$ 次 independent Bernoulli trials 中成功 $m$ 次。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Bernoulli 是一次 coin flip；Binomial 是很多次 coin flips 后 head 的数量。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> binary labels / features 用 Bernoulli；success count 用 Binomial。Logistic regression 和 Bernoulli NB 都在用 binary-event likelihood 这个思想。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Bernoulli 是一次 coin flip；Binomial 是很多次 coin flips 后 head 的数量。</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Multivariate Gaussian 与 empirical distribution</div>
       <div class="eq">$$ \mathcal{N}(x;\mu,\Sigma)=\frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}}\exp\!\left[-\frac12(x-\mu)^\top\Sigma^{-1}(x-\mu)\right] $$</div>
       <div class="eq">$$ p_{\mathrm{emp}}(x)=\frac1n\sum_{i=1}^{n}\delta(x-x_i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mu$ 是 mean vector；$\Sigma$ 是 covariance matrix；$\delta(\cdot)$ 是集中在训练样本点上的 Dirac delta spike。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Gaussian density 由中心和协方差控制；等概率曲面是 ellipsoids。Empirical distribution 把相同质量放在每个 observed sample 上。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Continuous data、Gaussian NB、PCA/covariance intuition、noise models 常用 Gaussian；empirical distribution 用来把“训练集”写成一个 distribution。Central Limit Theorem 解释了为什么很多 independent effects 相加后近似 Gaussian。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Gaussian density 由中心和协方差控制；等概率曲面是 ellipsoids。Empirical distribution 把相同质量放在每个 observed sample 上。</p>
     </div>
 
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Naive Bayes 因子分解（预告）</div>
       <div class="eq">$$ P(Y\mid X_1,\dots,X_d) \;\propto\; P(Y)\prod_{i=1}^{d} P(X_i\mid Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $Y$ 是类别标签；$X_i$ 是第 $i$ 个特征（共 $d$ 个）；$P(Y)$ 是类 <b>prior</b>（每个类别有多常见）；$P(X_i\mid Y)$ 是各特征的类条件 likelihood。"$\propto$" 隐藏了归一化常数 $P(X)$，它与 $y$ 无关，所以不影响 $\arg\max$。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 贝叶斯（分子）+ 条件独立假设（似然分解）。把参数数从 $\sim 2^d$ 压到 $2d$——NB 在高维可行的唯一原因。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 训练靠在每个类别下数特征出现次数，估出 $P(Y)$ 与各 $P(X_i\mid Y)$；预测 $\hat y=\arg\max_y P(Y)\prod_i P(X_i\mid Y)$。代码里用 $\log$ 求和代替乘积避免下溢。</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 贝叶斯（分子）+ 条件独立假设（似然分解）。把参数数从 $\sim 2^d$ 压到 $2d$——NB 在高维可行的唯一原因。</p>
     </div>
 
   </div>

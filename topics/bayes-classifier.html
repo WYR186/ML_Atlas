@@ -83,32 +83,24 @@
     <div class="callout formula">
       <h4>Binary Bayes rule</h4>
       <div class="eq">$$ f_{\text{Bayes}}(x)=\begin{cases}1,&\eta(x)\ge \frac12\\0,&\eta(x)<\frac12\end{cases},\qquad \eta(x)=\Pr(Y=1\mid X=x) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ is the random input; $x$ is one observed feature value. $Y\in\{0,1\}$ is the true label. $\eta(x)=\Pr(Y=1\mid X=x)$ is the posterior probability of class 1 after seeing $x$. $f_{\text{Bayes}}(x)$ is the prediction made by the optimal rule.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The threshold $\frac12$ is majority vote under uncertainty: predict 1 if class 1 is at least as likely as class 0. This rule minimizes 0-1 loss pointwise; for each fixed $x$, choosing the larger posterior leaves the smaller posterior as the unavoidable local error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The threshold $\frac12$ is majority vote under uncertainty: predict 1 if class 1 is at least as likely as class 0. This rule minimizes 0-1 loss pointwise; for each fixed $x$, choosing the larger posterior leaves the smaller posterior as the unavoidable local error.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute or compare $\Pr(Y=1\mid X=x)$ and $\Pr(Y=0\mid X=x)=1-\eta(x)$. If $\eta(x)=0.73$, predict 1; if $\eta(x)=0.41$, predict 0.</p>
     </div>
     <div class="callout formula">
       <h4>Bayes error</h4>
       <div class="eq">$$ \epsilon_\mu^*=\mathbb{E}_X\left[\min\{\eta(X),1-\eta(X)\}\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\epsilon_\mu^*$ is the smallest possible true error under data distribution $\mu$. $\mathbb{E}_X[\cdot]$ averages over the marginal distribution of $X$. $\min\{\eta(X),1-\eta(X)\}$ picks the probability of the class the Bayes rule does <i>not</i> predict.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is "average unavoidable mistake." Near $\eta(X)=0$ or $1$, the label is almost certain, so local error is small. Near $\eta(X)=0.5$, the classes are intrinsically ambiguous, so even the best classifier often fails.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For discrete $X$, sum $\Pr(X=x)\min\{\eta(x),1-\eta(x)\}$ over all $x$. For continuous $X$, replace the sum with an integral against the density of $X$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is "average unavoidable mistake." Near $\eta(X)=0$ or $1$, the label is almost certain, so local error is small. Near $\eta(X)=0.5$, the classes are intrinsically ambiguous, so even the best classifier often fails.</p>
     </div>
     <div class="callout formula">
       <h4>Equivalent binary form</h4>
       <div class="eq">$$ \epsilon_\mu^*=\frac12-\frac12\mathbb{E}_X\left[|2\eta(X)-1|\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $|2\eta(X)-1|$ is a confidence margin away from a coin flip. If $\eta(X)=0.5$, the margin is 0; if $\eta(X)=0$ or $1$, the margin is 1.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Start from the worst local binary uncertainty, $\frac12$, then subtract certainty. More posterior confidence means a larger absolute-value term, hence lower Bayes error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Start from the worst local binary uncertainty, $\frac12$, then subtract certainty. More posterior confidence means a larger absolute-value term, hence lower Bayes error.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This form is handy when a problem gives posterior confidence or asks for algebraic reasoning. It matches the min form because for any $p\in[0,1]$, $\min(p,1-p)=\frac12-\frac12|2p-1|$.</p>
     </div>
     <div class="callout formula">
       <h4>Squared-loss regression</h4>
       <div class="eq">$$ f_{\text{Bayes}}(X)=\mathbb{E}[Y\mid X],\qquad \epsilon_\mu^*=\mathbb{E}\operatorname{Var}(Y\mid X) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f_{\text{Bayes}}(X)$ is the best prediction under squared loss. $\mathbb{E}[Y\mid X]$ is the conditional mean: the average value of $Y$ among examples with the same input. $\operatorname{Var}(Y\mid X)$ is the remaining randomness after $X$ is known.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Under squared loss, the best single summary of a conditional distribution is its mean. Any noise left around that mean is not learnable from $X$, so its conditional variance becomes Bayes error.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Identify the predictable part as the conditional mean. Then compute or read off the conditional variance; averaging it gives the irreducible squared-loss error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Under squared loss, the best single summary of a conditional distribution is its mean. Any noise left around that mean is not learnable from $X$, so its conditional variance becomes Bayes error.</p>
     </div>
   </div>
   <div class="callout">

@@ -81,44 +81,32 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Policy Q-value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^π(s,a): state-action value under π； s_0=s, a_0=a: initial state/action are fixed； γ^t r_t: discounted reward sequence</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Definition of Q under a fixed policy: force action a first, then follow π and average future discounted rewards.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Definition of Q under a fixed policy: force action a first, then follow π and average future discounted rewards.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it when asked for the value of a state-action pair under a given policy.</p>
     </div>
     <div class="callout formula"><div class="head">Policy Bellman equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Σ_{s'}P(s'|s,a): average over possible next states； Σ_{a'}π(a'|s'): average over next actions from π； Q^π(s',a'): future state-action value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Expands Q into immediate reward, then averages over next states and next actions chosen by π.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it for policy evaluation when transition probabilities and policy probabilities are known.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Expands Q into immediate reward, then averages over next states and next actions chosen by π.</p>
     </div>
     <div class="callout formula"><div class="head">State-value Bellman expectation</div>
       <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\sum_{s',r}p(s',r\mid s,a)\,[r+\gamma V^\pi(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> p(s',r|s,a): probability of next state s' and reward r after taking a in s； π(a|s): policy probability； γV^π(s'): discounted future value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Average the one-step quantity reward plus future value over the policy's actions and the environment's possible next outcomes.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this V-form when rewards are written as random variables. If reward is deterministic, replace the inner sum over r with $R(s,a)$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Average the one-step quantity reward plus future value over the policy's actions and the environment's possible next outcomes.</p>
     </div>
     <div class="callout formula"><div class="head">Optimality equations</div>
       <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a)=\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
       <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'\in\mathcal{A}}Q^*(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $V^*(s)$ is the best possible value starting from state $s$. $Q^*(s,a)$ is the best possible value after first taking action $a$. $p(s',r\mid s,a)$ is the joint probability of next state and reward. $P(s'\mid s,a)$ is transition probability, and $R(s,a)$ is expected immediate reward.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Optimal value chooses the best first action, then assumes optimal behavior afterward. The $Q^*$ form says: reward now, then go to $s'$ and choose the best next action.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Optimal value chooses the best first action, then assumes optimal behavior afterward. The $Q^*$ form says: reward now, then go to $s'$ and choose the best next action.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use the $V^*$ equation when backing up state values and the $Q^*$ equation when backing up state-action values. In both cases, replace policy averaging with a max over actions.</p>
     </div>
     <div class="callout formula"><div class="head">Greedy optimal policy</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ \pi^*(s)\in\arg\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\pi^*(s)$ is an optimal action in state $s$. $\arg\max_a$ returns the action or actions with the largest value. If several actions tie, any fixed tie-breaking gives a deterministic optimal policy.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Greedy with respect to $Q^*$ is immediate: compare the stored action values. Greedy with respect to $V^*$ requires a one-step model-based lookahead through $p$ or $P,R$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the final extraction step after value iteration, policy iteration, or Q-learning. $Q^*$ is convenient for acting because the agent can choose $\arg\max_a Q^*(s,a)$ without knowing transition dynamics at decision time.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Greedy with respect to $Q^*$ is immediate: compare the stored action values. Greedy with respect to $V^*$ requires a one-step model-based lookahead through $p$ or $P,R$.</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman optimality operator contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> T: Bellman optimality operator； ||·||∞: largest absolute difference over states； U,V: two candidate value functions； γ: discount/contraction factor</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> $T$ is one optimal Bellman backup. The contraction inequality says repeated backups shrink value-function error by a factor at most $\gamma$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to justify convergence of value iteration: because $\gamma&lt;1$, repeated $T$ approaches the unique fixed point $V^*$, independent of the initial guess.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> $T$ is one optimal Bellman backup. The contraction inequality says repeated backups shrink value-function error by a factor at most $\gamma$.</p>
     </div>
   </div>
 
@@ -225,44 +213,32 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">策略下的 Q-value</div>
       <div class="eq">$$ Q^\pi(s,a)=\mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty}\gamma^t r_t\mid s_0=s,a_0=a\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^π(s,a): 策略 π 下的状态-动作价值；s_0=s, a_0=a: 初始状态和动作固定；γ^t r_t: 折扣奖励序列</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 固定策略下 Q 的定义：先强制做动作 a，然后按 π 继续行动，对未来折扣奖励求期望。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 固定策略下 Q 的定义：先强制做动作 a，然后按 π 继续行动，对未来折扣奖励求期望。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 题目问某策略下 state-action pair 的价值时，用这个定义。</p>
     </div>
     <div class="callout formula"><div class="head">Policy Bellman equation</div>
       <div class="eq">$$ Q^\pi(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\sum_{a'}\pi(a'\mid s')Q^\pi(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Σ_{s'}P(s'|s,a): 对可能下一状态加权平均；Σ_{a'}π(a'|s'): 对 π 在下一状态会选的动作加权平均；Q^π(s',a'): 后续 state-action 的价值</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把 Q 展开成即时奖励，然后对下一状态以及策略 π 选择的下一动作做平均。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当转移概率和策略概率已知时，用它做 policy evaluation。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 把 Q 展开成即时奖励，然后对下一状态以及策略 π 选择的下一动作做平均。</p>
     </div>
     <div class="callout formula"><div class="head">State-value Bellman expectation</div>
       <div class="eq">$$ V^\pi(s)=\sum_{a}\pi(a\mid s)\sum_{s',r}p(s',r\mid s,a)\,[r+\gamma V^\pi(s')] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> p(s',r|s,a): 在 state s 做 action a 后，同时得到 next state s' 和 reward r 的概率；π(a|s): policy 选 a 的概率；γV^π(s'): 折扣后的未来价值</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 对“一步 reward + future value”做两层平均：先按 policy 平均 actions，再按 environment 平均 next outcome。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> reward 被写成随机变量时用这个 V 形式；如果 reward 是 deterministic，就把对 r 的求和替换成 $R(s,a)$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 对“一步 reward + future value”做两层平均：先按 policy 平均 actions，再按 environment 平均 next outcome。</p>
     </div>
     <div class="callout formula"><div class="head">Bellman optimality</div>
       <div class="eq">$$ V^*(s)=\max_{a\in\mathcal{A}}Q^*(s,a)=\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
       <div class="eq">$$ Q^*(s,a)=R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)\max_{a'\in\mathcal{A}}Q^*(s',a') $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $V^*(s)$ 是从 state $s$ 出发的最优价值；$Q^*(s,a)$ 是先做 action $a$ 后的最优价值；$p(s',r\mid s,a)$ 是 next state 和 reward 的联合概率；$P(s'\mid s,a)$ 是 transition probability；$R(s,a)$ 是 expected immediate reward。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Optimal value 先选最好的 first action，然后假设未来也一直 optimal。$Q^*$ 形式就是：当前 reward，加上到达 $s'$ 后继续选择最佳 action 的价值。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Optimal value 先选最好的 first action，然后假设未来也一直 optimal。$Q^*$ 形式就是：当前 reward，加上到达 $s'$ 后继续选择最佳 action 的价值。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新 state values 时用 $V^*$ 形式；更新 state-action values 时用 $Q^*$ 形式。看到 optimality，就把 policy average 换成 max over actions。</p>
     </div>
     <div class="callout formula"><div class="head">最优策略</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ \pi^*(s)\in\arg\max_{a\in\mathcal{A}}\sum_{s',r}p(s',r\mid s,a)\bigl[r+\gamma V^*(s')\bigr] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\pi^*(s)$ 是 state $s$ 的一个 optimal action；$\arg\max_a$ 返回让 value 最大的 action。若多个 actions 并列最大，任选一个固定 tie-breaking，就得到 deterministic optimal policy。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 有 $Q^*$ 时，greedy 很直接：比较 $Q^*(s,a)$。只有 $V^*$ 时，需要用环境模型 $p$ 或 $P,R$ 做一步 lookahead 才能比较 actions。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 value iteration、policy iteration 或 Q-learning 之后抽取 policy 的步骤。$Q^*$ 的好处是：决策时不必知道 transition dynamics，直接选 $\arg\max_a Q^*(s,a)$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 有 $Q^*$ 时，greedy 很直接：比较 $Q^*(s,a)$。只有 $V^*$ 时，需要用环境模型 $p$ 或 $P,R$ 做一步 lookahead 才能比较 actions。</p>
     </div>
     <div class="callout formula wide"><div class="head">Bellman operator 是 $\gamma$-contraction</div>
       <div class="eq">$$ (TV)(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V(s')\right] $$</div>
       <div class="eq">$$ \lVert TV-TU\rVert_\infty\le \gamma\lVert V-U\rVert_\infty $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> T: Bellman 最优算子；||·||∞: 所有状态最大绝对差；U,V: 两个候选 value function；γ: 折扣 / 收缩系数</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $T$ 表示做一次最优 Bellman backup。Contraction 不等式说明反复 backup 会让 value function 误差最多按 $\gamma$ 收缩。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它解释 value iteration 为什么收敛：因为 $\gamma&lt;1$，反复套 $T$ 会逼近唯一 fixed point $V^*$，而且与 initial guess 无关。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> $T$ 表示做一次最优 Bellman backup。Contraction 不等式说明反复 backup 会让 value function 误差最多按 $\gamma$ 收缩。</p>
     </div>
   </div>
 

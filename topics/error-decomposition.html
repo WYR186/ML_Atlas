@@ -74,52 +74,25 @@
     +\underbrace{\left(\inf_{g\in\mathcal{F}}\epsilon_\mu(g)-\epsilon_\mu^*\right)}_{\text{approximation error}}
     +\underbrace{\epsilon_\mu^*}_{\text{Bayes error}}
     $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
-
-    <ul>
-      <li>$\epsilon_\mu(f)$ is the true/test error of predictor $f$ under the data distribution $\mu$.</li>
-      <li>$\mathcal{F}$ is the hypothesis class you allowed, such as linear classifiers or trees.</li>
-      <li>$g\in\mathcal{F}$ means "any candidate predictor inside this class."</li>
-      <li>$\inf_{g\in\mathcal{F}}\epsilon_\mu(g)$ is the smallest true error achievable by any predictor in $\mathcal{F}$.</li>
-      <li>$\epsilon_\mu^*$ is Bayes error, the best possible error if there were no restriction to $\mathcal{F}$.</li>
-    </ul>
-    <p><b>How to read it.</b> The equality adds and subtracts the same best-in-class error. The first gap asks how far the learned $f$ is from the best member of $\mathcal{F}$. The second gap asks how far the best member of $\mathcal{F}$ is from Bayes optimal. The last term is irreducible noise.</p>
-    <p><b>How to use.</b> More data mainly shrinks estimation error for fixed $\mathcal{F}$; a richer $\mathcal{F}$ can shrink approximation error but may make estimation harder; changing only the learner cannot remove Bayes error.</p>
+    <p><b>What it does.</b> The equality adds and subtracts the same best-in-class error. The first gap asks how far the learned $f$ is from the best member of $\mathcal{F}$. The second gap asks how far the best member of $\mathcal{F}$ is from Bayes optimal. The last term is irreducible noise.</p>
   </div>
   <div class="callout formula">
     <div class="head">Squared-loss cousin: bias, variance, noise</div>
     <div class="eq">$$ \mathbb{E}\big[(\hat f(x)-y)^2\big]=\mathrm{Bias}(\hat f(x))^2+\mathrm{Var}(\hat f(x))+\mathrm{Noise} $$</div>
-    <p><b>How to read it.</b> For regression with squared loss, the same diagnosis appears as bias, variance, and noise. Noise parallels Bayes error; bias roughly tracks model-class mismatch; variance tracks how much the learned predictor changes across training sets.</p>
-    <p><b>How to use.</b> Do not confuse the two decompositions algebraically. Error decomposition is written with a fixed hypothesis class $\mathcal{F}$ and true risk; bias-variance-noise is an expectation over possible training sets under squared loss.</p>
+    <p><b>What it does.</b> For regression with squared loss, the same diagnosis appears as bias, variance, and noise. Noise parallels Bayes error; bias roughly tracks model-class mismatch; variance tracks how much the learned predictor changes across training sets.</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Best-in-class predictor</div>
       <div class="eq">$$ f_{\mathcal{F}}^*\in\arg\min_{g\in\mathcal{F}}\epsilon_\mu(g) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This names the ideal predictor inside the chosen hypothesis class. It is the benchmark for estimation error, even though the learner does not know it directly.</p>
 
-      <ul>
-        <li>$f_{\mathcal{F}}^*$ is one predictor in $\mathcal{F}$ with minimum true error.</li>
-        <li>$\arg\min$ returns the input/predictor that achieves the minimum, not the minimum value itself.</li>
-        <li>The star means "optimal," and the subscript $\mathcal{F}$ means "optimal within this class."</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This names the ideal predictor inside the chosen hypothesis class. It is the benchmark for estimation error, even though the learner does not know it directly.</p>
-
-      <p><b>How to use.</b> Compare your learned model to $f_{\mathcal{F}}^*$ when a question asks about finite-sample learning gap.</p>
     </div>
     <div class="callout formula">
       <div class="head">Learned predictor</div>
       <div class="eq">$$ \hat f=\mathcal{A}(\mathcal{D}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This says the actual predictor is the output of an algorithm applied to a finite random dataset, so it can change when the sample changes.</p>
 
-      <ul>
-        <li>$\mathcal{D}$ is the training set.</li>
-        <li>$\mathcal{A}$ is the learning algorithm, such as ERM, SVM training, or tree induction.</li>
-        <li>The hat in $\hat f$ means the predictor is data-dependent and random through $\mathcal{D}$.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This says the actual predictor is the output of an algorithm applied to a finite random dataset, so it can change when the sample changes.</p>
-
-      <p><b>How to use.</b> When $\mathcal{D}$ changes, $\hat f$ can change; that is why estimation error is a finite-sample issue.</p>
     </div>
   </div>
   <div class="callout">

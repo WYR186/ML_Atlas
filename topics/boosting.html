@@ -78,61 +78,45 @@
       <div class="head">Additive ensemble</div>
       <div class="eq">$$ F_m(x)=F_{m-1}(x)+\alpha_m G_m(x) $$</div>
       <div class="eq">$$ G(x)=\operatorname{sign}\!\left(F_M(x)\right)=\operatorname{sign}\!\left(\sum_{m=1}^{M}\alpha_mG_m(x)\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F_m(x)$ is the ensemble score after round $m$. $G_m(x)$ is the weak classifier added at that round. $\alpha_m$ is that classifier's voting weight. $M$ is the total number of rounds.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> AdaBoost does not average classifiers equally. It adds a signed, weighted vote from each weak learner, then takes the sign of the final score.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a new point, compute every weak learner's prediction, multiply by its $\alpha_m$, sum them, and predict $+1$ if the sum is positive and $-1$ if it is negative.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> AdaBoost does not average classifiers equally. It adds a signed, weighted vote from each weak learner, then takes the sign of the final score.</p>
     </div>
     <div class="callout formula">
       <div class="head">Weighted error</div>
       <div class="eq">$$ err_m=\frac{\sum_{i=1}^{N}w_i\,\mathbf{1}\!\left[y_i\ne G_m(x_i)\right]}{\sum_{i=1}^{N}w_i} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i$ is the current weight of example $i$. $\mathbf{1}[\cdot]$ is an indicator: 1 if the statement is true, 0 otherwise. $N$ is the number of training examples.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is the fraction of total weight placed on the examples that the current weak learner gets wrong.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Do not count mistakes equally. Add the weights of the misclassified examples, divide by total weight, then use this $err_m$ to compute $\alpha_m$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is the fraction of total weight placed on the examples that the current weak learner gets wrong.</p>
     </div>
     <div class="callout formula">
       <div class="head">Classifier coefficient</div>
       <div class="eq">$$ \alpha_m=\frac12\log\frac{1-err_m}{err_m} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $err_m$ is the weighted error of weak learner $m$. $\alpha_m$ is its coefficient in the ensemble. The log compares correct weighted mass $1-err_m$ against mistaken mass $err_m$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If $err_m&lt;0.5$, then $\alpha_m&gt;0$ and the learner is trusted. If $err_m=0.5$, then $\alpha_m=0$. If $err_m&gt;0.5$, $\alpha_m&lt;0$, which effectively flips the learner's vote.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> If $err_m&lt;0.5$, then $\alpha_m&gt;0$ and the learner is trusted. If $err_m=0.5$, then $\alpha_m=0$. If $err_m&gt;0.5$, $\alpha_m&lt;0$, which effectively flips the learner's vote.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute weighted error first, plug it into the log formula, and watch the edge cases: as $err_m\to0$, $\alpha_m$ becomes very large.</p>
     </div>
     <div class="callout formula">
       <div class="head">Exponential loss</div>
       <div class="eq">$$ L(F)=\frac1N\sum_{i=1}^N \exp(-y_iF(x_i)) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$ is the number of training examples. $y_i\in\{-1,+1\}$ is the true label. $F(x_i)$ is the ensemble score. $y_iF(x_i)$ is the margin: positive means correct with confidence, negative means wrong.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Exponential loss punishes low or negative margins heavily, so badly handled examples dominate the next round.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If $y_iF(x_i)<0$, the example is misclassified and $\exp(-y_iF(x_i))$ is large. Those examples get more attention.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Exponential loss punishes low or negative margins heavily, so badly handled examples dominate the next round.</p>
     </div>
     <div class="callout formula">
       <div class="head">Example weights</div>
       <div class="eq">$$ w_i^{(m)}=\exp(-y_iF_{m-1}(x_i)) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(m)}$ is the weight of training example $i$ before round $m$. $F_{m-1}$ is the ensemble before adding $G_m$. A larger $w_i$ means the next weak learner should care more about that example.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The weight is an exponential transform of the current margin. Poorly classified points receive large weights.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The weight is an exponential transform of the current margin. Poorly classified points receive large weights.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Train the next weak classifier using these weights, so it focuses on examples the previous ensemble handled poorly.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Weight update after round $m$</div>
       <div class="eq">$$ w_i^{(m+1)}\propto w_i^{(m)}\exp\!\left(-\alpha_m y_i G_m(x_i)\right) $$</div>
       <div class="eq">$$ w_i\leftarrow w_i\exp\!\left(\alpha_m\mathbf{1}[y_i\ne G_m(x_i)]\right),\quad\text{normalize} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w_i^{(m)}$ is the old sample weight. $\alpha_m$ is the classifier weight. $y_iG_m(x_i)$ equals $+1$ for a correct prediction and $-1$ for a mistake. $\propto$ means normalize afterward so weights sum to 1.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Correct predictions are multiplied by $e^{-\alpha_m}$ and shrink. Mistakes are multiplied by $e^{\alpha_m}$ and grow.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Update every sample weight, normalize, then train the next weak learner on the new weighted dataset. If the algorithm box uses the indicator version, read it as the same operational rule: mistakes are scaled up before normalization.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Correct predictions are multiplied by $e^{-\alpha_m}$ and shrink. Mistakes are multiplied by $e^{\alpha_m}$ and grow.</p>
     </div>
     <div class="callout formula">
       <div class="head">Population minimizer of exponential loss</div>
       <div class="eq">$$ f^*(x)=\frac12\log\frac{\Pr(Y=1\mid x)}{\Pr(Y=-1\mid x)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $f^*(x)$ is the best real-valued score under exponential loss. $\Pr(Y=1\mid x)$ and $\Pr(Y=-1\mid x)$ are the class posterior probabilities.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The optimal score is half of the log-odds. Positive score means class $+1$ is more likely; negative score means class $-1$ is more likely.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This explains why the sign of $F(x)$ is a classifier: the sign follows the more probable class.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The optimal score is half of the log-odds. Positive score means class $+1$ is more likely; negative score means class $-1$ is more likely.</p>
     </div>
     <div class="callout formula">
       <div class="head">Weak-edge training bound</div>
       <div class="eq">$$ L_S(h_T)\le \exp(-2\gamma^2T) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $L_S(h_T)$ is training error after $T$ rounds. $\gamma$ is the weak learner's edge: each round has $err_t\le 1/2-\gamma$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If every weak learner beats random guessing by a fixed margin, the training error drops exponentially fast with the number of rounds.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In theory questions, state the edge assumption first, then quote the exponential decay in $T$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> If every weak learner beats random guessing by a fixed margin, the training error drops exponentially fast with the number of rounds.</p>
     </div>
   </div>
 
@@ -257,60 +241,44 @@
           <div class="head">Additive ensemble</div>
           <div class="eq">$$ F_m(x)=F_{m-1}(x)+\alpha_m G_m(x) $$</div>
           <div class="eq">$$ G(x)=\operatorname{sign}\!\left(F_M(x)\right)=\operatorname{sign}\!\left(\sum_{m=1}^{M}\alpha_mG_m(x)\right) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F_m(x)$ 是第 $m$ 轮后的 ensemble score；$G_m(x)$ 是第 $m$ 个 weak classifier；$\alpha_m$ 是它的 voting weight；$M$ 是 boosting rounds 总数。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> AdaBoost 不是简单平均 classifiers，而是把每个 weak learner 的 signed weighted vote 加起来，最后看总分正负。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对新点 $x$，先让所有 weak learners 预测，分别乘 $\alpha_m$，求和；总和为正预测 $+1$，为负预测 $-1$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> AdaBoost 不是简单平均 classifiers，而是把每个 weak learner 的 signed weighted vote 加起来，最后看总分正负。</p>
         </div>
         <div class="callout formula">
           <div class="head">Weighted error</div>
           <div class="eq">$$ err_m=\frac{\sum_{i=1}^{N}w_i\,\mathbf{1}\!\left[y_i\ne G_m(x_i)\right]}{\sum_{i=1}^{N}w_i} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i$ 是第 $i$ 个样本当前的 weight；$\mathbf{1}[\cdot]$ 是 indicator，条件成立为 1，否则为 0；$N$ 是 training examples 数量。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 它不是普通 error rate，而是“错分样本占了多少总权重”。难样本权重大，所以错一个难样本代价更高。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把所有错分样本的 weights 加起来，除以总 weight，再用这个 $err_m$ 计算 $\alpha_m$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 它不是普通 error rate，而是“错分样本占了多少总权重”。难样本权重大，所以错一个难样本代价更高。</p>
         </div>
         <div class="callout formula">
           <div class="head">Classifier coefficient</div>
           <div class="eq">$$ \alpha_m=\frac12\log\frac{1-err_m}{err_m} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $err_m$ 是第 $m$ 个 weak learner 的 weighted error；$\alpha_m$ 是它在 ensemble 里的 coefficient；log 里比较的是正确权重质量 $1-err_m$ 和错误权重质量 $err_m$。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 若 $err_m&lt;0.5$，则 $\alpha_m&gt;0$，说明 learner 比 random guessing 好；若 $err_m=0.5$，$\alpha_m=0$；若 $err_m&gt;0.5$，$\alpha_m&lt;0$，相当于 flip 它的预测方向。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 weighted error，再代入 log。注意边界：$err_m\to0$ 时 $\alpha_m$ 会非常大。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 若 $err_m&lt;0.5$，则 $\alpha_m&gt;0$，说明 learner 比 random guessing 好；若 $err_m=0.5$，$\alpha_m=0$；若 $err_m&gt;0.5$，$\alpha_m&lt;0$，相当于 flip 它的预测方向。</p>
         </div>
         <div class="callout formula">
           <div class="head">Exponential loss</div>
           <div class="eq">$$ L(F)=\frac1N\sum_{i=1}^N \exp(-y_iF(x_i)) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$ 是 training examples 数量；$y_i\in\{-1,+1\}$ 是真实 label；$F(x_i)$ 是 ensemble score；$y_iF(x_i)$ 是 margin，正值表示分类正确且有信心，负值表示错分。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Exponential loss 会特别惩罚 margin 小或为负的样本，所以这些样本会主导下一轮学习。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 $y_iF(x_i)<0$，样本被错分，$\exp(-y_iF(x_i))$ 会很大；下一轮就要更关注它。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Exponential loss 会特别惩罚 margin 小或为负的样本，所以这些样本会主导下一轮学习。</p>
         </div>
         <div class="callout formula">
           <div class="head">Example weights</div>
           <div class="eq">$$ w_i^{(m)}=\exp(-y_iF_{m-1}(x_i)) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(m)}$ 是第 $i$ 个样本在第 $m$ 轮前的 weight；$F_{m-1}$ 是加入新 learner 前的 ensemble；weight 越大，下一轮越需要关心这个样本。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Weight 是当前 margin 的 exponential transform。当前分得越差，weight 越大。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Weight 是当前 margin 的 exponential transform。当前分得越差，weight 越大。</p>
 
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这些 weights 训练下一轮 weak classifier，让它更努力处理之前分错或低置信度的样本。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Weight update after round $m$</div>
           <div class="eq">$$ w_i^{(m+1)}\propto w_i^{(m)}\exp\!\left(-\alpha_m y_i G_m(x_i)\right) $$</div>
           <div class="eq">$$ w_i\leftarrow w_i\exp\!\left(\alpha_m\mathbf{1}[y_i\ne G_m(x_i)]\right),\quad\text{normalize} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w_i^{(m)}$ 是旧 sample weight；$\alpha_m$ 是 classifier weight；$y_iG_m(x_i)=+1$ 表示预测正确，$-1$ 表示预测错误；$\propto$ 表示更新后还要 normalize。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 预测正确时权重乘 $e^{-\alpha_m}$ 变小；预测错误时权重乘 $e^{\alpha_m}$ 变大。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 更新所有 sample weights，normalize 到总和为 1，再训练下一轮 weak learner。如果 algorithm box 写成 indicator version，就按同一个操作理解：错分样本先被 scale up，再 normalize。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 预测正确时权重乘 $e^{-\alpha_m}$ 变小；预测错误时权重乘 $e^{\alpha_m}$ 变大。</p>
         </div>
         <div class="callout formula">
           <div class="head">Population minimizer of exponential loss</div>
           <div class="eq">$$ f^*(x)=\frac12\log\frac{\Pr(Y=1\mid x)}{\Pr(Y=-1\mid x)} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $f^*(x)$ 是 exponential loss 下最优的 real-valued score；$\Pr(Y=1\mid x)$ 和 $\Pr(Y=-1\mid x)$ 是两个 class posterior probabilities。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 最优 score 是 log-odds 的一半。score 为正表示 $+1$ 更可能，为负表示 $-1$ 更可能。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这解释了为什么最终用 $\operatorname{sign}(F(x))$ 做 classifier：sign 对应 posterior 更大的类别。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 最优 score 是 log-odds 的一半。score 为正表示 $+1$ 更可能，为负表示 $-1$ 更可能。</p>
         </div>
         <div class="callout formula">
           <div class="head">Weak-edge training bound</div>
           <div class="eq">$$ L_S(h_T)\le \exp(-2\gamma^2T) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $L_S(h_T)$ 是 $T$ 轮后的 training error；$\gamma$ 是 weak learner 的 edge，即每轮满足 $err_t\le 1/2-\gamma$。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 只要每个 weak learner 都稳定地比 random guessing 好一点，training error 就会随 rounds 指数下降。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 理论题先写 weak edge assumption，再写 error 随 $T$ 的 exponential decay。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 只要每个 weak learner 都稳定地比 random guessing 好一点，training error 就会随 rounds 指数下降。</p>
         </div>
       </div>
 

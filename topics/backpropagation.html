@@ -77,69 +77,51 @@
   <div class="callout formula">
     <div class="head">Gradient notation</div>
     <div class="eq">$$ \bar{v}\equiv \frac{\partial L}{\partial v} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $L$: scalar loss at the end of the computation graph； $v$: any intermediate value or parameter； $\bar v$: gradient of the loss with respect to $v$</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The bar notation measures blame: how strongly changing this value would change the final loss.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The bar notation measures blame: how strongly changing this value would change the final loss.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Run the forward pass first. In the backward pass, initialize $\bar L=1$ and propagate gradients to earlier nodes.</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Chain rule on one edge</div>
       <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\bar y$: upstream gradient arriving from later nodes； $\partial y/\partial x$: local derivative of the current operation； $\bar x$: gradient to pass to the previous value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Backprop is just the chain rule organized so every reused partial derivative is computed once.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> At each node, multiply the upstream gradient by the local derivative. Repeat this node by node from the loss back to the inputs and parameters.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Backprop is just the chain rule organized so every reused partial derivative is computed once.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gradient accumulation</div>
       <div class="eq">$$ \bar{x}=\sum_{j:\,x\to y_j}\bar{y}_j\frac{\partial y_j}{\partial x} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x\to y_j$: $x$ feeds into several downstream values $y_j$； $\bar y_j$: gradient contribution arriving from path $j$； $\sum_j$: add contributions from all branches</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If one value affects the loss through multiple routes, total blame is the sum of blame from every route.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> If one value affects the loss through multiple routes, total blame is the sum of blame from every route.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> When a variable branches, add all returned gradients into the same accumulator. In code this is why repeated use of a tensor accumulates into one .grad field.</p>
     </div>
     <div class="callout formula">
       <div class="head">Output error for canonical losses</div>
       <div class="eq">$$ \delta_k = y_k-t_k $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_k$ is the model output for output unit $k$. $t_k$ is the target value. $\delta_k$ is the output-layer error signal, usually the gradient with respect to the output pre-activation under a matching loss/link pair.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For sigmoid or softmax paired with cross-entropy, the scary derivative simplifies to prediction minus target.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Start the output-layer backward pass with this value, then propagate it into weights and hidden units. Check the sign convention in the problem; some notes define the opposite error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> For sigmoid or softmax paired with cross-entropy, the scary derivative simplifies to prediction minus target.</p>
     </div>
     <div class="callout formula">
       <div class="head">Hidden unit error</div>
       <div class="eq">$$ \delta_j = h'(a_j)\sum_k w_{kj}\delta_k $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a_j$ is hidden unit $j$'s pre-activation. $h'(a_j)$ is the activation derivative. $w_{kj}$ connects hidden unit $j$ to upper-layer unit $k$. $\delta_k$ is the upper-layer error signal.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A hidden unit receives blame from every upper unit it affects, then scales that blame by its own activation derivative.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Sum weighted errors from the next layer first, then multiply by the local derivative. For $\tanh$, use $h'(a)=1-\tanh^2(a)$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A hidden unit receives blame from every upper unit it affects, then scales that blame by its own activation derivative.</p>
     </div>
     <div class="callout formula">
       <div class="head">Neuron weight gradient</div>
       <div class="eq">$$ \frac{\partial E_n}{\partial w_{ji}}=\delta_j z_i $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $E_n$ is the loss for example $n$. $w_{ji}$ connects input unit $i$ to unit $j$. $z_i$ is the input-side activation. $\delta_j$ is the error signal at the receiving unit.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A weight changes the loss in proportion to the error at the output end and the activation that entered the weight.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Once $\delta_j$ is known, multiply it by each incoming activation to get the gradient for each incoming weight.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A weight changes the loss in proportion to the error at the output end and the activation that entered the weight.</p>
     </div>
     <div class="callout formula">
       <div class="head">Affine layer backward pass</div>
       <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
       <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $a$: input activation to the layer； $W,b$: weight matrix and bias vector； $z$: pre-activation output； $g_z$: upstream gradient at $z$； $g_z a^\top$: outer product that has the same shape as $W$</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A weight gradient is upstream error times the input that weight saw. The transpose sends the error signal back to the previous layer.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use these formulas for a single example after you know $g_z$. For a mini-batch, compute the same contributions per example and sum or average according to the loss convention.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A weight gradient is upstream error times the input that weight saw. The transpose sends the error signal back to the previous layer.</p>
     </div>
     <div class="callout formula">
       <div class="head">Batch matrix form</div>
       <div class="eq">$$ \frac{\partial L}{\partial X}=G_YW^\top,\qquad \frac{\partial L}{\partial W}=X^\top G_Y $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X$ stores input row vectors for a batch. $Y=XW$ is the affine output. $G_Y=\partial L/\partial Y$ is the upstream gradient matrix.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The upstream gradient flows back through $W^\top$, while the weight gradient is an input-transpose times upstream-gradient product.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the row-vector batch version often used in code. Compare shapes before multiplying: $X^\top G_Y$ must match $W$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The upstream gradient flows back through $W^\top$, while the weight gradient is an input-transpose times upstream-gradient product.</p>
     </div>
     <div class="callout formula">
       <div class="head">ReLU backward pass</div>
       <div class="eq">$$ a=\operatorname{ReLU}(z),\qquad \frac{\partial L}{\partial z}=\frac{\partial L}{\partial a}\odot \mathbf{1}[z>0] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\odot$: elementwise multiplication； $\mathbf{1}[z&gt;0]$: mask that is $1$ where the forward pre-activation was positive and $0$ otherwise； $\partial L/\partial a$: upstream gradient after the ReLU</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Inactive ReLU units were clipped to zero, so small changes behind them do not affect the output locally.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Keep the upstream gradient only where ReLU was active in the forward pass. Zero it out where the pre-activation was negative.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Inactive ReLU units were clipped to zero, so small changes behind them do not affect the output locally.</p>
     </div>
   </div>
 
@@ -240,69 +222,51 @@
       <div class="callout formula">
         <div class="head">Gradient notation：bar 符号怎么读</div>
         <div class="eq">$$ \bar{v}\equiv \frac{\partial L}{\partial v} $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $L$: computation graph 最后的 scalar loss；$v$: 任意 intermediate value 或 parameter；$\bar v$: loss 对 $v$ 的 gradient</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> bar notation 可以理解成 blame：这个值稍微改变，会让最终 loss 改变多少。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> bar notation 可以理解成 blame：这个值稍微改变，会让最终 loss 改变多少。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先做 forward pass。Backward 时从 $\bar L=1$ 开始，把 gradient 一层层往前传。</p>
       </div>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">单条边上的 chain rule</div>
           <div class="eq">$$ \bar{x}=\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\frac{\partial y}{\partial x}=\bar{y}\frac{\partial y}{\partial x} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\bar y$: 从后面节点传回来的 upstream gradient；$\partial y/\partial x$: 当前这个 operation 的 local derivative；$\bar x$: 继续往前传给 $x$ 的 gradient</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Backprop 本质就是 chain rule，只是把重复的 partial derivative 组织起来复用。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 每到一个节点，就做 upstream gradient × local derivative。沿着 graph 从 loss 往 input / parameters 一步步倒推。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Backprop 本质就是 chain rule，只是把重复的 partial derivative 组织起来复用。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gradient accumulation：分叉要相加</div>
           <div class="eq">$$ \bar{x}=\sum_{j:\,x\to y_j}\bar{y}_j\frac{\partial y_j}{\partial x} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x\to y_j$: $x$ 同时喂给多个 downstream values $y_j$；$\bar y_j$: 第 $j$ 条路径传回来的 gradient contribution；$\sum_j$: 把所有 branch 的 contribution 相加</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个值如果通过多条路径影响 loss，总责任就是每条路径责任的总和。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 一个值如果通过多条路径影响 loss，总责任就是每条路径责任的总和。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 变量分叉时，把所有回来的 gradient 都加到同一个 accumulator。代码里的同一个 tensor 被重复使用时，也会累加到同一个 .grad。</p>
         </div>
         <div class="callout formula">
           <div class="head">Canonical loss 的 output error</div>
           <div class="eq">$$ \delta_k = y_k-t_k $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_k$ 是第 $k$ 个 output unit 的 prediction；$t_k$ 是 target；$\delta_k$ 是 output layer 的 error signal，通常是 matching loss/link 下对 output pre-activation 的 gradient。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Sigmoid 或 softmax 搭配 cross-entropy 时，复杂 derivative 会简化成 prediction minus target。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Output layer backward 从这个值开始，再把它传给 weights 和 hidden units。注意题目/讲义的 sign convention，有些地方会定义成相反方向。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Sigmoid 或 softmax 搭配 cross-entropy 时，复杂 derivative 会简化成 prediction minus target。</p>
         </div>
         <div class="callout formula">
           <div class="head">Hidden unit error</div>
           <div class="eq">$$ \delta_j = h'(a_j)\sum_k w_{kj}\delta_k $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a_j$ 是 hidden unit $j$ 的 pre-activation；$h'(a_j)$ 是 activation derivative；$w_{kj}$ 连接 hidden unit $j$ 到上一层的 unit $k$；$\delta_k$ 是上层传回来的 error signal。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Hidden unit 从所有受它影响的上层 units 收到“责任”，再乘上自己的 activation derivative。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先把 next layer 的 weighted errors 求和，再乘 local derivative。若 $h=\tanh$，则 $h'(a)=1-\tanh^2(a)$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Hidden unit 从所有受它影响的上层 units 收到“责任”，再乘上自己的 activation derivative。</p>
         </div>
         <div class="callout formula">
           <div class="head">Neuron weight gradient</div>
           <div class="eq">$$ \frac{\partial E_n}{\partial w_{ji}}=\delta_j z_i $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $E_n$ 是第 $n$ 个样本的 loss；$w_{ji}$ 连接 input unit $i$ 到 unit $j$；$z_i$ 是 input-side activation；$\delta_j$ 是 receiving unit 的 error signal。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一个 weight 的 gradient = 输出端 error × 输入端当时给它的 activation。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 已知 $\delta_j$ 后，对每条 incoming weight，都乘对应的 input activation $z_i$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 一个 weight 的 gradient = 输出端 error × 输入端当时给它的 activation。</p>
         </div>
         <div class="callout formula">
           <div class="head">Affine layer 的 backward pass</div>
           <div class="eq">$$ z=Wa+b,\qquad g_z=\frac{\partial L}{\partial z} $$</div>
           <div class="eq">$$ \frac{\partial L}{\partial W}=g_z a^\top,\qquad \frac{\partial L}{\partial b}=g_z,\qquad \frac{\partial L}{\partial a}=W^\top g_z $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $a$: 这一层的 input activation；$W,b$: weight matrix 和 bias vector；$z$: pre-activation output；$g_z$: $z$ 处的 upstream gradient；$g_z a^\top$: outer product，shape 和 $W$ 一样</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> weight gradient = 上游 error × 这个 weight 当时看到的 input。转置 $W^\top$ 则把 error signal 送回上一层。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 已知 $g_z$ 后，单样本直接套这些公式。Mini-batch 时对每个 example 算同样的 contribution，再按 loss 的定义 sum 或 average。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> weight gradient = 上游 error × 这个 weight 当时看到的 input。转置 $W^\top$ 则把 error signal 送回上一层。</p>
         </div>
         <div class="callout formula">
           <div class="head">Batch matrix form</div>
           <div class="eq">$$ \frac{\partial L}{\partial X}=G_YW^\top,\qquad \frac{\partial L}{\partial W}=X^\top G_Y $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X$ 存一个 batch 的 row-vector inputs；$Y=XW$ 是 affine output；$G_Y=\partial L/\partial Y$ 是 upstream gradient matrix。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Upstream gradient 通过 $W^\top$ 传回 input；weight gradient 是 input-transpose 乘 upstream-gradient。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是代码里常见的 row-vector batch 写法。先检查 shapes：$X^\top G_Y$ 必须和 $W$ 同 shape。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Upstream gradient 通过 $W^\top$ 传回 input；weight gradient 是 input-transpose 乘 upstream-gradient。</p>
         </div>
         <div class="callout formula">
           <div class="head">ReLU 的 backward pass</div>
           <div class="eq">$$ a=\operatorname{ReLU}(z),\qquad \frac{\partial L}{\partial z}=\frac{\partial L}{\partial a}\odot \mathbf{1}[z>0] $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\odot$: elementwise multiplication；$\mathbf{1}[z&gt;0]$: mask：forward 时 $z$ 为正处为 $1$，否则为 $0$；$\partial L/\partial a$: ReLU 后面传回来的 upstream gradient</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 没激活的 ReLU unit 被截成了 $0$，所以局部上它后面的微小变化不会影响输出。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> forward 时 ReLU 激活的位置保留 upstream gradient；pre-activation 为负的位置直接清零。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 没激活的 ReLU unit 被截成了 $0$，所以局部上它后面的微小变化不会影响输出。</p>
         </div>
       </div>
 

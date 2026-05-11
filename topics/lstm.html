@@ -72,17 +72,13 @@
     <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
     <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
     <div class="eq">$$ \tilde c^{(t)}=\tanh(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x^{(t)}$ is current input and $h^{(t-1)}$ is previous hidden state. $i^{(t)}$ is the input gate, $f^{(t)}$ the forget gate, $o^{(t)}$ the output gate, and $\tilde c^{(t)}$ the candidate memory. Each $W$ and $b$ is gate-specific. $\sigma$ is sigmoid, so gate values lie between 0 and 1.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each gate looks at the current input and previous hidden state, then outputs a soft switch. Near 0 means closed; near 1 means open.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Each gate looks at the current input and previous hidden state, then outputs a soft switch. Near 0 means closed; near 1 means open.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute the three gates and candidate memory first. Then plug them into the cell-state and hidden-state update formulas.</p>
   </div>
   <div class="callout formula">
     <div class="head">Cell and hidden updates</div>
     <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c^{(t)}$ is internal cell memory. $f^{(t)}\odot c^{(t-1)}$ keeps old memory coordinate by coordinate. $i^{(t)}\odot\tilde c^{(t)}$ writes new candidate memory. $o^{(t)}$ controls how much updated memory becomes visible as $h^{(t)}$. $\odot$ means elementwise multiplication.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The cell update is keep-old-memory plus write-new-memory. The plus sign is the key: memory can flow additively instead of being overwritten every step.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> If a problem gives gate values directly, skip matrix multiplications and plug vectors into the cell equation coordinate by coordinate.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The cell update is keep-old-memory plus write-new-memory. The plus sign is the key: memory can flow additively instead of being overwritten every step.</p>
   </div>
   <div class="callout formula" id="eq-lstm-gru-summary">
     <div class="head">GRU summary</div>
@@ -90,9 +86,7 @@
     <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
     <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
     <p style="font-size:13px;margin:6px 0 4px;"><b>Three lines = one GRU step.</b> Line 1 computes the two gates from the current input and previous hidden state. Line 2 computes a <b>candidate</b> hidden state $\tilde h^{(t)}$ — like a vanilla-RNN proposal, except the previous state is first masked by the reset gate $r^{(t)}\odot h^{(t-1)}$ so the candidate can ignore stale context. Line 3 blends the candidate with the previous state using the update gate.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>Symbols.</b> $z^{(t)}$ is the update / keep gate in this convention; $r^{(t)}$ is the reset gate; $\tilde h^{(t)}$ is the candidate hidden state; $W_{\tilde h x}, W_{\tilde h h}, b_{\tilde h}$ are the candidate's own weights (separate from the gate weights); $\odot$ is elementwise multiplication.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> GRU blends old hidden state with the candidate using <i>fewer</i> gates than an LSTM (no separate cell state, no output gate). With this written convention, large $z^{(t)}$ keeps more old hidden state.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Compute $z, r$ first, then $\tilde h^{(t)}$ (don't forget the reset mask on $h^{(t-1)}$), then the blended $h^{(t)}$ coordinate by coordinate. Always look at the formula before explaining $z$'s direction — some textbooks flip the convention.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> GRU blends old hidden state with the candidate using <i>fewer</i> gates than an LSTM (no separate cell state, no output gate). With this written convention, large $z^{(t)}$ keeps more old hidden state.</p>
     <p style="font-size:13px;margin:4px 0 0;"><b>Why the candidate matters.</b> Without the $\tilde h$ line, the GRU is incomplete — the update equation $h^{(t)}=(1-z)\odot\tilde h+z\odot h^{(t-1)}$ alone doesn't tell you what $\tilde h$ is. HW3-style "fill in the GRU forward pass" or "back-prop through one GRU step" questions almost always ask about this middle line.</p>
   </div>
 
@@ -169,17 +163,13 @@
         <div class="eq">$$ f^{(t)}=\sigma(W_{fx}x^{(t)}+W_{fh}h^{(t-1)}+b_f) $$</div>
         <div class="eq">$$ o^{(t)}=\sigma(W_{ox}x^{(t)}+W_{oh}h^{(t-1)}+b_o) $$</div>
         <div class="eq">$$ \tilde c^{(t)}=\tanh(W_{cx}x^{(t)}+W_{ch}h^{(t-1)}+b_c) $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x^{(t)}$ 是当前 input，$h^{(t-1)}$ 是上一 hidden state；$i^{(t)}$ 是 input gate，$f^{(t)}$ 是 forget gate，$o^{(t)}$ 是 output gate，$\tilde c^{(t)}$ 是 candidate memory。每组 $W,b$ 都属于对应 gate；$\sigma$ 是 sigmoid，所以 gate 值在 0 到 1 之间。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每个 gate 都看当前 input 和上一 hidden state，然后输出一个 soft switch。接近 0 表示关，接近 1 表示开。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 每个 gate 都看当前 input 和上一 hidden state，然后输出一个 soft switch。接近 0 表示关，接近 1 表示开。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算三个 gates 和 candidate memory，再把它们代入 cell state / hidden state 更新公式。</p>
       </div>
       <div class="callout formula">
         <div class="head">cell state 与 hidden state</div>
         <div class="eq">$$ c^{(t)}=f^{(t)}\odot c^{(t-1)}+i^{(t)}\odot \tilde c^{(t)}, \qquad h^{(t)}=o^{(t)}\odot \sigma_h(c^{(t)}) $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c^{(t)}$ 是内部 cell memory；$f^{(t)}\odot c^{(t-1)}$ 表示逐坐标保留旧 memory；$i^{(t)}\odot\tilde c^{(t)}$ 表示写入新 candidate memory；$o^{(t)}$ 控制多少 memory 暴露成 $h^{(t)}$；$\odot$ 是 elementwise multiplication。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Cell update = 保留旧记忆 + 写入新记忆。中间的加号很关键：memory 可以 additive 地流动，而不是每一步都完全覆盖。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果题目直接给 gate values，就跳过矩阵乘法，把向量逐坐标代进 cell equation。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Cell update = 保留旧记忆 + 写入新记忆。中间的加号很关键：memory 可以 additive 地流动，而不是每一步都完全覆盖。</p>
       </div>
       <div class="callout formula" id="eq-lstm-gru-summary-cn">
         <div class="head">GRU 速记</div>
@@ -187,9 +177,7 @@
         <div class="eq">$$ \tilde h^{(t)}=\tanh(W_{\tilde h x}x^{(t)}+W_{\tilde h h}(r^{(t)}\odot h^{(t-1)})+b_{\tilde h}) $$</div>
         <div class="eq">$$ h^{(t)}=(1-z^{(t)})\odot \tilde h^{(t)}+z^{(t)}\odot h^{(t-1)} $$</div>
         <p style="font-size:13px;margin:6px 0 4px;"><b>三行 = 一个 GRU 步.</b> 第 1 行用当前 input 和上一 hidden state 算两个 gates。第 2 行算 <b>candidate</b> hidden state $\tilde h^{(t)}$ —— 像 vanilla RNN 的 proposal，区别是先用 reset gate 给 previous state 套了 mask $r^{(t)}\odot h^{(t-1)}$，让 candidate 可以选择忽略陈旧 context。第 3 行用 update gate 把 candidate 与 previous state blend 起来。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>符号.</b> 这个写法下 $z^{(t)}$ 是 update / keep gate；$r^{(t)}$ 是 reset gate；$\tilde h^{(t)}$ 是 candidate hidden state；$W_{\tilde h x}, W_{\tilde h h}, b_{\tilde h}$ 是 candidate 自己的 weights（与 gate weights 分开）；$\odot$ 是 elementwise multiplication。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> GRU 用 <i>更少</i> 的 gates 把旧 hidden state 和 candidate 混在一起（没有单独 cell state，也没有 output gate）。这个写法下 $z^{(t)}$ 越大，越保留旧 hidden state。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先算 $z, r$，再算 $\tilde h^{(t)}$（别忘记给 $h^{(t-1)}$ 套 reset mask），最后逐坐标 blend 出 $h^{(t)}$。注意有些教材的 $z$ 方向相反，先看公式再解释。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> GRU 用 <i>更少</i> 的 gates 把旧 hidden state 和 candidate 混在一起（没有单独 cell state，也没有 output gate）。这个写法下 $z^{(t)}$ 越大，越保留旧 hidden state。</p>
         <p style="font-size:13px;margin:4px 0 0;"><b>candidate 为什么必要.</b> 没有 $\tilde h$ 这一行整个 GRU 就不完整 —— 单看 $h^{(t)}=(1-z)\odot\tilde h+z\odot h^{(t-1)}$ 你不知道 $\tilde h$ 是什么。HW3 风格的 “补全 GRU forward pass” 或 “backprop 一个 GRU step” 题，几乎都问中间这一行。</p>
       </div>
 

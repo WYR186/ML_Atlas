@@ -66,64 +66,48 @@
   <div class="callout formula">
     <div class="head">Forward pass, layer by layer</div>
     <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: one input example； $a^{(0)}$: layer-0 activation, equal to the raw input $x$； $\ell$: layer index； $W^{(\ell)}$: weight matrix of layer $\ell$; shape $n_\ell\times n_{\ell-1}$； $b^{(\ell)}$: bias vector of layer $\ell$; shape $n_\ell$； $z^{(\ell)}$: pre-activation raw score before the nonlinearity； $a^{(\ell)}$: post-activation output passed to the next layer； $\sigma$: activation function, applied elementwise</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> An MLP alternates linear mixing and nonlinear bending. The linear part combines previous features; the activation prevents stacked layers from collapsing into one big linear map.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> An MLP alternates linear mixing and nonlinear bending. The linear part combines previous features; the activation prevents stacked layers from collapsing into one big linear map.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Start with $a^{(0)}=x$. For each layer, multiply by $W^{(\ell)}$, add $b^{(\ell)}$, then apply $\sigma$. In homework calculations, write the vector dimensions first so matrix multiplication errors show up immediately.</p>
   </div>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">ReLU activation</div>
       <div class="eq">$$ \operatorname{ReLU}(z)=\max(0,z) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $z$: pre-activation value; can be a scalar, vector, or matrix； $\max(0,z)$: elementwise choice between zero and the input value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> ReLU is a simple gate. A hidden unit either fires with its positive score or stays silent at zero.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Apply ReLU to every entry: negative values become $0$, positive values remain unchanged. In backprop, the derivative is $0$ on inactive negative entries and $1$ on active positive entries.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> ReLU is a simple gate. A hidden unit either fires with its positive score or stays silent at zero.</p>
     </div>
     <div class="callout formula">
       <div class="head">Sigmoid activation</div>
       <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $z$: pre-activation or logit； $\sigma(z)$: value between $0$ and $1$, often read as a binary-class probability</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Sigmoid squashes large negative inputs near $0$ and large positive inputs near $1$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it for binary outputs or gates. Be careful in deep networks: saturated sigmoid units have tiny derivatives, which is one source of vanishing gradients.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Sigmoid squashes large negative inputs near $0$ and large positive inputs near $1$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Softmax output</div>
       <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $K$: number of classes； $z_i$: logit score for class $i$； $\hat y_i$: predicted probability of class $i$； $\sum_{j=1}^{K}$: normalization across all classes</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Softmax turns arbitrary class scores into a probability distribution. Larger logits get exponentially more probability mass.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Softmax turns arbitrary class scores into a probability distribution. Larger logits get exponentially more probability mass.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Exponentiate every logit, divide each exponential by the total sum, and pick the class with largest $\hat y_i$ for prediction. For numerical stability in code, subtract $\max_j z_j$ before exponentiating.</p>
     </div>
     <div class="callout formula">
       <div class="head">Cross-entropy loss</div>
       <div class="eq">$$ \ell(y,\hat y)=-\sum_{i=1}^{K} y_i\log \hat y_i $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_i$: true label indicator for class $i$, often one-hot； $\hat y_i$: predicted probability for class $i$； $\ell$: loss for one example</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The loss is small only when the model assigns high probability to the correct class. Confidently wrong predictions get punished strongly.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a one-hot label with true class $c$, all terms vanish except $i=c$, so $\ell=-\log\hat y_c$. Use it with softmax for multiclass classification.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The loss is small only when the model assigns high probability to the correct class. Confidently wrong predictions get punished strongly.</p>
     </div>
     <div class="callout formula" id="eq-mlp-softmax-ce-gradient">
       <div class="head">Softmax + cross-entropy output gradient</div>
       <div class="eq">$$ \hat y=\operatorname{softmax}(z),\qquad \frac{\partial \ell}{\partial z}=\hat y-y $$</div>
       <p style="font-size:13px;margin:6px 0 4px;">This is the single most-used backprop shortcut in the course. Whenever the network ends in <i>softmax then cross-entropy</i> (multiclass) or <i>sigmoid then BCE</i> (binary, which is the $K=2$ collapse of the same identity), the gradient at the logits is simply <b>predicted minus truth</b> — no chain-rule expansion needed.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>Symbols.</b> $z\in\mathbb R^K$: pre-softmax logits at the output layer； $\hat y\in(0,1)^K$: softmax probabilities, $\sum_k\hat y_k=1$； $y\in\{0,1\}^K$: one-hot true label； $\partial\ell/\partial z$: vector of partial derivatives, same shape as $z$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> $(\hat y-y)_c=\hat y_c-1$ on the true class $c$ (the only entry where $y$ is non-zero) and $(\hat y-y)_k=\hat y_k$ on every other class. So the gradient pulls the true logit up and pushes every wrong logit down, in proportion to how confidently the model predicted that wrong class.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> $(\hat y-y)_c=\hat y_c-1$ on the true class $c$ (the only entry where $y$ is non-zero) and $(\hat y-y)_k=\hat y_k$ on every other class. So the gradient pulls the true logit up and pushes every wrong logit down, in proportion to how confidently the model predicted that wrong class.</p>
       <p style="font-size:13px;margin:4px 0;"><b>How to derive it.</b> Write $\ell=-\sum_i y_i\log\hat y_i$ with $\hat y_i=e^{z_i}/\sum_j e^{z_j}$. Compute $\partial\hat y_i/\partial z_k=\hat y_i(\delta_{ik}-\hat y_k)$, then $\partial\ell/\partial z_k=-\sum_i y_i(\delta_{ik}-\hat y_k)=\hat y_k-y_k$. The terms cancel beautifully because softmax outputs are normalized and labels sum to 1.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Start your backprop pass with $\partial\ell/\partial z=\hat y-y$ at the logits, then apply the affine-layer backward pass to push the gradient through $W^{(L)}, b^{(L)}$ and any earlier layers. This is why deep-learning libraries fuse softmax + cross-entropy into one op (<code>CrossEntropyLoss</code> in PyTorch, <code>softmax_cross_entropy_with_logits</code> in TF) — the analytical gradient is exactly this clean.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>Where it shows up.</b> HW3 backprop problems (start with this line, save half the algebra); midterm / final review's softmax-CE worked example; every classification head in the deep-learning blocks (MLP, CNN, Transformer, LLM).</p>
     </div>
     <div class="callout formula">
       <div class="head">Mini-batch gradient descent</div>
       <div class="eq">$$ \theta\leftarrow \theta-\alpha\frac{1}{\lvert B\rvert}\sum_{i\in B}\nabla_{\theta}\ell_i(\theta) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\theta$: all trainable parameters, including every $W$ and $b$； $\alpha$: learning rate / step size； $B$: mini-batch of training examples； $\lvert B\rvert$: batch size； $\nabla_{\theta}\ell_i(\theta)$: gradient of example $i$'s loss with respect to the parameters</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The batch gradient estimates the full-data direction without scanning the entire dataset every step.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute gradients for each example in the batch, average them, scale by $\alpha$, and subtract from the parameters. This is the standard training update after backprop.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The batch gradient estimates the full-data direction without scanning the entire dataset every step.</p>
     </div>
     <div class="callout formula">
       <div class="head">ERM objective</div>
       <div class="eq">$$ \min_{\theta}\ \frac{1}{n}\sum_{i=1}^{n}\ell\!\left(y^{(i)}, f_{\theta}(x^{(i)})\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\theta$: all weights and biases； $f_{\theta}$: MLP prediction function； $\ell$: task loss； $n$: number of training examples</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Training chooses parameters that make average training loss small. Regression commonly uses MSE; classification commonly uses cross-entropy.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Pick the loss based on the task, compute gradients by backprop, then update parameters with SGD, Adam, or another gradient optimizer.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Training chooses parameters that make average training loss small. Regression commonly uses MSE; classification commonly uses cross-entropy.</p>
     </div>
   </div>
 
@@ -215,64 +199,48 @@
       <div class="callout formula">
         <div class="head">Forward pass：一层一层往前算</div>
         <div class="eq">$$ a^{(0)}=x,\qquad z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\qquad a^{(\ell)}=\sigma\!\left(z^{(\ell)}\right) $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 一个 input example；$a^{(0)}$: 第 0 层 activation，也就是原始输入 $x$；$\ell$: layer index，第几层；$W^{(\ell)}$: 第 $\ell$ 层 weight matrix；shape 是 $n_\ell\times n_{\ell-1}$；$b^{(\ell)}$: 第 $\ell$ 层 bias vector；shape 是 $n_\ell$；$z^{(\ell)}$: pre-activation，过 nonlinearity 前的 raw score；$a^{(\ell)}$: post-activation，传给下一层的 representation；$\sigma$: activation function，elementwise 套到每个坐标</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> MLP 就是在 linear mixing 和 nonlinear bending 之间交替。Linear part 负责组合上一层 features；activation 负责把空间折弯，避免多层网络退化成一个大 linear map。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> MLP 就是在 linear mixing 和 nonlinear bending 之间交替。Linear part 负责组合上一层 features；activation 负责把空间折弯，避免多层网络退化成一个大 linear map。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 从 $a^{(0)}=x$ 开始。每层先乘 $W^{(\ell)}$，再加 $b^{(\ell)}$，最后套 activation $\sigma$。手算题先写每个 vector / matrix 的 dimension，shape 错误会立刻暴露。</p>
       </div>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">ReLU activation</div>
           <div class="eq">$$ \operatorname{ReLU}(z)=\max(0,z) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $z$: pre-activation value；可以是 scalar、vector 或 matrix；$\max(0,z)$: elementwise 地在 $0$ 和原值之间取较大者</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> ReLU 像一个简单开关：hidden unit 的 score 为正就激活，为负就静默成 $0$。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 entry 单独套 ReLU：负数变 $0$，正数原样保留。做 backprop 时，负数位置 derivative 是 $0$，正数位置 derivative 是 $1$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> ReLU 像一个简单开关：hidden unit 的 score 为正就激活，为负就静默成 $0$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Sigmoid activation</div>
           <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $z$: pre-activation / logit；$\sigma(z)$: 落在 $(0,1)$ 的数，常当作 binary-class probability。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Sigmoid 会把很负的输入压到接近 $0$，把很正的输入压到接近 $1$。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 常用于 binary output 或 gate。深层网络里要小心 saturation：输入太大或太小时 derivative 很小，会导致 vanishing gradients。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Sigmoid 会把很负的输入压到接近 $0$，把很正的输入压到接近 $1$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Softmax output</div>
           <div class="eq">$$ \hat y_i=\frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $K$: classes 的数量；$z_i$: 第 $i$ 类的 logit score；$\hat y_i$: 模型预测属于第 $i$ 类的 probability；$\sum_{j=1}^{K}$: 对所有 classes 做 normalization</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Softmax 把任意 class scores 变成 probability distribution。logit 越大，拿到的 probability mass 会指数级更大。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Softmax 把任意 class scores 变成 probability distribution。logit 越大，拿到的 probability mass 会指数级更大。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先对每个 logit 取指数，再除以所有指数之和；prediction 通常取最大的 $\hat y_i$。代码里为了 numerical stability，常先减去 $\max_j z_j$ 再 exp。</p>
         </div>
         <div class="callout formula">
           <div class="head">Cross-entropy loss</div>
           <div class="eq">$$ \ell(y,\hat y)=-\sum_{i=1}^{K} y_i\log \hat y_i $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_i$: 第 $i$ 类的 true label indicator，通常是 one-hot；$\hat y_i$: 第 $i$ 类的 predicted probability；$\ell$: 单个 example 的 loss</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 只有模型给正确类别很高 probability 时，loss 才小。自信但错误的 prediction 会被重罚。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 如果 label 是 one-hot，真实类别为 $c$，只有 $i=c$ 那一项留下，所以 $\ell=-\log\hat y_c$。Multiclass classification 通常 softmax + cross-entropy 一起用。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 只有模型给正确类别很高 probability 时，loss 才小。自信但错误的 prediction 会被重罚。</p>
         </div>
         <div class="callout formula" id="eq-mlp-softmax-ce-gradient-cn">
           <div class="head">Softmax + cross-entropy 输出梯度</div>
           <div class="eq">$$ \hat y=\operatorname{softmax}(z),\qquad \frac{\partial \ell}{\partial z}=\hat y-y $$</div>
           <p style="font-size:13px;margin:6px 0 4px;">本课最常用的 backprop 捷径。只要网络末端是 <i>softmax + cross-entropy</i>（多类）或 <i>sigmoid + BCE</i>（二类，对应同一恒等式 $K=2$ 退化），logits 处的梯度就是简单的 <b>预测减真实</b> —— 不用展开 chain rule。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>符号.</b> $z\in\mathbb R^K$：输出层 softmax 之前的 logits；$\hat y\in(0,1)^K$：softmax 概率，$\sum_k\hat y_k=1$；$y\in\{0,1\}^K$：one-hot 真实标签；$\partial\ell/\partial z$：与 $z$ 同 shape 的梯度向量。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $(\hat y-y)_c=\hat y_c-1$ 在真实类别 $c$ 处（$y$ 唯一非 0 的位置），其余 $(\hat y-y)_k=\hat y_k$。所以梯度把真实 logit 往上推、把所有错误 logit 往下压，压力大小正比于模型在错误类别上的自信度。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> $(\hat y-y)_c=\hat y_c-1$ 在真实类别 $c$ 处（$y$ 唯一非 0 的位置），其余 $(\hat y-y)_k=\hat y_k$。所以梯度把真实 logit 往上推、把所有错误 logit 往下压，压力大小正比于模型在错误类别上的自信度。</p>
           <p style="font-size:13px;margin:4px 0;"><b>怎么推导.</b> 写 $\ell=-\sum_i y_i\log\hat y_i$，$\hat y_i=e^{z_i}/\sum_j e^{z_j}$。算 $\partial\hat y_i/\partial z_k=\hat y_i(\delta_{ik}-\hat y_k)$，再代回得 $\partial\ell/\partial z_k=-\sum_i y_i(\delta_{ik}-\hat y_k)=\hat y_k-y_k$。能塌得这么干净，是因为 softmax 输出已归一、标签也求和为 1。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> Backprop 时直接从 $\partial\ell/\partial z=\hat y-y$ 起步，再用 affine-layer backward pass 把梯度穿过 $W^{(L)}, b^{(L)}$ 与更早层。这正是 deep learning library 把 softmax 与 cross-entropy 融合成一个 op（PyTorch 的 <code>CrossEntropyLoss</code>、TF 的 <code>softmax_cross_entropy_with_logits</code>）的原因 —— 解析梯度本身就是这么干净。</p>
           <p style="font-size:13px;margin:4px 0 0;"><b>典型出处.</b> HW3 backprop 题（直接从这一行起步，省掉一半代数）；midterm / final review 的 softmax-CE worked example；后面 deep learning block（MLP、CNN、Transformer、LLM）每个 classification head 都重复用到。</p>
         </div>
         <div class="callout formula">
           <div class="head">Mini-batch gradient descent</div>
           <div class="eq">$$ \theta\leftarrow \theta-\alpha\frac{1}{\lvert B\rvert}\sum_{i\in B}\nabla_{\theta}\ell_i(\theta) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\theta$: 所有 trainable parameters，包括每层的 $W$ 和 $b$；$\alpha$: learning rate / step size；$B$: 一个 mini-batch 的 training examples；$\lvert B\rvert$: batch size；$\nabla_{\theta}\ell_i(\theta)$: 第 $i$ 个 example 的 loss 对参数的 gradient</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Mini-batch gradient 用一小批样本近似 full-data gradient，避免每一步都扫完整 dataset。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 batch 内每个样本的 gradient，取平均，乘 learning rate $\alpha$，再从参数中减掉。这就是 backprop 后最常见的 training update。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Mini-batch gradient 用一小批样本近似 full-data gradient，避免每一步都扫完整 dataset。</p>
         </div>
         <div class="callout formula">
           <div class="head">ERM objective</div>
           <div class="eq">$$ \min_{\theta}\ \frac{1}{n}\sum_{i=1}^{n}\ell\!\left(y^{(i)}, f_{\theta}(x^{(i)})\right) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\theta$: 所有 weights 和 biases；$f_{\theta}$: MLP prediction function；$\ell$: task loss；$n$: training examples 数量。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Training 的目标是让 average training loss 小。Regression 常用 MSE；classification 常用 cross-entropy。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先根据任务选 loss，再用 backprop 算 gradients，最后用 SGD、Adam 或其他 gradient optimizer 更新参数。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Training 的目标是让 average training loss 小。Regression 常用 MSE；classification 常用 cross-entropy。</p>
         </div>
       </div>
 

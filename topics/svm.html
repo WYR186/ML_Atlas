@@ -69,41 +69,31 @@
     <div class="callout formula">
       <div class="head">Signed distance / margin</div>
       <div class="eq">$$ \gamma(w,b)=\min_i \frac{y_i(w^\top x_i+b)}{\|w\|_2} $$</div>
-      <p><b>Symbols.</b> $x_i$ is a training point; $y_i\in\{-1,+1\}$ is its label; $w^\top x_i+b=f(x_i)$ is the signed score before multiplying by $y_i$; $\|w\|_2$ is the Euclidean norm of the normal vector.</p>
-      <p><b>How to read it.</b> $y_i f(x_i)$ is positive when the point is correctly classified and larger when it is more confidently correct. Dividing by $\|w\|_2$ converts that functional score into actual distance from the hyperplane.</p>
+      <p><b>What it does.</b> $y_i f(x_i)$ is positive when the point is correctly classified and larger when it is more confidently correct. Dividing by $\|w\|_2$ converts that functional score into actual distance from the hyperplane.</p>
 
-      <p><b>How to use.</b> Compute the normalized signed distance for each training point, then take the minimum. SVM tries to make this worst-case distance as large as possible.</p>
     </div>
     <div class="callout formula">
       <div class="head">Hard-margin SVM</div>
       <div class="eq">$$ \min_{w,b}\frac12\|w\|_2^2 \quad \text{s.t.}\quad y_i(w^\top x_i+b)\ge 1 $$</div>
-      <p><b>Symbols.</b> The variables are $w$ and $b$; the constraint must hold for every training example $i$; the right side 1 fixes the scale of $(w,b)$.</p>
-      <p><b>How to read it.</b> With the normalization $y_i f(x_i)\ge 1$, the one-sided margin is $M=1/\|w\|_2$ and the full strip between the two support hyperplanes has width $2/\|w\|_2$. The constraints say every point must be correctly classified with a safety buffer.</p>
-      <p><b>How to use.</b> Use this form only when the data are linearly separable. In derivations, start from this primal and introduce Lagrange multipliers $\alpha_i$ for each margin constraint.</p>
+      <p><b>What it does.</b> With the normalization $y_i f(x_i)\ge 1$, the one-sided margin is $M=1/\|w\|_2$ and the full strip between the two support hyperplanes has width $2/\|w\|_2$. The constraints say every point must be correctly classified with a safety buffer.</p>
     </div>
     <div class="callout formula">
       <div class="head">Soft-margin SVM</div>
       <div class="eq">$$ \min_{w,b,\xi}\frac12\|w\|_2^2+C\sum_i\xi_i $$</div>
       <div class="eq">$$ y_i(w^\top x_i+b)\ge 1-\xi_i,\qquad \xi_i\ge 0 $$</div>
-      <p><b>Symbols.</b> $\xi_i$ is the slack for example $i$; $C$ is the penalty strength for slack; the first term wants a wide margin and the second term pays for violations.</p>
-      <p><b>How to read it.</b> $\xi_i=0$ means the point satisfies the margin. $0&lt;\xi_i\le1$ means correct sign but inside the margin. $\xi_i>1$ means the point is misclassified.</p>
+      <p><b>What it does.</b> $\xi_i=0$ means the point satisfies the margin. $0&lt;\xi_i\le1$ means correct sign but inside the margin. $\xi_i>1$ means the point is misclassified.</p>
 
-      <p><b>How to use.</b> Increase $C$ when you want fewer violations; decrease $C$ when you want more tolerance and a wider, smoother margin. A very large $C$ behaves close to hard-margin SVM when separation is possible, but it can become sensitive to outliers.</p>
     </div>
     <div class="callout formula">
       <div class="head">Hinge-loss form</div>
       <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\qquad t=y_i(w^\top x_i+b) $$</div>
-      <p><b>Symbols.</b> $t$ is the margin score for one example. The hinge loss is zero only when $t\ge1$, meaning the point is correctly classified and outside the margin.</p>
-      <p><b>How to read it.</b> Correct but not safe still costs loss: if $0&lt;t&lt;1$, the sign is right but the point lies inside the margin. If $t&lt;0$, the point is misclassified and the loss is larger than 1. Unlike logistic log-loss, hinge loss becomes exactly zero once $t\ge1$.</p>
-      <p><b>How to use.</b> For hand calculation, first compute $f(x)$, then $t=yf(x)$, then plug into $\max(0,1-t)$.</p>
+      <p><b>What it does.</b> Correct but not safe still costs loss: if $0&lt;t&lt;1$, the sign is right but the point lies inside the margin. If $t&lt;0$, the point is misclassified and the loss is larger than 1. Unlike logistic log-loss, hinge loss becomes exactly zero once $t\ge1$.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Soft-margin dual shape</div>
       <div class="eq">$$ \max_\alpha \sum_i \alpha_i-\frac12\sum_i\sum_j \alpha_i\alpha_j y_i y_j x_i^\top x_j $$</div>
       <div class="eq">$$ 0\le \alpha_i\le C,\qquad \sum_i \alpha_i y_i=0 $$</div>
-      <p><b>Symbols.</b> $\alpha_i$ is the Lagrange multiplier for example $i$'s margin constraint. $x_i^\top x_j$ is the inner product between training examples $i$ and $j$.</p>
-      <p><b>How to read it.</b> Points with $\alpha_i=0$ do not influence the boundary; points with $\alpha_i>0$ are support vectors. If non-support vectors move or new non-support vectors are added while their $\alpha_i$ remains zero, the decision boundary does not change.</p>
-      <p><b>How to use.</b> After solving for $\alpha$, predict with $f(x)=\sum_{i:\alpha_i>0}\alpha_i y_i x_i^\top x+b$. For kernel SVM, replace $x_i^\top x_j$ and $x_i^\top x$ by kernels. Prediction time scales with the number of support vectors, not the full training set.</p>
+      <p><b>What it does.</b> Points with $\alpha_i=0$ do not influence the boundary; points with $\alpha_i>0$ are support vectors. If non-support vectors move or new non-support vectors are added while their $\alpha_i$ remains zero, the decision boundary does not change.</p>
     </div>
   </div>
 
@@ -197,41 +187,31 @@
         <div class="callout formula">
           <div class="head">Signed distance / margin · 有符号距离</div>
           <div class="eq">$$ \gamma(w,b)=\min_i \frac{y_i(w^\top x_i+b)}{\|w\|_2} $$</div>
-          <p><b>符号.</b> $x_i$ 是第 $i$ 个 training point；$y_i\in\{-1,+1\}$ 是标签；$w^\top x_i+b=f(x_i)$ 是 score；$\|w\|_2$ 是 normal vector 的 Euclidean norm。</p>
-          <p><b>怎么理解.</b> $y_if(x_i)$ 为正表示分类正确，越大表示越有信心。除以 $\|w\|_2$ 后才变成点到 hyperplane 的真实几何距离。</p>
+          <p><b>这个公式在做什么？</b> $y_if(x_i)$ 为正表示分类正确，越大表示越有信心。除以 $\|w\|_2$ 后才变成点到 hyperplane 的真实几何距离。</p>
 
-      <p><b>怎么用.</b> 对每个 training point 算 normalized signed distance，然后取最小值。SVM 要 maximize 的就是这个最差点的距离。</p>
         </div>
         <div class="callout formula">
           <div class="head">Hard-margin SVM · 硬间隔</div>
           <div class="eq">$$ \min_{w,b}\frac12\|w\|_2^2 \quad \text{s.t.}\quad y_i(w^\top x_i+b)\ge 1 $$</div>
-          <p><b>符号.</b> 优化变量是 $w,b$；constraint 对每个样本 $i$ 都要成立；右边的 1 是为了固定 $(w,b)$ 的 scale。</p>
-          <p><b>怎么理解.</b> 在 normalization $y_i f(x_i)\ge 1$ 下，单侧 margin 是 $M=1/\|w\|_2$，两条 support hyperplanes 之间的 full strip 宽度是 $2/\|w\|_2$。Constraint 表示每个点都要分类正确并留出 buffer。</p>
-      <p><b>怎么用.</b> 只在 linearly separable data 上用。推 dual 时，从这个 primal 出发，给每个 margin constraint 加 Lagrange multiplier $\alpha_i$。</p>
+          <p><b>这个公式在做什么？</b> 在 normalization $y_i f(x_i)\ge 1$ 下，单侧 margin 是 $M=1/\|w\|_2$，两条 support hyperplanes 之间的 full strip 宽度是 $2/\|w\|_2$。Constraint 表示每个点都要分类正确并留出 buffer。</p>
         </div>
         <div class="callout formula">
           <div class="head">Soft-margin SVM · 软间隔</div>
           <div class="eq">$$ \min_{w,b,\xi}\frac12\|w\|_2^2+C\sum_i\xi_i $$</div>
           <div class="eq">$$ y_i(w^\top x_i+b)\ge 1-\xi_i,\qquad \xi_i\ge 0 $$</div>
-          <p><b>符号.</b> $\xi_i$ 是第 $i$ 个样本的 slack；$C$ 是 slack penalty；第一项想要 large margin，第二项为 violations 付费。</p>
-          <p><b>怎么理解.</b> $\xi_i=0$ 表示满足 margin；$0&lt;\xi_i\le1$ 表示 sign 正确但在 margin 内；$\xi_i>1$ 表示 misclassified。</p>
+          <p><b>这个公式在做什么？</b> $\xi_i=0$ 表示满足 margin；$0&lt;\xi_i\le1$ 表示 sign 正确但在 margin 内；$\xi_i>1$ 表示 misclassified。</p>
 
-      <p><b>怎么用.</b> 想更少 violations 就增大 $C$；想更宽、更 tolerant 的 margin 就减小 $C$。非常大的 $C$ 在可分时会接近 hard-margin SVM，但也更容易被 outliers 牵着走。</p>
         </div>
         <div class="callout formula">
           <div class="head">Hinge loss form · 合页损失</div>
           <div class="eq">$$ \ell_{\text{hinge}}(t)=\max(0,1-t),\qquad t=y_i(w^\top x_i+b) $$</div>
-          <p><b>符号.</b> $t$ 是一个样本的 margin score。只有 $t\ge1$ 时 hinge loss 为 0，表示点分类正确且在 margin 外。</p>
-          <p><b>怎么理解.</b> 分类对但不够安全也会有 loss：$0&lt;t&lt;1$ 是 margin 内；$t&lt;0$ 是 misclassified，loss 大于 1。和 logistic log-loss 不同，hinge loss 一旦 $t\ge1$ 就真的变成 0。</p>
-      <p><b>怎么用.</b> 手算时先算 $f(x)$，再算 $t=yf(x)$，最后代入 $\max(0,1-t)$。</p>
+          <p><b>这个公式在做什么？</b> 分类对但不够安全也会有 loss：$0&lt;t&lt;1$ 是 margin 内；$t&lt;0$ 是 misclassified，loss 大于 1。和 logistic log-loss 不同，hinge loss 一旦 $t\ge1$ 就真的变成 0。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Soft-margin dual · 对偶形式</div>
           <div class="eq">$$ \max_\alpha \sum_i \alpha_i-\frac12\sum_i\sum_j \alpha_i\alpha_j y_i y_j x_i^\top x_j $$</div>
           <div class="eq">$$ 0\le \alpha_i\le C,\qquad \sum_i \alpha_i y_i=0 $$</div>
-          <p><b>符号.</b> $\alpha_i$ 是样本 $i$ 的 margin constraint 对应的 Lagrange multiplier；$x_i^\top x_j$ 是两个 training examples 的 inner product。</p>
-          <p><b>怎么理解.</b> $\alpha_i=0$ 的点不影响 boundary；$\alpha_i>0$ 的点是 support vectors。如果移动或新增的只是 non-support vectors，并且它们的 $\alpha_i$ 仍为 0，decision boundary 不变。</p>
-          <p><b>怎么用.</b> 解出 $\alpha$ 后用 $f(x)=\sum_{i:\alpha_i>0}\alpha_i y_i x_i^\top x+b$ 预测。Kernel SVM 中，把 $x_i^\top x_j$ 和 $x_i^\top x$ 换成 kernel。预测时间主要和 support vectors 数量成正比，而不是和全部训练集大小成正比。</p>
+          <p><b>这个公式在做什么？</b> $\alpha_i=0$ 的点不影响 boundary；$\alpha_i>0$ 的点是 support vectors。如果移动或新增的只是 non-support vectors，并且它们的 $\alpha_i$ 仍为 0，decision boundary 不变。</p>
         </div>
       </div>
 

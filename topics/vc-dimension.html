@@ -71,63 +71,26 @@
     <div class="callout formula">
       <div class="head">Hoeffding</div>
       <div class="eq">$$ \Pr\left(|\bar Z_n-\mathbb{E}\bar Z_n|\ge \epsilon\right)\le 2\exp\left(-\frac{2n\epsilon^2}{(b-a)^2}\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The bound says sample averages concentrate around expectations; more samples or a smaller range makes large deviations exponentially unlikely.</p>
 
-      <ul>
-        <li>$Z_1,\ldots,Z_n$ are independent random variables bounded in $[a,b]$.</li>
-        <li>$\bar Z_n=\frac1n\sum_{i=1}^n Z_i$ is the empirical average.</li>
-        <li>$\mathbb{E}\bar Z_n$ is the expected average, usually the true mean.</li>
-        <li>$\epsilon$ is the allowed deviation between sample average and expectation.</li>
-        <li>The right side is an upper bound on the probability of deviating by at least $\epsilon$.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The bound says sample averages concentrate around expectations; more samples or a smaller range makes large deviations exponentially unlikely.</p>
-
-      <p><b>How to use.</b> identify the bounded variable, plug in $a,b,n,\epsilon$, then compare the bound to your desired failure probability $\delta$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Fixed classifier bound</div>
       <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\sqrt{\frac{\log(2/\delta)}{2n}} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Training error plus a confidence radius upper-bounds test error, but only when the classifier was fixed before looking at the data.</p>
 
-      <ul>
-        <li>$f$ must be fixed before seeing the data for this direct bound.</li>
-        <li>$\epsilon_\mu(f)$ is true/test error.</li>
-        <li>$\hat\epsilon_{\mathcal{D}}(f)$ is training error on $\mathcal{D}$.</li>
-        <li>$\sqrt{\log(2/\delta)/(2n)}$ is the confidence radius.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Training error plus a confidence radius upper-bounds test error, but only when the classifier was fixed before looking at the data.</p>
-
-      <p><b>How to use.</b> add the confidence radius to the observed training error to upper-bound test error with confidence at least $1-\delta$.</p>
     </div>
     <div class="callout formula">
       <div class="head">VC dimension definition</div>
       <div class="eq">$$ \operatorname{VCdim}(\mathcal{F})=\max\{|S|:\mathcal{F}\text{ shatters }S\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> VC dimension is the largest point set on which the class can realize all binary labelings; it measures class flexibility.</p>
 
-      <ul>
-        <li>$S$ is a finite set of input points.</li>
-        <li>$|S|$ is the number of points in that set.</li>
-        <li>$\mathcal{F}$ shatters $S$ if it can realize every possible binary labeling of $S$.</li>
-        <li>The maximum asks for the largest set size for which such complete flexibility is possible.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> VC dimension is the largest point set on which the class can realize all binary labelings; it measures class flexibility.</p>
-
-      <p><b>How to use.</b> prove a lower bound by exhibiting one shattered set; prove an upper bound by showing every larger set has at least one impossible labeling.</p>
     </div>
     <div class="callout formula">
       <div class="head">Typical VC-style bound</div>
       <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\mathcal{O}\!\left(\sqrt{\frac{\operatorname{VCdim}(\mathcal{F})+\log(1/\delta)}{n}}\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is a scaling rule for generalization gap: complexity and confidence increase the gap, while sample size shrinks it.</p>
 
-      <ul>
-        <li>$\operatorname{VCdim}(\mathcal{F})$ is the model-class complexity term.</li>
-        <li>$\log(1/\delta)$ is the confidence cost.</li>
-        <li>$n$ in the denominator means the gap shrinks as data grows.</li>
-        <li>$\mathcal{O}(\cdot)$ hides constants and sometimes additional logarithmic factors, depending on the exact theorem.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is a scaling rule for generalization gap: complexity and confidence increase the gap, while sample size shrinks it.</p>
-
-      <p><b>How to use.</b> read it as a scaling rule: generalization gap is roughly controlled by $\sqrt{d/n}$ where $d=\operatorname{VCdim}(\mathcal{F})$. To make the gap at most $\epsilon$, expect $n$ on the order of $(d+\log(1/\delta))/\epsilon^2$.</p>
     </div>
   </div>
   <div class="callout">
@@ -260,63 +223,26 @@
     <div class="callout formula">
       <div class="head">Hoeffding</div>
       <div class="eq">$$ \Pr\left(|\bar Z_n-\mathbb{E}\bar Z_n|\ge \epsilon\right)\le 2\exp\left(-\frac{2n\epsilon^2}{(b-a)^2}\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 控制 sample average 偏离真实期望的概率；样本越多、允许误差越大，右边会指数级变小。</p>
 
-      <ul>
-        <li>$Z_1,\ldots,Z_n$ 是 independent random variables，并且都落在区间 $[a,b]$ 里。</li>
-        <li>$\bar Z_n=\frac1n\sum_{i=1}^n Z_i$ 是 empirical average。</li>
-        <li>$\mathbb{E}\bar Z_n$ 是这个平均值的 expectation，通常就是 true mean。</li>
-        <li>$\epsilon$ 是允许 sample average 偏离 true mean 的误差半径。</li>
-        <li>右边是“偏离至少 $\epsilon$”这件事发生概率的 upper bound。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>先确定随机变量是什么，再代入 $a,b,n,\epsilon$；如果题目给 confidence，就把右边设成 $\le\delta$ 解 $n$ 或 $\epsilon$。</p>
     </div>
     <div class="callout formula">
       <div class="head">固定 classifier bound</div>
       <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\sqrt{\frac{\log(2/\delta)}{2n}} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 对一个事先固定的 classifier，用 training error 加一个 confidence radius 来 upper-bound test error。</p>
 
-      <ul>
-        <li>这个直接版本要求 $f$ 在看数据之前已经固定。</li>
-        <li>$\epsilon_\mu(f)$ 是 true/test error。</li>
-        <li>$\hat\epsilon_{\mathcal{D}}(f)$ 是 training error。</li>
-        <li>$\sqrt{\log(2/\delta)/(2n)}$ 是 confidence radius。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>把观察到的 training error 加上 confidence radius，就得到 test error 的 high-probability upper bound。</p>
     </div>
     <div class="callout formula">
       <div class="head">VC dimension 定义</div>
       <div class="eq">$$ \operatorname{VCdim}(\mathcal{F})=\max\{|S|:\mathcal{F}\text{ shatters }S\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 定义模型 class 最多能 shatter 几个点；它衡量 hypothesis class 的表达能力。</p>
 
-      <ul>
-        <li>$S$ 是一个有限 input point set。</li>
-        <li>$|S|$ 是这个点集里的点数。</li>
-        <li>$\mathcal{F}$ shatters $S$ 表示：对 $S$ 上任意 0/1 labeling，$\mathcal{F}$ 都能找到一个函数实现它。</li>
-        <li>$\max$ 要找的是“最大还能被完全任意标记”的点集大小。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>证明下界时构造一组能 shatter 的点；证明上界时说明任意更大的点集都会有至少一种 labeling 做不到。</p>
     </div>
     <div class="callout formula">
       <div class="head">典型 VC-style bound</div>
       <div class="eq">$$ \epsilon_\mu(f)\le \hat\epsilon_{\mathcal{D}}(f)+\mathcal{O}\!\left(\sqrt{\frac{\operatorname{VCdim}(\mathcal{F})+\log(1/\delta)}{n}}\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 把模型复杂度和 confidence cost 加到 generalization gap 里；VC dimension 越大，需要的样本越多。</p>
 
-      <ul>
-        <li>$\operatorname{VCdim}(\mathcal{F})$ 是 model class complexity。</li>
-        <li>$\log(1/\delta)$ 是 confidence cost。</li>
-        <li>$n$ 在分母里，表示样本越多，generalization gap 越小。</li>
-        <li>$\mathcal{O}(\cdot)$ 隐藏常数，有些定理版本还会隐藏额外 log factor。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>把它当 scaling rule 看：若 $d=\operatorname{VCdim}(\mathcal{F})$，generalization gap 大致像 $\sqrt{d/n}$。想让 gap $\le\epsilon$，通常需要 $n$ 大约是 $(d+\log(1/\delta))/\epsilon^2$ 量级。</p>
     </div>
   </div>
   <div class="callout">

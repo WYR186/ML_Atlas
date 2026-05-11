@@ -70,9 +70,7 @@
   <h3>Notation</h3>
   <p>$x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final almost-pure-noise step, $I$ is the identity covariance matrix, $\beta_t$ is noise variance, $\alpha_t=1-\beta_t$, and $\bar{\alpha}_t=\prod_{i=1}^t\alpha_i$. Some notes write the noisy state as $z_t$; this page uses $x_t$ for the same object.</p>
   <div class="study-box">
-    <p><b>Symbols.</b> $x_0$ is clean data, $x_t$ is the noisy state at step $t$, $T$ is the final noise step, $q$ is the fixed forward process, $p_\theta$ is the learned reverse process, $w$ is an optional conditioning signal such as a text prompt, and $\alpha_t,\beta_t,\bar\alpha_t$ control one-step and cumulative noise.</p>
-    <p><b>How to read it.</b> $q(\cdot)$ is the fixed forward noising process; $p_\theta(\cdot)$ is the learned reverse denoising process. $\alpha_t,\beta_t$ describe one step, while $\bar{\alpha}_t$ describes the cumulative effect from $0$ to $t$.</p>
-    <p><b>How to use.</b> first decide whether the question is moving forward ($q$) or backward ($p_\theta$). Then decide whether it asks for one step ($\alpha_t,\beta_t$) or a direct jump from clean data ($\bar{\alpha}_t$).</p>
+    <p><b>What it does.</b> $q(\cdot)$ is the fixed forward noising process; $p_\theta(\cdot)$ is the learned reverse denoising process. $\alpha_t,\beta_t$ describe one step, while $\bar{\alpha}_t$ describes the cumulative effect from $0$ to $t$.</p>
   </div>
   <h3 id="eq-diffusion-noise-schedule-identity">Noise-schedule identity</h3>
   <div class="eq">$$ \beta_t=1-\alpha_t,\qquad \bar\alpha_t=\prod_{i=1}^{t}\alpha_i $$</div>
@@ -294,7 +292,6 @@
   <h3>简化 noise-prediction objective</h3>
   <div class="eq">$$ \mathcal{L}_{\text{simple}}=\mathbb{E}_{t,x_0,\epsilon}\left[\left\|\epsilon_\theta(x_t,t,w)-\epsilon\right\|_2^2\right] $$</div>
   <p>很多 DDPM 实现不会直接让网络预测 clean image，而是让它预测构造 $x_t$ 时加入的 noise $\epsilon$。这里 $\epsilon_\theta$ 是 shared denoising network，$w$ 是 optional conditioning。</p>
-  <p><b>怎么用.</b> 先 sample clean example $x_0$，sample time $t$，sample Gaussian noise $\epsilon$，用 direct formula 构造 $x_t$，然后训练 network output 去匹配 $\epsilon$。</p>
 </section>
 
 <section class="topic lesson-section examples" id="diffusion-examples-cn">

@@ -71,16 +71,12 @@
   <h3>Add position to token embeddings</h3>
   <div class="eq">$$ u_n=x_n+r_n $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $x_n$ is the token embedding at position $n$; $r_n$ is the positional encoding vector for that position; $u_n$ is the vector sent into the first Transformer block.</p>
-    <p><b>How to read it.</b> The Transformer usually adds position and token vectors coordinate by coordinate rather than concatenating them. Both live in the same $d_{\text{model}}$-dimensional space.</p>
-    <p><b>How to use.</b> In architecture questions, place this addition before the first self-attention layer.</p>
+    <p><b>What it does.</b> The Transformer usually adds position and token vectors coordinate by coordinate rather than concatenating them. Both live in the same $d_{\text{model}}$-dimensional space.</p>
   </div>
   <h3>Sinusoidal positional encoding</h3>
   <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $pos$ is the token position; $i$ indexes a sine/cosine frequency pair; $2i$ and $2i+1$ are the even and odd coordinates; $d_{\text{model}}$ is the embedding width. Let $\omega_i=10000^{-2i/d_{\text{model}}}$, so the pair is $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$.</p>
-    <p><b>How to read it.</b> Each position gets a vector whose even coordinates are sine waves and whose odd coordinates are cosine waves. Different coordinate pairs use different frequencies, so the vector carries both coarse and fine position information and acts like a distinguishable fingerprint over the intended sequence range. This fixed sinusoidal scheme has zero learnable parameters.</p>
-    <p><b>How to use.</b> For coordinate questions, plug in $pos$ and $i$. For proof questions, rewrite the denominator as $\omega_i$ first so the trig identities are readable.</p>
+    <p><b>What it does.</b> Each position gets a vector whose even coordinates are sine waves and whose odd coordinates are cosine waves. Different coordinate pairs use different frequencies, so the vector carries both coarse and fine position information and acts like a distinguishable fingerprint over the intended sequence range. This fixed sinusoidal scheme has zero learnable parameters.</p>
   </div>
   <h3>Shift by $k$</h3>
   <div class="eq">$$
@@ -97,23 +93,17 @@ PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
 PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
 \end{aligned} $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $pos$ is the original position, $k$ is the offset, $i$ selects a sine/cosine frequency pair, $\omega_i$ is that pair's frequency, and $PE(pos,2i)$ / $PE(pos,2i+1)$ are the sine and cosine coordinates.</p>
-    <p><b>How to read it.</b> Moving from $pos$ to $pos+k$ rotates each 2-D sine/cosine pair by an angle determined by $k\omega_i$. The coefficients depend on the offset $k$, not on the absolute position.</p>
-    <p><b>How to use.</b> Use $\sin(a+b)$ and $\cos(a+b)$ with $a=pos\,\omega_i$ and $b=k\omega_i$. This is the standard HW4 move for proving relative positions can be represented linearly.</p>
+    <p><b>What it does.</b> Moving from $pos$ to $pos+k$ rotates each 2-D sine/cosine pair by an angle determined by $k\omega_i$. The coefficients depend on the offset $k$, not on the absolute position.</p>
   </div>
   <h3>Relative-position dot product</h3>
   <div class="eq">$$ PE(pos_1)^\top PE(pos_2)=\sum_i \cos\!\big((pos_2-pos_1)\omega_i\big) $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $pos_1,pos_2$ are token positions. $\omega_i$ is frequency $i$. The sum runs over sine/cosine pairs, and the dot product adds their same-frequency similarities.</p>
-    <p><b>How to read it.</b> The similarity between two positional encodings depends only on their distance $pos_2-pos_1$, not their absolute locations.</p>
-    <p><b>How to use.</b> Pair sine with sine and cosine with cosine at the same frequency, then use $\sin a\sin b+\cos a\cos b=\cos(b-a)$.</p>
+    <p><b>What it does.</b> The similarity between two positional encodings depends only on their distance $pos_2-pos_1$, not their absolute locations.</p>
   </div>
   <h3>Learned positional embeddings</h3>
   <div class="eq">$$ r_n \in \mathbb{R}^{d_{\text{model}}}\quad\text{is learned for }n=1,\ldots,N $$</div>
   <div class="study-box">
-    <p><b>Symbols.</b> $r_n$ is a trainable position vector; $N$ is the maximum sequence length configured during training.</p>
-    <p><b>How to read it.</b> Learned position embeddings give each position its own parameter vector, as in many BERT- or ViT-style models.</p>
-    <p><b>How to use.</b> Use learned embeddings when sequence length is fixed or bounded. Sinusoidal PE is easier to evaluate beyond trained lengths because the formula is defined for any $pos$.</p>
+    <p><b>What it does.</b> Learned position embeddings give each position its own parameter vector, as in many BERT- or ViT-style models.</p>
   </div>
 </section>
 
@@ -212,16 +202,12 @@ PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
   <h3>把 position 加到 token embedding</h3>
   <div class="eq">$$ u_n=x_n+r_n $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $x_n$ 是第 $n$ 个位置的 token embedding；$r_n$ 是该位置的 positional encoding vector；$u_n$ 是送进第一个 Transformer block 的输入向量。</p>
-    <p><b>怎么理解.</b> 这里通常不是把 token 和 position 拼接起来，而是逐坐标相加。两者都在同一个 $d_{\text{model}}$ 维空间里。</p>
-    <p><b>怎么用.</b> 问 architecture 时，要说 positional encoding 加在 input embeddings 上，位置是在 first self-attention layer 之前。</p>
+    <p><b>这个公式在做什么？</b> 这里通常不是把 token 和 position 拼接起来，而是逐坐标相加。两者都在同一个 $d_{\text{model}}$ 维空间里。</p>
   </div>
   <h3>Sinusoidal positional encoding</h3>
   <div class="eq">$$ PE(pos,2i)=\sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right),\qquad PE(pos,2i+1)=\cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $pos$ 是 token 位置；$i$ 是 frequency pair 的编号；$2i$ 和 $2i+1$ 是偶数/奇数坐标；$d_{\text{model}}$ 是 embedding width。记 $\omega_i=10000^{-2i/d_{\text{model}}}$，每一对坐标就是 $(\sin(pos\,\omega_i),\cos(pos\,\omega_i))$。</p>
-    <p><b>怎么理解.</b> 每个位置会得到一个向量：偶数维是 sine wave，奇数维是 cosine wave。不同维度用不同频率，所以既能表示粗略位置，也能区分相邻位置，在常用序列长度范围内像一个可区分的 fingerprint。这个 fixed sinusoidal scheme 没有 learnable parameters。</p>
-    <p><b>怎么用.</b> 算具体坐标时直接代 $pos,i$。证明题里先定义 $\omega_i$，公式会短很多。</p>
+    <p><b>这个公式在做什么？</b> 每个位置会得到一个向量：偶数维是 sine wave，奇数维是 cosine wave。不同维度用不同频率，所以既能表示粗略位置，也能区分相邻位置，在常用序列长度范围内像一个可区分的 fingerprint。这个 fixed sinusoidal scheme 没有 learnable parameters。</p>
   </div>
   <h3>平移 $k$</h3>
   <div class="eq">$$
@@ -238,23 +224,17 @@ PE(pos+k,2i)&=\cos(k\omega_i)\,PE(pos,2i)+\sin(k\omega_i)\,PE(pos,2i+1),\\
 PE(pos+k,2i+1)&=-\sin(k\omega_i)\,PE(pos,2i)+\cos(k\omega_i)\,PE(pos,2i+1).
 \end{aligned} $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $pos$ 是原位置，$k$ 是 offset，$i$ 选择一对 sine/cosine frequency，$\omega_i$ 是该 pair 的 frequency，$PE(pos,2i)$ 和 $PE(pos,2i+1)$ 是 sine / cosine 坐标。</p>
-    <p><b>怎么理解.</b> 从 $pos$ 平移到 $pos+k$，每一对 sine/cosine 坐标就是做了一次 rotation。系数只依赖 offset $k$ 和 frequency $\omega_i$，不依赖绝对位置 $pos$。</p>
-    <p><b>怎么用.</b> 令 $a=pos\,\omega_i$，$b=k\omega_i$，直接套 $\sin(a+b)$ 和 $\cos(a+b)$。这就是 HW4 里证明 relative position 可线性表达的核心步骤。</p>
+    <p><b>这个公式在做什么？</b> 从 $pos$ 平移到 $pos+k$，每一对 sine/cosine 坐标就是做了一次 rotation。系数只依赖 offset $k$ 和 frequency $\omega_i$，不依赖绝对位置 $pos$。</p>
   </div>
   <h3>只依赖相对距离的 dot product</h3>
   <div class="eq">$$ PE(pos_1)^\top PE(pos_2)=\sum_i \cos\!\big((pos_2-pos_1)\omega_i\big) $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $pos_1,pos_2$ 是两个 token positions；$\omega_i$ 是第 $i$ 个 frequency；sum 遍历所有 sine/cosine pairs；dot product 把同频率坐标的相似度加起来。</p>
-    <p><b>怎么理解.</b> 两个位置编码的相似度只看距离 $pos_2-pos_1$，不看它们具体出现在句子第几个位置。</p>
-    <p><b>怎么用.</b> 同一个 frequency 下，把 sine 和 sine、cosine 和 cosine 配对，然后用 $\sin a\sin b+\cos a\cos b=\cos(b-a)$。</p>
+    <p><b>这个公式在做什么？</b> 两个位置编码的相似度只看距离 $pos_2-pos_1$，不看它们具体出现在句子第几个位置。</p>
   </div>
   <h3>Learned positional embeddings</h3>
   <div class="eq">$$ r_n \in \mathbb{R}^{d_{\text{model}}}\quad\text{is learned for }n=1,\ldots,N $$</div>
   <div class="study-box">
-    <p><b>符号.</b> $r_n$ 是 trainable position vector；$N$ 是训练时设定的 maximum sequence length。</p>
-    <p><b>怎么理解.</b> Learned positional embedding 会给每个位置单独学一个参数向量，BERT / ViT 这类模型里很常见。</p>
-    <p><b>怎么用.</b> 当 sequence length 固定或有明确上限时，learned PE 很常见；sinusoidal PE 因为公式对任意 $pos$ 都有定义，所以更容易 extrapolate 到训练长度之外。</p>
+    <p><b>这个公式在做什么？</b> Learned positional embedding 会给每个位置单独学一个参数向量，BERT / ViT 这类模型里很常见。</p>
   </div>
 </section>
 

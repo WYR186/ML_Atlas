@@ -1109,6 +1109,35 @@ html[data-theme="dark"] .toc-problem-link:hover {
 .callout p:last-child { margin-bottom: 0; }
 .callout.formula { border-color: var(--purple); }
 .callout.formula .head { color: var(--purple); }
+/* Per-formula toggle: collapsed by default, expands to show symbols /
+   intuition / usage. Sits inside a .callout.formula on topic pages. */
+.formula-detail {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+}
+.formula-detail > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+  padding: 4px 0;
+  user-select: none;
+}
+.formula-detail > summary::-webkit-details-marker { display: none; }
+.formula-detail > summary::before {
+  content: "▶";
+  display: inline-block;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-right: 6px;
+  transition: transform 0.18s ease;
+}
+.formula-detail[open] > summary::before { transform: rotate(90deg); color: var(--purple); }
+.formula-detail > summary:hover { color: var(--purple); }
+.formula-detail[open] > summary { color: var(--purple); }
+.formula-detail p { font-size: 13px; line-height: 1.55; margin: 6px 0; }
 .callout.warn { border-color: var(--warn); }
 .callout.warn .head { color: #b45309; }
 .callout.exam { border-color: var(--accent); }

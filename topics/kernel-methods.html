@@ -66,58 +66,44 @@
     <div class="callout formula">
       <div class="head">Kernel definition</div>
       <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
-      <p><b>Symbols.</b> $x$ and $x'$ are two inputs; $\phi$ is the feature map into a possibly high-dimensional space; $k(x,x')$ is the similarity value computed without explicitly forming $\phi(x)$.</p>
-      <p><b>How to read it.</b> A kernel is not just any similarity score: it must equal an inner product in some feature space, which is why it can safely replace dot products in algorithms like SVM.</p>
+      <p><b>What it does.</b> A kernel is not just any similarity score: it must equal an inner product in some feature space, which is why it can safely replace dot products in algorithms like SVM.</p>
 
-      <p><b>How to use.</b> Whenever a dual algorithm contains $\phi(x_i)^\top\phi(x_j)$, compute $k(x_i,x_j)$ instead. This is the kernel trick.</p>
     </div>
     <div class="callout formula">
       <div class="head">Gram matrix / Mercer check</div>
       <div class="eq">$$ G_{ij}=k(x_i,x_j),\qquad G\succeq 0 $$</div>
-      <p><b>Symbols.</b> $G$ is the $N\times N$ Gram matrix over the training set. $G\succeq0$ means positive semidefinite: $c^\top Gc\ge0$ for every vector $c$.</p>
-      <p><b>How to read it.</b> A symmetric function is a valid Mercer-style kernel when every finite Gram matrix it produces is positive semidefinite. The matrix is a similarity lookup table for the training examples.</p>
-      <p><b>How to use.</b> For a small numerical question, fill in every $G_{ij}$ by evaluating $k(x_i,x_j)$. For large $N$, remember the downside: storing $G$ costs $O(N^2)$ memory.</p>
+      <p><b>What it does.</b> A symmetric function is a valid Mercer-style kernel when every finite Gram matrix it produces is positive semidefinite. The matrix is a similarity lookup table for the training examples.</p>
     </div>
     <div class="callout formula">
       <div class="head">Kernelized SVM prediction</div>
       <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
-      <p><b>Symbols.</b> $x$ is the test point; $x_i$ are training points; $y_i$ are labels; $\alpha_i$ are dual weights; $b$ is the intercept.</p>
-      <p><b>How to read it.</b> The prediction is a weighted vote from training examples. Each support vector compares itself to the test point through $k(x_i,x)$, then votes with sign $y_i$ and strength $\alpha_i$.</p>
-      <p><b>How to use.</b> In practice, terms with $\alpha_i=0$ disappear. For a new $x$, compute its kernel similarity to support vectors, sum the weighted votes, add $b$, then take $\mathrm{sign}(f(x))$.</p>
+      <p><b>What it does.</b> The prediction is a weighted vote from training examples. Each support vector compares itself to the test point through $k(x_i,x)$, then votes with sign $y_i$ and strength $\alpha_i$.</p>
     </div>
     <div class="callout formula">
       <div class="head">SVM dual slot</div>
       <div class="eq">$$ \max_\alpha \sum_i\alpha_i-\frac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,k(x_i,x_j) $$</div>
-      <p><b>How to read it.</b> Kernels enter the SVM through the dual objective because the data appear only as pairwise inner products. Points with $\alpha_i&gt;0$ are support vectors.</p>
-      <p><b>How to use.</b> In soft-margin SVM, slack variables are controlled by $C$ in the primal; in the dual this appears as box constraints $0\le\alpha_i\le C$. Larger $C$ punishes violations more; smaller $C$ allows more slack and a smoother margin.</p>
+      <p><b>What it does.</b> Kernels enter the SVM through the dual objective because the data appear only as pairwise inner products. Points with $\alpha_i&gt;0$ are support vectors.</p>
     </div>
     <div class="callout formula">
       <div class="head">Polynomial kernel</div>
       <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
-      <p><b>Symbols.</b> $x^\top x'$ is the ordinary dot product; $d$ is the polynomial degree; the constant 1 adds lower-order and bias-like terms.</p>
-      <p><b>How to read it.</b> Expanding the power creates interaction features up to degree $d$. For $d=2$, the feature space includes constants, linear terms, squares, and pairwise products.</p>
+      <p><b>What it does.</b> Expanding the power creates interaction features up to degree $d$. For $d=2$, the feature space includes constants, linear terms, squares, and pairwise products.</p>
 
-      <p><b>How to use.</b> For explicit feature-map questions, expand the polynomial and match each term to one coordinate of $\phi(x)$. Keep scaling factors such as $\sqrt2$ so the dot product matches exactly. In 2D, a degree-2 inhomogeneous polynomial kernel has 6 implicit coordinates.</p>
     </div>
     <div class="callout formula">
       <div class="head">RBF / Gaussian kernel</div>
       <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
-      <p><b>Symbols.</b> $\|x-x'\|_2^2$ is squared Euclidean distance; $\sigma$ is bandwidth; the exponential converts distance into similarity between 0 and 1.</p>
-      <p><b>How to read it.</b> If two points are identical, distance is 0 and the kernel is 1. As distance grows, the exponential shrinks toward 0. Small $\sigma$ makes the shrinkage faster.</p>
-      <p><b>How to use.</b> Compare distances first. With small $\sigma$, nearest support vectors dominate and overfitting risk rises; with large $\sigma$, many points have similar influence and the boundary becomes smoother. Standardize features before using distance-based kernels.</p>
+      <p><b>What it does.</b> If two points are identical, distance is 0 and the kernel is 1. As distance grows, the exponential shrinks toward 0. Small $\sigma$ makes the shrinkage faster.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">XOR lifting from Lecture 7</div>
       <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
-      <p><b>Symbols.</b> $x_1,x_2$ are the original two coordinates; $x_1x_2$ is the new interaction feature that records whether the signs of the coordinates agree.</p>
-      <p><b>How to read it.</b> XOR is hard in the original plane because diagonal classes cannot be separated by one line. The interaction coordinate sends same-sign points to one side and opposite-sign points to the other.</p>
-      <p><b>How to use.</b> For XOR-style questions, compute $x_1x_2$ for each point. A linear classifier using this third coordinate can separate the classes.</p>
+      <p><b>What it does.</b> XOR is hard in the original plane because diagonal classes cannot be separated by one line. The interaction coordinate sends same-sign points to one side and opposite-sign points to the other.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Representer theorem form</div>
       <div class="eq">$$ f(x)=\sum_{i=1}^{N}\alpha_i\,k(x,x_i) $$</div>
-      <p><b>How to read it.</b> For many regularized empirical-risk problems, the optimal function lives in the span of kernels centered at the training points. You do not need arbitrary functions in the whole feature space.</p>
-      <p><b>How to use.</b> This explains why kernel ridge regression and kernel SVM predictions both become weighted sums over training examples or support vectors.</p>
+      <p><b>What it does.</b> For many regularized empirical-risk problems, the optimal function lives in the span of kernels centered at the training points. You do not need arbitrary functions in the whole feature space.</p>
     </div>
   </div>
   <div class="callout">
@@ -218,58 +204,44 @@
         <div class="callout formula">
           <div class="head">Kernel definition</div>
           <div class="eq">$$ k(x,x')=\phi(x)^\top\phi(x') $$</div>
-          <p><b>符号.</b> $x,x'$ 是两个输入；$\phi$ 是 feature map，可能映射到很高维；$k(x,x')$ 是不显式构造 $\phi(x)$ 时直接算出来的 similarity value。</p>
-          <p><b>怎么理解.</b> Kernel 不是随便一个相似度；它必须等于某个 feature space 里的 inner product，所以才能安全替换 SVM 里的 dot product。</p>
+          <p><b>这个公式在做什么？</b> Kernel 不是随便一个相似度；它必须等于某个 feature space 里的 inner product，所以才能安全替换 SVM 里的 dot product。</p>
 
-      <p><b>怎么用.</b> 只要 dual algorithm 出现 $\phi(x_i)^\top\phi(x_j)$，就直接算 $k(x_i,x_j)$。这就是 kernel trick。</p>
         </div>
         <div class="callout formula">
           <div class="head">Gram matrix / Mercer check</div>
           <div class="eq">$$ G_{ij}=k(x_i,x_j),\qquad G\succeq 0 $$</div>
-          <p><b>符号.</b> $G$ 是 training set 上的 $N\times N$ Gram matrix；$G\succeq0$ 表示 positive semidefinite，即对任意向量 $c$ 都有 $c^\top Gc\ge0$。</p>
-          <p><b>怎么理解.</b> 一个 symmetric function 要成为 valid Mercer-style kernel，需要它对任意有限样本生成的 Gram matrix 都是 PSD。这个矩阵就是训练样本之间的 similarity lookup table。</p>
-          <p><b>怎么用.</b> 小计算题就逐个填 $G_{ij}=k(x_i,x_j)$；大数据时要记得缺点：存 Gram matrix 需要 $O(N^2)$ memory。</p>
+          <p><b>这个公式在做什么？</b> 一个 symmetric function 要成为 valid Mercer-style kernel，需要它对任意有限样本生成的 Gram matrix 都是 PSD。这个矩阵就是训练样本之间的 similarity lookup table。</p>
         </div>
         <div class="callout formula">
           <div class="head">Kernelized SVM prediction</div>
           <div class="eq">$$ f(x)=\sum_i\alpha_i y_i\,k(x_i,x)+b $$</div>
-          <p><b>符号.</b> $x$ 是 test point；$x_i$ 是 training points；$y_i$ 是 labels；$\alpha_i$ 是 dual weights；$b$ 是 intercept。</p>
-          <p><b>怎么理解.</b> Prediction 是 training examples 的 weighted vote。每个 support vector 通过 $k(x_i,x)$ 和 test point 比相似度，再用 $y_i$ 给方向、$\alpha_i$ 给权重。</p>
-      <p><b>怎么用.</b> $\alpha_i=0$ 的项直接消失。对新点 $x$，只算它和 support vectors 的 kernel similarity，加权求和后加 $b$，最后看 $\mathrm{sign}(f(x))$。</p>
+          <p><b>这个公式在做什么？</b> Prediction 是 training examples 的 weighted vote。每个 support vector 通过 $k(x_i,x)$ 和 test point 比相似度，再用 $y_i$ 给方向、$\alpha_i$ 给权重。</p>
         </div>
         <div class="callout formula">
           <div class="head">SVM dual slot</div>
           <div class="eq">$$ \max_\alpha \sum_i\alpha_i-\frac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,k(x_i,x_j) $$</div>
-          <p><b>怎么理解.</b> Kernel 会进入 SVM dual objective，因为数据只通过 pairwise inner products 出现。$\alpha_i&gt;0$ 的点就是 support vectors。</p>
-          <p><b>怎么用.</b> Soft-margin SVM 在 primal 里用 slack variables，由 $C$ 控制；在 dual 里表现为 box constraints $0\le\alpha_i\le C$。$C$ 越大越惩罚 violation；$C$ 越小越允许 slack，margin 更 smooth。</p>
+          <p><b>这个公式在做什么？</b> Kernel 会进入 SVM dual objective，因为数据只通过 pairwise inner products 出现。$\alpha_i&gt;0$ 的点就是 support vectors。</p>
         </div>
         <div class="callout formula">
           <div class="head">Polynomial kernel</div>
           <div class="eq">$$ k(x,x')=(1+x^\top x')^d $$</div>
-          <p><b>符号.</b> $x^\top x'$ 是普通 dot product；$d$ 是 polynomial degree；常数 1 会加入 lower-order 和 bias-like terms。</p>
-          <p><b>怎么理解.</b> 展开幂次后，会出现最高到 degree $d$ 的 interaction features。$d=2$ 时有常数、线性项、平方项和 pairwise products。</p>
+          <p><b>这个公式在做什么？</b> 展开幂次后，会出现最高到 degree $d$ 的 interaction features。$d=2$ 时有常数、线性项、平方项和 pairwise products。</p>
 
-      <p><b>怎么用.</b> 显式 feature map 题就把 polynomial 展开，把每一项对应到 $\phi(x)$ 的一个坐标；注意 $\sqrt2$ 这类 scaling，保证内积完全匹配。2D 里 degree-2 inhomogeneous polynomial kernel 隐式有 6 个坐标。</p>
         </div>
         <div class="callout formula">
           <div class="head">RBF / Gaussian kernel</div>
           <div class="eq">$$ k_\sigma(x,x')=\exp\!\left(-\frac{\|x-x'\|_2^2}{2\sigma^2}\right) $$</div>
-          <p><b>符号.</b> $\|x-x'\|_2^2$ 是 squared Euclidean distance；$\sigma$ 是 bandwidth；exponential 把 distance 转成 0 到 1 的 similarity。</p>
-          <p><b>怎么理解.</b> 两点完全相同距离为 0，kernel = 1；距离越远，kernel 越接近 0。$\sigma$ 越小，衰减越快。</p>
-      <p><b>怎么用.</b> 先比较 distances。$\sigma$ 小时，最近 support vectors dominate，overfitting 风险更高；$\sigma$ 大时，很多点都有相近影响，boundary 更 smooth。使用 distance-based kernels 前要先 standardize features。</p>
+          <p><b>这个公式在做什么？</b> 两点完全相同距离为 0，kernel = 1；距离越远，kernel 越接近 0。$\sigma$ 越小，衰减越快。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">XOR lifting from Lecture 7</div>
           <div class="eq">$$ \phi(x_1,x_2)=(x_1,x_2,x_1x_2) $$</div>
-          <p><b>符号.</b> $x_1,x_2$ 是原始两个坐标；$x_1x_2$ 是新 interaction feature，记录两个坐标的符号是否一致。</p>
-          <p><b>怎么理解.</b> XOR 在原平面不能一条直线分开，因为类别在对角线上；interaction coordinate 会把同号点和异号点送到不同侧。</p>
-          <p><b>怎么用.</b> 遇到 XOR 类题，先算每个点的 $x_1x_2$。只用第三个坐标就能构造 linear classifier 分开类别。</p>
+          <p><b>这个公式在做什么？</b> XOR 在原平面不能一条直线分开，因为类别在对角线上；interaction coordinate 会把同号点和异号点送到不同侧。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Representer theorem form</div>
           <div class="eq">$$ f(x)=\sum_{i=1}^{N}\alpha_i\,k(x,x_i) $$</div>
-          <p><b>怎么理解.</b> 很多 regularized empirical-risk 问题的最优函数，都可以写成以 training points 为中心的 kernels 的线性组合。你不需要在整个 feature space 里随便找函数。</p>
-          <p><b>怎么用.</b> 这解释了为什么 kernel ridge regression 和 kernel SVM prediction 都会变成对 training examples / support vectors 的加权求和。</p>
+          <p><b>这个公式在做什么？</b> 很多 regularized empirical-risk 问题的最优函数，都可以写成以 training points 为中心的 kernels 的线性组合。你不需要在整个 feature space 里随便找函数。</p>
         </div>
       </div>
       <div class="callout">

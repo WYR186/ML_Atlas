@@ -81,63 +81,45 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Policy-gradient objective</div>
       <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim P^{\pi_\theta}}[R(\tau)] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> J(θ): policy objective； θ: policy parameters； τ ~ P^{π_θ}: trajectory sampled by policy and environment； R(τ): trajectory return</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The objective is expected trajectory reward under the current parameterized policy.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The objective is expected trajectory reward under the current parameterized policy.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it as the starting point for REINFORCE/policy-gradient derivations: differentiate J with respect to θ.</p>
     </div>
     <div class="callout formula"><div class="head">Policy Gradient Theorem</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\propto \sum_s \mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a\mid s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mu_\pi(s)$: how often state $s$ is visited under policy $\pi$； $q_\pi(s,a)$: expected return after taking $a$ in $s$； $\nabla_\theta\pi_\theta(a\mid s)$: how the action probability changes with parameters.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Increase probabilities of actions with high $q_\pi(s,a)$ in states that the current policy actually visits.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This theorem justifies sample-based PG updates without needing to differentiate the state-visitation distribution $\mu_\pi$ directly.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Increase probabilities of actions with high $q_\pi(s,a)$ in states that the current policy actually visits.</p>
     </div>
     <div class="callout formula"><div class="head">Monte-Carlo estimator</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> N: number of sampled trajectories； R(τ_i): return of trajectory i； ∇θ log πθ(a_t^i|s_t^i): direction changing probability of sampled action； H: trajectory horizon</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Estimate the gradient from sampled trajectories: high-return trajectories increase log-probability of the actions they took.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this when rollouts are available but the environment is not differentiable. Average N trajectories to reduce noise.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Estimate the gradient from sampled trajectories: high-return trajectories increase log-probability of the actions they took.</p>
     </div>
     <div class="callout formula"><div class="head">REINFORCE update</div>
       <div class="eq">$$ \nabla_\theta J(\theta)=\mathbb{E}_{\pi}\!\left[G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ \theta_{t+1}\leftarrow \theta_t+\alpha G_t\nabla_\theta\log\pi_{\theta_t}(A_t\mid S_t) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $G_t$: Monte-Carlo return from time $t$； $\alpha$: learning rate； $A_t,S_t$: sampled action and state； $\nabla_\theta\log\pi$: score function of the chosen action.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> If $G_t$ is large, move parameters in the direction that makes the sampled action more likely in that state.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Run an episode, compute returns, then apply this update to the action log-probabilities along the episode. It is Monte Carlo, so it is unbiased but often high variance.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> If $G_t$ is large, move parameters in the direction that makes the sampled action more likely in that state.</p>
     </div>
     <div class="callout formula"><div class="head">Baseline / advantage version</div>
       <div class="eq">$$ \nabla J\approx \mathbb{E}\!\left[(G_t-b(S_t))\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $b(S_t)$ is any state-only baseline； $\hat v(S_t,w)$ is a common learned baseline； $A^\pi$ is advantage.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The update asks whether the action did better than the state baseline, not merely whether the whole episode return was large.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The update asks whether the action did better than the state baseline, not merely whether the whole episode return was large.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use $G_t-\hat v(S_t,w)$ in REINFORCE with baseline, or use a critic-estimated advantage in actor-critic / PPO-style algorithms.</p>
     </div>
     <div class="callout formula"><div class="head">Why a baseline is unbiased</div>
       <div class="eq">$$ \mathbb{E}_{A\sim\pi(\cdot\mid s)}[b(s)\nabla_\theta\log\pi_\theta(A\mid s)]
 =b(s)\sum_a\nabla_\theta\pi_\theta(a\mid s)=b(s)\nabla_\theta 1=0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $b(s)$ must not depend on the sampled action； the sum runs over all actions available in state $s$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A state-only baseline changes the variance of the estimator but has zero expected contribution to the gradient.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the standard HW5 proof: pull $b(s)$ outside the action expectation, convert $\pi\nabla\log\pi$ to $\nabla\pi$, then use $\sum_a\pi(a\mid s)=1$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A state-only baseline changes the variance of the estimator but has zero expected contribution to the gradient.</p>
     </div>
     <div class="callout formula"><div class="head">Softmax eligibility vector</div>
       <div class="eq">$$ \nabla_\theta\log\pi_\theta(a\mid s)=x(s,a)-\sum_b\pi_\theta(b\mid s)x(s,b) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x(s,a)$ is the feature vector for state-action pair $(s,a)$； $b$ indexes possible actions； $\pi_\theta(b\mid s)$ weights the average feature vector under the current policy.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The chosen action's feature vector is compared against the policy's average feature vector in that state.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For softmax policies with linear preferences $h_\theta(s,a)=\theta^\top x(s,a)$, compute the chosen feature vector, compute the probability-weighted average feature vector, then subtract.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The chosen action's feature vector is compared against the policy's average feature vector in that state.</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM policy</div>
       <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> x: prompt/input； y_{1:t-1}: tokens generated so far； y_t: next token/action； Pθ: model probability under θ</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> In LLM RL, the state is prompt plus previous tokens, and the action is the next token.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> In LLM RL, the state is prompt plus previous tokens, and the action is the next token.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this mapping to translate RL formulas to language models: πθ(a_t|s_t) becomes probability of token y_t.</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Log-derivative trick</div>
       <div class="eq">$$ \nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)\,d\tau,\qquad \nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t\mid s_t) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Pθ(τ): trajectory probability under θ； ∇log Pθ(τ): score function of trajectory probability； Σ_t ∇log πθ(a_t|s_t): sum of policy log-prob gradients； R(τ): trajectory return weighting the update</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This moves the gradient from the sampling probability into a log-probability gradient that the policy network can compute.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to derive policy gradient: write ∇P=P∇logP; environment transitions drop out if they do not depend on θ.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This moves the gradient from the sampling probability into a log-probability gradient that the policy network can compute.</p>
     </div>
   </div>
 
@@ -266,63 +248,45 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Policy-gradient 目标</div>
       <div class="eq">$$ J(\theta)=\mathbb{E}_{\tau\sim P^{\pi_\theta}}[R(\tau)] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> J(θ): 策略目标函数；θ: 策略参数；τ ~ P^{π_θ}: 由策略和环境采样出的轨迹；R(τ): 整条轨迹回报</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 目标是在当前参数化策略下，让采样 trajectory 的期望回报最大。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 目标是在当前参数化策略下，让采样 trajectory 的期望回报最大。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 推导 REINFORCE / policy gradient 时从这里开始：对 θ 求梯度。</p>
     </div>
     <div class="callout formula"><div class="head">Policy Gradient Theorem</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\propto \sum_s \mu_\pi(s)\sum_a q_\pi(s,a)\nabla_\theta\pi_\theta(a\mid s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mu_\pi(s)$ 是 policy $\pi$ 下 state $s$ 被访问的频率；$q_\pi(s,a)$ 是在 $s$ 做 $a$ 后的 expected return；$\nabla_\theta\pi_\theta(a\mid s)$ 是 action probability 对参数的变化方向。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 当前策略经常访问的 state 更重要；在这些 state 里，要提高 high-$q_\pi$ actions 的概率。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这个 theorem 说明我们可以用 sample-based PG update，而不必直接对 state-visitation distribution $\mu_\pi$ 求导。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 当前策略经常访问的 state 更重要；在这些 state 里，要提高 high-$q_\pi$ actions 的概率。</p>
     </div>
     <div class="callout formula"><div class="head">Monte-Carlo 估计</div>
       <div class="eq">$$ \nabla_\theta J(\theta)\approx \frac1N\sum_{i=1}^{N}R(\tau_i)\sum_{t=0}^{H}\nabla_\theta\log\pi_\theta(a_t^i\mid s_t^i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> N: 采样轨迹数量；R(τ_i): 第 i 条轨迹回报；∇θ log πθ(a_t^i|s_t^i): 改变该采样动作概率的梯度方向；H: 轨迹长度</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 用采样 trajectories 估计梯度：高回报轨迹会提高其中动作的 log-probability。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当能采样 rollout、但不能对环境求导时使用。对 N 条轨迹取平均可以降低噪声。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 用采样 trajectories 估计梯度：高回报轨迹会提高其中动作的 log-probability。</p>
     </div>
     <div class="callout formula"><div class="head">REINFORCE 更新</div>
       <div class="eq">$$ \nabla_\theta J(\theta)=\mathbb{E}_{\pi}\!\left[G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ \theta_{t+1}\leftarrow \theta_t+\alpha G_t\nabla_\theta\log\pi_{\theta_t}(A_t\mid S_t) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $G_t$ 是从时间 $t$ 开始的 Monte-Carlo return；$\alpha$ 是 learning rate；$A_t,S_t$ 是采样到的 action 和 state；$\nabla_\theta\log\pi$ 是 chosen action 的 score function。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 如果 $G_t$ 很高，就沿着“让这个 state 下这个 action 更容易出现”的方向更新参数。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先跑完整 episode，算 returns，再对 episode 里的 action log-probabilities 做这个更新。它是 Monte Carlo，所以通常 unbiased 但 high variance。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 如果 $G_t$ 很高，就沿着“让这个 state 下这个 action 更容易出现”的方向更新参数。</p>
     </div>
     <div class="callout formula"><div class="head">Baseline / advantage 版本</div>
       <div class="eq">$$ \nabla J\approx \mathbb{E}\!\left[(G_t-b(S_t))\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right] $$</div>
       <div class="eq">$$ A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $b(S_t)$ 是只依赖 state 的 baseline；常用 baseline 是 learned state-value $\hat v(S_t,w)$；$A^\pi$ 是 advantage。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 更新看的不是 episode return 绝对有多大，而是 action 相比这个 state 的正常水平好多少。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 更新看的不是 episode return 绝对有多大，而是 action 相比这个 state 的正常水平好多少。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> REINFORCE with baseline 里用 $G_t-\hat v(S_t,w)$；actor-critic / PPO 中常用 critic 估计出的 advantage。</p>
     </div>
     <div class="callout formula"><div class="head">为什么 baseline 不引入 bias</div>
       <div class="eq">$$ \mathbb{E}_{A\sim\pi(\cdot\mid s)}[b(s)\nabla_\theta\log\pi_\theta(A\mid s)]
 =b(s)\sum_a\nabla_\theta\pi_\theta(a\mid s)=b(s)\nabla_\theta 1=0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $b(s)$ 不能依赖采样到的 action；sum 遍历 state $s$ 下所有 actions。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> state-only baseline 改变 estimator 的 variance，但它的期望梯度贡献是 0。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> HW5 证明套路：把 $b(s)$ 从 action expectation 里提出去，把 $\pi\nabla\log\pi$ 换成 $\nabla\pi$，最后用 $\sum_a\pi(a\mid s)=1$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> state-only baseline 改变 estimator 的 variance，但它的期望梯度贡献是 0。</p>
     </div>
     <div class="callout formula"><div class="head">Softmax eligibility vector</div>
       <div class="eq">$$ \nabla_\theta\log\pi_\theta(a\mid s)=x(s,a)-\sum_b\pi_\theta(b\mid s)x(s,b) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x(s,a)$ 是 state-action pair 的 feature vector；$b$ 遍历 possible actions；$\pi_\theta(b\mid s)$ 给出当前策略下的加权平均。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> chosen action 的 feature vector 减去当前 policy 的平均 feature vector；它告诉你 chosen action 比平均行为“多了哪些特征”。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对 linear preferences $h_\theta(s,a)=\theta^\top x(s,a)$ 的 softmax policy，先算 chosen feature，再算 policy-weighted average feature，最后相减。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> chosen action 的 feature vector 减去当前 policy 的平均 feature vector；它告诉你 chosen action 比平均行为“多了哪些特征”。</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">LLM 策略</div>
       <div class="eq">$$ \pi_\theta(a_t\mid s_t)=P_\theta(y_t\mid x,y_{1:t-1}) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> x: prompt / 输入；y_{1:t-1}: 目前已生成 tokens；y_t: 下一个 token / 动作；Pθ: 参数 θ 下的模型概率</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 在 LLM 强化学习里，state 是 prompt 加已生成 tokens，action 是下一个 token。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 在 LLM 强化学习里，state 是 prompt 加已生成 tokens，action 是下一个 token。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用这个映射把 RL 公式套到语言模型：πθ(a_t|s_t) 就是生成 token y_t 的概率。</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Log-derivative trick</div>
       <div class="eq">$$ \nabla J=\int P_\theta(\tau)R(\tau)\nabla\log P_\theta(\tau)\,d\tau,\qquad \nabla\log P_\theta(\tau)=\sum_t\nabla\log\pi_\theta(a_t\mid s_t) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Pθ(τ): 参数 θ 下轨迹 τ 的概率；∇log Pθ(τ): 轨迹概率的 score function；Σ_t ∇log πθ(a_t|s_t): 每一步策略 log 概率梯度之和；R(τ): 给更新加权的轨迹回报</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这个技巧把对采样概率的梯度，转成策略网络能计算的 log 概率梯度。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它推导 policy gradient：写成 ∇P=P∇logP；环境转移不依赖 θ，所以最后只剩 policy 的 log 概率项。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 这个技巧把对采样概率的梯度，转成策略网络能计算的 log 概率梯度。</p>
     </div>
   </div>
 

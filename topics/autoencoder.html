@@ -83,28 +83,22 @@
     <div class="callout formula">
       <div class="head">Encoder / decoder</div>
       <div class="eq">$$ z=f_\phi(x),\qquad \hat{x}=g_\theta(z) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x$: Original input, such as an image or feature vector; $f_\phi$: Encoder network with trainable parameters $\phi$; $z$ or $h$: Latent code, embedding, or bottleneck representation; $g_\theta$: Decoder network with trainable parameters $\theta$; $\hat{x}$ or $r$: Reconstructed version of the input.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The encoder compresses; the decoder tests whether the compressed code kept enough information to rebuild the input.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The encoder compresses; the decoder tests whether the compressed code kept enough information to rebuild the input.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute $z=f_\phi(x)$ first, then decode $\hat{x}=g_\theta(z)$. The code $z$ can be used as a learned feature vector after training.</p>
     </div>
     <div class="callout formula">
       <div class="head">Reconstruction loss</div>
       <div class="eq">$$ \min_{\theta,\phi}\;\mathcal{L}_{rec}(x,\hat{x}) $$</div>
       <div class="eq">$$ \mathcal{L}_{rec}=\|x-\hat{x}\|_2^2\quad\text{(MSE)} $$</div>
       <div class="eq">$$ E(w)=\frac12\sum_{n=1}^N\|y(x_n,w)-x_n\|^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{L}_{rec}$ or $E(w)$: Reconstruction loss; $x_n$: The $n$th training input; $y(x_n,w)$: The full auto-encoder output for $x_n$, same role as $\hat{x}_n$; $w$: All network weights; $\frac12$: A convenience factor that cancels the 2 when differentiating squared error.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The loss is a copying test. With a bottleneck or regularizer, doing well on this test requires learning reusable structure rather than memorizing raw input.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each example, subtract reconstruction from input feature by feature, square, sum, then multiply by $\frac12$ if the exam uses the sum-of-squares convention. For minibatch MSE, average over examples or pixels as specified.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The loss is a copying test. With a bottleneck or regularizer, doing well on this test requires learning reusable structure rather than memorizing raw input.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Regularized AE variants</div>
       <div class="eq">$$ \mathcal{L}_{sparse}=\mathcal{L}_{rec}+\lambda\sum_j |z_j| $$</div>
       <div class="eq">$$ \mathcal{L}_{DAE}=\mathbb{E}_{\tilde{x}\sim q(\tilde{x}\mid x)}\|g_\theta(f_\phi(\tilde{x}))-x\|_2^2 $$</div>
       <div class="eq">$$ \mathcal{L}_{CAE}=\mathcal{L}_{rec}+\lambda\left\|\frac{\partial f_\phi(x)}{\partial x}\right\|_F^2 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda$: Strength of the regularizer; $z_j$: Activation of hidden unit $j$; $\tilde{x}$: Corrupted input sampled from noise process $q(\tilde{x}\mid x)$; $\frac{\partial f_\phi(x)}{\partial x}$: Encoder Jacobian; $\|\cdot\|_F$: Frobenius norm, the square root of the sum of squared matrix entries.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Sparse AE limits how many hidden units fire. DAE learns to map noisy points back toward clean data, which is why it is connected to the data manifold and, theoretically, the score $\nabla_x\log p(x)$. CAE penalizes sensitivity of the encoder, so small input perturbations should not change the code too much.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Identify the variant from the extra term: activation penalty means sparse AE, corrupted input with clean target means DAE, and encoder-Jacobian penalty means CAE.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Sparse AE limits how many hidden units fire. DAE learns to map noisy points back toward clean data, which is why it is connected to the data manifold and, theoretically, the score $\nabla_x\log p(x)$. CAE penalizes sensitivity of the encoder, so small input perturbations should not change the code too much.</p>
     </div>
   </div>
 
@@ -210,28 +204,22 @@
         <div class="callout formula">
           <div class="head">Encoder / decoder · 编码与解码</div>
           <div class="eq">$$ z=f_\phi(x),\qquad \hat{x}=g_\theta(z) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x$: 原始输入，比如图片或 feature vector；$f_\phi$: encoder network，参数是 $\phi$；$z$ 或 $h$: latent code / embedding / bottleneck representation；$g_\theta$: decoder network，参数是 $\theta$；$\hat{x}$ 或 $r$: 模型重建出来的输入。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Encoder 负责压缩，decoder 检验这个压缩后的 code 是否保留了足够信息来重建输入。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Encoder 负责压缩，decoder 检验这个压缩后的 code 是否保留了足够信息来重建输入。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先算 $z=f_\phi(x)$，再 decode 得到 $\hat{x}=g_\theta(z)$。训练后，$z$ 可以当作 learned feature vector 使用。</p>
         </div>
         <div class="callout formula">
           <div class="head">Reconstruction loss · 重建损失</div>
           <div class="eq">$$ \min_{\theta,\phi}\;\mathcal{L}_{rec}(x,\hat{x}) $$</div>
           <div class="eq">$$ \mathcal{L}_{rec}=\|x-\hat{x}\|_2^2\quad\text{(MSE)} $$</div>
           <div class="eq">$$ E(w)=\frac12\sum_{n=1}^N\|y(x_n,w)-x_n\|^2 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{L}_{rec}$ 或 $E(w)$: reconstruction loss；$x_n$: 第 $n$ 个 training input；$y(x_n,w)$: 整个 auto-encoder 对 $x_n$ 的输出，等价于 $\hat{x}_n$；$w$: 全部 network weights；$\frac12$: 方便求导时抵消 squared error 的 2。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这个 loss 像一个“复原测试”。有 bottleneck 或 regularizer 时，想复原得好就必须学习可复用结构，而不能只死记硬背。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个样本，先逐 feature 算 reconstruction 和 input 的差，平方后求和；如果题目用 sum-of-squares convention，再乘 $\frac12$。如果题目写 MSE，就按要求对样本 / 像素取平均。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 这个 loss 像一个“复原测试”。有 bottleneck 或 regularizer 时，想复原得好就必须学习可复用结构，而不能只死记硬背。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">Regularized AE variants · 正则化变体</div>
           <div class="eq">$$ \mathcal{L}_{sparse}=\mathcal{L}_{rec}+\lambda\sum_j |z_j| $$</div>
           <div class="eq">$$ \mathcal{L}_{DAE}=\mathbb{E}_{\tilde{x}\sim q(\tilde{x}\mid x)}\|g_\theta(f_\phi(\tilde{x}))-x\|_2^2 $$</div>
           <div class="eq">$$ \mathcal{L}_{CAE}=\mathcal{L}_{rec}+\lambda\left\|\frac{\partial f_\phi(x)}{\partial x}\right\|_F^2 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda$: regularizer strength；$z_j$: 第 $j$ 个 hidden unit 的 activation；$\tilde{x}$: 从 noise process $q(\tilde{x}\mid x)$ 得到的 corrupted input；$\frac{\partial f_\phi(x)}{\partial x}$: encoder Jacobian；$\|\cdot\|_F$: Frobenius norm，也就是矩阵元素平方和再开根号。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Sparse AE 限制 hidden units 不要全都激活；DAE 把 noisy points 拉回 clean data，所以和 data manifold 有关，理论上也和 score $\nabla_x\log p(x)$ 有联系；CAE 惩罚 encoder sensitivity，希望输入小扰动不会让 code 大幅变化。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 看额外项识别类型：activation penalty 是 sparse AE；输入 corrupted、target clean 是 DAE；encoder-Jacobian penalty 是 CAE。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Sparse AE 限制 hidden units 不要全都激活；DAE 把 noisy points 拉回 clean data，所以和 data manifold 有关，理论上也和 score $\nabla_x\log p(x)$ 有联系；CAE 惩罚 encoder sensitivity，希望输入小扰动不会让 code 大幅变化。</p>
         </div>
       </div>
 

@@ -69,46 +69,34 @@
     <div class="callout formula">
       <div class="head">Centering</div>
       <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $N$: number of data points; $x^{(i)}$: the $i$-th original data vector in $\mathbb{R}^d$; $\mu$: the sample mean, or the center of the point cloud; $\bar x^{(i)}$: the centered version of point $i$</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Find the center of the point cloud, then rewrite every point as an offset from that center. PCA should describe spread around the mean, not the mean's location.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Find the center of the point cloud, then rewrite every point as an offset from that center. PCA should describe spread around the mean, not the mean's location.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For hand problems, average each coordinate separately, subtract that vector from every sample, and only then form the covariance matrix.</p>
     </div>
     <div class="callout formula">
       <div class="head">Empirical covariance</div>
       <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\bar X$: matrix whose columns are centered examples $\bar x^{(i)}$; $\Sigma$: covariance matrix; its diagonal entries are variances; $\bar x^{(i)}\bar x^{(i)\top}$: outer product showing how coordinates of one point move together</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The covariance matrix summarizes the shape of the centered cloud: large diagonal entries mean large variance along coordinates, and off-diagonal entries show coordinates moving together.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> With columns-as-examples, multiply $\bar X\bar X^\top$ and divide by $N$. If your convention uses rows as examples, the equivalent formula is $\bar X^\top\bar X/N$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The covariance matrix summarizes the shape of the centered cloud: large diagonal entries mean large variance along coordinates, and off-diagonal entries show coordinates moving together.</p>
     </div>
     <div class="callout formula">
       <div class="head">First principal component</div>
       <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $w$: a candidate direction vector; $\|w\|_2=1$: unit-length constraint, so scale cannot fake larger variance; $w^\top\Sigma w$: variance of the data after projection onto direction $w$; $\arg\max$: the value of $w$ that makes the expression largest</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Test every unit direction and choose the one whose projected coordinates have the largest variance. The solution is the top eigenvector of $\Sigma$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Test every unit direction and choose the one whose projected coordinates have the largest variance. The solution is the top eigenvector of $\Sigma$.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a small matrix, solve the eigenvalue problem, sort eigenvalues from largest to smallest, and take the eigenvector attached to the largest eigenvalue as PC1.</p>
     </div>
     <div class="callout formula">
       <div class="head">Eigenvalues and residual error</div>
       <div class="eq">$$ |\Sigma-\lambda I|=0,\qquad \Sigma u_k=\lambda_k u_k,\qquad J_L=\sum_{k=L+1}^{d}\lambda_k $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\lambda_k$ is the variance captured by component $u_k$; $I$ is the identity matrix; $L$ is the number of components kept; $J_L$ is the mean squared reconstruction error from discarding the remaining directions.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Eigenvectors give orthogonal principal directions, eigenvalues tell how much variance each direction explains, and discarded eigenvalues are exactly the reconstruction error left behind.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> After sorting $\lambda_1\ge\lambda_2\ge\cdots$, keep the first $L$ vectors and add the rest of the eigenvalues to get the residual error.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Eigenvectors give orthogonal principal directions, eigenvalues tell how much variance each direction explains, and discarded eigenvalues are exactly the reconstruction error left behind.</p>
     </div>
     <div class="callout formula">
       <div class="head">Projection and reconstruction</div>
       <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: $d\times m$ matrix of selected principal directions; $\hat x$: low-dimensional PCA coordinates in $\mathbb{R}^m$; $\tilde x$: reconstructed approximation back in original space</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Projection records coordinates in the PCA basis after centering. Reconstruction maps those coordinates back into the original feature space and restores the mean.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Always subtract $\mu$ before multiplying by $U^\top$; always add $\mu$ back after multiplying by $U$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Projection records coordinates in the PCA basis after centering. Reconstruction maps those coordinates back into the original feature space and restores the mean.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">SVD route</div>
       <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $U$: left singular vectors; PCA directions; $S$: diagonal singular-value matrix; $V^\top$: right singular-vector part; not usually needed for PCA directions; $S^2$: eigenvalues of the covariance matrix under this normalization</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> SVD decomposes the centered data into orthogonal directions and stretch sizes. With the scaled matrix $(1/\sqrt N)\bar X$, the covariance eigenvalues are $s_k^2$; with the unscaled SVD $\bar X=\tilde U\tilde S V^\top$, they are $\tilde s_k^2/N$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In high-dimensional data with $d\gg N$, compute the smaller Gram matrix $\bar X^\top\bar X$ of size $N\times N$ first, then recover data-space principal directions from $\bar X v_k$ and normalize.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> SVD decomposes the centered data into orthogonal directions and stretch sizes. With the scaled matrix $(1/\sqrt N)\bar X$, the covariance eigenvalues are $s_k^2$; with the unscaled SVD $\bar X=\tilde U\tilde S V^\top$, they are $\tilde s_k^2/N$.</p>
     </div>
   </div>
   <div class="callout">
@@ -211,46 +199,34 @@
         <div class="callout formula">
           <div class="head">Centering</div>
           <div class="eq">$$ \mu=\frac1N\sum_i x^{(i)},\qquad \bar x^{(i)}=x^{(i)}-\mu $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $N$: data points 的数量; $x^{(i)}$: 第 $i$ 个原始数据向量，维度是 $d$; $\mu$: sample mean，也就是点云中心; $\bar x^{(i)}$: centered point，表示点相对均值的位置</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 先找点云中心，再把每个点改写成“相对中心的偏移”。PCA 要看的是围绕 mean 的 spread，不是 mean 自己在空间里的位置。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 先找点云中心，再把每个点改写成“相对中心的偏移”。PCA 要看的是围绕 mean 的 spread，不是 mean 自己在空间里的位置。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 手算时每个 coordinate 分别求平均，再从每个 sample 中减掉这个 mean vector，之后才能算 covariance。</p>
         </div>
         <div class="callout formula">
           <div class="head">Empirical covariance</div>
           <div class="eq">$$ \Sigma=\frac1N\bar X\bar X^\top=\frac1N\sum_i\bar x^{(i)}\bar x^{(i)\top} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\bar X$: 由 centered examples $\bar x^{(i)}$ 组成的数据矩阵; $\Sigma$: covariance matrix；对角线是各坐标 variance; $\bar x^{(i)}\bar x^{(i)\top}$: outer product，记录一个点各坐标如何一起变化</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Covariance matrix 描述 centered cloud 的形状：diagonal entries 是各坐标 variance，off-diagonal entries 表示两个坐标是否一起变大或变小。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 若约定 columns 是 examples，就算 $\bar X\bar X^\top/N$；如果题目用 rows-as-examples，则对应写成 $\bar X^\top\bar X/N$。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Covariance matrix 描述 centered cloud 的形状：diagonal entries 是各坐标 variance，off-diagonal entries 表示两个坐标是否一起变大或变小。</p>
         </div>
         <div class="callout formula">
           <div class="head">First principal component</div>
           <div class="eq">$$ w_1=\arg\max_{\|w\|_2=1} w^\top\Sigma w $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $w$: 候选 direction vector; $\|w\|_2=1$: unit-length constraint，防止靠放大 $w$ 作弊; $w^\top\Sigma w$: 数据投影到 $w$ 方向后的 variance; $\arg\max$: 让这个值最大的那个 $w$</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 在所有 unit directions 里，找 projection variance 最大的方向。解出来就是 $\Sigma$ 的 top eigenvector。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 在所有 unit directions 里，找 projection variance 最大的方向。解出来就是 $\Sigma$ 的 top eigenvector。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 小矩阵题先解 eigenvalue problem，把 eigenvalues 从大到小排；最大 eigenvalue 对应的 eigenvector 就是 PC1。</p>
         </div>
         <div class="callout formula">
           <div class="head">Eigenvalues and residual error</div>
           <div class="eq">$$ |\Sigma-\lambda I|=0,\qquad \Sigma u_k=\lambda_k u_k,\qquad J_L=\sum_{k=L+1}^{d}\lambda_k $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\lambda_k$ 是第 $k$ 个 component 捕捉到的 variance；$I$ 是 identity matrix；$L$ 是保留的 components 数量；$J_L$ 是丢掉剩余 directions 后的 mean squared reconstruction error。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Eigenvectors 给出互相 orthogonal 的 principal directions，eigenvalues 表示每个方向解释多少 variance，被丢掉的 eigenvalues 加起来就是 reconstruction error。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 排好 $\lambda_1\ge\lambda_2\ge\cdots$ 后，保留前 $L$ 个 vectors，剩余 eigenvalues 相加就是 residual error。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Eigenvectors 给出互相 orthogonal 的 principal directions，eigenvalues 表示每个方向解释多少 variance，被丢掉的 eigenvalues 加起来就是 reconstruction error。</p>
         </div>
         <div class="callout formula">
           <div class="head">Projection and reconstruction</div>
           <div class="eq">$$ \hat x=U^\top(x-\mu),\qquad \tilde x=U\hat x+\mu $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: $d\times m$ matrix，列向量是选中的 principal directions; $\hat x$: 低维 PCA coordinates，维度是 $m$; $\tilde x$: 从低维坐标重建回原空间的 approximation</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Projection 是在 center 后，用 PCA basis 记录新坐标；reconstruction 是把低维坐标映回原空间，并把 mean 加回去。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 投影前一定减 $\mu$；重建后一定加 $\mu$。少掉这一步，答案会整体平移错。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Projection 是在 center 后，用 PCA basis 记录新坐标；reconstruction 是把低维坐标映回原空间，并把 mean 加回去。</p>
         </div>
         <div class="callout formula wide">
           <div class="head">SVD route</div>
           <div class="eq">$$ \frac1{\sqrt N}\bar X=USV^\top,\qquad \Sigma=US^2U^\top $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $U$: left singular vectors，也就是 PCA directions; $S$: singular values 组成的 diagonal matrix; $V^\top$: right singular vectors；通常不是 PCA direction 本身; $S^2$: 在这个 normalization 下对应 covariance eigenvalues</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> SVD 把 centered data 拆成 orthogonal directions 和 stretch sizes。若对 scaled matrix $(1/\sqrt N)\bar X$ 做 SVD，则 covariance eigenvalues 是 $s_k^2$；若对 unscaled $\bar X=\tilde U\tilde S V^\top$ 做 SVD，则 $\lambda_k=\tilde s_k^2/N$。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 当 $d\gg N$ 时，先算更小的 Gram matrix $\bar X^\top\bar X$（$N\times N$），再由 $\bar X v_k$ recover data-space principal direction 并 normalize。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> SVD 把 centered data 拆成 orthogonal directions 和 stretch sizes。若对 scaled matrix $(1/\sqrt N)\bar X$ 做 SVD，则 covariance eigenvalues 是 $s_k^2$；若对 unscaled $\bar X=\tilde U\tilde S V^\top$ 做 SVD，则 $\lambda_k=\tilde s_k^2/N$。</p>
         </div>
       </div>
       <div class="callout">

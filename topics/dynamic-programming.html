@@ -76,44 +76,32 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Finite-horizon DP backup</div>
       <div class="eq">$$ Q_t(s,a)=R(s,a)+\mathbb{E}_{s_{t+1}\sim P(\cdot|s,a)}\!\left[\max_{a'}Q_{t+1}(s_{t+1},a')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q_t(s,a): value at time t； Q_{t+1}: next-time value table； max_{a'}: choose best next action； P(·|s,a): next-state distribution</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> At time t, value equals immediate reward plus the best value available at the next time step.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> At time t, value equals immediate reward plus the best value available at the next time step.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use backward induction: start from terminal time and compute values backward to the start.</p>
     </div>
     <div class="callout formula"><div class="head">Value iteration</div>
       <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
       <div class="eq">$$ V^{(k)}(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^{(k-1)}(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> Q^(k), V^(k): value estimates at iteration k； Q^(k-1), V^(k-1): previous estimates； γ: discount factor； max: choose the best action under the previous estimate</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each iteration does a one-step lookahead: immediate reward plus discounted best future value from the previous table.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Initialize values arbitrarily, with terminal states usually fixed at 0. Sweep all states until $\max_s|V^{(k)}(s)-V^{(k-1)}(s)|&lt;\theta$, then extract a greedy policy.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Each iteration does a one-step lookahead: immediate reward plus discounted best future value from the previous table.</p>
     </div>
     <div class="callout formula"><div class="head">Policy evaluation</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
       <div class="eq">$$ V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> V^π: value vector under π； P^π: transition matrix induced by π； R^π: reward vector induced by π； (I-γP^π)^{-1}: matrix inverse solving the linear system</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For a fixed policy, the value vector satisfies a linear Bellman equation.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> For a fixed policy, the value vector satisfies a linear Bellman equation.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use V=(I-γP)^{-1}R for small finite MDPs, or iterative evaluation for large ones.</p>
     </div>
     <div class="callout formula"><div class="head">Policy improvement</div>
       <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> π_new(s): improved action in state s； argmax_a: action maximizing lookahead； R(s,a): immediate reward； E_{s'}V^π(s'): expected next-state value</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> After evaluating π, improve it by choosing the action with the largest one-step lookahead value.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this in policy iteration: evaluate π, greedify π, repeat until $\pi_{\text{new}}=\pi_{\text{old}}$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> After evaluating π, improve it by choosing the action with the largest one-step lookahead value.</p>
     </div>
     <div class="callout formula"><div class="head">Greedy policy extraction</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\pi^*(s)$ is the optimal action in state $s$; $Q^*$ and $V^*$ are optimal value functions; the $\arg\max$ returns an action, not the value itself.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once the optimal value table is known or nearly converged, the policy is obtained by choosing the action with the largest one-step lookahead.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> This is the final step after value iteration and the improvement step inside policy iteration.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Once the optimal value table is known or nearly converged, the policy is obtained by choosing the action with the largest one-step lookahead.</p>
     </div>
     <div class="callout formula wide"><div class="head">Geometric convergence idea</div>
       <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> ||·||∞: maximum absolute error over state-action pairs； Q^(k): estimate after k iterations； Q*: optimal Q function； γ^k: error shrink factor</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The distance from current Q to Q* shrinks like γ^k.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use it to reason about iteration count: smaller γ converges faster; γ near 1 needs more iterations.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The distance from current Q to Q* shrinks like γ^k.</p>
     </div>
   </div>
 
@@ -226,44 +214,32 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">有限时域 DP backup</div>
       <div class="eq">$$ Q_t(s,a)=R(s,a)+\mathbb{E}_{s_{t+1}\sim P(\cdot|s,a)}\!\left[\max_{a'}Q_{t+1}(s_{t+1},a')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q_t(s,a): 第 t 步 state-action 价值；Q_{t+1}: 下一时刻价值表；max_{a'}: 选择下一步最优动作；P(·|s,a): 下一状态分布</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 有限时域里，第 t 步价值等于即时奖励加下一步能拿到的最佳价值。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 有限时域里，第 t 步价值等于即时奖励加下一步能拿到的最佳价值。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用 backward induction：从终点往前算，一直算回起点。</p>
     </div>
     <div class="callout formula"><div class="head">Value iteration</div>
       <div class="eq">$$ Q^{(k)}(s,a)=R(s,a)+\gamma\mathbb{E}_{s'\sim P(\cdot|s,a)}\!\left[\max_{a'}Q^{(k-1)}(s',a')\right] $$</div>
       <div class="eq">$$ V^{(k)}(s)=\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^{(k-1)}(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> Q^(k), V^(k): 第 k 轮 value estimates；Q^(k-1), V^(k-1): 上一轮估计；γ: discount factor；max: 按上一轮 value 选择最好的 action</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每轮都做 one-step lookahead：即时 reward + 上一轮表格里的最佳未来 value。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 先任意初始化 value，terminal states 通常固定为 0。反复 sweep 所有 states，直到 $\max_s|V^{(k)}(s)-V^{(k-1)}(s)|&lt;\theta$，最后抽取 greedy policy。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 每轮都做 one-step lookahead：即时 reward + 上一轮表格里的最佳未来 value。</p>
     </div>
     <div class="callout formula"><div class="head">Policy evaluation</div>
       <div class="eq">$$ V^\pi=R^\pi+\gamma P^\pi V^\pi $$</div>
       <div class="eq">$$ V^\pi=(I-\gamma P^\pi)^{-1}R^\pi $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> V^π: 策略 π 下价值向量；P^π: 策略 π 诱导出的转移矩阵；R^π: 策略 π 诱导出的奖励向量；(I-γP^π)^{-1}: 解线性方程组的矩阵逆</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 固定策略下，value vector 满足线性的 Bellman 方程。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 固定策略下，value vector 满足线性的 Bellman 方程。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 小型有限 MDP 可直接用 V=(I-γP)^{-1}R；大型问题通常用迭代 evaluation。</p>
     </div>
     <div class="callout formula"><div class="head">Policy improvement</div>
       <div class="eq">$$ \pi_{\text{new}}(s)=\arg\max_a\left[R(s,a)+\gamma\mathbb{E}_{s'}V^\pi(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> π_new(s): 状态 s 的改进后动作；argmax_a: 让前瞻价值最大的动作；R(s,a): 即时奖励；E_{s'}V^π(s'): 下一状态期望价值</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 评估完策略 π 后，用一步前瞻选择价值最大的动作，从而改进策略。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 policy iteration 的 improvement 步：evaluate π，再 greedify π，直到 $\pi_{\text{new}}=\pi_{\text{old}}$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 评估完策略 π 后，用一步前瞻选择价值最大的动作，从而改进策略。</p>
     </div>
     <div class="callout formula"><div class="head">抽取 greedy policy</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_{a\in\mathcal{A}}Q^*(s,a) $$</div>
       <div class="eq">$$ \pi^*(s)=\arg\max_a\left[R(s,a)+\gamma\sum_{s'}P(s'\mid s,a)V^*(s')\right] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\pi^*(s)$ 是 state $s$ 的最优 action；$Q^*$ 和 $V^*$ 是 optimal value functions；$\arg\max$ 返回的是 action，不是最大值本身。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦 optimal value table 已知或基本收敛，policy 就是每个 state 里 one-step lookahead 最大的 action。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 value iteration 后的最后一步，也是 policy iteration 里的 improvement 步。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 一旦 optimal value table 已知或基本收敛，policy 就是每个 state 里 one-step lookahead 最大的 action。</p>
     </div>
     <div class="callout formula wide"><div class="head">几何收敛口径</div>
       <div class="eq">$$ \lVert Q^{(k)}-Q^*\rVert_\infty\le \gamma^k\lVert Q^{(0)}-Q^*\rVert_\infty $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> ||·||∞: 所有 state-action pair 最大绝对误差；Q^(k): 第 k 轮后的估计；Q*: 最优 Q 函数；γ^k: k 轮后的误差缩小因子</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 当前 Q 估计和最优 Q* 的距离会像 γ^k 一样几何下降。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 用它估计迭代速度：γ 越小收敛越快；γ 接近 1 时需要更多轮。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 当前 Q 估计和最优 Q* 的距离会像 γ^k 一样几何下降。</p>
     </div>
   </div>
 

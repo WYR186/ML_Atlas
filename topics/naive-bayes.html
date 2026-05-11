@@ -54,7 +54,6 @@
   <div class="callout formula">
     <div class="head">Bayes' rule foundation</div>
     <div class="eq">$$ P(Y\mid X)=\frac{P(X\mid Y)P(Y)}{P(X)} $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $P(Y)$ is the prior, $P(X\mid Y)$ is the likelihood, $P(Y\mid X)$ is the posterior, and $P(X)$ is the evidence.</p>
     <p style="font-size:13px;margin:4px 0 0;"><b>Exam read.</b> Classification asks for the class with the largest posterior. Since $P(X)$ is shared by every candidate class, MAP prediction only needs to compare $P(X\mid Y=y)P(Y=y)$ across labels.</p>
   </div>
   <div class="callout example">
@@ -67,25 +66,19 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Conditional independence</div>
       <div class="eq">$$ P(X_1,\ldots,X_d\mid Y)=\prod_{j=1}^{d} P(X_j\mid Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $X_1,\ldots,X_d$ are the $d$ feature variables. $Y$ is the class label. $P(X_1,\ldots,X_d\mid Y)$ is the joint class-conditional likelihood. $\prod_{j=1}^{d}$ means multiply one factor for each feature.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Once the class $Y$ is known, Naive Bayes pretends the features stop interacting with each other. The large joint likelihood becomes a product of one-feature likelihoods.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Once the class $Y$ is known, Naive Bayes pretends the features stop interacting with each other. The large joint likelihood becomes a product of one-feature likelihoods.</p>
       <p style="font-size:13px;margin:4px 0;"><b>Email example.</b> If $X_1$ means "has free," $X_2$ means "has money," and $X_3$ means "has click," then NB approximates $P(X_1,X_2,X_3\mid Y=\text{spam})$ as $P(X_1\mid Y)P(X_2\mid Y)P(X_3\mid Y)$.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Estimate each $P(X_j\mid Y=y)$ separately inside each class. For discrete features, count and smooth; for continuous features, fit a 1-D distribution such as a Gaussian.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>Why it matters.</b> For binary features and binary labels, the full class-conditional table needs about $2(2^d-1)$ free parameters. The naive factorization cuts this to about $2d$, which avoids the sparse-combination problem in high dimension.</p>
     </div>
     <div class="callout formula"><div class="head">MAP decision</div>
       <div class="eq">$$ \hat{y}=\arg\max_y P(Y=y)\prod_j P(X_j\mid y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\hat y$ is the predicted class. $\arg\max_y$ means choose the class $y$ that makes the score largest. $P(Y=y)$ is the class prior; $P(X_j\mid y)$ is the likelihood of feature $j$ under class $y$.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Score each class by prior × likelihood. The prior rewards common classes; the product of likelihoods rewards classes that explain the observed feature values well.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For a test example $x=(x_1,\ldots,x_d)$, plug in $x_j$ to each feature likelihood, multiply by the prior for every candidate class, and pick the largest score. The denominator $P(X=x)$ from Bayes' rule is omitted because it is the same for all classes.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Score each class by prior × likelihood. The prior rewards common classes; the product of likelihoods rewards classes that explain the observed feature values well.</p>
     </div>
     <div class="callout formula" style="grid-column:1/3;"><div class="head">Log-space implementation</div>
       <div class="eq">$$ \hat{y}=\arg\max_y\Big[\log P(y)+\sum_j\log P(X_j\mid y)\Big] $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\log$ is any monotone logarithm. The product over features becomes a sum of log-likelihoods. Since $\log$ is increasing, the class that maximizes the original probability also maximizes the log score.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is the same MAP decision, just numerically safer. Multiplying many small probabilities can underflow to 0; adding logs stays stable.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is the same MAP decision, just numerically safer. Multiplying many small probabilities can underflow to 0; adding logs stays stable.</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> In code and exams, compute one log score per class: start with $\log P(y)$, add $\log P(x_j\mid y)$ for every feature, then choose the largest total.</p>
     </div>
   </div>
 
@@ -93,13 +86,11 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Maximum likelihood estimation (MLE) by counting</div>
       <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_y$ counts training examples with label $y$, $n$ is the training-set size, and $c(X_j=1,Y=y)$ counts examples where feature $j$ is active inside class $y$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> For discrete Bernoulli features, training is maximum likelihood estimation by counts: estimate a class prior and one feature probability per class-feature pair.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> For discrete Bernoulli features, training is maximum likelihood estimation by counts: estimate a class prior and one feature probability per class-feature pair.</p>
     </div>
     <div class="callout formula"><div class="head">Laplace smoothing</div>
       <div class="eq">$$ \hat p_{j,y}=\frac{c_{j,y}+\lambda}{c_y+\lambda |X_j|},\qquad \lambda>0 $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $c_{j,y}$ is the count for a particular value of feature $j$ in class $y$; $|X_j|$ is the number of possible values for that feature.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to read it.</b> The pseudo-count prevents a never-seen feature value from assigning probability 0 and wiping out the entire product at prediction time.</p>
+      <p style="font-size:13px;margin:4px 0 0;"><b>What it does.</b> The pseudo-count prevents a never-seen feature value from assigning probability 0 and wiping out the entire product at prediction time.</p>
     </div>
   </div>
 
@@ -118,9 +109,7 @@
   <div class="callout formula">
     <div class="head">Each feature is Gaussian per class</div>
     <div class="eq">$$ P(X_j\mid Y=y)=\mathcal{N}(X_j;\,\mu_{y,j},\,\sigma_{y,j}^2) $$</div>
-    <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\mathcal{N}(X_j;\mu_{y,j},\sigma_{y,j}^2)$ is a one-dimensional Gaussian density for feature $j$ in class $y$. $\mu_{y,j}$ is that class-feature mean; $\sigma_{y,j}^2$ is its variance.</p>
-    <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> For continuous data, each class gets its own little bell curve for each feature. A test value is more likely under a class if it lies near that class's mean with reasonable variance.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Estimate $\mu_{y,j}$ and $\sigma_{y,j}^2$ from training examples with label $y$, then plug the Gaussian density into the MAP log score. When all classes <b>share the same per-feature variance</b>, the quadratic terms cancel and the decision boundary is linear.</p>
+    <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> For continuous data, each class gets its own little bell curve for each feature. A test value is more likely under a class if it lies near that class's mean with reasonable variance.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>Special case.</b> If priors and variances are equal, GNB chooses the class whose mean vector is closest to the test point, using Euclidean distance.</p>
   </div>
 
@@ -165,7 +154,6 @@
       <div class="callout formula">
         <div class="head">Bayes rule 基础</div>
         <div class="eq">$$ P(Y\mid X)=\frac{P(X\mid Y)P(Y)}{P(X)} $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $P(Y)$ 是 prior；$P(X\mid Y)$ 是 likelihood；$P(Y\mid X)$ 是 posterior；$P(X)$ 是 evidence。</p>
         <p style="font-size:13px;margin:4px 0 0;"><b>考试读法.</b> 分类就是找 posterior 最大的类别。因为 $P(X)$ 对所有候选 class 相同，MAP 预测只需比较各个 label 的 $P(X\mid Y=y)P(Y=y)$。</p>
       </div>
       <div class="callout example">
@@ -178,25 +166,19 @@
       <div class="cols2">
         <div class="callout formula"><div class="head">条件独立分解</div>
           <div class="eq">$$ P(X_1,\ldots,X_d\mid Y)=\prod_{j=1}^{d} P(X_j\mid Y) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $X_1,\ldots,X_d$ 是 $d$ 个 feature variables；$Y$ 是 class label；$P(X_1,\ldots,X_d\mid Y)$ 是给定类别后的联合 likelihood；$\prod_{j=1}^{d}$ 表示对每个 feature 的一项连乘。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 一旦知道类别 $Y$，Naive Bayes 就假设 features 之间“不再互相影响”。于是一个高维联合 likelihood 被拆成很多一维 likelihood 的乘积。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 一旦知道类别 $Y$，Naive Bayes 就假设 features 之间“不再互相影响”。于是一个高维联合 likelihood 被拆成很多一维 likelihood 的乘积。</p>
           <p style="font-size:13px;margin:4px 0;"><b>邮件例子.</b> 若 $X_1$ 表示 has "free"，$X_2$ 表示 has "money"，$X_3$ 表示 has "click"，NB 会把 $P(X_1,X_2,X_3\mid Y=\text{spam})$ 近似拆成 $P(X_1\mid Y)P(X_2\mid Y)P(X_3\mid Y)$。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 在每个 class 内分别估计 $P(X_j\mid Y=y)$。离散 feature 用计数加 smoothing；连续 feature 常拟合一维 Gaussian。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>为什么有用.</b> 对 binary features 和 binary labels，完整 class-conditional 表大约需要 $2(2^d-1)$ 个自由参数；Naive factorization 把它降到约 $2d$，高维时不必等待每一种 feature combination 都在训练集中出现。</p>
         </div>
         <div class="callout formula"><div class="head">MAP 决策</div>
           <div class="eq">$$ \hat{y}=\arg\max_y \;P(Y=y)\prod_{j} P(X_j\mid Y=y) $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\hat y$ 是预测类别；$\arg\max_y$ 表示选让分数最大的类别 $y$；$P(Y=y)$ 是 class prior；$P(X_j\mid Y=y)$ 是类别 $y$ 下第 $j$ 个 feature 的 likelihood。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每个 class 的分数 = prior × likelihood。Prior 偏向常见类别；likelihood 衡量这个类别有多能解释当前 observation。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对测试样本 $x=(x_1,\ldots,x_d)$，把每个 $x_j$ 代入对应 likelihood，对每个候选 class 算一个分数，取最大者。Bayes 公式分母 $P(X=x)$ 对所有 class 一样，所以 $\arg\max$ 时可省略。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 每个 class 的分数 = prior × likelihood。Prior 偏向常见类别；likelihood 衡量这个类别有多能解释当前 observation。</p>
         </div>
         <div class="callout formula" style="grid-column:1/3;"><div class="head">Log-space 实现</div>
           <div class="eq">$$ \hat{y}=\arg\max_y\Big[\log P(y)+\sum_{j}\log P(X_j\mid y)\Big] $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\log$ 是单调递增函数；feature likelihood 的乘积变成 log-likelihood 的求和。因为 $\log$ 不改变大小顺序，最大概率的 class 也会有最大 log score。</p>
-          <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 这和 MAP 决策完全等价，只是数值更稳。很多小概率连乘会 underflow 成 0；取 log 后变成加法，不容易崩。</p>
+          <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 这和 MAP 决策完全等价，只是数值更稳。很多小概率连乘会 underflow 成 0；取 log 后变成加法，不容易崩。</p>
 
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 代码和考试都这样算：每个 class 从 $\log P(y)$ 开始，加上所有 $\log P(x_j\mid y)$，总分最大者就是预测。遇“为什么用 log”就答避免下溢且不改变 $\arg\max$。</p>
         </div>
       </div>
 
@@ -204,13 +186,11 @@
       <div class="cols2">
         <div class="callout formula"><div class="head">Maximum likelihood estimation (MLE) = 计数</div>
           <div class="eq">$$ \hat p_y=\frac{c_y}{n},\qquad \hat p_{j,y}=\frac{c(X_j=1,Y=y)}{c_y} $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_y$ 是 label 为 $y$ 的训练样本数；$n$ 是训练集大小；$c(X_j=1,Y=y)$ 是 class $y$ 内第 $j$ 个 binary feature 激活的样本数。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> 对离散 Bernoulli features，训练就是 maximum likelihood estimation (MLE) by counting：估一个 class prior，再估每个 class-feature pair 的条件概率。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> 对离散 Bernoulli features，训练就是 maximum likelihood estimation (MLE) by counting：估一个 class prior，再估每个 class-feature pair 的条件概率。</p>
         </div>
         <div class="callout formula"><div class="head">Laplace smoothing</div>
           <div class="eq">$$ \hat p_{j,y}=\frac{c_{j,y}+\lambda}{c_y+\lambda |X_j|},\qquad \lambda>0 $$</div>
-          <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $c_{j,y}$ 是 class $y$ 中 feature $j$ 某个取值的 count；$|X_j|$ 是该 feature 可能取值数。</p>
-          <p style="font-size:13px;margin:4px 0 0;"><b>怎么理解.</b> pseudo-count 防止训练集中没出现过的 feature value 被估成 0，从而在 prediction 时把整串 likelihood product 直接归零。</p>
+          <p style="font-size:13px;margin:4px 0 0;"><b>这个公式在做什么？</b> pseudo-count 防止训练集中没出现过的 feature value 被估成 0，从而在 prediction 时把整串 likelihood product 直接归零。</p>
         </div>
       </div>
 
@@ -229,9 +209,7 @@
       <div class="callout formula">
         <div class="head">假设每个 $X_j\mid Y$ 高斯</div>
         <div class="eq">$$ P(X_j\mid Y=y)=\mathcal{N}\!\big(X_j\,;\,\mu_{y,j},\sigma_{y,j}^2\big) $$</div>
-        <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\mathcal{N}(X_j;\mu_{y,j},\sigma_{y,j}^2)$ 是类别 $y$ 下第 $j$ 个 feature 的一维 Gaussian density；$\mu_{y,j}$ 是 mean；$\sigma_{y,j}^2$ 是 variance。</p>
-        <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 对连续 feature，每个 class 都给每个 feature 拟合一条小钟形曲线。测试值越靠近该 class 的 mean，且方差解释得合理，likelihood 越高。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 先用训练集中 $Y=y$ 的样本估 $\mu_{y,j}$ 和 $\sigma_{y,j}^2$，再把 Gaussian density 代入 MAP log score。若 <b>所有类共享同一方差 $\sigma_j^2$</b>，二次项会抵消，GNB 决策边界为 <b>线性</b>。</p>
+        <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 对连续 feature，每个 class 都给每个 feature 拟合一条小钟形曲线。测试值越靠近该 class 的 mean，且方差解释得合理，likelihood 越高。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>特例.</b> 如果 class priors 和 variances 都相同，GNB 会选 mean vector 离 test point 最近的 class，本质是在比 Euclidean distance。</p>
       </div>
 

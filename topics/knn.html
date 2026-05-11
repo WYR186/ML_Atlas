@@ -83,25 +83,19 @@
     <div class="callout formula" id="eq-knn-classification">
       <div class="head">Classification (majority vote)</div>
       <div class="eq">$$ \hat{y}(x)=\arg\max_{c}\;\frac{1}{k}\sum_{n\in \mathcal{N}_k(x,\mathcal{D})} \mathbb{I}(y_n=c) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $\hat{y}(x)$: predicted label for query point $x$. $\mathcal{N}_k(x,\mathcal{D})$: indices of the $k$ training points closest to $x$. $\mathbb{I}(\cdot)$: indicator (1 if the statement is true, 0 otherwise). $c$: a class label. The fraction is the empirical class probability inside the neighborhood.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> "What fraction of my $k$ neighbors are class $c$?" — pick the class with the highest fraction. Ties on $\arg\max$ are broken by problem-specific rules (random pick, smaller class, smaller distance sum).</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compute distances to all training points, sort, take the top-$k$, count labels, return the most frequent. For 1-NN this collapses to "return the label of the single nearest neighbor." Choose $k$ by cross-validation.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> "What fraction of my $k$ neighbors are class $c$?" — pick the class with the highest fraction. Ties on $\arg\max$ are broken by problem-specific rules (random pick, smaller class, smaller distance sum).</p>
     </div>
 
     <div class="callout formula" id="eq-knn-regression">
       <div class="head">Regression (mean)</div>
       <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i \qquad\text{or}\qquad \hat y(x)=\frac{\sum_i w_i y_i}{\sum_i w_i},\ \ w_i=\frac{1}{d(x,x_i)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $y_i\in\mathbb{R}$: real-valued target of training point $x_i$; $w_i$: optional inverse-distance weight (closer neighbors weighted more). The unweighted form is the plain arithmetic mean.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> "Predict the average target value seen near $x$." Local averaging — works whenever the target is roughly smooth in feature space.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Same neighbor lookup as classification; replace voting with averaging. $k=1$ regression is rarely a good idea — it just echoes the nearest training point's noisy target.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> "Predict the average target value seen near $x$." Local averaging — works whenever the target is roughly smooth in feature space.</p>
     </div>
 
     <div class="callout formula" id="eq-knn-euclidean" style="grid-column:1/3;">
       <div class="head">Euclidean ($L_2$) distance</div>
       <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d}(x_j-x_{ij})^2} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x\in\mathbb{R}^d$: query point; $x_i\in\mathbb{R}^d$: the $i$-th training point; $j$: feature index, summed across all $d$ features; $\|\cdot\|_2$: Euclidean / $L_2$ norm.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Straight-line ruler distance in $d$-dimensional feature space. The squaring inside the sum amplifies large per-feature gaps, which is exactly why feature scale dominates everything.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Square per-coordinate differences, sum, take the square root. <b>Always standardize features first</b> (zero mean, unit variance), or a high-magnitude feature like "salary in dollars" will swamp a low-magnitude one like "age in years." Common alternatives when $L_2$ doesn't fit your geometry: Manhattan ($L_1$), cosine, Mahalanobis.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Straight-line ruler distance in $d$-dimensional feature space. The squaring inside the sum amplifies large per-feature gaps, which is exactly why feature scale dominates everything.</p>
     </div>
   </div>
 
@@ -264,25 +258,19 @@
     <div class="callout formula" id="eq-knn-classification-cn">
       <div class="head">Classification（多数投票）</div>
       <div class="eq">$$ \hat{y}(x)=\arg\max_{c}\;\frac{1}{k}\sum_{n\in \mathcal{N}_k(x,\mathcal{D})} \mathbb{I}(y_n=c) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $\hat{y}(x)$：对 query 点 $x$ 的预测标签；$\mathcal{N}_k(x,\mathcal{D})$：训练集中距 $x$ 最近的 $k$ 个点的下标；$\mathbb{I}(\cdot)$：indicator，命题为真取 1 否则取 0；$c$：某个类别；分式即 "邻域里类别 $c$ 的经验概率"。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "我的 $k$ 个邻居里，类别 $c$ 占多大比例？" —— 选比例最大的那个类别。$\arg\max$ 出现 tie 时按题目规则（随机选 / 选下标小的 / 距离和小的）打破。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 算到所有训练点的距离 → 排序 → 取前 $k$ 个 → 数标签 → 取众数。1-NN 退化成 "返回最近邻的标签"。$k$ 用 cross-validation 选。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> "我的 $k$ 个邻居里，类别 $c$ 占多大比例？" —— 选比例最大的那个类别。$\arg\max$ 出现 tie 时按题目规则（随机选 / 选下标小的 / 距离和小的）打破。</p>
     </div>
 
     <div class="callout formula" id="eq-knn-regression-cn">
       <div class="head">Regression（求平均）</div>
       <div class="eq">$$ \hat{y}(x)=\frac{1}{k}\sum_{x_i\in \mathcal{N}_k(x)} y_i \qquad\text{或}\qquad \hat y(x)=\frac{\sum_i w_i y_i}{\sum_i w_i},\ \ w_i=\frac{1}{d(x,x_i)} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $y_i\in\mathbb{R}$：训练点 $x_i$ 的实数目标；$w_i$：可选 inverse-distance weight（越近权重越大）。无权重形式就是普通 arithmetic mean。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "预测 $x$ 附近样本目标的平均值"。Local averaging —— 真实函数在 feature space 中近似平滑时效果好。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 找邻居的步骤与 classification 完全一致，把 vote 换成 average 即可。$k=1$ regression 通常不可取 —— 它直接把最近邻那一个点的 noisy target 抄过来。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> "预测 $x$ 附近样本目标的平均值"。Local averaging —— 真实函数在 feature space 中近似平滑时效果好。</p>
     </div>
 
     <div class="callout formula" id="eq-knn-euclidean-cn" style="grid-column:1/3;">
       <div class="head">Euclidean ($L_2$) 距离</div>
       <div class="eq">$$ d(x,x_i)=\|x-x_i\|_2=\sqrt{\sum_{j=1}^{d}(x_j-x_{ij})^2} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x\in\mathbb{R}^d$：query 点；$x_i\in\mathbb{R}^d$：第 $i$ 个训练点；$j$：feature 下标，对所有 $d$ 个 feature 求和；$\|\cdot\|_2$：Euclidean / $L_2$ norm。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> $d$ 维 feature space 里的 "直尺距离"。逐 coordinate 做平方会把大差异放大、小差异压缩，所以 feature scale 对它影响极大。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 逐分量算差的平方 → 求和 → 开方。<b>先把 feature 标准化</b>（mean=0, var=1），否则一个量级大的 feature（如 "工资按美元计算" vs. "年龄按年计算"）会把距离吞掉。常见替代：Manhattan ($L_1$)、cosine、Mahalanobis。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> $d$ 维 feature space 里的 "直尺距离"。逐 coordinate 做平方会把大差异放大、小差异压缩，所以 feature scale 对它影响极大。</p>
     </div>
   </div>
 

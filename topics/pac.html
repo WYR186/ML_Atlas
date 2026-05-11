@@ -61,7 +61,7 @@
     <div class="head">Formal PAC definition</div>
     <p>In the standard realizable concept-class definition, $\mathcal{F}$ is <b>PAC-learnable</b> if there exists a learning algorithm $\mathcal{A}$ and a sample bound $m_{\mathcal{F}}(\epsilon,\delta,d)$ such that, for every $\epsilon&gt;0$, $\delta&gt;0$, distribution $\mu$, and target concept $f^*\in\mathcal{F}$, using $n\ge m_{\mathcal{F}}(\epsilon,\delta,d)$ i.i.d. labeled examples makes</p>
     <div class="eq">$$ \Pr_{\mathcal{D}}\!\left(\epsilon_\mu(\mathcal{A}(\mathcal{D}))\le \epsilon\right)\ge 1-\delta. $$</div>
-    <p><b>How to read it.</b> You choose the desired accuracy $\epsilon$ and failure probability $\delta$ first. The learner then receives enough random samples and, with high probability over that sample draw, outputs a predictor whose true error is small. The distribution $\mu$ is arbitrary, so the guarantee is distribution-free. To count as PAC, $m_{\mathcal{F}}$ must grow at most polynomially in $1/\epsilon$, $1/\delta$, and $d$.</p>
+    <p><b>What it does.</b> You choose the desired accuracy $\epsilon$ and failure probability $\delta$ first. The learner then receives enough random samples and, with high probability over that sample draw, outputs a predictor whose true error is small. The distribution $\mu$ is arbitrary, so the guarantee is distribution-free. To count as PAC, $m_{\mathcal{F}}$ must grow at most polynomially in $1/\epsilon$, $1/\delta$, and $d$.</p>
   </div>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -81,71 +81,33 @@
     <div class="callout formula">
       <div class="head">Training error</div>
       <div class="eq">$$ \hat\epsilon_{\mathcal{D}}(f)=\frac1n\sum_{i=1}^n\mathbf{1}\{f(x^{(i)})\ne y^{(i)}\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is empirical 0-1 loss: each indicator records one training mistake, and the average turns the count into a rate.</p>
 
-      <ul>
-        <li>$\mathcal{D}=\{(x^{(i)},y^{(i)})\}_{i=1}^n$ is the training set.</li>
-        <li>$n$ is the number of training examples.</li>
-        <li>$\mathbf{1}\{\cdot\}$ is an indicator: it equals 1 if the statement is true and 0 otherwise.</li>
-        <li>The hat in $\hat\epsilon$ means this error is measured from data.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is empirical 0-1 loss: each indicator records one training mistake, and the average turns the count into a rate.</p>
-
-      <p><b>How to use.</b> count how many training points $f$ misclassifies, then divide by $n$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Test error</div>
       <div class="eq">$$ \epsilon_\mu(f)=\Pr_\mu(f(X)\ne Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> This is population error on a fresh draw from the true distribution, so it is the quantity generalization theory tries to control.</p>
 
-      <ul>
-        <li>$\mu$ is the unknown data-generating distribution.</li>
-        <li>$(X,Y)\sim\mu$ is a fresh random test example, not necessarily one from training.</li>
-        <li>$\Pr_\mu$ asks for the probability of making a mistake under that distribution.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> This is population error on a fresh draw from the true distribution, so it is the quantity generalization theory tries to control.</p>
-
-      <p><b>How to use.</b> this is the quantity PAC bounds try to control. It is usually not directly observable, so we estimate or upper-bound it from samples.</p>
     </div>
     <div class="callout formula" id="eq-pac-generalization-gap">
       <div class="head">Generalization gap</div>
       <div class="eq">$$ \bigl|\hat\epsilon_{\mathcal{D}}(f)-\epsilon_\mu(f)\bigr| $$</div>
       <p style="font-size:13px;margin:6px 0 4px;">The single object that all of learning theory tries to bound. The two error notions above (training and test) are only useful insofar as they're <i>close</i> — and "close" means this gap is small.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>Symbols.</b> $\hat\epsilon_{\mathcal{D}}(f)$ is the training (empirical) error of $f$ on a finite dataset $\mathcal{D}$ of size $n$. $\epsilon_\mu(f)$ is the true (population) error under the unknown distribution $\mu$. The absolute value covers both directions — overfit (training under-counts) and pessimistic estimate (training over-counts).</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> "Did the model just memorize $\mathcal{D}$, or did it learn a real pattern?" If the gap is small with high probability, training error is a trustworthy proxy for test error and you can stop worrying. If the gap is big, your training-set performance tells you nothing about deployment.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to use.</b> Every PAC / Hoeffding / VC theorem in this chapter has the same shape: $|\hat\epsilon_{\mathcal{D}}(f)-\epsilon_\mu(f)|\le \text{(complexity term)}/\sqrt n$ with probability $\ge 1-\delta$. The complexity term is $\log|\mathcal{F}|$ for finite classes (next entry) or $d_{\mathrm{VC}}$ for infinite classes (see VC-dimension page). On exams, when asked to "derive a generalization bound," your job is exactly to bound this gap — name it explicitly, then cite the theorem and plug in the complexity factor.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> "Did the model just memorize $\mathcal{D}$, or did it learn a real pattern?" If the gap is small with high probability, training error is a trustworthy proxy for test error and you can stop worrying. If the gap is big, your training-set performance tells you nothing about deployment.</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>Where it shows up.</b> Final review's "generalization gap" slide; HW5 §1.1 (uniform convergence ⇒ good ERM — bound the gap uniformly over $\mathcal{F}$, then derive an ERM guarantee); the proof template behind every PAC sample-complexity result.</p>
     </div>
     <div class="callout formula">
       <div class="head">Finite realizable ERM bound</div>
       <div class="eq">$$ n\ge \frac1\epsilon\left(\log|\mathcal{F}|+\log\frac1\delta\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The inequality is a sample-complexity promise: enough samples make every bad finite-class hypothesis unlikely to fit the data perfectly.</p>
 
-      <ul>
-        <li>$n$ is the required sample size.</li>
-        <li>$\epsilon$ is the target error level: smaller $\epsilon$ means you demand a more accurate classifier.</li>
-        <li>$\delta$ is the allowed failure probability: smaller $\delta$ means you demand more confidence.</li>
-        <li>$|\mathcal{F}|$ is the number of hypotheses in the finite class.</li>
-        <li>$\log$ is typically natural log in these bounds; changing bases only changes constants.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The inequality is a sample-complexity promise: enough samples make every bad finite-class hypothesis unlikely to fit the data perfectly.</p>
-
-      <p><b>How to use.</b> choose target $\epsilon,\delta$, plug in $|\mathcal{F}|$, and solve for the minimum $n$. If $n$ meets this bound, realizable ERM has true error at most $\epsilon$ with probability at least $1-\delta$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Agnostic PAC target</div>
       <div class="eq">$$ \Pr\left(\epsilon_\mu(f)\le \min_{g\in\mathcal{H}}\epsilon_\mu(g)+\epsilon\right)\ge 1-\delta $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> The bullet list below defines each variable used in the formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> The learner is compared with the best function in the class plus a tolerance, because noisy labels may make zero error impossible.</p>
 
-      <ul>
-        <li>$\mathcal{H}$ is the hypothesis class used in the agnostic setting.</li>
-        <li>$\min_{g\in\mathcal{H}}\epsilon_\mu(g)$ is the best true error achievable inside $\mathcal{H}$.</li>
-        <li>The extra $+\epsilon$ is the allowed excess error over that best-in-class predictor.</li>
-        <li>The outer probability is over the random draw of the training set and any algorithmic randomness.</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> The learner is compared with the best function in the class plus a tolerance, because noisy labels may make zero error impossible.</p>
-
-      <p><b>How to use.</b> use this form when labels may be noisy or no perfect classifier is assumed. The learner is judged against the best function in the class, not against zero error.</p>
     </div>
   </div>
   <div class="callout">
@@ -280,71 +242,33 @@
     <div class="callout formula">
       <div class="head">Training error</div>
       <div class="eq">$$ \hat\epsilon_{\mathcal{D}}(f)=\frac1n\sum_{i=1}^n\mathbf{1}\{f(x^{(i)})\ne y^{(i)}\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 统计模型在 training set 上错了多少比例；indicator 负责把每个样本变成 0/1 错误。</p>
 
-      <ul>
-        <li>$\mathcal{D}=\{(x^{(i)},y^{(i)})\}_{i=1}^n$ 是 training set。</li>
-        <li>$n$ 是训练样本数量。</li>
-        <li>$\mathbf{1}\{\cdot\}$ 是 indicator：括号里的事件为真就等于 1，否则等于 0。</li>
-        <li>$\hat\epsilon$ 上面的 hat 表示这是从数据上量出来的 empirical error。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>数一数 $f$ 在训练集上错了多少个点，再除以 $n$。</p>
     </div>
     <div class="callout formula">
       <div class="head">Test error</div>
       <div class="eq">$$ \epsilon_\mu(f)=\Pr_\mu(f(X)\ne Y) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 衡量模型在真实分布中新样本上犯错的概率；这是 PAC bound 真正想控制的量。</p>
 
-      <ul>
-        <li>$\mu$ 是未知的数据生成分布。</li>
-        <li>$(X,Y)\sim\mu$ 是一个新的 random test example，不是训练集里的某个固定点。</li>
-        <li>$\Pr_\mu$ 表示在真实分布下发生分类错误的概率。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>PAC bound 真正想控制的是这个量。它通常不能直接算，只能用样本估计或给 upper bound。</p>
     </div>
     <div class="callout formula" id="eq-pac-generalization-gap-cn">
       <div class="head">Generalization gap（泛化间隙）</div>
       <div class="eq">$$ \bigl|\hat\epsilon_{\mathcal{D}}(f)-\epsilon_\mu(f)\bigr| $$</div>
       <p style="font-size:13px;margin:6px 0 4px;">学习理论想要 bound 的唯一对象。上面两个 error notion（training 和 test）只有在它们 <i>足够接近</i> 时才有意义 —— 而 “接近” 意味着这个 gap 很小。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>符号.</b> $\hat\epsilon_{\mathcal{D}}(f)$ 是 $f$ 在大小 $n$ 的有限数据集 $\mathcal{D}$ 上的训练（empirical）error；$\epsilon_\mu(f)$ 是 $f$ 在未知分布 $\mu$ 下的真实（population）error。绝对值同时覆盖两个方向 —— overfit（训练 error 偏低）与 pessimistic estimate（训练 error 偏高）。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> "模型只是把 $\mathcal{D}$ 死记下来了，还是真的学到了 pattern？" gap 大概率小，训练 error 就是 test error 的可信代理；gap 大，训练成绩对 deployment 没参考价值。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么用.</b> 本章所有 PAC / Hoeffding / VC 定理形状一致：$|\hat\epsilon_{\mathcal{D}}(f)-\epsilon_\mu(f)|\le \text{(complexity term)}/\sqrt n$，以 $\ge 1-\delta$ 的概率成立。complexity term 在有限类是 $\log|\mathcal{F}|$（下一项），在无限类是 $d_{\mathrm{VC}}$（见 VC-dimension 页）。考试上 "推导一个 generalization bound" 等价于 bound 这一项 —— 先把 gap 写出来，再 cite 定理、代入复杂度因子。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> "模型只是把 $\mathcal{D}$ 死记下来了，还是真的学到了 pattern？" gap 大概率小，训练 error 就是 test error 的可信代理；gap 大，训练成绩对 deployment 没参考价值。</p>
       <p style="font-size:13px;margin:4px 0 0;"><b>典型出处.</b> Final review 的 generalization gap slide；HW5 §1.1（uniform convergence ⇒ good ERM —— 在 $\mathcal{F}$ 上 uniformly bound 这个 gap，再推 ERM guarantee）；每条 PAC sample-complexity 结果的证明模板。</p>
     </div>
     <div class="callout formula">
       <div class="head">有限 realizable ERM bound</div>
       <div class="eq">$$ n\ge \frac1\epsilon\left(\log|\mathcal{F}|+\log\frac1\delta\right) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 给出有限 hypothesis class 在 realizable setting 下需要多少样本，才能以高概率把 true error 压到 $\epsilon$ 以下。</p>
 
-      <ul>
-        <li>$n$ 是需要的 sample size。</li>
-        <li>$\epsilon$ 是目标错误率，越小代表要求越准。</li>
-        <li>$\delta$ 是允许失败的概率，越小代表要求越有把握。</li>
-        <li>$|\mathcal{F}|$ 是 finite hypothesis class 里的 hypothesis 数量。</li>
-        <li>$\log$ 通常按 natural log 理解；底数不同只会改变常数。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>给定目标 $\epsilon,\delta$ 和 $|\mathcal{F}|$，代入右边求最小 $n$。满足这个样本数时，realizable ERM 以至少 $1-\delta$ 概率得到 true error $\le\epsilon$。</p>
     </div>
     <div class="callout formula">
       <div class="head">Agnostic PAC 目标</div>
       <div class="eq">$$ \Pr\left(\epsilon_\mu(f)\le \min_{g\in\mathcal{H}}\epsilon_\mu(g)+\epsilon\right)\ge 1-\delta $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> 下面的 bullet list 逐项解释公式里的变量。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 不要求学到零错误，而是要求接近 class 内最优模型；适合 labels 有噪声或模型 class 不完美的情况。</p>
 
-      <ul>
-        <li>$\mathcal{H}$ 是 agnostic setting 里的 hypothesis class。</li>
-        <li>$\min_{g\in\mathcal{H}}\epsilon_\mu(g)$ 是 $\mathcal{H}$ 内能达到的最小 true error。</li>
-        <li>$+\epsilon$ 是允许比 class 内最优多出来的 excess error。</li>
-        <li>外面的 probability 来自随机抽到的 training set，以及算法本身可能的 randomness。</li>
-      </ul>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 把公式先当成“输入哪些量、输出哪个量”的计算规则来看；符号含义确定后，再按步骤代入。</p>
-
-      <p><b>怎么用.</b>当 label 有噪声、或者不假设存在完美 classifier 时，用这个形式。此时不是要求 error 接近 0，而是接近 class 内最优。</p>
     </div>
   </div>
   <div class="callout">

@@ -65,39 +65,29 @@
     <div class="callout formula">
       <div class="head">Bootstrap sample</div>
       <div class="eq">$$ D_t=\{(x_{i_s},y_{i_s})\}_{s=1}^{n},\qquad i_s\sim\text{Uniform}\{1,\dots,n\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $D_t$ is the resampled training set for base learner $t$. The original dataset has $n$ examples. $s$ is the draw number, $i_s$ is the index drawn on that draw, and the uniform distribution means every original example has the same chance each time.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A bootstrap set is built by drawing $n$ examples with replacement. Some original points may appear multiple times; some may be absent.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For each base learner, sample $n$ indices with replacement, train $f_t$ on $D_t$, then repeat independently for the next learner.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A bootstrap set is built by drawing $n$ examples with replacement. Some original points may appear multiple times; some may be absent.</p>
       <p style="font-size:13px;margin:6px 0 0;"><b>OOB fact.</b> One original point is left out with probability $(1-\frac1n)^n\approx e^{-1}\approx0.368$, so each bootstrap sample contains about $63.2\%$ unique original examples and leaves about $36.8\%$ out-of-bag.</p>
     </div>
     <div class="callout formula">
       <div class="head">Majority vote</div>
       <div class="eq">$$ F(x)=\operatorname{sign}\!\left(\sum_{t=1}^{T} f_t(x)\right) $$</div>
       <div class="eq">$$ \hat f_{\text{bag}}(x)=\frac1T\sum_{t=1}^{T}\hat f_t(x) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $F(x)$ is the ensemble class prediction. $T$ is the number of trained base models. $f_t(x)\in\{-1,+1\}$ is model $t$'s vote on example $x$. $\hat f_{\text{bag}}(x)$ is the bagged regression prediction, and $\hat f_t(x)$ is model $t$'s numeric prediction.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Each model votes; the ensemble adds the votes; the final label is whichever side has the larger total.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> For classification, run all trees on the test example, add their $+1/-1$ votes, and choose the sign. For multiclass, choose the most frequent class. For regression, use the average formula.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Each model votes; the ensemble adds the votes; the final label is whichever side has the larger total.</p>
     </div>
     <div class="callout formula">
       <div class="head">Variance of an average</div>
       <div class="eq">$$ \operatorname{Var}\!\left(\frac1T\sum_t f_t\right)\approx \frac{\sigma^2}{T} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $T$ is ensemble size. $f_t$ is one base learner's prediction. $\sigma^2$ is the variance of one base learner. The approximation assumes the learners are roughly independent and similarly variable.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> Averaging independent noisy predictors makes random fluctuation cancel out, so variance drops by about a factor of $T$.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Use this as the variance-reduction intuition for bagging. If trees are highly correlated, the reduction is much smaller than $\sigma^2/T$.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> Averaging independent noisy predictors makes random fluctuation cancel out, so variance drops by about a factor of $T$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Random forest split idea</div>
       <div class="eq">$$ \text{consider about }\sqrt d\text{ features per split} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $d$ is the total number of input features. $\sqrt d$ is the common rough number of candidate features checked at each tree split.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> A random forest does not let every split inspect every feature. It randomly narrows the feature menu before choosing the best local split.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Mention this when explaining why random forests improve plain bagging: feature subsampling lowers correlation among trees.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> A random forest does not let every split inspect every feature. It randomly narrows the feature menu before choosing the best local split.</p>
     </div>
     <div class="callout formula wide">
       <div class="head">Out-of-bag prediction</div>
       <div class="eq">$$ \hat y_i^{\text{OOB}}=\operatorname{Agg}_{t:\,i\notin D_t} f_t(x_i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>Symbols.</b> $x_i$ is training example $i$. The condition $i\notin D_t$ means model $t$ did not train on that example. $\operatorname{Agg}$ means majority vote for classification and average for regression.</p>
-      <p style="font-size:13px;margin:4px 0;"><b>How to read it.</b> To predict a training point in an honest way, only ask the trees that never saw that point during bootstrap training.</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>How to use.</b> Compare OOB predictions with the true training labels to estimate generalization error without a separate validation set. If OOB error stops improving, adding more trees may no longer help much.</p>
+      <p style="font-size:13px;margin:4px 0;"><b>What it does.</b> To predict a training point in an honest way, only ask the trees that never saw that point during bootstrap training.</p>
     </div>
   </div>
 
@@ -138,35 +128,25 @@
   <div class="cols2">
     <div class="callout formula"><div class="head">Bootstrap sample</div>
       <div class="eq">$$ D_t=\{(x_{i_s},y_{i_s})\}_{s=1}^{n},\qquad i_s\sim\text{Uniform}\{1,\dots,n\} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $D_t$ 是第 $t$ 个 base learner 的重采样训练集；原始 dataset 有 $n$ 个样本；$s$ 是第几次抽样；$i_s$ 是第 $s$ 次抽到的样本 index；Uniform 表示每次抽样时每个原始样本概率相同。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Bootstrap 就是“有放回抽样”：抽 $n$ 次组成一个新训练集。同一个样本可以重复出现，也可能完全没被抽到。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 对每个 base learner，先抽 $n$ 个 indices 组成 $D_t$，在这个 dataset 上训练 $f_t$，然后对下一个 learner 重新抽。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Bootstrap 就是“有放回抽样”：抽 $n$ 次组成一个新训练集。同一个样本可以重复出现，也可能完全没被抽到。</p>
       <p style="font-size:13px;margin:6px 0 0;"><b>OOB fact.</b> 一个原始样本在 $n$ 次有放回抽样中没被抽到的概率是 $(1-\frac1n)^n\approx e^{-1}\approx0.368$，所以每个 bootstrap sample 平均包含约 $63.2\%$ unique original examples，约 $36.8\%$ 是 out-of-bag。</p>
     </div>
     <div class="callout formula"><div class="head">Majority vote</div>
       <div class="eq">$$ F(x)=\operatorname{sign}\!\left(\sum_{t=1}^{T} f_t(x)\right) $$</div>
       <div class="eq">$$ \hat f_{\text{bag}}(x)=\frac1T\sum_{t=1}^{T}\hat f_t(x) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $F(x)$ 是 ensemble 的分类 prediction；$T$ 是 base models 数量；$f_t(x)\in\{-1,+1\}$ 是第 $t$ 个模型对样本 $x$ 的 vote；$\operatorname{sign}$ 把 vote sum 变成二分类 label。$\hat f_{\text{bag}}(x)$ 是 bagged regression prediction，$\hat f_t(x)$ 是第 $t$ 个模型的数值预测。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 每棵树投一票，ensemble 把票加起来，哪边票更多就选哪边。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> Classification 让所有 trees 预测，把 $+1/-1$ 加起来看正负号；multiclass 用最多票的 class。Regression 用第二个公式：把所有模型的 numeric predictions 求平均。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 每棵树投一票，ensemble 把票加起来，哪边票更多就选哪边。</p>
     </div>
     <div class="callout formula"><div class="head">Variance of an average</div>
       <div class="eq">$$ \operatorname{Var}\!\left(\frac1T\sum_t f_t\right)\approx \frac{\sigma^2}{T} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $T$ 是 ensemble size；$f_t$ 是一个 base learner 的 prediction；$\sigma^2$ 是单个 learner 的 variance；这个近似默认 learners 基本 independent 且 variance 类似。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 多个 independent noisy predictors 做 average，随机波动会互相抵消，所以 variance 大约除以 $T$。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 这是 bagging 降 variance 的核心直觉。如果 trees 高度相关，实际下降会远小于 $\sigma^2/T$。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 多个 independent noisy predictors 做 average，随机波动会互相抵消，所以 variance 大约除以 $T$。</p>
     </div>
     <div class="callout formula"><div class="head">Random forest split idea</div>
       <div class="eq">$$ \text{每个 split 只考虑约 }\sqrt d\text{ 个 features} $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $d$ 是总 feature 数；$\sqrt d$ 是每次 tree split 常用的候选 feature 数量。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> Random Forest 不让每个 split 都看全部 features，而是先随机抽一小部分 feature，再在里面挑 best split。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 解释 Random Forest vs plain Bagging 时要提：feature subsampling 会降低 trees 之间的 correlation。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> Random Forest 不让每个 split 都看全部 features，而是先随机抽一小部分 feature，再在里面挑 best split。</p>
     </div>
     <div class="callout formula wide"><div class="head">Out-of-bag prediction</div>
       <div class="eq">$$ \hat y_i^{\text{OOB}}=\operatorname{Agg}_{t:\,i\notin D_t} f_t(x_i) $$</div>
-      <p style="font-size:13px;margin:6px 0 4px;"><b>符号.</b> $x_i$ 是第 $i$ 个 training example；条件 $i\notin D_t$ 表示第 $t$ 个模型训练时没有见过这个样本；$\operatorname{Agg}$ 表示 aggregation：classification 用 majority vote，regression 用 average。</p>
-      <p style="font-size:13px;margin:4px 0;"><b>怎么理解.</b> 想公平地预测一个训练样本，就只问“当年没看过它”的那些 trees，这样更像 validation。</p>
-      <p style="font-size:13px;margin:4px 0 0;"><b>怎么用.</b> 把 OOB predictions 和真实 training labels 对比，就得到一个内部的 generalization error estimate，不一定要额外切 validation set。若 OOB error 不再下降，继续加 trees 的收益可能已经很小。</p>
+      <p style="font-size:13px;margin:4px 0;"><b>这个公式在做什么？</b> 想公平地预测一个训练样本，就只问“当年没看过它”的那些 trees，这样更像 validation。</p>
     </div>
   </div>
 

@@ -68,47 +68,92 @@
       <div class="head">Sigmoid</div>
       <div class="eq">$$ \sigma(z)=\frac{1}{1+e^{-z}} $$</div>
       <p><b>What it does.</b> Turns an unbounded logit $z$ into a class-1 probability. Remember $\sigma(0)=0.5$ and $\sigma'(z)=\sigma(z)(1-\sigma(z))$.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p style="font-size:13px;margin:6px 0;"><b>Symbols.</b> $z$ is any real-valued logit, almost always $z=w^\top\phi(x)$ (or $w^\top x+b$); $\sigma(z)\in(0,1)$ is the predicted probability of the positive class; $e^{-z}$ is the exponential factor in the denominator.</p>
+        <p style="font-size:13px;margin:6px 0;"><b>How to read it.</b> An S-curve squashing any score into $(0,1)$. $\sigma(0)=0.5$; large positive $z\to 1$; large negative $z\to 0$. The curve saturates at the extremes — that's why "very confident" predictions get tiny gradients (one source of vanishing gradients in deep nets).</p>
+        <p style="font-size:13px;margin:6px 0 0;"><b>How to use.</b> Compute the linear score first, then plug into $\sigma$. Thresholding at $0.5$ for classification is equivalent to checking whether $z>0$. Memorize $\sigma'(z)=\sigma(z)(1-\sigma(z))$ — it's the identity that makes logistic-regression gradients and sigmoid backprop steps collapse cleanly.</p>
+      </details>
     </div>
     <div class="callout formula">
       <div class="head">Logit / log-odds</div>
       <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
       <p><b>What it does.</b> Says the model is linear in log-odds, not in raw probability. Setting $p=0.5$ gives log-odds $0$, so the boundary is linear.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $p=p(y=1\mid x)$ is the model's class-1 probability; $p/(1-p)$ is the <b>odds</b> of class 1 against class 0; the LHS $\log(p/(1-p))$ is the <b>logit</b> (the inverse of $\sigma$); $w$ are weights and $b$ is bias.</p>
+        <p><b>How to read it.</b> Logistic regression is linear in <i>log-odds</i>, not in raw probability. A one-unit increase in feature $j$ shifts the log-odds by exactly $w_j$ — so $w_j$ has a clean interpretive meaning (an "odds-multiplier" of $e^{w_j}$).</p>
+        <p><b>How to use.</b> To answer "why is the boundary linear?" on an exam, set $p=0.5$ — log-odds become $\log 1=0$, so the boundary is exactly $w^\top\phi(x)+b=0$. To convert log-odds back to a probability, apply $\sigma$.</p>
+      </details>
     </div>
     <div class="callout formula">
       <div class="head">Decision boundary</div>
       <div class="eq">$$ p(y=1\mid x)=0.5 \iff w^\top\phi(x)=0 $$</div>
       <p><b>What it does.</b> Connects probability thresholding to a sign test: classify by whether the score is above or below zero.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $p(y=1\mid x)$ is the model's predicted probability for class $+1$; $w$ is the learned weight vector; $\phi(x)$ is the feature representation (identity for plain logistic regression); $w^\top\phi(x)$ is the linear score.</p>
+        <p><b>How to read it.</b> The boundary is the locus of points where the model is exactly indifferent — both classes tied at probability $0.5$. Sigmoid is monotone, so the tie happens exactly at score $0$. The boundary is linear in feature space even though the probability curve is nonlinear, which is why logistic regression is still called a <b>linear classifier</b> despite the sigmoid output.</p>
+        <p><b>How to use.</b> For classification, compute $w^\top\phi(x)$: positive score → predict $+1$, negative score → predict $-1$. To draw the boundary, solve $w^\top\phi(x)+b=0$ — for 2D plain logistic this is a line.</p>
+      </details>
     </div>
     <div class="callout formula">
       <div class="head">Negative log-likelihood</div>
       <div class="eq">$$ \min_w \sum_{(x_i,y_i)\in D}\log\!\left(1+\exp(-y_i w^\top\phi(x_i))\right) $$</div>
       <p><b>What it does.</b> Trains the classifier by penalizing negative or weak margins. This is the $y\in\{-1,+1\}$ form of logistic loss.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $D$ is the training set; $y_i\in\{-1,+1\}$ is the label; $w^\top\phi(x_i)$ is the score; $y_i w^\top\phi(x_i)$ is the <b>signed margin</b>; $\log(1+e^{-z})$ is the <b>softplus</b> — a smooth approximation of $\max(0,-z)$.</p>
+        <p><b>How to read it.</b> Confidently correct (large positive margin) → loss $\approx 0$; confidently wrong (negative margin) → loss grows roughly linearly in $|z|$. Always non-negative; convex and differentiable, so SGD works cleanly. Comes from maximizing the i.i.d. Bernoulli likelihood, then taking $-\log$.</p>
+        <p><b>How to use.</b> Sum this term over all training examples and minimize via gradient descent. Add an L2 regularizer $\tfrac{\lambda}{2}\|w\|^2$ for ridge-style logistic regression. Don't mix this with the $\{0,1\}$ BCE form unless you convert labels first ($y_{01}=(y_{\pm 1}+1)/2$).</p>
+      </details>
     </div>
     <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy">
       <div class="head">Binary cross-entropy (BCE)</div>
       <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
       <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
       <p><b>What it does.</b> Same NLL with $y\in\{0,1\}$ labels: reward high probability on the true class, punish confident wrong predictions. With logits, the gradient collapses to $\hat y-y$.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $y\in\{0,1\}$ is the true binary label; $\hat y=\sigma(z)\in(0,1)$ is the predicted class-1 probability with logit $z$; $\mu_n=\sigma(w^\top x_n)$ in the dataset form; the two log terms are mutually exclusive — only one is "on" per example.</p>
+        <p><b>How to read it.</b> $y=1$ keeps $-\log\hat y$ (penalty grows when $\hat y$ is far below 1); $y=0$ keeps $-\log(1-\hat y)$ (penalty grows when $\hat y$ is far above 0). Confidently wrong → unbounded penalty. Same loss as the $\pm 1$ NLL above with labels converted; this is the form every neural-net library uses.</p>
+        <p><b>How to use.</b> Standard loss for any sigmoid-output binary classifier (logistic regression, MLP single-sigmoid output, HW3 two-layer net). With the underlying logit, the gradient famously collapses to $\partial\mathcal{L}/\partial z=\hat y-y$. For numerical stability use the fused <code>BCEWithLogitsLoss</code> (computes the softplus form internally instead of $\log(\sigma(z))$).</p>
+      </details>
     </div>
     <div class="callout formula">
       <div class="head">Gradient descent update</div>
       <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
       <p><b>What it does.</b> Gives the iterative training step: move weights opposite the loss gradient because logistic regression has no normal-equation closed form.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $w_t$ is the current weight vector; $\alpha>0$ is the learning rate / step size; $\nabla f(w_t)$ is the gradient of the logistic objective $f$ at $w_t$ — the steepest <i>ascent</i> direction (the minus sign turns it into descent).</p>
+        <p><b>How to read it.</b> Larger $\alpha$ moves faster but can overshoot the minimum; smaller $\alpha$ is safer but slower. Logistic regression has no closed-form solution unlike linear regression's normal equations, so iteration is mandatory; convexity of the loss guarantees that GD converges to the global minimum from any start.</p>
+        <p><b>How to use.</b> Each round: (i) compute $\mu_i=\sigma(w^\top x_i)$, (ii) form $\nabla L(w)=\sum_i(\mu_i-y_i)x_i$ (next entry), (iii) update $w$. Pick $\alpha$ via line search, an exponential schedule, or the Lipschitz-based safe value $1/L$ where $L=\tfrac14\sigma_{\max}(X^\top X)$.</p>
+      </details>
     </div>
     <div class="callout formula">
       <div class="head">Gradient and IRLS</div>
       <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
       <p><b>What it does.</b> Shows the useful gradient shape: probability error times input. IRLS/Newton uses this with curvature for faster but heavier steps.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $\nabla L$ is the gradient of the $\{0,1\}$ NLL; $\mu_i\in(0,1)$ is the predicted class-1 probability for sample $i$; $(\mu_i-y_i)$ is the <b>residual</b> (predicted − true), bounded in $[-1,1]$.</p>
+        <p><b>How to read it.</b> Beautiful "probability error times input" form — directly mirrors linear regression's normal-equation residual structure $X^\top(\hat y-y)$, just with $\sigma$-mapped predictions instead of raw scores. In matrix form, $\nabla L(w)=X^\top(\mu-y)$.</p>
+        <p><b>How to use.</b> Drop into mini-batch SGD as is. <b>IRLS</b> (Iteratively Reweighted Least Squares) / Newton's method combines this gradient with the $X^\top BX$ Hessian (next entry) to take a quasi-second-order step $w_{t+1}=w_t-(X^\top B X)^{-1}X^\top(\mu-y)$ — converges in $O(\log\log(1/\epsilon))$ iterations but each step costs an $O(d^3)$ matrix solve, so it's only worth it when $d$ is moderate.</p>
+      </details>
     </div>
     <div class="callout formula wide">
       <div class="head">Convexity check for $y\in\{0,1\}$ form</div>
       <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
       <p><b>What it does.</b> Proves logistic loss is convex: $B$ has nonnegative diagonal entries, so $X^\top B X$ is PSD and local minima are global under rank conditions.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $X$ is the design matrix with rows $x_i^\top$; $p_i=\sigma(w^\top x_i)$ is the predicted probability for sample $i$; $B$ is diagonal with entries $p_i(1-p_i)\in[0,\tfrac14]$ — the per-sample curvature weight (peaked at $0.25$ when $p_i=0.5$, vanishing as $p_i\to 0$ or $1$).</p>
+        <p><b>How to read it.</b> Each $p_i(1-p_i)$ is non-negative, so $B\succeq 0$ (PSD). By the sandwich identity (see <a href="linear-algebra.html#sandwich">linear-algebra page</a>), $X^\top BX$ is PSD too, so the Hessian is PSD <i>everywhere</i> → loss is globally convex. Saturated samples ($p_i$ near 0 or 1) contribute almost zero curvature — that's why "easy" examples don't pull on the optimum once they're confidently classified.</p>
+        <p><b>How to use.</b> For a convexity proof, expand $v^\top\nabla^2 L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge 0$. Hence local minima are global, and the optimum is unique when $X$ has full column rank with at least one $p_i\in(0,1)$. The same Hessian appears in IRLS / Newton's method (previous entry) as the second-order curvature term.</p>
+      </details>
     </div>
     <div class="callout formula wide">
       <div class="head">Softmax extension</div>
       <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
       <p><b>What it does.</b> Extends sigmoid to $C$ classes by normalizing one score per class into probabilities that sum to 1. Use log-sum-exp for stable computation.</p>
+      <details class="formula-detail"><summary>📖 Symbols, intuition &amp; usage</summary>
+        <p><b>Symbols.</b> $C$ is the number of classes; $w_c$ is the per-class weight vector ($C$ vectors total — one per class); the numerator $\exp(w_c^\top x)$ is the unnormalized class-$c$ score; the denominator normalizes outputs to sum to 1.</p>
+        <p><b>How to read it.</b> Multi-class generalization of sigmoid. Larger logits get exponentially more probability mass; $C=2$ collapses back to sigmoid after the parameterization shift $w=w_1-w_0$. Note the model is over-parameterized — adding the same constant to every $w_c$ leaves probabilities unchanged, so usually one class is held fixed at $w_C=0$ to remove the redundancy.</p>
+        <p><b>How to use.</b> Train with multi-class cross-entropy $-\sum_c y_c\log\hat y_c$ on one-hot $y$; the gradient at logits is again $\hat y - y$ — the same clean "predicted minus truth" identity as binary BCE. Subtract $\max_j z_j$ before exponentiating for numerical stability, or use the fused log-sum-exp / <code>CrossEntropyLoss</code> op.</p>
+      </details>
     </div>
   </div>
 
