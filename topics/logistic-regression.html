@@ -51,6 +51,7 @@
   <h3 class="section-blue">1. Concept Understanding</h3>
   <p>For binary labels $y\in\{-1,+1\}$, logistic regression computes a linear score $s=w^\top\phi(x)$ and converts it into a class probability:</p>
   <div class="eq">$$ p(y\mid x)=\frac{1}{1+\exp(-y\,w^\top\phi(x))} $$</div>
+  <p>It is a <b>discriminative</b> model: it directly models $p(y\mid x;\theta)$ instead of modeling the joint distribution $p(x,y)$ as Naive Bayes does. A bias term can be written explicitly as $a=w^\top x+b$, or absorbed into $\phi(x)$ by adding a constant feature.</p>
   <p>The concept solves the classification weakness of linear regression: we want a loss that cares about correct signs and probability confidence, not about matching labels as numeric targets.</p>
 
   <h3 class="section-orange">2. Plain-English Explanation</h3>
@@ -70,6 +71,14 @@
       <p><b>How to read it.</b> The sigmoid turns an unbounded score into a number between 0 and 1. If $z$ is large positive, $e^{-z}$ is tiny and $\sigma(z)\approx1$; if $z$ is large negative, $\sigma(z)\approx0$.</p>
 
       <p><b>How to use.</b> Compute the score first, then plug it into $\sigma$. Since $\sigma(0)=0.5$, probability-threshold classification at 0.5 is the same as checking whether the score is positive.</p>
+      <p><b>Derivative.</b> $\sigma'(z)=\sigma(z)(1-\sigma(z))$, the identity that makes logistic-regression gradients and sigmoid backprop collapse cleanly.</p>
+    </div>
+    <div class="callout formula">
+      <div class="head">Logit / log-odds</div>
+      <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
+      <p><b>Symbols.</b> $p=p(y=1\mid x)$, so $\frac{p}{1-p}$ is the odds of class 1 against class 0. The logit is the inverse of the sigmoid.</p>
+      <p><b>How to read it.</b> Logistic regression is linear in log-odds, not linear in probability. A one-unit increase in a feature shifts the log-odds by its weight.</p>
+      <p><b>How to use.</b> If an exam asks why the boundary is linear, set $p=0.5$. The log-odds become $\log 1=0$, so the boundary is exactly $w^\top\phi(x)+b=0$.</p>
     </div>
     <div class="callout formula">
       <div class="head">Decision boundary</div>
@@ -86,6 +95,16 @@
 
       <p><b>How to use.</b> Sum this term over all training examples, then minimize with gradient-based optimization. Do not mix this $y\in\{-1,+1\}$ form with the $y\in\{0,1\}$ cross-entropy form unless you convert labels.</p>
     </div>
+    <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy">
+      <div class="head">Binary cross-entropy (BCE)</div>
+      <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
+      <p>This is the same logistic-regression loss as the NLL above, just rewritten with the <b>$y\in\{0,1\}$</b> label convention and an explicit predicted probability $\hat y$. It's the form you'll see in every neural-net library, and the form HW3 asks you to backprop through.</p>
+      <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
+      <p><b>Symbols.</b> $y\in\{0,1\}$ is the true binary label; $\hat y\in(0,1)$ is the model's predicted probability of class 1, almost always $\hat y=\sigma(z)$ where $z$ is the logit $w^\top x$ (or the output of a deeper net). The two terms are mutually exclusive — only one is "on" for any given example.</p>
+      <p><b>How to read it.</b> When $y=1$, the second term vanishes and you're left with $-\log\hat y$ — penalty grows when $\hat y$ is far below 1. When $y=0$, the first term vanishes and you're left with $-\log(1-\hat y)$ — penalty grows when $\hat y$ is far above 0. Confidently wrong → unbounded penalty.</p>
+      <p><b>How to use.</b> Sum (or average) this loss over a mini-batch and minimize via gradient descent. Combined with the sigmoid logit $z$, the gradient famously simplifies to $\partial\mathcal{L}/\partial z=\hat y-y$ (see the MLP page's <i>Softmax + cross-entropy output gradient</i> entry — same identity, $K=2$ collapse). For numerical stability, frameworks fuse sigmoid and BCE into one op (<code>BCEWithLogitsLoss</code>), equivalent to the $\log(1+\exp(-yz))$ softplus form above with $y\in\{-1,+1\}$.</p>
+      <p><b>Where it shows up.</b> HW3 §1 (two-layer net binary classifier — write forward pass + BCE loss + backprop), every MLP example with a single sigmoid output unit, the Bernoulli-likelihood term inside VAE / diffusion ELBOs.</p>
+    </div>
     <div class="callout formula">
       <div class="head">Gradient descent update</div>
       <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
@@ -93,12 +112,24 @@
       <p><b>How to read it.</b> Move opposite the gradient because we want to reduce loss. A larger $\alpha$ moves faster but can overshoot; a smaller $\alpha$ is safer but slower.</p>
       <p><b>How to use.</b> Repeatedly compute predicted probabilities, form the gradient, and update $w$. Logistic regression generally has no normal-equation closed form.</p>
     </div>
+    <div class="callout formula">
+      <div class="head">Gradient and IRLS</div>
+      <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
+      <p><b>How to read it.</b> The first-order gradient is predicted probability minus target, times the input. This is the logistic version of “error times feature.”</p>
+      <p><b>How to use.</b> Gradient descent uses only this gradient. Newton's method also uses the Hessian and is often called <b>IRLS</b> (Iteratively Reweighted Least Squares) for logistic regression; it can converge faster but each step is more expensive.</p>
+    </div>
     <div class="callout formula wide">
       <div class="head">Convexity check for $y\in\{0,1\}$ form</div>
       <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
       <p><b>Symbols.</b> $X$ is the design matrix with rows $x_i^\top$; $p_i=\sigma(w^\top x_i)$; $B$ is diagonal, with one curvature weight $p_i(1-p_i)$ per example.</p>
       <p><b>How to read it.</b> $p_i(1-p_i)$ is never negative, so $B$ is positive semidefinite. The sandwich form $X^\top B X$ therefore has nonnegative quadratic form $v^\top X^\top B Xv$.</p>
-      <p><b>How to use.</b> For convexity proofs, write $v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$.</p>
+      <p><b>How to use.</b> For convexity proofs, write $v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$. It is strictly convex when the relevant design matrix has full column rank, so any local minimum is global.</p>
+    </div>
+    <div class="callout formula wide">
+      <div class="head">Softmax extension</div>
+      <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
+      <p><b>How to read it.</b> Binary sigmoid becomes softmax for $C$ classes. Each class gets its own score, and the normalization makes all probabilities sum to 1.</p>
+      <p><b>How to use.</b> In numerical work, subtract the largest score or use the log-sum-exp trick before exponentiating; direct exponentials can overflow.</p>
     </div>
   </div>
 
@@ -111,7 +142,7 @@
   <div class="callout example">
     <div class="head">Example B · Logistic vs. linear loss</div>
     <div class="example-source">Source: Lecture 5, comparison with quadratic loss.</div>
-    <p>For a correctly classified point with large positive margin, quadratic classification loss can still be large because it tries to make the score close to the numeric label. Logistic loss becomes close to zero because the model already assigns high probability to the correct label.</p>
+    <p>For a correctly classified point with large positive margin, quadratic classification loss can still be large because it tries to make the score close to the numeric label. Linear regression can also output values outside $[0,1]$ and is sensitive to outliers. Logistic loss becomes close to zero because the model already assigns high probability to the correct Bernoulli label.</p>
   </div>
   <div class="callout example">
     <div class="head">Example C · Hessian proves convexity</div>
@@ -125,6 +156,9 @@
     <div><b>For probability questions,</b> write the sigmoid first, then threshold at 0.5 if classification is required.</div>
     <div><b>For convexity questions,</b> show the Hessian is $X^\top B X$ and test $v^\top H v$.</div>
     <div><b>For optimization questions,</b> say “no closed form in general; use gradient descent.”</div>
+    <div><b>For linear-vs-logistic questions,</b> contrast Gaussian regression targets with Bernoulli class labels. In multiclass classification, linear regression can mask an intermediate class even when the classes are separable.</div>
+    <div><b>For separable data,</b> unregularized MLE may send $\|w\|$ toward infinity. Add $L_2$ weight decay, such as $\lambda\|w\|_2^2$, to keep the solution finite and improve generalization.</div>
+    <div><b>For XOR,</b> a single logistic-regression boundary cannot solve it. You need nonlinear features or a hidden layer such as an MLP.</div>
   </div>
 
   <h3 class="section-red">7. Common Mistakes</h3>
@@ -133,6 +167,7 @@
     <li>Mixing $y\in\{0,1\}$ and $y\in\{-1,+1\}$ formulas without converting.</li>
     <li>Expecting a normal-equation closed form like linear regression.</li>
     <li>Forgetting the i.i.d. assumption when multiplying likelihoods over the dataset.</li>
+    <li>Forgetting that perfectly separable data makes unregularized MLE chase infinite weights.</li>
   </ul>
 
   <h3 class="section-yellow">8. Exam Focus</h3>
@@ -142,6 +177,7 @@
     <li>Derive or recognize the gradient form used by gradient descent.</li>
     <li>Use $H=X^\top B X$ to prove convexity.</li>
     <li>Explain why the decision boundary is $w^\top\phi(x)=0$.</li>
+    <li>Know the log-odds interpretation, the softmax multiclass extension, and why log-sum-exp is used for numerical stability.</li>
   </ul>
 
   <h3 class="section-yellow">9. Quick Checklist</h3>
@@ -151,6 +187,7 @@
     <li>I know logistic regression usually needs iterative optimization.</li>
     <li>I can explain convexity using the PSD Hessian.</li>
     <li>I know the decision boundary remains linear in feature space.</li>
+    <li>I can explain why separable data needs regularization and why XOR needs nonlinear features.</li>
   </ul>
 </section>
 </div><!--/en-only-->
@@ -163,6 +200,7 @@
       <h3 class="section-blue">1. Concept Understanding · 概念理解</h3>
       <p>对二分类 $y\in\{-1,+1\}$，模型先算 score $s=w^\top\phi(x)$，再把它变成真实类别的概率：</p>
       <div class="eq">$$ p(y\mid x)=\frac{1}{1+\exp(-y\,w^\top\phi(x))} $$</div>
+      <p>它是 <b>discriminative model</b>：直接建模 $p(y\mid x;\theta)$，而不是像 Naive Bayes 那样建模 joint distribution $p(x,y)$。Bias 可以显式写成 $a=w^\top x+b$，也可以把常数 1 加进 $\phi(x)$ 里吸收掉。</p>
       <p>它解决的是 linear regression 做 classification 的问题：分类更关心 sign 和 confidence，而不是把标签当普通数字去拟合。</p>
 
       <h3 class="section-orange">2. Plain-English Explanation · 大白话理解</h3>
@@ -182,6 +220,14 @@
           <p><b>怎么理解.</b> Sigmoid 把无限范围的 score 压到 0 到 1。$z$ 很大为正时 $\sigma(z)\approx1$；$z$ 很大为负时 $\sigma(z)\approx0$。</p>
 
       <p><b>怎么用.</b> 先算 score，再代入 $\sigma$。因为 $\sigma(0)=0.5$，用 0.5 做阈值分类等价于看 score 是否大于 0。</p>
+          <p><b>导数.</b> $\sigma'(z)=\sigma(z)(1-\sigma(z))$，这是 logistic regression gradient 和 sigmoid backprop 能简化的关键恒等式。</p>
+        </div>
+        <div class="callout formula">
+          <div class="head">Logit / log-odds</div>
+          <div class="eq">$$ \log\frac{p}{1-p}=w^\top\phi(x)+b $$</div>
+          <p><b>符号.</b> $p=p(y=1\mid x)$；$\frac{p}{1-p}$ 是 class 1 相对 class 0 的 odds；logit 是 sigmoid 的 inverse。</p>
+          <p><b>怎么理解.</b> Logistic Regression 对 probability 不是线性的，对 log-odds 是线性的。某个 feature 增加 1，会让 log-odds 改变对应 weight。</p>
+          <p><b>怎么用.</b> 考 boundary 时令 $p=0.5$，log-odds 变成 $\log 1=0$，所以 boundary 正是 $w^\top\phi(x)+b=0$。</p>
         </div>
         <div class="callout formula">
           <div class="head">Decision boundary</div>
@@ -198,6 +244,16 @@
 
       <p><b>怎么用.</b> 对所有样本求和后用 gradient descent 最小化。注意不要和 $y\in\{0,1\}$ 的 cross-entropy 公式混用，除非先转换标签。</p>
         </div>
+        <div class="callout formula" id="eq-logistic-regression-binary-cross-entropy-cn">
+          <div class="head">Binary cross-entropy (BCE)</div>
+          <div class="eq">$$ \mathcal{L}(y,\hat y)=-\bigl(y\log\hat y+(1-y)\log(1-\hat y)\bigr) $$</div>
+          <p>这就是上面那条 NLL，只不过换成了 <b>$y\in\{0,1\}$</b> 的标签约定，并直接写出预测概率 $\hat y$。所有 deep learning library 用的就是这个形式，HW3 要你手动 backprop 的也是它。</p>
+          <div class="eq">$$ \mathrm{NLL}(w)=-\frac{1}{N}\sum_{n=1}^{N}\left[y_n\log\mu_n+(1-y_n)\log(1-\mu_n)\right],\qquad \mu_n=\sigma(w^\top x_n) $$</div>
+          <p><b>符号.</b> $y\in\{0,1\}$ 是真实二分类标签；$\hat y\in(0,1)$ 是模型预测的 class 1 probability，几乎一定是 $\hat y=\sigma(z)$，其中 $z$ 是 logit $w^\top x$（或更深网络的输出）。两个 $\log$ 项互斥，对任意单个样本只有一项会激活。</p>
+          <p><b>怎么理解.</b> $y=1$ 时第二项消失，剩下 $-\log\hat y$ —— $\hat y$ 越远离 1，惩罚越大；$y=0$ 时第一项消失，剩下 $-\log(1-\hat y)$ —— $\hat y$ 越远离 0，惩罚越大。自信但错 → 惩罚趋近无穷。</p>
+          <p><b>怎么用.</b> 对一个 mini-batch 求和（或求平均），用 gradient descent 最小化。配合 sigmoid logit $z$，梯度漂亮地塌成 $\partial\mathcal{L}/\partial z=\hat y-y$（见 MLP 页的 <i>Softmax + cross-entropy output gradient</i> 项 —— 同一恒等式，$K=2$ 退化）。代码上为了数值稳定，框架把 sigmoid 和 BCE 融合成一个 op（<code>BCEWithLogitsLoss</code>），等价于上面 $y\in\{-1,+1\}$ 形式的 $\log(1+\exp(-yz))$ softplus。</p>
+          <p><b>典型出处.</b> HW3 §1（两层网二分类 —— 写 forward + BCE loss + backprop）；任何带单个 sigmoid 输出的 MLP example；VAE / diffusion ELBO 里的 Bernoulli likelihood term。</p>
+        </div>
         <div class="callout formula">
           <div class="head">Gradient descent</div>
           <div class="eq">$$ w_{t+1}=w_t-\alpha \nabla f(w_t) $$</div>
@@ -205,12 +261,24 @@
           <p><b>怎么理解.</b> 要让 loss 下降，就往 gradient 的反方向走。$\alpha$ 太大可能 overshoot，太小会很慢。</p>
       <p><b>怎么用.</b> 每轮算 probability、算 gradient、更新 $w$。Logistic regression 一般没有 normal equation closed form。</p>
         </div>
+        <div class="callout formula">
+          <div class="head">Gradient and IRLS</div>
+          <div class="eq">$$ \nabla L(w)=\sum_i(\mu_i-y_i)x_i,\qquad \mu_i=\sigma(w^\top x_i) $$</div>
+          <p><b>怎么理解.</b> 一阶 gradient 是 predicted probability minus target，再乘 input，也就是 logistic 版本的“error times feature”。</p>
+          <p><b>怎么用.</b> Gradient descent 只用这个 gradient。Newton's method 还会用 Hessian，在 logistic regression 里常叫 <b>IRLS</b> (Iteratively Reweighted Least Squares)；收敛可能更快，但每一步更贵。</p>
+        </div>
         <div class="callout formula wide">
           <div class="head">Convexity check ($y\in\{0,1\}$ form)</div>
           <div class="eq">$$ \nabla^2 L(w)=X^\top B X,\qquad B=\mathrm{diag}(p_i(1-p_i)) $$</div>
           <p><b>符号.</b> $X$ 是 design matrix，每行是 $x_i^\top$；$p_i=\sigma(w^\top x_i)$；$B$ 是 diagonal matrix，每个对角元是样本 $i$ 的 curvature weight $p_i(1-p_i)$。</p>
           <p><b>怎么理解.</b> $p_i(1-p_i)$ 永远非负，所以 $B$ 是 positive semidefinite；夹心形式 $X^\top B X$ 的二次型也非负。</p>
-          <p><b>怎么用.</b> 证明 convexity 时写：$v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$。</p>
+          <p><b>怎么用.</b> 证明 convexity 时写：$v^\top\nabla^2L(w)v=(Xv)^\top B(Xv)=\sum_i p_i(1-p_i)(x_i^\top v)^2\ge0$。当相关 design matrix full column rank 时是 strictly convex，所以 local minimum 就是 global minimum。</p>
+        </div>
+        <div class="callout formula wide">
+          <div class="head">Softmax extension</div>
+          <div class="eq">$$ p(y=c\mid x)=\frac{\exp(w_c^\top x)}{\sum_{j=1}^{C}\exp(w_j^\top x)} $$</div>
+          <p><b>怎么理解.</b> 二分类 sigmoid 推广到 $C$ 类就是 softmax。每个 class 有一个 score，归一化后所有 class probabilities 加起来等于 1。</p>
+          <p><b>怎么用.</b> 数值计算时先减最大 score，或直接用 log-sum-exp trick；裸算 exponential 容易 overflow。</p>
         </div>
       </div>
 
@@ -223,7 +291,7 @@
       <div class="callout example">
         <div class="head">Example B · Logistic loss vs. quadratic loss</div>
         <div class="example-source">来源：Lecture 5，和 linear regression 的 loss 对比。</div>
-        <p>对一个已经正确且 margin 很大的点，quadratic loss 还可能很大，因为它想把 score 拉到某个数字标签附近；logistic loss 会接近 0，因为模型已经给真实类别高概率。</p>
+        <p>对一个已经正确且 margin 很大的点，quadratic loss 还可能很大，因为它想把 score 拉到某个数字标签附近。Linear regression 还可能输出 $[0,1]$ 之外的“概率”，且对 outliers 敏感；logistic loss 会接近 0，因为模型已经给真实 Bernoulli label 高概率。</p>
       </div>
       <div class="callout example">
         <div class="head">Example C · Hessian 证明 convexity</div>
@@ -237,6 +305,9 @@
         <div><b>概率题：</b> 先写 sigmoid，再根据 0.5 threshold 做分类。</div>
         <div><b>凸性题：</b> 写出 Hessian = $X^\top B X$，再看 $v^\top H v$。</div>
         <div><b>优化题：</b> 说清楚一般没有 closed form，需要 gradient descent。</div>
+        <div><b>Linear vs. Logistic：</b> 对比 Gaussian regression target 和 Bernoulli class label。多分类里 linear regression 可能 mask 掉中间类别，即使类别本身可分。</div>
+        <div><b>Separable data：</b> 未正则化 MLE 可能让 $\|w\|$ 趋向无穷。加 $L_2$ weight decay，例如 $\lambda\|w\|_2^2$，可以让解有限并改善泛化。</div>
+        <div><b>XOR：</b> 单个 logistic-regression boundary 解不了 XOR；需要 nonlinear features 或 MLP 这样的 hidden layer。</div>
       </div>
 
       <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
@@ -245,6 +316,7 @@
         <li>把 $y\in\{0,1\}$ 和 $y\in\{-1,+1\}$ 的公式混着用。</li>
         <li>期待像 linear regression 一样有 normal equation closed form。</li>
         <li>写 dataset likelihood 时忘记 i.i.d. assumption。</li>
+        <li>忘记 perfectly separable data 会让 unregularized MLE 追逐无限大的 weights。</li>
       </ul>
 
       <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
@@ -254,6 +326,7 @@
         <li>会识别 / 推导 gradient descent 用到的 gradient。</li>
         <li>会用 $H=X^\top B X$ 证明 convexity。</li>
         <li>会说明 decision boundary 为什么是 $w^\top\phi(x)=0$。</li>
+        <li>知道 log-odds interpretation、softmax multiclass extension，以及 log-sum-exp 为什么用于数值稳定。</li>
       </ul>
 
       <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
@@ -263,6 +336,7 @@
         <li>我知道 logistic regression 通常需要 iterative optimization。</li>
         <li>我能用 PSD Hessian 解释 convexity。</li>
         <li>我知道 decision boundary 在 feature space 里仍然 linear。</li>
+        <li>我能解释为什么 separable data 需要 regularization，以及为什么 XOR 需要 nonlinear features。</li>
       </ul>
     </section>
 
