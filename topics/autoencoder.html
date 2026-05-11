@@ -40,7 +40,8 @@
       <div class="subtitle"><span class="en-only">Encoder–decoder reconstruction</span><span class="cn-only">encoder–decoder 重建表示</span></div>
       <div class="refs"><a class="ref-chip lecture" href="../slides/Lecture_13.pdf" target="_blank">📄 Lecture 13</a>
         <a class="ref-chip hw" href="../HW/hw4.pdf" target="_blank">📝 hw4</a>
-        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a></div>
+        <a class="ref-chip hw" href="../HW/hw5.pdf" target="_blank">📝 hw5</a>
+        <a class="ref-chip" href="https://www.geeksforgeeks.org/machine-learning/auto-encoders/" target="_blank" rel="noopener">🔗 GeeksforGeeks AE</a></div>
     </div>
 
 <div class="en-only">
@@ -78,7 +79,21 @@
     <p>A standard deterministic AE is still not a full generator: random latent noise may decode poorly because the decoder was trained mostly on codes produced by the encoder. VAEs add a prior over latent space so sampling becomes part of the model.</p>
   </div>
 
-  <h3 class="section-purple">4. Key Equations</h3>
+  <h3 class="section-gray" id="autoencoder-visual-guide-en">4. Visual Reading Guide</h3>
+  <div class="visual-grid visual-grid-single">
+    <figure class="topic-figure">
+      <img src="../assets/figures/autoencoder-bottleneck.svg" alt="Autoencoder bottleneck diagram with input, hidden code, and reconstructed output layers" loading="lazy" />
+      <figcaption><b>Read the picture as compression followed by reconstruction.</b> The left side is the original input $x$, the middle is a small code $z$, and the right side is the reconstruction $\hat{x}$.</figcaption>
+    </figure>
+  </div>
+  <div class="mini-list visual-notes">
+    <div><b>Encoder side.</b> The many input coordinates are squeezed into fewer hidden activations, so the model cannot keep every detail separately.</div>
+    <div><b>Bottleneck.</b> The small middle layer is the constraint that forces the network to preserve only the information most useful for rebuilding $x$.</div>
+    <div><b>Decoder side.</b> The decoder expands the code back to the original dimension; training compares this output $\hat{x}$ with the input $x$.</div>
+    <div><b>Reference.</b> Additional implementation context: <a href="https://www.geeksforgeeks.org/machine-learning/auto-encoders/" target="_blank" rel="noopener">GeeksforGeeks Autoencoders in Machine Learning</a>.</div>
+  </div>
+
+  <h3 class="section-purple">5. Key Equations</h3>
   <div class="cols2">
     <div class="callout formula">
       <div class="head">Encoder / decoder</div>
@@ -102,7 +117,7 @@
     </div>
   </div>
 
-  <h3 class="section-gray">5. Worked Examples</h3>
+  <h3 class="section-gray">6. Worked Examples</h3>
   <div class="mini-list">
     <div>
       <h4>Example A · Lecture 13 reconstruction setup</h4>
@@ -121,7 +136,7 @@
     </div>
   </div>
 
-  <h3 class="section-yellow">6. Problem-Solving Tips</h3>
+  <h3 class="section-yellow">7. Problem-Solving Tips</h3>
   <ul>
     <li>Start by identifying the input $x$, code $z$, and reconstruction $\hat{x}$.</li>
     <li>If the question asks why the representation is meaningful, point to the bottleneck or regularization.</li>
@@ -131,7 +146,7 @@
     <li>For CAE, read the Jacobian penalty as "make the encoder locally insensitive."</li>
   </ul>
 
-  <h3 class="section-red">7. Common Mistakes</h3>
+  <h3 class="section-red">8. Common Mistakes</h3>
   <ul>
     <li>Assuming every auto-encoder learns useful features. Without constraints, a large model can simply memorize.</li>
     <li>Mixing up $x$ and $\hat{x}$: $x$ is the target input, while $\hat{x}$ is the model output.</li>
@@ -141,7 +156,7 @@
     <li>Overstating the PCA result: a linear AE learns the PCA subspace, not necessarily the exact PCA coordinate axes.</li>
   </ul>
 
-  <h3 class="section-yellow">8. Exam Focus</h3>
+  <h3 class="section-yellow">9. Exam Focus</h3>
   <ul>
     <li>Write $z=f_\phi(x)$ and $\hat{x}=g_\theta(z)$ from memory.</li>
     <li>Explain what the reconstruction loss is minimizing.</li>
@@ -152,7 +167,7 @@
     <li>Explain the manifold interpretation and why VAEs are the generative extension.</li>
   </ul>
 
-  <h3 class="section-yellow">9. Quick Checklist</h3>
+  <h3 class="section-yellow">10. Quick Checklist</h3>
   <ul>
     <li>I can name the encoder, decoder, code, and reconstruction.</li>
     <li>I can explain each symbol in the reconstruction loss.</li>
@@ -199,7 +214,21 @@
         <p>但普通 deterministic AE 还不是完整 generative model：随机采一个 latent noise 可能 decode 得很差，因为 decoder 主要见过 encoder 产生的那些 codes。VAE 进一步给 latent space 加 prior，才把 sampling 变成模型目标的一部分。</p>
       </div>
 
-      <h3 class="section-purple">4. Key Equations · 核心公式</h3>
+      <h3 class="section-gray" id="autoencoder-visual-guide-cn">4. Visual Reading Guide · 看图理解</h3>
+      <div class="visual-grid visual-grid-single">
+        <figure class="topic-figure">
+          <img src="../assets/figures/autoencoder-bottleneck.svg" alt="Autoencoder bottleneck 结构图：输入、压缩 code、重建输出" loading="lazy" />
+          <figcaption><b>这张图要看成“先压缩，再重建”。</b> 左边是原始 input $x$，中间是很小的 code $z$，右边是 reconstruction $\hat{x}$。</figcaption>
+        </figure>
+      </div>
+      <div class="mini-list visual-notes">
+        <div><b>Encoder side：</b> 很多 input coordinates 被压到更少的 hidden activations 里，所以模型不能把每个细节都单独原样保存。</div>
+        <div><b>Bottleneck：</b> 中间的小层就是约束；它迫使网络只保留最有助于重建 $x$ 的信息。</div>
+        <div><b>Decoder side：</b> Decoder 把 code 展开回原始维度；训练时比较输出 $\hat{x}$ 和输入 $x$ 的差距。</div>
+        <div><b>参考链接：</b> 如果想看实现语境，可以看 <a href="https://www.geeksforgeeks.org/machine-learning/auto-encoders/" target="_blank" rel="noopener">GeeksforGeeks Autoencoders in Machine Learning</a>。</div>
+      </div>
+
+      <h3 class="section-purple">5. Key Equations · 核心公式</h3>
       <div class="cols2">
         <div class="callout formula">
           <div class="head">Encoder / decoder · 编码与解码</div>
@@ -223,7 +252,7 @@
         </div>
       </div>
 
-      <h3 class="section-gray">5. Worked Examples · 代表性例题</h3>
+      <h3 class="section-gray">6. Worked Examples · 代表性例题</h3>
       <div class="mini-list">
         <div>
           <h4>Example A · Lecture 13 reconstruction setup</h4>
@@ -242,7 +271,7 @@
         </div>
       </div>
 
-      <h3 class="section-yellow">6. Problem-Solving Tips · 解题技巧</h3>
+      <h3 class="section-yellow">7. Problem-Solving Tips · 解题技巧</h3>
       <ul>
         <li>先标出 input $x$、code $z$、reconstruction $\hat{x}$。</li>
         <li>题目问 representation 为什么有意义，就回答 bottleneck 或 regularization 限制了 trivial copying。</li>
@@ -252,7 +281,7 @@
         <li>CAE 里的 Jacobian penalty 可以理解成“让 encoder 在局部更不敏感”。</li>
       </ul>
 
-      <h3 class="section-red">7. Common Mistakes · 常见错误</h3>
+      <h3 class="section-red">8. Common Mistakes · 常见错误</h3>
       <ul>
         <li>以为所有 auto-encoder 都自动学到好特征；如果容量太大又没约束，可能只是 memorization。</li>
         <li>混淆 $x$ 和 $\hat{x}$：$x$ 是目标输入，$\hat{x}$ 是模型输出。</li>
@@ -262,7 +291,7 @@
         <li>把 PCA 结论说过头：linear AE 学到 PCA subspace，但不一定学到完全相同的 PCA coordinate axes。</li>
       </ul>
 
-      <h3 class="section-yellow">8. Exam Focus · 考试重点</h3>
+      <h3 class="section-yellow">9. Exam Focus · 考试重点</h3>
       <ul>
         <li>能默写 $z=f_\phi(x)$ 和 $\hat{x}=g_\theta(z)$。</li>
         <li>能解释 reconstruction loss 到底在最小化什么。</li>
@@ -273,7 +302,7 @@
         <li>能解释 manifold interpretation，以及为什么 VAE 是 generative extension。</li>
       </ul>
 
-      <h3 class="section-yellow">9. Quick Checklist · 速记清单</h3>
+      <h3 class="section-yellow">10. Quick Checklist · 速记清单</h3>
       <ul>
         <li>我能说清 encoder、decoder、code、reconstruction。</li>
         <li>我能解释 reconstruction loss 里每个符号。</li>
